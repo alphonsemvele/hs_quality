@@ -1,0 +1,279 @@
+created:
+    - app/Http/Controllers/Auth/LoginController.php
+    - app/Http/Controllers/DashboardController.php
+    - app/Http/Controllers/PatientController.php
+    - app/Http/Controllers/AdmissionController.php
+    - app/Http/Controllers/ConsultationController.php
+    - app/Http/Controllers/RendezVousController.php
+    - app/Http/Controllers/PrescriptionController.php
+    - app/Http/Controllers/MedicamentController.php
+    - app/Http/Controllers/DelivranceController.php
+    - app/Http/Controllers/MouvementStockController.php
+    - app/Http/Controllers/AnalyseLaboratoireController.php
+    - app/Http/Controllers/ExamenImagerieController.php
+    - app/Http/Controllers/PatientHadController.php
+    - app/Http/Controllers/TourneeController.php
+    - app/Http/Controllers/VisiteHadController.php
+    - app/Http/Controllers/FactureController.php
+    - app/Http/Controllers/PaiementController.php
+    - app/Http/Controllers/ServiceController.php
+    - app/Http/Controllers/LitController.php
+    - app/Http/Controllers/UserController.php
+    - app/Http/Controllers/RoleController.php
+    - app/Http/Controllers/PointageController.php
+    - app/Http/Controllers/DemandeCongeController.php
+    - app/Http/Controllers/ConstanteVitaleController.php
+    - app/Http/Controllers/AssuranceController.php
+    - app/Http/Controllers/FournisseurController.php
+    - database/factories/UserFactory.php
+    - database/factories/RoleFactory.php
+    - database/factories/PermissionFactory.php
+    - database/factories/ServiceFactory.php
+    - database/factories/LitFactory.php
+    - database/factories/PatientFactory.php
+    - database/factories/AssuranceFactory.php
+    - database/factories/AdmissionFactory.php
+    - database/factories/RendezVousFactory.php
+    - database/factories/ConsultationFactory.php
+    - database/factories/ConstanteVitaleFactory.php
+    - database/factories/ActeMedicalFactory.php
+    - database/factories/MedicamentFactory.php
+    - database/factories/FournisseurFactory.php
+    - database/factories/PrescriptionFactory.php
+    - database/factories/LignePrescriptionFactory.php
+    - database/factories/DelivranceFactory.php
+    - database/factories/LigneDelivranceFactory.php
+    - database/factories/MouvementStockFactory.php
+    - database/factories/CommandeFournisseurFactory.php
+    - database/factories/LigneCommandeFactory.php
+    - database/factories/TypeAnalyseFactory.php
+    - database/factories/AnalyseLaboratoireFactory.php
+    - database/factories/TypeExamenImagerieFactory.php
+    - database/factories/ExamenImagerieFactory.php
+    - database/factories/PatientHadFactory.php
+    - database/factories/TourneeFactory.php
+    - database/factories/VisiteHadFactory.php
+    - database/factories/FactureFactory.php
+    - database/factories/LigneFactureFactory.php
+    - database/factories/PaiementFactory.php
+    - database/factories/PointageFactory.php
+    - database/factories/DemandeCongeFactory.php
+    - database/factories/ParametreFactory.php
+    - database/factories/AuditLogFactory.php
+    - database/migrations/2026_01_30_084247_create_users_table.php
+    - database/migrations/2026_01_30_084248_create_roles_table.php
+    - database/migrations/2026_01_30_084249_create_permissions_table.php
+    - database/migrations/2026_01_30_084250_create_services_table.php
+    - database/migrations/2026_01_30_084251_create_lits_table.php
+    - database/migrations/2026_01_30_084252_create_patients_table.php
+    - database/migrations/2026_01_30_084253_create_assurances_table.php
+    - database/migrations/2026_01_30_084254_create_admissions_table.php
+    - database/migrations/2026_01_30_084255_create_rendez_vouses_table.php
+    - database/migrations/2026_01_30_084256_create_consultations_table.php
+    - database/migrations/2026_01_30_084257_create_constante_vitales_table.php
+    - database/migrations/2026_01_30_084258_create_acte_medicals_table.php
+    - database/migrations/2026_01_30_084259_create_medicaments_table.php
+    - database/migrations/2026_01_30_084300_create_fournisseurs_table.php
+    - database/migrations/2026_01_30_084301_create_prescriptions_table.php
+    - database/migrations/2026_01_30_084302_create_ligne_prescriptions_table.php
+    - database/migrations/2026_01_30_084303_create_delivrances_table.php
+    - database/migrations/2026_01_30_084304_create_ligne_delivrances_table.php
+    - database/migrations/2026_01_30_084305_create_mouvement_stocks_table.php
+    - database/migrations/2026_01_30_084306_create_commande_fournisseurs_table.php
+    - database/migrations/2026_01_30_084307_create_ligne_commandes_table.php
+    - database/migrations/2026_01_30_084308_create_type_analyses_table.php
+    - database/migrations/2026_01_30_084309_create_analyse_laboratoires_table.php
+    - database/migrations/2026_01_30_084310_create_type_examen_imageries_table.php
+    - database/migrations/2026_01_30_084311_create_examen_imageries_table.php
+    - database/migrations/2026_01_30_084312_create_patient_hads_table.php
+    - database/migrations/2026_01_30_084313_create_tournees_table.php
+    - database/migrations/2026_01_30_084314_create_visite_hads_table.php
+    - database/migrations/2026_01_30_084315_create_factures_table.php
+    - database/migrations/2026_01_30_084316_create_ligne_factures_table.php
+    - database/migrations/2026_01_30_084317_create_paiements_table.php
+    - database/migrations/2026_01_30_084318_create_pointages_table.php
+    - database/migrations/2026_01_30_084319_create_demande_conges_table.php
+    - database/migrations/2026_01_30_084320_create_parametres_table.php
+    - database/migrations/2026_01_30_084321_create_audit_logs_table.php
+    - database/migrations/2026_01_30_084322_create_role_user_table.php
+    - database/migrations/2026_01_30_084323_create_permission_role_table.php
+    - app/Models/User.php
+    - app/Models/Role.php
+    - app/Models/Permission.php
+    - app/Models/Service.php
+    - app/Models/Lit.php
+    - app/Models/Patient.php
+    - app/Models/Assurance.php
+    - app/Models/Admission.php
+    - app/Models/RendezVous.php
+    - app/Models/Consultation.php
+    - app/Models/ConstanteVitale.php
+    - app/Models/ActeMedical.php
+    - app/Models/Medicament.php
+    - app/Models/Fournisseur.php
+    - app/Models/Prescription.php
+    - app/Models/LignePrescription.php
+    - app/Models/Delivrance.php
+    - app/Models/LigneDelivrance.php
+    - app/Models/MouvementStock.php
+    - app/Models/CommandeFournisseur.php
+    - app/Models/LigneCommande.php
+    - app/Models/TypeAnalyse.php
+    - app/Models/AnalyseLaboratoire.php
+    - app/Models/TypeExamenImagerie.php
+    - app/Models/ExamenImagerie.php
+    - app/Models/PatientHad.php
+    - app/Models/Tournee.php
+    - app/Models/VisiteHad.php
+    - app/Models/Facture.php
+    - app/Models/LigneFacture.php
+    - app/Models/Paiement.php
+    - app/Models/Pointage.php
+    - app/Models/DemandeConge.php
+    - app/Models/Parametre.php
+    - app/Models/AuditLog.php
+    - database/seeders/UserSeeder.php
+    - database/seeders/RoleSeeder.php
+    - database/seeders/PermissionSeeder.php
+    - database/seeders/ServiceSeeder.php
+    - database/seeders/TypeAnalyseSeeder.php
+    - database/seeders/TypeExamenImagerieSeeder.php
+    - database/seeders/ParametreSeeder.php
+    - tests/Feature/Http/Controllers/Auth/LoginControllerTest.php
+    - tests/Feature/Http/Controllers/DashboardControllerTest.php
+    - tests/Feature/Http/Controllers/PatientControllerTest.php
+    - tests/Feature/Http/Controllers/AdmissionControllerTest.php
+    - tests/Feature/Http/Controllers/ConsultationControllerTest.php
+    - tests/Feature/Http/Controllers/RendezVousControllerTest.php
+    - tests/Feature/Http/Controllers/PrescriptionControllerTest.php
+    - tests/Feature/Http/Controllers/MedicamentControllerTest.php
+    - tests/Feature/Http/Controllers/DelivranceControllerTest.php
+    - tests/Feature/Http/Controllers/MouvementStockControllerTest.php
+    - tests/Feature/Http/Controllers/AnalyseLaboratoireControllerTest.php
+    - tests/Feature/Http/Controllers/ExamenImagerieControllerTest.php
+    - tests/Feature/Http/Controllers/PatientHadControllerTest.php
+    - tests/Feature/Http/Controllers/TourneeControllerTest.php
+    - tests/Feature/Http/Controllers/VisiteHadControllerTest.php
+    - tests/Feature/Http/Controllers/FactureControllerTest.php
+    - tests/Feature/Http/Controllers/PaiementControllerTest.php
+    - tests/Feature/Http/Controllers/ServiceControllerTest.php
+    - tests/Feature/Http/Controllers/LitControllerTest.php
+    - tests/Feature/Http/Controllers/UserControllerTest.php
+    - tests/Feature/Http/Controllers/RoleControllerTest.php
+    - tests/Feature/Http/Controllers/PointageControllerTest.php
+    - tests/Feature/Http/Controllers/DemandeCongeControllerTest.php
+    - tests/Feature/Http/Controllers/ConstanteVitaleControllerTest.php
+    - tests/Feature/Http/Controllers/AssuranceControllerTest.php
+    - tests/Feature/Http/Controllers/FournisseurControllerTest.php
+    - app/Http/Requests/Auth/LoginLoginRequest.php
+    - app/Http/Requests/PatientStoreRequest.php
+    - app/Http/Requests/PatientUpdateRequest.php
+    - app/Http/Requests/AdmissionStoreRequest.php
+    - app/Http/Requests/AdmissionUpdateRequest.php
+    - app/Http/Requests/ConsultationStoreRequest.php
+    - app/Http/Requests/ConsultationUpdateRequest.php
+    - app/Http/Requests/RendezVouStoreRequest.php
+    - app/Http/Requests/RendezVouUpdateRequest.php
+    - app/Http/Requests/PrescriptionStoreRequest.php
+    - app/Http/Requests/PrescriptionUpdateRequest.php
+    - app/Http/Requests/MedicamentStoreRequest.php
+    - app/Http/Requests/MedicamentUpdateRequest.php
+    - app/Http/Requests/DelivranceStoreRequest.php
+    - app/Http/Requests/DelivranceUpdateRequest.php
+    - app/Http/Requests/MouvementStockStoreRequest.php
+    - app/Http/Requests/MouvementStockUpdateRequest.php
+    - app/Http/Requests/AnalyseLaboratoireStoreRequest.php
+    - app/Http/Requests/AnalyseLaboratoireUpdateRequest.php
+    - app/Http/Requests/ExamenImagerieStoreRequest.php
+    - app/Http/Requests/ExamenImagerieUpdateRequest.php
+    - app/Http/Requests/PatientHadStoreRequest.php
+    - app/Http/Requests/PatientHadUpdateRequest.php
+    - app/Http/Requests/TourneeStoreRequest.php
+    - app/Http/Requests/TourneeUpdateRequest.php
+    - app/Http/Requests/VisiteHadStoreRequest.php
+    - app/Http/Requests/VisiteHadUpdateRequest.php
+    - app/Http/Requests/FactureStoreRequest.php
+    - app/Http/Requests/FactureUpdateRequest.php
+    - app/Http/Requests/PaiementStoreRequest.php
+    - app/Http/Requests/PaiementUpdateRequest.php
+    - app/Http/Requests/ServiceStoreRequest.php
+    - app/Http/Requests/ServiceUpdateRequest.php
+    - app/Http/Requests/LitStoreRequest.php
+    - app/Http/Requests/LitUpdateRequest.php
+    - app/Http/Requests/UserStoreRequest.php
+    - app/Http/Requests/UserUpdateRequest.php
+    - app/Http/Requests/RoleStoreRequest.php
+    - app/Http/Requests/RoleUpdateRequest.php
+    - app/Http/Requests/PointageStoreRequest.php
+    - app/Http/Requests/PointageUpdateRequest.php
+    - app/Http/Requests/DemandeCongeStoreRequest.php
+    - app/Http/Requests/DemandeCongeUpdateRequest.php
+    - app/Http/Requests/ConstanteVitaleStoreRequest.php
+    - app/Http/Requests/ConstanteVitaleUpdateRequest.php
+    - app/Http/Requests/AssuranceStoreRequest.php
+    - app/Http/Requests/AssuranceUpdateRequest.php
+    - app/Http/Requests/FournisseurStoreRequest.php
+    - app/Http/Requests/FournisseurUpdateRequest.php
+    - app/Http/Resources/AdmissionResource.php
+    - app/Http/Resources/ConsultationResource.php
+    - app/Http/Resources/RendezVouResource.php
+    - app/Http/Resources/PrescriptionResource.php
+    - app/Http/Resources/MedicamentResource.php
+    - app/Http/Resources/DelivranceResource.php
+    - app/Http/Resources/MouvementStockResource.php
+    - app/Http/Resources/AnalyseLaboratoireResource.php
+    - app/Http/Resources/ExamenImagerieResource.php
+    - app/Http/Resources/PatientHadResource.php
+    - app/Http/Resources/TourneeResource.php
+    - app/Http/Resources/VisiteHadResource.php
+    - app/Http/Resources/FactureResource.php
+    - app/Http/Resources/PaiementResource.php
+    - app/Http/Resources/ServiceResource.php
+    - app/Http/Resources/LitResource.php
+    - app/Http/Resources/UserResource.php
+    - app/Http/Resources/RoleResource.php
+    - app/Http/Resources/PointageResource.php
+    - app/Http/Resources/DemandeCongeResource.php
+    - app/Http/Resources/ConstanteVitaleResource.php
+    - app/Http/Resources/AssuranceResource.php
+    - app/Http/Resources/FournisseurResource.php
+    - resources/views/dashboard.blade.php
+updated:
+    - routes/api.php
+    - routes/web.php
+models:
+    User: { nom: 'string:100', prenom: 'string:100', email: 'string:150 unique', email_verified_at: 'timestamp nullable', password: string, telephone: 'string:20 nullable', avatar: 'string nullable', matricule: 'string:20 unique nullable', fonction: 'enum:medecin,infirmier,sage_femme,pharmacien,technicien,laborantin,administratif,receptionniste,comptable nullable', specialite: 'string:100 nullable', service_id: 'id foreign:services nullable', date_embauche: 'date nullable', statut: 'enum:actif,inactif,conge,suspendu default:actif', remember_token: 'string:100 nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Service, hasMany: 'Consultation, Prescription, Pointage, DemandeConge' } }
+    Role: { nom: 'string:50 unique', description: 'text nullable', couleur: 'string:20 nullable', timestamps: timestamps, relationships: { belongsToMany: 'User, Permission' } }
+    Permission: { nom: 'string:100 unique', description: 'text nullable', module: 'string:50', timestamps: timestamps, relationships: { belongsToMany: Role } }
+    Service: { code: 'string:20 unique', nom: 'string:100', description: 'text nullable', chef_service_id: 'id foreign:users nullable', etage: 'string:10 nullable', batiment: 'string:50 nullable', telephone: 'string:20 nullable', email: 'string:100 nullable', capacite_lits: 'integer unsigned default:0', actif: 'boolean default:true', timestamps: timestamps, softdeletes: softDeletes, relationships: { hasMany: 'User, Lit, Patient, Admission', belongsTo: 'User:chef_service' } }
+    Lit: { numero: 'string:20', service_id: 'id foreign:services', chambre: 'string:20 nullable', type: 'enum:standard,soins_intensifs,reanimation,pediatrique,maternite default:standard', statut: 'enum:libre,occupe,maintenance,reserve default:libre', equipements: 'json nullable', tarif_journalier: 'decimal:10,2 default:0', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Service, hasMany: Admission } }
+    Patient: { numero_dossier: 'string:20 unique', nom: 'string:100', prenom: 'string:100', date_naissance: date, sexe: 'enum:M,F', lieu_naissance: 'string:100 nullable', nationalite: 'string:50 default:Camerounaise', cni: 'string:30 nullable unique', telephone: 'string:20 nullable', telephone_urgence: 'string:20 nullable', email: 'string:100 nullable', adresse: 'text nullable', ville: 'string:50 nullable', quartier: 'string:100 nullable', profession: 'string:100 nullable', situation_matrimoniale: 'enum:celibataire,marie,divorce,veuf nullable', groupe_sanguin: 'enum:A+,A-,B+,B-,AB+,AB-,O+,O- nullable', allergies: 'json nullable', antecedents_medicaux: 'json nullable', antecedents_chirurgicaux: 'json nullable', antecedents_familiaux: 'json nullable', assurance_id: 'id foreign:assurances nullable', numero_assurance: 'string:50 nullable', personne_contact_nom: 'string:100 nullable', personne_contact_telephone: 'string:20 nullable', personne_contact_lien: 'string:50 nullable', photo: 'string nullable', notes: 'text nullable', statut: 'enum:actif,inactif,decede default:actif', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Assurance, hasMany: 'Admission, Consultation, Prescription, RendezVous, Facture, AnalyseLaboratoire, ExamenImagerie, ConstanteVitale, PatientHad' } }
+    Assurance: { code: 'string:20 unique', nom: 'string:100', type: 'enum:publique,privee,mutuelle', adresse: 'text nullable', telephone: 'string:20 nullable', email: 'string:100 nullable', taux_couverture: 'decimal:5,2 default:0', plafond_annuel: 'decimal:12,2 nullable', delai_paiement: 'integer unsigned default:30', contact_nom: 'string:100 nullable', contact_telephone: 'string:20 nullable', actif: 'boolean default:true', timestamps: timestamps, softdeletes: softDeletes, relationships: { hasMany: 'Patient, Facture' } }
+    Admission: { numero: 'string:20 unique', patient_id: 'id foreign:patients', service_id: 'id foreign:services', lit_id: 'id foreign:lits nullable', medecin_id: 'id foreign:users', type: 'enum:urgence,programmee,transfert default:programmee', motif: text, diagnostic_entree: 'text nullable', diagnostic_sortie: 'text nullable', date_admission: datetime, date_sortie: 'datetime nullable', mode_sortie: 'enum:guerison,amelioration,transfert,evasion,deces,contre_avis nullable', accompagnant_nom: 'string:100 nullable', accompagnant_telephone: 'string:20 nullable', accompagnant_lien: 'string:50 nullable', notes: 'text nullable', statut: 'enum:en_cours,termine,annule default:en_cours', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, Service, Lit, User:medecin', hasMany: 'Consultation, Prescription, ConstanteVitale, ActeMedical' } }
+    RendezVous: { patient_id: 'id foreign:patients', medecin_id: 'id foreign:users', service_id: 'id foreign:services nullable', date_heure: datetime, duree_minutes: 'integer unsigned default:30', type: 'enum:consultation,suivi,examen,chirurgie,vaccination default:consultation', motif: 'text nullable', notes: 'text nullable', statut: 'enum:planifie,confirme,en_attente,en_cours,termine,annule,absent default:planifie', timestamps: timestamps, relationships: { belongsTo: 'Patient, User:medecin, Service', hasOne: Consultation } }
+    Consultation: { numero: 'string:20 unique', patient_id: 'id foreign:patients', medecin_id: 'id foreign:users', admission_id: 'id foreign:admissions nullable', rendez_vous_id: 'id foreign:rendez_vous nullable', service_id: 'id foreign:services nullable', date_consultation: datetime, motif: text, histoire_maladie: 'text nullable', examen_clinique: 'text nullable', hypotheses_diagnostiques: 'json nullable', diagnostic_principal: 'string:255 nullable', diagnostics_secondaires: 'json nullable', conduite_a_tenir: 'text nullable', recommandations: 'text nullable', prochain_rdv: 'date nullable', duree_minutes: 'integer unsigned nullable', statut: 'enum:en_cours,termine,annule default:en_cours', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, User:medecin, Admission, RendezVous, Service', hasMany: 'Prescription, AnalyseLaboratoire, ExamenImagerie, ActeMedical' } }
+    ConstanteVitale: { patient_id: 'id foreign:patients', admission_id: 'id foreign:admissions nullable', user_id: 'id foreign:users', date_mesure: datetime, poids: 'decimal:5,2 nullable', taille: 'decimal:5,2 nullable', temperature: 'decimal:4,2 nullable', tension_systolique: 'integer unsigned nullable', tension_diastolique: 'integer unsigned nullable', frequence_cardiaque: 'integer unsigned nullable', frequence_respiratoire: 'integer unsigned nullable', saturation_oxygene: 'integer unsigned nullable', glycemie: 'decimal:5,2 nullable', score_douleur: 'integer unsigned nullable', notes: 'text nullable', timestamps: timestamps, relationships: { belongsTo: 'Patient, Admission, User' } }
+    ActeMedical: { code: 'string:20', libelle: 'string:255', consultation_id: 'id foreign:consultations nullable', admission_id: 'id foreign:admissions nullable', patient_id: 'id foreign:patients', medecin_id: 'id foreign:users', date_acte: datetime, description: 'text nullable', resultat: 'text nullable', quantite: 'integer unsigned default:1', prix_unitaire: 'decimal:10,2 default:0', prix_total: 'decimal:10,2 default:0', statut: 'enum:planifie,en_cours,termine,annule default:planifie', timestamps: timestamps, relationships: { belongsTo: 'Consultation, Admission, Patient, User:medecin' } }
+    Medicament: { code: 'string:20 unique', nom: 'string:200', dci: 'string:200 nullable', forme: 'enum:comprime,gelule,sirop,injectable,pommade,collyre,suppositoire,solution,poudre,autre', dosage: 'string:50 nullable', categorie: 'enum:antalgique,antibiotique,anti_inflammatoire,antidiabetique,antihypertenseur,antipaludeen,antiseptique,vitamine,autre', voie_administration: 'enum:orale,injectable,cutanee,rectale,oculaire,nasale,auriculaire,autre default:orale', conditionnement: 'string:100 nullable', stock_actuel: 'integer unsigned default:0', stock_minimum: 'integer unsigned default:10', stock_maximum: 'integer unsigned default:1000', prix_achat: 'decimal:10,2 default:0', prix_vente: 'decimal:10,2 default:0', tva: 'decimal:5,2 default:0', fournisseur_id: 'id foreign:fournisseurs nullable', date_expiration: 'date nullable', emplacement: 'string:50 nullable', ordonnance_obligatoire: 'boolean default:false', actif: 'boolean default:true', notes: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: Fournisseur, hasMany: 'LignePrescription, MouvementStock, LigneCommande' } }
+    Fournisseur: { code: 'string:20 unique', nom: 'string:150', type: 'enum:laboratoire,grossiste,importateur', adresse: 'text nullable', ville: 'string:50 nullable', pays: 'string:50 default:Cameroun', telephone: 'string:20 nullable', email: 'string:100 nullable', site_web: 'string:200 nullable', contact_nom: 'string:100 nullable', contact_telephone: 'string:20 nullable', delai_livraison_jours: 'integer unsigned default:7', conditions_paiement: 'text nullable', actif: 'boolean default:true', timestamps: timestamps, softdeletes: softDeletes, relationships: { hasMany: 'Medicament, CommandeFournisseur' } }
+    Prescription: { numero: 'string:20 unique', patient_id: 'id foreign:patients', medecin_id: 'id foreign:users', consultation_id: 'id foreign:consultations nullable', admission_id: 'id foreign:admissions nullable', date_prescription: datetime, date_validite: 'date nullable', instructions_generales: 'text nullable', statut: 'enum:en_attente,partiellement_delivree,delivree,annulee default:en_attente', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, User:medecin, Consultation, Admission', hasMany: 'LignePrescription, Delivrance' } }
+    LignePrescription: { prescription_id: 'id foreign:prescriptions', medicament_id: 'id foreign:medicaments', posologie: 'string:255', quantite_prescrite: 'integer unsigned', quantite_delivree: 'integer unsigned default:0', duree_jours: 'integer unsigned nullable', voie_administration: 'string:50 nullable', instructions: 'text nullable', timestamps: timestamps, relationships: { belongsTo: 'Prescription, Medicament' } }
+    Delivrance: { numero: 'string:20 unique', prescription_id: 'id foreign:prescriptions', pharmacien_id: 'id foreign:users', date_delivrance: datetime, montant_total: 'decimal:10,2 default:0', montant_paye: 'decimal:10,2 default:0', mode_paiement: 'enum:especes,carte,mobile_money,assurance,credit nullable', notes: 'text nullable', statut: 'enum:en_cours,terminee,annulee default:en_cours', timestamps: timestamps, relationships: { belongsTo: 'Prescription, User:pharmacien', hasMany: LigneDelivrance } }
+    LigneDelivrance: { delivrance_id: 'id foreign:delivrances', medicament_id: 'id foreign:medicaments', quantite: 'integer unsigned', prix_unitaire: 'decimal:10,2', prix_total: 'decimal:10,2', lot: 'string:50 nullable', date_expiration: 'date nullable', timestamps: timestamps, relationships: { belongsTo: 'Delivrance, Medicament' } }
+    MouvementStock: { medicament_id: 'id foreign:medicaments', type: 'enum:entree,sortie,ajustement,perte,peremption', quantite: integer, stock_avant: 'integer unsigned', stock_apres: 'integer unsigned', motif: 'string:255 nullable', reference: 'string:50 nullable', lot: 'string:50 nullable', date_expiration: 'date nullable', prix_unitaire: 'decimal:10,2 nullable', user_id: 'id foreign:users', timestamps: timestamps, relationships: { belongsTo: 'Medicament, User' } }
+    CommandeFournisseur: { numero: 'string:20 unique', fournisseur_id: 'id foreign:fournisseurs', user_id: 'id foreign:users', date_commande: date, date_livraison_prevue: 'date nullable', date_livraison_effective: 'date nullable', montant_total: 'decimal:12,2 default:0', notes: 'text nullable', statut: 'enum:brouillon,envoyee,confirmee,livree_partiellement,livree,annulee default:brouillon', timestamps: timestamps, relationships: { belongsTo: 'Fournisseur, User', hasMany: LigneCommande } }
+    LigneCommande: { commande_id: 'id foreign:commande_fournisseurs', medicament_id: 'id foreign:medicaments', quantite_commandee: 'integer unsigned', quantite_recue: 'integer unsigned default:0', prix_unitaire: 'decimal:10,2', prix_total: 'decimal:10,2', timestamps: timestamps, relationships: { belongsTo: 'CommandeFournisseur:commande, Medicament' } }
+    TypeAnalyse: { code: 'string:20 unique', nom: 'string:150', categorie: 'enum:biochimie,hematologie,microbiologie,parasitologie,immunologie,hormonologie,serologie,autre', description: 'text nullable', delai_resultat_heures: 'integer unsigned default:24', prix: 'decimal:10,2 default:0', valeurs_normales: 'json nullable', echantillon_requis: 'enum:sang,urine,selles,crachat,lcr,autre', preparation_patient: 'text nullable', actif: 'boolean default:true', timestamps: timestamps, relationships: { hasMany: AnalyseLaboratoire } }
+    AnalyseLaboratoire: { numero: 'string:20 unique', patient_id: 'id foreign:patients', consultation_id: 'id foreign:consultations nullable', medecin_prescripteur_id: 'id foreign:users', technicien_id: 'id foreign:users nullable', biologiste_id: 'id foreign:users nullable', type_analyse_id: 'id foreign:type_analyses', date_prescription: datetime, date_prelevement: 'datetime nullable', date_resultat: 'datetime nullable', resultat: 'json nullable', interpretation: 'text nullable', conclusion: 'text nullable', commentaire_medecin: 'text nullable', urgent: 'boolean default:false', statut: 'enum:prescrit,preleve,en_cours,resultat_disponible,valide,annule default:prescrit', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, Consultation, User:medecin_prescripteur, User:technicien, User:biologiste, TypeAnalyse' } }
+    TypeExamenImagerie: { code: 'string:20 unique', nom: 'string:150', modalite: 'enum:radiographie,echographie,scanner,irm,mammographie,autre', description: 'text nullable', preparation_patient: 'text nullable', duree_minutes: 'integer unsigned default:30', prix: 'decimal:10,2 default:0', actif: 'boolean default:true', timestamps: timestamps, relationships: { hasMany: ExamenImagerie } }
+    ExamenImagerie: { numero: 'string:20 unique', patient_id: 'id foreign:patients', consultation_id: 'id foreign:consultations nullable', medecin_prescripteur_id: 'id foreign:users', radiologue_id: 'id foreign:users nullable', manipulateur_id: 'id foreign:users nullable', type_examen_id: 'id foreign:type_examen_imageries', date_prescription: datetime, date_examen: 'datetime nullable', date_resultat: 'datetime nullable', indication_clinique: 'text nullable', technique: 'text nullable', resultat: 'text nullable', conclusion: 'text nullable', images_path: 'json nullable', urgent: 'boolean default:false', statut: 'enum:prescrit,planifie,en_cours,resultat_disponible,valide,annule default:prescrit', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, Consultation, User:medecin_prescripteur, User:radiologue, User:manipulateur, TypeExamenImagerie' } }
+    PatientHad: { patient_id: 'id foreign:patients', medecin_referent_id: 'id foreign:users', date_inclusion: date, date_sortie: 'date nullable', motif_inclusion: text, motif_sortie: 'text nullable', adresse_domicile: text, latitude: 'decimal:10,7 nullable', longitude: 'decimal:10,7 nullable', personne_reference_nom: 'string:100 nullable', personne_reference_telephone: 'string:20 nullable', personne_reference_lien: 'string:50 nullable', protocole_soins: 'text nullable', frequence_visites: 'enum:quotidien,2_fois_semaine,hebdomadaire,bimensuel default:hebdomadaire', equipements_domicile: 'json nullable', notes: 'text nullable', statut: 'enum:actif,suspendu,termine default:actif', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, User:medecin_referent', hasMany: 'Tournee, VisiteHad' } }
+    Tournee: { date: date, soignant_id: 'id foreign:users', vehicule: 'string:50 nullable', heure_debut_prevue: 'time nullable', heure_fin_prevue: 'time nullable', heure_debut_effective: 'time nullable', heure_fin_effective: 'time nullable', kilometres: 'decimal:8,2 nullable', notes: 'text nullable', statut: 'enum:planifiee,en_cours,terminee,annulee default:planifiee', timestamps: timestamps, relationships: { belongsTo: 'User:soignant', hasMany: VisiteHad } }
+    VisiteHad: { tournee_id: 'id foreign:tournees', patient_had_id: 'id foreign:patient_hads', ordre: 'integer unsigned default:1', heure_prevue: 'time nullable', heure_arrivee: 'time nullable', heure_depart: 'time nullable', latitude_arrivee: 'decimal:10,7 nullable', longitude_arrivee: 'decimal:10,7 nullable', soins_realises: 'json nullable', observations: 'text nullable', constantes: 'json nullable', alertes: 'json nullable', signature_patient: 'text nullable', photos: 'json nullable', statut: 'enum:planifiee,en_cours,terminee,annulee,reportee default:planifiee', timestamps: timestamps, relationships: { belongsTo: 'Tournee, PatientHad' } }
+    Facture: { numero: 'string:20 unique', patient_id: 'id foreign:patients', admission_id: 'id foreign:admissions nullable', assurance_id: 'id foreign:assurances nullable', date_facture: date, date_echeance: 'date nullable', montant_brut: 'decimal:12,2 default:0', remise: 'decimal:12,2 default:0', montant_assurance: 'decimal:12,2 default:0', montant_patient: 'decimal:12,2 default:0', montant_total: 'decimal:12,2 default:0', montant_paye: 'decimal:12,2 default:0', tva: 'decimal:12,2 default:0', notes: 'text nullable', statut: 'enum:brouillon,emise,partiellement_payee,payee,annulee default:brouillon', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Patient, Admission, Assurance', hasMany: 'LigneFacture, Paiement' } }
+    LigneFacture: { facture_id: 'id foreign:factures', designation: 'string:255', type: 'enum:consultation,acte_medical,medicament,analyse,imagerie,sejour,autre', reference_id: 'integer unsigned nullable', quantite: 'integer unsigned default:1', prix_unitaire: 'decimal:10,2', remise: 'decimal:10,2 default:0', tva: 'decimal:10,2 default:0', prix_total: 'decimal:10,2', couvert_assurance: 'boolean default:false', timestamps: timestamps, relationships: { belongsTo: Facture } }
+    Paiement: { numero: 'string:20 unique', facture_id: 'id foreign:factures', date_paiement: datetime, montant: 'decimal:12,2', mode_paiement: 'enum:especes,carte_bancaire,mobile_money,cheque,virement,assurance', reference: 'string:100 nullable', banque: 'string:100 nullable', telephone_mobile_money: 'string:20 nullable', recu_par: 'id foreign:users', notes: 'text nullable', statut: 'enum:en_attente,confirme,annule default:confirme', timestamps: timestamps, relationships: { belongsTo: 'Facture, User:recu_par' } }
+    Pointage: { user_id: 'id foreign:users', date: date, heure_arrivee: 'datetime nullable', heure_depart: 'datetime nullable', type: 'enum:normal,garde,astreinte default:normal', equipe: 'enum:matin,apres_midi,nuit nullable', source: 'enum:manuel,biometrique,mobile default:manuel', localisation: 'string:255 nullable', notes: 'text nullable', statut: 'enum:present,absent,retard,conge,maladie default:present', timestamps: timestamps, relationships: { belongsTo: User } }
+    DemandeConge: { user_id: 'id foreign:users', type: 'enum:annuel,maladie,maternite,paternite,sans_solde,recuperation,formation', date_debut: date, date_fin: date, nombre_jours: 'integer unsigned', motif: 'text nullable', piece_jointe: 'string nullable', valideur_id: 'id foreign:users nullable', date_validation: 'datetime nullable', commentaire_validation: 'text nullable', statut: 'enum:en_attente,approuve,refuse,annule default:en_attente', timestamps: timestamps, relationships: { belongsTo: 'User, User:valideur' } }
+    Parametre: { cle: 'string:100 unique', valeur: 'text nullable', type: 'enum:string,integer,boolean,json,date default:string', groupe: 'string:50 nullable', description: 'text nullable', modifiable: 'boolean default:true', timestamps: timestamps }
+    AuditLog: { user_id: 'id foreign:users nullable', action: 'enum:create,update,delete,view,login,logout,export', model: 'string:100', model_id: 'integer unsigned nullable', ancien_valeurs: 'json nullable', nouvelles_valeurs: 'json nullable', ip_address: 'string:45 nullable', user_agent: 'text nullable', timestamps: timestamps, relationships: { belongsTo: User } }
