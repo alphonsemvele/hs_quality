@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Fonction;
+use App\Enums\UserType;
 use App\Models\Structure;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,18 +22,18 @@ class UserFactory extends Factory
     {
         return [
             'structure_id' => null,
-            'name' => fake('fr_FR')->firstName(),
-            'lastname' => fake('fr_FR')->lastName(),
+            'first_name' => fake('fr_FR')->firstName(),
+            'last_name' => fake('fr_FR')->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'telephone' => fake('fr_FR')->mobileNumber(),
+            'phone' => fake('fr_FR')->mobileNumber(),
             'avatar' => null,
-            'matricule' => strtoupper(Str::random(8)),
-            'type' => Fonction::Intervenant->value,
-            'specialite' => null,
-            'date_embauche' => fake()->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
-            'statut' => 'actif',
+            'employee_number' => strtoupper(Str::random(8)),
+            'type' => UserType::Intervenant->value,
+            'specialty' => null,
+            'hired_at' => fake()->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ];
     }
@@ -50,31 +50,31 @@ class UserFactory extends Factory
 
     public function intervenant(): static
     {
-        return $this->state(fn () => ['type' => Fonction::Intervenant->value]);
+        return $this->state(fn () => ['type' => UserType::Intervenant->value]);
     }
 
     public function coordinateur(): static
     {
-        return $this->state(fn () => ['type' => Fonction::Coordinateur->value]);
+        return $this->state(fn () => ['type' => UserType::Coordinateur->value]);
     }
 
     public function dirigeant(): static
     {
-        return $this->state(fn () => ['type' => Fonction::Dirigeant->value]);
+        return $this->state(fn () => ['type' => UserType::Dirigeant->value]);
     }
 
     public function referentQualite(): static
     {
-        return $this->state(fn () => ['type' => Fonction::ReferentQualite->value]);
+        return $this->state(fn () => ['type' => UserType::ReferentQualite->value]);
     }
 
     public function rh(): static
     {
-        return $this->state(fn () => ['type' => Fonction::Rh->value]);
+        return $this->state(fn () => ['type' => UserType::Rh->value]);
     }
 
     public function beneficiairePortal(): static
     {
-        return $this->state(fn () => ['type' => Fonction::BeneficiairePortal->value]);
+        return $this->state(fn () => ['type' => UserType::BeneficiairePortal->value]);
     }
 }

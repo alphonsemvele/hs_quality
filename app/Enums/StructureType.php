@@ -2,7 +2,12 @@
 
 namespace App\Enums;
 
-enum TypeStructure: string
+/**
+ * Structure types — French home-care regulatory categories.
+ * Values kept in French (SAAD / SSIAD / SPASAD / ESAD) as they are the
+ * official regulatory identifiers used across the sector.
+ */
+enum StructureType: string
 {
     case SAAD = 'saad';
     case SSIAD = 'ssiad';

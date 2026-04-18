@@ -2,16 +2,16 @@
 
 namespace App\Enums;
 
-enum TierStructure: string
+enum StructureTier: string
 {
-    case Essentiel = 'essentiel';
+    case Essential = 'essential';
     case Pro = 'pro';
     case Premium = 'premium';
 
     public function label(): string
     {
         return match ($this) {
-            self::Essentiel => 'Essentiel',
+            self::Essential => 'Essentiel',
             self::Pro => 'Pro',
             self::Premium => 'Premium',
         };
@@ -20,7 +20,7 @@ enum TierStructure: string
     public function monthlyPricePerUser(): int
     {
         return match ($this) {
-            self::Essentiel => 8,
+            self::Essential => 8,
             self::Pro => 15,
             self::Premium => 25,
         };

@@ -11,17 +11,17 @@ return new class extends Migration
         Schema::create('structures', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('code', 50)->unique();
-            $table->string('nom');
+            $table->string('name');
             $table->string('type', 20);
-            $table->text('adresse')->nullable();
+            $table->text('address')->nullable();
             $table->string('siret', 14)->nullable();
-            $table->string('tier', 20)->default('essentiel');
-            $table->string('statut', 20)->default('active');
+            $table->string('tier', 20)->default('essential');
+            $table->string('status', 20)->default('active');
             $table->timestamps();
             $table->softDeletes();
 
             $table->index('type');
-            $table->index('statut');
+            $table->index('status');
             $table->index('tier');
         });
     }

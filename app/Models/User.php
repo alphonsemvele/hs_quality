@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Fonction;
+use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -21,17 +21,17 @@ class User extends Authenticatable
 
     protected $fillable = [
         'structure_id',
-        'name',
-        'lastname',
+        'first_name',
+        'last_name',
         'email',
         'password',
-        'telephone',
+        'phone',
         'avatar',
-        'matricule',
+        'employee_number',
         'type',
-        'specialite',
-        'date_embauche',
-        'statut',
+        'specialty',
+        'hired_at',
+        'status',
     ];
 
     protected $hidden = [
@@ -46,27 +46,30 @@ class User extends Authenticatable
         return [
             'id' => 'integer',
             'email_verified_at' => 'datetime',
-            'type' => Fonction::class,
-            'date_embauche' => 'date',
+            'type' => UserType::class,
+            'hired_at' => 'date',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'erased_at' => 'datetime',
-            // two_factor_secret and two_factor_recovery_codes are auto-encrypted
-            // by Fortify's TwoFactorAuthenticatable trait — do not add casts here.
         ];
     }
 
     /**
      * The Structure (tenant) this user belongs to.
      *
-     * Note: User does NOT apply the BelongsToStructure trait. User is the
-     * authentication subject that TenantResolver READS to determine the
-     * current tenant context. Applying the trait would create a circular
-     * dependency (scope filters by tenant, tenant comes from the user).
+     * User does NOT apply the BelongsToStructure trait. User is the
+     * authentication subject TenantResolver READS to determine the
+     * current tenant context — applying the trait would create a
+     * circular dependency.
      */
     public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
+    }
+
+    public function fullName(): string
+    {
+        return trim($this->first_name.' '.$this->last_name);
     }
 
     public function isErased(): bool

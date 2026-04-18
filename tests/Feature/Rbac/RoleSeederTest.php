@@ -56,7 +56,7 @@ it('gives a coordinateur team-level operational access', function () {
         ->toContain(
             'incidents.analyze',
             'incidents.close',
-            'beneficiaires.update',
+            'beneficiaries.update',
             'qvct.view.team_aggregates',
         )
         ->not->toContain('cross_tenant_benchmark.read');
@@ -91,7 +91,7 @@ it('restricts beneficiaire_portal to portal actions only', function () {
     $role = Role::findByName('beneficiaire_portal', 'web');
     $names = $role->permissions->pluck('name')->all();
 
-    $allowedPrefixes = ['portail.', 'audit_logs.view.own', 'rgpd.erasure.request'];
+    $allowedPrefixes = ['portal.', 'audit_logs.view.own', 'rgpd.erasure.request'];
 
     foreach ($names as $name) {
         $allowed = false;

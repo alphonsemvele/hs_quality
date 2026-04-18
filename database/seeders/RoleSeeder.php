@@ -11,8 +11,12 @@ use Spatie\Permission\PermissionRegistrar;
  * Instantiates the 6 personas × permission matrix. Idempotent — safe to re-run.
  *
  * Roles are created at the GLOBAL scope (team_foreign_key = null), serving as
- * templates that every tenant inherits. A user assignment in a specific
- * structure uses setPermissionsTeamId($structureId) before assignRole('...').
+ * templates every tenant inherits. A user assignment in a specific structure
+ * uses setPermissionsTeamId($structureId) before assignRole('...').
+ *
+ * Permission names are generally English (interventions, incidents, audits).
+ * Regulatory/domain acronyms stay French (QVCT, PAC, HAS). Persona identifiers
+ * stay French (coordinateur, dirigeant) — they're canonical role names.
  *
  * Source of truth: references/rbac/matrix.md + references/rbac/seeding-patterns.md
  */
@@ -20,7 +24,7 @@ class RoleSeeder extends Seeder
 {
     /** @var list<string> */
     private array $permissions = [
-        // M1 Traçabilité
+        // M1 Care records (interventions + beneficiaries + care plans)
         'interventions.view.own',
         'interventions.view.team',
         'interventions.view.structure',
@@ -28,13 +32,13 @@ class RoleSeeder extends Seeder
         'interventions.update.own',
         'interventions.update.team',
         'interventions.delete',
-        'beneficiaires.view.assigned',
-        'beneficiaires.view.structure',
-        'beneficiaires.create',
-        'beneficiaires.update',
-        'beneficiaires.delete',
-        'plans_accompagnement.view',
-        'plans_accompagnement.update',
+        'beneficiaries.view.assigned',
+        'beneficiaries.view.structure',
+        'beneficiaries.create',
+        'beneficiaries.update',
+        'beneficiaries.delete',
+        'care_plans.view',
+        'care_plans.update',
 
         // M2 Incidents
         'incidents.declare',
@@ -45,7 +49,7 @@ class RoleSeeder extends Seeder
         'incidents.delete',
         'incidents.notify_ars',
 
-        // M3 QVCT
+        // M3 QVCT (French sector acronym — kept)
         'qvct.respond',
         'qvct.view.team_aggregates',
         'qvct.view.structure_aggregates',
@@ -59,15 +63,15 @@ class RoleSeeder extends Seeder
         'newsfeed.post',
         'documents.upload',
 
-        // M5 Compétences
-        'habilitations.view.own',
-        'habilitations.view.team',
-        'habilitations.view.structure',
-        'habilitations.record',
-        'formations.plan',
-        'formations.record',
+        // M5 Skills & training
+        'certifications.view.own',
+        'certifications.view.team',
+        'certifications.view.structure',
+        'certifications.record',
+        'trainings.plan',
+        'trainings.record',
 
-        // M6 Audits
+        // M6 Audits + PAC (French acronym — kept)
         'audits.view',
         'audits.configure',
         'audits.execute',
@@ -83,16 +87,16 @@ class RoleSeeder extends Seeder
         'reports.export',
         'reports.annual_quality.generate',
 
-        // M8 Portail bénéficiaires (Premium)
-        'portail.view_own_plan',
-        'portail.submit_satisfaction',
-        'portail.declare_incident',
-        'portail.message_coordinateur',
+        // M8 Beneficiary portal (Premium)
+        'portal.view_own_plan',
+        'portal.submit_satisfaction',
+        'portal.declare_incident',
+        'portal.message_coordinateur',
 
-        // M9 IA prédictive (Premium)
-        'ia.burnout.view.own',
-        'ia.burnout.view.team_aggregate',
-        'ia.autonomy_loss.view',
+        // M9 AI predictive (Premium)
+        'ai.burnout_risk.view.own',
+        'ai.burnout_risk.view.team_aggregate',
+        'ai.autonomy_loss.view',
 
         // Cross-tenant benchmark — service account only, never assigned to
         // human roles (listed here so it exists as a permission to reference)
@@ -114,15 +118,15 @@ class RoleSeeder extends Seeder
             'interventions.view.own',
             'interventions.create.own',
             'interventions.update.own',
-            'beneficiaires.view.assigned',
-            'plans_accompagnement.view',
+            'beneficiaries.view.assigned',
+            'care_plans.view',
             'incidents.declare',
             'incidents.view.own',
             'qvct.respond',
             'qvct.request_rh_exchange',
             'messages.send',
-            'habilitations.view.own',
-            'ia.burnout.view.own',
+            'certifications.view.own',
+            'ai.burnout_risk.view.own',
             'audit_logs.view.own',
             'rgpd.erasure.request',
         ],
@@ -131,12 +135,12 @@ class RoleSeeder extends Seeder
             'interventions.view.structure',
             'interventions.update.team',
             'interventions.delete',
-            'beneficiaires.view.structure',
-            'beneficiaires.create',
-            'beneficiaires.update',
-            'beneficiaires.delete',
-            'plans_accompagnement.view',
-            'plans_accompagnement.update',
+            'beneficiaries.view.structure',
+            'beneficiaries.create',
+            'beneficiaries.update',
+            'beneficiaries.delete',
+            'care_plans.view',
+            'care_plans.update',
             'incidents.declare',
             'incidents.view.structure',
             'incidents.analyze',
@@ -150,8 +154,8 @@ class RoleSeeder extends Seeder
             'messages.moderate',
             'newsfeed.post',
             'documents.upload',
-            'habilitations.view.team',
-            'formations.record',
+            'certifications.view.team',
+            'trainings.record',
             'pac.generate',
             'pac.update',
             'audits.view',
@@ -163,9 +167,9 @@ class RoleSeeder extends Seeder
 
         'dirigeant' => [
             'interventions.view.structure',
-            'beneficiaires.view.structure',
-            'plans_accompagnement.view',
-            'plans_accompagnement.update',
+            'beneficiaries.view.structure',
+            'care_plans.view',
+            'care_plans.update',
             'incidents.view.structure',
             'incidents.analyze',
             'incidents.close',
@@ -179,9 +183,9 @@ class RoleSeeder extends Seeder
             'messages.moderate',
             'newsfeed.post',
             'documents.upload',
-            'habilitations.view.structure',
-            'habilitations.record',
-            'formations.record',
+            'certifications.view.structure',
+            'certifications.record',
+            'trainings.record',
             'audits.view',
             'audits.configure',
             'pac.generate',
@@ -192,8 +196,8 @@ class RoleSeeder extends Seeder
             'dashboard.executive.view',
             'reports.export',
             'reports.annual_quality.generate',
-            'ia.burnout.view.team_aggregate',
-            'ia.autonomy_loss.view',
+            'ai.burnout_risk.view.team_aggregate',
+            'ai.autonomy_loss.view',
             'users.manage.structure',
             'roles.assign.structure',
             'structure.configure',
@@ -204,7 +208,7 @@ class RoleSeeder extends Seeder
 
         'referent_qualite' => [
             'interventions.view.structure',
-            'beneficiaires.view.structure',
+            'beneficiaries.view.structure',
             'incidents.view.structure',
             'incidents.analyze',
             'incidents.close',
@@ -238,22 +242,22 @@ class RoleSeeder extends Seeder
             'messages.moderate',
             'newsfeed.post',
             'documents.upload',
-            'habilitations.view.structure',
-            'habilitations.record',
-            'formations.plan',
-            'formations.record',
+            'certifications.view.structure',
+            'certifications.record',
+            'trainings.plan',
+            'trainings.record',
             'dashboard.operational.view',
             'reports.export',
-            'ia.burnout.view.team_aggregate',
+            'ai.burnout_risk.view.team_aggregate',
             'audit_logs.view.own',
             'rgpd.erasure.request',
         ],
 
         'beneficiaire_portal' => [
-            'portail.view_own_plan',
-            'portail.submit_satisfaction',
-            'portail.declare_incident',
-            'portail.message_coordinateur',
+            'portal.view_own_plan',
+            'portal.submit_satisfaction',
+            'portal.declare_incident',
+            'portal.message_coordinateur',
             'audit_logs.view.own',
             'rgpd.erasure.request',
         ],
@@ -261,9 +265,6 @@ class RoleSeeder extends Seeder
 
     public function run(): void
     {
-        // Seed at the global scope (team_foreign_key = null). Roles created here
-        // serve as templates inherited by every tenant. User-to-role assignments
-        // happen in a tenant context via setPermissionsTeamId($structureId).
         app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 
         foreach ($this->permissions as $permission) {

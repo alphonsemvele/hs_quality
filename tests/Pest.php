@@ -34,8 +34,8 @@ pest()->extend(Tests\TestCase::class)
  */
 function twoStructures(): array
 {
-    $structureA = Structure::factory()->create(['nom' => 'Structure A', 'code' => 'TEST-A']);
-    $structureB = Structure::factory()->create(['nom' => 'Structure B', 'code' => 'TEST-B']);
+    $structureA = Structure::factory()->create(['name' => 'Structure A', 'code' => 'TEST-A']);
+    $structureB = Structure::factory()->create(['name' => 'Structure B', 'code' => 'TEST-B']);
 
     $userA = User::factory()->forStructure($structureA)->coordinateur()->create();
     $userB = User::factory()->forStructure($structureB)->coordinateur()->create();

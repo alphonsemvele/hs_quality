@@ -2,16 +2,16 @@
 
 namespace App\Enums;
 
-enum StatutStructure: string
+enum StructureStatus: string
 {
     case Active = 'active';
-    case Suspendue = 'suspendue';
+    case Suspended = 'suspended';
 
     public function label(): string
     {
         return match ($this) {
-            self::Active => 'Active',
-            self::Suspendue => 'Suspendue',
+            self::Active => 'Actif',
+            self::Suspended => 'Suspendu',
         };
     }
 }

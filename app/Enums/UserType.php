@@ -3,10 +3,14 @@
 namespace App\Enums;
 
 /**
- * The 6 personas on this project. Mirrors Spatie Permission role names.
- * See: references/rbac/matrix.md for the per-role permission matrix.
+ * The 6 personas. Values kept in French as they are the canonical role
+ * names used across Spatie Permission, French sector documentation, and
+ * stakeholder conversations. Translating "coordinateur" → "coordinator"
+ * loses the specific French regulatory / cultural meaning.
+ *
+ * See: references/rbac/matrix.md
  */
-enum Fonction: string
+enum UserType: string
 {
     case Intervenant = 'intervenant';
     case Coordinateur = 'coordinateur';
@@ -40,6 +44,6 @@ enum Fonction: string
     /** @return array<int, self> */
     public static function mandatoryMfaRoles(): array
     {
-        return array_filter(self::cases(), fn (self $f) => $f->requiresMfa());
+        return array_filter(self::cases(), fn (self $t) => $t->requiresMfa());
     }
 }

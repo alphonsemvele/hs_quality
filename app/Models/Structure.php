@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\StatutStructure;
-use App\Enums\TierStructure;
-use App\Enums\TypeStructure;
+use App\Enums\StructureStatus;
+use App\Enums\StructureTier;
+use App\Enums\StructureType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,35 +18,35 @@ class Structure extends Model
 
     protected $fillable = [
         'code',
-        'nom',
+        'name',
         'type',
-        'adresse',
+        'address',
         'siret',
         'tier',
-        'statut',
+        'status',
     ];
 
     public function casts(): array
     {
         return [
-            'type' => TypeStructure::class,
-            'tier' => TierStructure::class,
-            'statut' => StatutStructure::class,
+            'type' => StructureType::class,
+            'tier' => StructureTier::class,
+            'status' => StructureStatus::class,
         ];
     }
 
     public function isActive(): bool
     {
-        return $this->statut === StatutStructure::Active;
+        return $this->status === StructureStatus::Active;
     }
 
     public function hasFeature(string $feature): bool
     {
         return match ($feature) {
-            'incidents.full' => in_array($this->tier, [TierStructure::Pro, TierStructure::Premium], true),
-            'qvct' => in_array($this->tier, [TierStructure::Pro, TierStructure::Premium], true),
-            'audits' => in_array($this->tier, [TierStructure::Pro, TierStructure::Premium], true),
-            'portail_beneficiaires', 'ia_predictive' => $this->tier === TierStructure::Premium,
+            'incidents.full' => in_array($this->tier, [StructureTier::Pro, StructureTier::Premium], true),
+            'qvct' => in_array($this->tier, [StructureTier::Pro, StructureTier::Premium], true),
+            'audits' => in_array($this->tier, [StructureTier::Pro, StructureTier::Premium], true),
+            'beneficiary_portal', 'ai_predictive' => $this->tier === StructureTier::Premium,
             default => true,
         };
     }
