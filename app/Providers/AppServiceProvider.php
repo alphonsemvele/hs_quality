@@ -2,13 +2,23 @@
 
 namespace App\Providers;
 
+use App\Models\Beneficiary;
+use App\Policies\BeneficiaryPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * Policy mapping. Every new domain Policy is registered here.
+     */
+    protected array $policies = [
+        Beneficiary::class => BeneficiaryPolicy::class,
+    ];
+
     public function register(): void
     {
         //
@@ -17,6 +27,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiters();
+        $this->registerPolicies();
+    }
+
+    private function registerPolicies(): void
+    {
+        foreach ($this->policies as $model => $policy) {
+            Gate::policy($model, $policy);
+        }
     }
 
     /**

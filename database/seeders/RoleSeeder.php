@@ -168,6 +168,9 @@ class RoleSeeder extends Seeder
         'dirigeant' => [
             'interventions.view.structure',
             'beneficiaries.view.structure',
+            'beneficiaries.create',
+            'beneficiaries.update',
+            'beneficiaries.delete',
             'care_plans.view',
             'care_plans.update',
             'incidents.view.structure',
