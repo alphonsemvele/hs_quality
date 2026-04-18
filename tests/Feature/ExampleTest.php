@@ -1,18 +1,7 @@
 <?php
 
-namespace Tests\Feature;
+it('responds to the Laravel health check endpoint', function () {
+    $response = $this->get('/up');
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    use RefreshDatabase;
-
-    public function test_returns_a_successful_response()
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-}
+    $response->assertOk();
+});
