@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
 
             // Tenant scoping: every user belongs to one Structure.
-            // Nullable for the bootstrap/seed case (very first super-admin user before
-            // any structure exists). Production users always have a structure_id.
+            // Nullable for the bootstrap case (very first super-admin user
+            // before any structure exists). Production users always have one.
             $table->uuid('structure_id')->nullable()->index();
 
             $table->string('name');
@@ -24,11 +24,28 @@ return new class extends Migration
             $table->string('telephone')->nullable();
             $table->string('avatar')->nullable();
             $table->string('matricule')->nullable()->index();
-            $table->string('fonction', 30)->nullable();
+
+            // Persona type — one of: intervenant, coordinateur, dirigeant,
+            // referent_qualite, rh, beneficiaire_portal.
+            // Spatie Permission's role table is the authoritative source for
+            // "what this user can do"; `type` is a denormalized column for
+            // quick filtering in dashboards and queries.
+            $table->string('type', 30)->nullable();
+
             $table->string('specialite')->nullable();
-            $table->bigInteger('service_id')->nullable();
             $table->date('date_embauche')->nullable();
             $table->string('statut', 20)->default('actif');
+
+            // Fortify two-factor authentication columns
+            // Both encrypted at the model level via casts().
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+
+            // RGPD Art 17 right-to-erasure flag. Set when the user's personal
+            // data has been anonymized but the row is retained for audit
+            // evidence. Different from deleted_at (ordinary soft delete).
+            $table->timestamp('erased_at')->nullable();
 
             $table->rememberToken();
             $table->timestamps();
