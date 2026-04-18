@@ -1,3 +1,79 @@
+# QualitéDomicile SaaS — Project Rules
+
+**This project is a multi-tenant SaaS for French home care quality management (SAAD / SSIAD / SPASAD / ESAD / CCAS). Authoritative product spec: `CDC-QUALITE-DOM-2024-v2.0` (Feb 2024). End-to-end implementation plan: [IMPLEMENTATION_PLAN.txt](IMPLEMENTATION_PLAN.txt) in this repo root.**
+
+**Last updated: 2026-04-16. Rules in this project section take precedence over the Laravel Boost guidelines below where they conflict.**
+
+## Locked architecture
+
+- **Backend**: Laravel 12 + PHP 8.2+ + PostgreSQL 16 + Redis 7 + S3 (HDS-hosted: AWS Paris or OVHcloud France)
+- **Two frontends, one backend**:
+  - **Inertia + React** for the admin web app (coordinateurs, dirigeants, référents qualité, RH, responsables formation — always-online office users)
+  - **REST API under `/api/v1/*`** (Sanctum personal access tokens, OpenAPI via Scramble) for the React Native mobile app (intervenants à domicile — offline-first, "zones blanches")
+- **Shared business logic** lives in `app/Services/*` — both Inertia controllers and API controllers call the same service. No logic duplication between the two controller stacks.
+- **Tenancy: row-level single-database.** Every domain table has `structure_id`; every domain model uses the `BelongsToStructure` trait with a global scope. Migration path to PostgreSQL schemas preserved for future enterprise tenants.
+- **Auth**: session cookies (Fortify) for web, Sanctum tokens for mobile.
+- **MFA: TOTP via Laravel Fortify.** Mandatory for dirigeants / référents qualité / coordinateurs / RH. Optional for intervenants (field UX; device biometric unlocks mobile token). **SMS and email OTP explicitly rejected** (SIM-swap risk; deprecated by NIST/ANSSI/CNIL for health data).
+
+## Non-negotiable rules
+
+1. **Testing: Pest only, not PHPUnit.** Every feature ships with BOTH a Pest feature test AND a Pest unit test. Full suite must always be green before merging. **This overrides the Laravel Boost PHPUnit guidance below.** Use `php artisan make:test` (Pest default), not `--phpunit`.
+
+2. **Security is top priority.** Order of checks on every write: tenant scope → Policy → Form Request `authorize()` → audit log entry. No shortcuts. No "we'll add security later."
+
+3. **Every domain model MUST**:
+   - Include `structure_id` FK in its migration
+   - Use the `BelongsToStructure` trait
+   - Have a matching Policy extending `BasePolicy` (which tenant-checks before any other logic)
+   - Have a Pest cross-tenant leak test (two structures, query across, assert zero rows leaked)
+   - Be `Auditable` (via `owen-it/laravel-auditing`) if it touches health data or QVCT data
+
+4. **DRY with rule of three.** Check for existing components / services / traits before writing new ones (also in Laravel Boost). Extract AFTER third duplication, not before. Shared enums (`Gravite`, `StatutIntervention`, `TypeStructure`, `Fonction`) live in `app/Enums/*` with TitleCase keys.
+
+5. **All write validation** goes through a Form Request extending `BaseFormRequest`. Never validate inline in a controller.
+
+6. **Config access**: use `config('app.name')`, never `env('APP_NAME')` at runtime. `env()` is only read during `php artisan config:cache` at deploy time. (Also a security rule — env leaks in runtime code are a common breach vector.)
+
+7. **Database queries**: use `Model::query()` / Eloquent. Ban raw `DB::` calls outside the explicitly reviewed `CrossTenantQueryService` (Module 9 benchmark).
+
+8. **Background work**: anything > 200ms goes to a queue. Queue jobs must be idempotent AND tenant-context-preserving.
+
+9. **Avoid unsafe HTML rendering patterns**: no `{!! !!}` with user input in Blade, no unescaped HTML injection in React. Blade and React escape by default; keep it that way.
+
+10. **French conventions**: enum values in French (`gravite: 'grave'`, `statut: 'en_cours'`), validation messages via `lang/fr/*.php`, UI labels French throughout. Localization for Phase 5 (Dutch, German) is planned — don't implement now, but don't hardcode French strings where a translation key would work.
+
+## Common traps (do NOT do)
+
+- **Never read or rely on `.blueprint` or `draft.yaml`** at the repo root — they describe a hospital information system, NOT QualitéDomicile. Dead artifacts, scheduled for deletion in Phase 0 Week 2.
+- **Never generate hospital-domain tables**: `patients`, `admissions`, `prescriptions`, `medicaments`, `factures`, `lits`, `consultations`, `analyses_laboratoires`, `examen_imageries`, `ordonnances`, etc. None belong here.
+- **Never convert Pest tests to PHPUnit** (Laravel Boost rule below says to; we override).
+- **Never use `$guarded = []`**; always `$fillable` explicit on every model.
+- **Never write raw SQL** without explicit review (use Eloquent).
+- **Never skip the cross-tenant leak test** for a new domain model.
+- **Never use SMS or email as MFA.**
+- **Never schedule a task outside `routes/console.php`.**
+- **Never hardcode secrets**; use AWS Secrets Manager / Parameter Store in production.
+
+## The 12 engineering concerns (PR checklist)
+
+Every PR is reviewed against: (1) architecture, (2) security, (3) database, (4) tenancy, (5) API design, (6) performance, (7) reliability, (8) observability, (9) background processing, (10) testing, (11) deployment, (12) compliance. Concerns 1–4 are mandatory for every PR; 5–12 applied where relevant to the PR's scope. Full detail in the custom skill and in project memory.
+
+## References
+
+- **Product spec**: `CDC-QUALITE-DOM-2024-v2.0` (external PDF; full contents captured in project memory)
+- **Implementation plan**: [IMPLEMENTATION_PLAN.txt](IMPLEMENTATION_PLAN.txt) in this repo root
+- **Custom skill** (Claude Code): `qualite-domicile-backend` — project-specific context, RBAC, tenancy, audit, compliance, French conventions, templates, anti-patterns
+- **Project memory**: `/home/muma/.claude/projects/-home-muma-Desktop-2026-hs-quality-app/memory/*`
+
+## Overrides to the Laravel Boost guidelines below
+
+The Laravel Boost section below remains valid as general Laravel / Inertia / React / Tailwind guidance. The explicit overrides applied on this project are:
+
+- **Testing framework**: use **Pest**, not PHPUnit. Ignore "convert Pest to PHPUnit" and `--phpunit` flag guidance.
+- **Nothing else in Laravel Boost is overridden** — PHP style (curly braces, typed parameters, return types, constructor promotion), Form Requests for validation, `$fillable`, Eloquent preference over raw `DB::`, Pint formatting, Inertia patterns, Tailwind v4 rules all apply.
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

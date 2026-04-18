@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,35 +20,35 @@ class AdminRoleController extends Controller
             ->get();
 
         $stats = [
-            'total'              => $roles->count(),
-            'avec_utilisateurs'  => $roles->where('users_count', '>', 0)->count(),
-            'total_permissions'  => Permission::count(),
+            'total' => $roles->count(),
+            'avec_utilisateurs' => $roles->where('users_count', '>', 0)->count(),
+            'total_permissions' => Permission::count(),
         ];
 
         return Inertia::render('admin/role', [
-            'roles'       => $roles,
+            'roles' => $roles,
             'permissions' => Permission::orderBy('nom')->get(),
-            'stats'       => $stats,
+            'stats' => $stats,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'nom'           => ['required', 'string', 'max:50', 'unique:roles,nom'],
-            'description'   => ['nullable', 'string', 'max:255'],
-            'couleur'       => ['nullable', 'string', 'max:7'],
-            'permissions'   => ['nullable', 'array'],
+            'nom' => ['required', 'string', 'max:50', 'unique:roles,nom'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'couleur' => ['nullable', 'string', 'max:7'],
+            'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
         $role = Role::create([
-            'nom'         => strtolower(trim($data['nom'])),
+            'nom' => strtolower(trim($data['nom'])),
             'description' => $data['description'] ?? null,
-            'couleur'     => $data['couleur'] ?? '#8B5CF6',
+            'couleur' => $data['couleur'] ?? '#8B5CF6',
         ]);
 
-        if (!empty($data['permissions'])) {
+        if (! empty($data['permissions'])) {
             $role->permissions()->sync($data['permissions']);
         }
 
@@ -59,17 +59,17 @@ class AdminRoleController extends Controller
     public function update(Request $request, Role $role): RedirectResponse
     {
         $data = $request->validate([
-            'nom'           => ['required', 'string', 'max:50', 'unique:roles,nom,' . $role->id],
-            'description'   => ['nullable', 'string', 'max:255'],
-            'couleur'       => ['nullable', 'string', 'max:7'],
-            'permissions'   => ['nullable', 'array'],
+            'nom' => ['required', 'string', 'max:50', 'unique:roles,nom,'.$role->id],
+            'description' => ['nullable', 'string', 'max:255'],
+            'couleur' => ['nullable', 'string', 'max:7'],
+            'permissions' => ['nullable', 'array'],
             'permissions.*' => ['integer', 'exists:permissions,id'],
         ]);
 
         $role->update([
-            'nom'         => strtolower(trim($data['nom'])),
+            'nom' => strtolower(trim($data['nom'])),
             'description' => $data['description'] ?? null,
-            'couleur'     => $data['couleur'] ?? $role->couleur,
+            'couleur' => $data['couleur'] ?? $role->couleur,
         ]);
 
         $role->permissions()->sync($data['permissions'] ?? []);

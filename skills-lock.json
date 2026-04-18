@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "laravel-security": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "computedHash": "83f5d1d663a9e51bed330ec1d790eb45c943ba8255d70500e42e9eedd9a5fe55"
+    },
+    "laravel:policies-and-authorization": {
+      "source": "jpcaparas/superpowers-laravel",
+      "sourceType": "github",
+      "computedHash": "6394260dafa86eca55b80705cd6547856ba28aed9cb4885d973b1f788f10422c"
+    }
+  }
+}

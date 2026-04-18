@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-    
-            $table->enum('statut', ["actif","inactif","conge","suspendu"])->default('actif');
+
+            $table->enum('statut', ['actif', 'inactif', 'conge', 'suspendu'])->default('actif');
             $table->softDeletes();
         });
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -37,6 +37,7 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
     }
+
     /**
      * Reverse the migrations.
      */

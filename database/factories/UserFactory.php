@@ -2,31 +2,36 @@
 
 namespace Database\Factories;
 
-use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     */
+    protected static ?string $password = null;
+
     public function definition(): array
     {
         return [
-            'nom' => fake()->regexify('[A-Za-z0-9]{100}'),
-            'prenom' => fake()->regexify('[A-Za-z0-9]{100}'),
-            'email' => fake()->safeEmail(),
-            'email_verified_at' => fake()->dateTime(),
-            'password' => fake()->password(),
-            'telephone' => fake()->regexify('[A-Za-z0-9]{20}'),
-            'avatar' => fake()->word(),
-            'matricule' => fake()->regexify('[A-Za-z0-9]{20}'),
-            'fonction' => fake()->randomElement(["medecin","infirmier","sage_femme","pharmacien","technicien","laborantin","administratif","receptionniste","comptable"]),
-            'specialite' => fake()->regexify('[A-Za-z0-9]{100}'),
-            'service_id' => Service::factory(),
-            'date_embauche' => fake()->date(),
-            'statut' => fake()->randomElement(["actif","inactif","conge","suspendu"]),
-            'remember_token' => fake()->uuid(),
+            'name' => fake('fr_FR')->firstName(),
+            'lastname' => fake('fr_FR')->lastName(),
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => static::$password ??= Hash::make('password'),
+            'telephone' => fake('fr_FR')->mobileNumber(),
+            'avatar' => null,
+            'matricule' => strtoupper(Str::random(8)),
+            'fonction' => fake()->randomElement(['intervenant', 'coordinateur', 'dirigeant', 'referent_qualite', 'rh']),
+            'specialite' => null,
+            'service_id' => null,
+            'date_embauche' => fake()->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
+            'statut' => 'actif',
+            'remember_token' => Str::random(10),
         ];
+    }
+
+    public function unverified(): static
+    {
+        return $this->state(fn () => ['email_verified_at' => null]);
     }
 }

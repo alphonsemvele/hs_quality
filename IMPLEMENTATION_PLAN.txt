@@ -1,0 +1,688 @@
+================================================================================
+QUALITÉDOMICILE SAAS — PROJECT IMPLEMENTATION PLAN
+================================================================================
+Reference:  CDC-QUALITE-DOM-2024-v2.0 (Cahier des Charges, Feb 2024)
+Project:    hs_quality_app
+Prepared:   2026-04-16
+Owner:      Muma Brian
+
+This document is the end-to-end plan from "where we are today" (Laravel
+scaffold, no real domain models, only User table migrated) to "Phase 5
+complete at Year 3" (3,000 structures across France + Belgium + Switzerland
++ Luxembourg).
+
+Use alongside:
+  - CLAUDE.md (project-level rules)
+  - /home/muma/.claude/projects/.../memory/project_cdc_specification.md
+  - /home/muma/.claude/projects/.../memory/architecture_decisions.md
+  - /home/muma/.claude/projects/.../memory/feedback_backend_engineering_checklist.md
+
+
+================================================================================
+0. LOCKED ARCHITECTURE DECISIONS (reference — do not re-litigate)
+================================================================================
+
+Backend framework    : Laravel 12 (PHP 8.2+)
+Web frontend         : Inertia + React + TypeScript + Tailwind v4 (admin users)
+Mobile frontend      : React Native + offline-first SQLite (field intervenants)
+API layer            : REST under /api/v1/* with Sanctum tokens (serves mobile)
+Database             : PostgreSQL 16 (source of truth, ACID, JSONB, PostGIS-ready)
+Cache / queue / pubsub: Redis 7
+File storage         : S3-compatible with SSE-KMS encryption (AWS S3 or MinIO local)
+Real-time            : Laravel Reverb (WebSocket server)
+Hosting              : AWS France (Paris) or OVHcloud France — HDS-certified
+Tenancy              : Row-level via BelongsToStructure trait + global scope
+                       (PostgreSQL schema-based escape hatch preserved)
+Testing              : Pest (NOT PHPUnit); feature + unit test per feature;
+                       suite always green; cross-tenant leak test mandatory per
+                       domain model
+Auth                 : Session cookies for Inertia web; Sanctum tokens for API;
+                       MFA mandatory for dirigeants / référents qualité /
+                       coordinateurs; optional for intervenants
+Security posture     : Top priority — multi-tenant isolation, audit logging,
+                       encryption at rest, Form Requests, Policies on every
+                       model, secrets in config (never env() in runtime code)
+Ignored / rejected   : .blueprint and draft.yaml files in repo root (hospital
+                       IS, NOT QualitéDomicile); hospital-domain tables
+                       (patients, admissions, prescriptions, factures, etc.);
+                       PHPUnit for new tests; custom-built multi-tenancy (use
+                       stancl/tenancy patterns); multi-database tenancy as
+                       default (row-level instead)
+
+
+================================================================================
+1. THE 12 ENGINEERING CONCERNS (mandatory — verified at every phase)
+================================================================================
+
+Every PR and every phase milestone is reviewed against these 12 concerns.
+
+  1. Architecture & code organization
+  2. Security (OWASP Top 10 + HDS/RGPD compliance)
+  3. Database & data layer
+  4. Multi-tenancy
+  5. API design & contracts
+  6. Performance & scalability
+  7. Reliability & resilience
+  8. Observability
+  9. Background processing
+ 10. Testing strategy
+ 11. Deployment & operations
+ 12. Compliance, governance & team
+
+Concerns 1–4 MUST be right from day one (Phase 0 + Phase 1 Month 1). The
+rest are additive and mature over 36 months. Full detail in
+feedback_backend_engineering_checklist.md.
+
+
+================================================================================
+2. TIMELINE OVERVIEW
+================================================================================
+
+Phase 0 — Foundation               Weeks  1–3      (before M1 feature work)
+Phase 1 — MVP                      Months 1–4     Target: 10 structures, 200 intervenants
+Phase 2 — Qualité (Pro offering)   Months 5–8     Target: 50 structures, 1,000 intervenants
+Phase 3 — IA & Data (Premium)      Months 9–14    Target: 200 structures, 5,000–15,000 intervenants
+Phase 4 — National expansion       Months 15–24   Target: 500 structures
+Phase 5 — European expansion       Months 25–36   Target: 1,000–3,000 structures
+
+
+================================================================================
+3. PHASE 0 — FOUNDATION (3 weeks)
+================================================================================
+
+Goal: Every tool, convention, and enforcement mechanism in place so Phase 1 is
+pure feature work, not scaffolding work.
+
+--------------------------------------------------------------------------------
+Week 1 — Skill & knowledge setup
+--------------------------------------------------------------------------------
+
+Day 1–2  Install Claude Code skills (9 total)
+         - affaan-m/everything-claude-code/laravel-security
+         - affaan-m/everything-claude-code/laravel-tdd-affaan-m
+         - leeovery/claude-laravel/laravel-multi-tenancy
+         - iserter/eloquent-best-practices
+         - jpcaparas/superpowers-laravel/laravel:policies-and-authorization
+         - jpcaparas/superpowers-laravel/laravel:migrations-and-factories
+         - jpcaparas/superpowers-laravel/laravel:transactions-and-consistency
+         - jpcaparas/superpowers-laravel/laravel:rate-limiting
+         - jpcaparas/superpowers-laravel/laravel:quality-checks
+
+Day 3–4  Build the custom qualite-domicile-backend skill
+         25 files covering: CDC context, glossary, architecture decisions,
+         RBAC/Spatie patterns for 6 personas, row-level tenancy templates,
+         audit logging patterns, HDS/RGPD compliance, French conventions,
+         code templates, anti-patterns. Use skill-creator skill to scaffold.
+
+Day 5    Update CLAUDE.md
+         Pest mandate, security-first, DRY with rule-of-three, feature+unit
+         test per feature, PostgreSQL + row-level tenancy assumption, two-app
+         architecture. This makes the rules durable across all AI tools
+         (Claude Code, Cursor, etc.) that read CLAUDE.md.
+
+--------------------------------------------------------------------------------
+Week 2 — Infrastructure & environment
+--------------------------------------------------------------------------------
+
+Day 1    Clean the repo of blueprint artifacts
+         - Delete .blueprint and draft.yaml at root
+         - Delete hospital-domain factories (~30 files): PatientFactory,
+           AdmissionFactory, PrescriptionFactory, MedicamentFactory,
+           FactureFactory, ConsultationFactory, AnalyseLaboratoireFactory, etc.
+         - Delete matching seeders
+         - Delete orphan tests in tests/Feature/Http/Controllers/ (~25 files)
+         - Delete missing controllers' route entries (StructureController,
+           UtilisateurController, RapportController, ParametreController)
+         - Keep the existing working stub controllers (Dashboard, Intervention,
+           Incident, etc.) — they'll be rebuilt module by module
+
+Day 2–3  Local environment setup
+         - docker-compose.yml: PostgreSQL 16 + Redis 7 + MinIO (S3 local)
+         - .env: DB_CONNECTION=pgsql, CACHE_STORE=redis, QUEUE_CONNECTION=redis,
+           SESSION_DRIVER=redis, FILESYSTEM_DISK=s3, BROADCAST_CONNECTION=reverb
+         - phpunit.xml / pest.php: SQLite in-memory for unit tests,
+           PostgreSQL for integration tests
+         - PostgreSQL extensions enabled via migration:
+           uuid-ossp (distributed ID generation for offline sync)
+           pgcrypto (column encryption complement)
+           pg_trgm (fuzzy text search)
+           PostGIS (added later when M1 geolocation is built)
+
+Day 4–5  Install Laravel packages
+         composer require stancl/tenancy                    (tenancy patterns)
+         composer require spatie/laravel-permission         (RBAC)
+         composer require owen-it/laravel-auditing          (audit logs)
+         composer require spatie/laravel-query-builder      (API filtering)
+         composer require dedoc/scramble                    (OpenAPI gen)
+         composer require sentry/sentry-laravel             (error tracking)
+         composer require laravel/reverb                    (WebSockets)
+         composer require laravel/pennant                   (feature flags)
+         composer require --dev pestphp/pest                (Pest)
+         composer require --dev pestphp/pest-plugin-laravel
+         composer require --dev larastan/larastan           (static analysis)
+
+         Run vendor/bin/pint + commit formatted baseline.
+
+--------------------------------------------------------------------------------
+Week 3 — Core infrastructure code
+--------------------------------------------------------------------------------
+
+Day 1–2  Multi-tenancy foundation
+         1. structures migration (columns: id uuid, code, nom, type
+            [SAAD/SSIAD/SPASAD/ESAD/Mandataire/CCAS], adresse, siret, tier
+            [Essentiel/Pro/Premium], statut [active/suspendue], timestamps)
+         2. Structure Eloquent model with factory
+         3. BelongsToStructure trait — asserts structure_id column exists in
+            boot(), adds global scope that filters by current tenant
+         4. TenantResolver middleware — reads authenticated user, binds
+            'tenant' in container, applies to all tenant-scoped routes
+         5. CrossTenantQueryService — the only approved escape hatch for
+            cross-tenant reads (Module 9 benchmark), with audit logging
+         6. Pest test helper: actingAsStructure($structure, $user) +
+            withFreshTenantContext()
+         7. Mandatory cross-tenant leak test template — copied into every
+            future domain model test file
+
+Day 3    User & RBAC foundation
+         1. users migration: add structure_id FK, add type enum
+            (intervenant/coordinateur/dirigeant/référent_qualité/rh/
+             bénéficiaire_portal), add mfa_secret column (encrypted)
+         2. Install Spatie Permission migrations
+         3. Define the 6 roles and base permissions in RoleSeeder,
+            tenant-scoped via team_id mapping to structure_id
+         4. User model: BelongsToStructure, HasRoles from Spatie,
+            relationships to structure
+         5. BasePolicy abstract class (tenant-check before any other logic)
+         6. BaseFormRequest abstract class (tenant-check in authorize() by
+            default)
+
+Day 4    Audit logging & security foundation
+         1. Configure owen-it/laravel-auditing with tenant-aware driver —
+            every audit entry includes structure_id
+         2. Auditable trait (wrapper around laravel-auditing + tenant context)
+         3. AuditLogMiddleware — logs every authenticated READ of endpoints
+            tagged as "health data"
+         4. Global exception handler (bootstrap/app.php) — structured JSON
+            logs with trace IDs, send to Sentry
+         5. Security headers middleware: HSTS, CSP, X-Frame-Options,
+            X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+         6. Rate limiting in bootstrap/app.php — per-user, per-IP, tighter
+            on auth endpoints
+
+Day 5    CI/CD & deployment scaffolding
+         1. GitHub Actions workflow:
+               lint (Pint) → static analysis (Larastan) → tests (Pest,
+               feature + unit + cross-tenant leak) → security scan
+               (composer audit) → build
+         2. Terraform scaffold for AWS France (Paris region):
+               ECS Fargate cluster (Laravel), RDS PostgreSQL (multi-AZ),
+               ElastiCache Redis, S3 bucket with SSE-KMS, CloudFront
+               distribution, Application Load Balancer
+         3. Staging environment deployed with a health check endpoint
+            returning 200 when DB + Redis + S3 are all reachable
+         4. Sentry project created, DSN in config, test error reported
+         5. Deploy first skeleton (health check only) to staging —
+            smoke-test the entire pipeline
+
+--------------------------------------------------------------------------------
+Phase 0 acceptance criteria
+--------------------------------------------------------------------------------
+[x] php artisan test passes with 10+ infrastructure tests (tenancy
+    enforcement, audit log fires, policies block unauthorized, cross-tenant
+    leak test catches a manual violation)
+[x] Staging deployment completes via git push main → GitHub Actions → AWS
+[x] Health check endpoint returns 200 on staging
+[x] Sentry receives a test error successfully
+[x] All 9 Claude skills + custom skill active
+[x] CLAUDE.md updated with all locked rules
+
+
+================================================================================
+4. PHASE 1 — MVP (4 months, target: 10 structures + 200 intervenants)
+================================================================================
+
+Per CDC §9: Traçabilité complète + Gestion incidents + Dashboard basique +
+Application mobile offline. First structure pilote en production.
+
+--------------------------------------------------------------------------------
+Month 1 — Core entities + authentication UX
+--------------------------------------------------------------------------------
+
+Week 1–2  Bénéficiaires
+  Domain:   beneficiaires table + Eloquent model (every field tenant-scoped)
+  Columns:  structure_id, uuid id, nom, prenom, date_naissance, adresse,
+            telephone, situation_familiale, gir (1–6), medecin_traitant,
+            personne_reference_nom, personne_reference_telephone,
+            notes_medicales (encrypted), allergies (encrypted),
+            timestamps, deleted_at (soft delete)
+  Model:    BelongsToStructure, Auditable, encrypted casts for medical fields
+  Policy:   view/create/update/delete — tenant-checked, role-aware
+            (intervenants see only assigned bénéficiaires; coordinateurs
+             see all in their structure)
+  Requests: StoreBeneficiaireRequest, UpdateBeneficiaireRequest
+  Service:  BeneficiaireService — create, update, soft-delete, restore,
+            anonymize (for RGPD erasure)
+  Inertia:  list (with filter/search/sort), create, detail (tabbed: info,
+            interventions history, plan d'accompagnement, incidents), edit
+  Tests:    feature tests per endpoint, unit tests per service method,
+            cross-tenant leak test
+
+Week 3    Plans d'accompagnement
+  Domain:   plans_accompagnement + taches_planifiees (recurring visit
+            checklist with frequency per task)
+  Logic:    a bénéficiaire has one active plan; a plan has many tâches
+  Features: CRUD, templates (copy from another bénéficiaire's plan)
+  Tests:    standard Pest coverage
+
+Week 4    Intervenants management
+  Domain:   extend users with intervenant-specific fields; create
+            intervenant_beneficiaire pivot for assignment
+  Features: list intervenants (coordinateurs see their structure's only),
+            assign to bénéficiaires, intervenant profile with placeholders
+            for habilitations + certifications (full M5 in Phase 2)
+  Tests:    standard Pest coverage
+
+  Month 1 acceptance: Coordinators can create structures, bénéficiaires with
+  plans, and intervenants. Multi-tenant enforced everywhere. 50+ Pest tests
+  green.
+
+--------------------------------------------------------------------------------
+Month 2 — M1 Traçabilité des interventions (web admin)
+--------------------------------------------------------------------------------
+
+Week 1–2  Interventions entity (the central table)
+  Columns:  id uuid, structure_id, intervenant_id, beneficiaire_id,
+            plan_accompagnement_id, date_prevue, heure_prevue_debut,
+            heure_prevue_fin, heure_reelle_debut, heure_reelle_fin,
+            latitude_checkin, longitude_checkin (PostGIS-ready), statut
+            (planifiee/en_cours/realisee/annulee/manquee), mode_saisie
+            (mobile/web/batch), rapport_texte (encrypted),
+            rapport_voice_transcript (encrypted)
+  Related:  intervention_taches_realisees (which tâches from plan were done),
+            intervention_photos, intervention_signatures
+  Service:  InterventionService — plan from tour, check-in, check-out,
+            attach photo, attach signature, submit report, auto-cancel no-show
+  Inertia:  today's tour view, intervention detail (tasks + photos +
+            signature), history per bénéficiaire
+
+Week 3    Photos & signatures
+  Upload:   multipart endpoint → S3 with SSE-KMS encryption
+  Validation: MIME/size (images only, max 5MB each)
+  Display:  signed URL generation (expires in 1 hour)
+  Signature: captured as base64 PNG → stored in S3 with restricted path
+  Tests:    security-focused (path traversal, MIME spoofing, size limits)
+
+Week 4    Intervention dashboard for coordinators
+  UI:       list of today's interventions across all intervenants with
+            status color coding, filter by intervenant/bénéficiaire/statut
+  Real-time: update when intervention is checked-in or completed
+             (Reverb broadcast — validates WebSocket setup early)
+
+  Month 2 acceptance: Coordinators plan a tournée, see intervenants' progress
+  in near-real-time, access full intervention history per bénéficiaire.
+  Photos and signatures flow through S3. 100+ Pest tests green.
+
+--------------------------------------------------------------------------------
+Month 3 — M2 Incidents + M7 basic dashboard
+--------------------------------------------------------------------------------
+
+Week 1–2  Incidents + gravity algorithm
+  Domain:   incidents, incident_actions_correctives, incident_suivis
+  Enums:    categorie (chute/agression/erreur_médicamenteuse/
+            maltraitance_suspectée/situation_danger/autre),
+            gravite (mineur/significatif/grave/critique),
+            statut (declare/en_analyse/plan_actions/clos)
+  Service:  GraviteClassifier (pure function, 100% unit test coverage,
+            takes incident inputs, returns gravité per CDC rules)
+  Service:  IncidentService — declare, classify, assign to coordinateur,
+            launch 5-whys workflow, close
+  API:      POST /api/v1/incidents with StoreIncidentRequest + idempotency
+            key, auto-classifies, broadcasts IncidentDeclared event
+  Jobs:     NotifyResponsableSecteurJob (every declaration),
+            NotifyARSJob (fires only if gravité in {grave, critique},
+            sends structured email)
+  Workflow: 5-whys UI (Inertia) + state machine in service layer
+  Features: corrective actions CRUD + follow-up tracking
+
+Week 3    M7 Basic dashboard
+  Service:  DashboardStatsService — per-structure aggregation
+  Cache:    Redis with tag structure:{id}:dashboard, 5-min TTL, invalidated
+            on any write to interventions/incidents
+  Metrics:  interventions this month, en cours, incidents declared,
+            incidents en cours, conformity score (placeholder for P2),
+            taux PAC (placeholder), QVCT moyen (placeholder)
+  Views:    executive (synthetic KPIs, evolution charts for dirigeants),
+            operational (today's work, alerts for coordinateurs)
+  UI:       Inertia with Chart.js or similar
+
+Week 4    Hardening + pilot dry run
+  - Rate limit tuning based on observed traffic
+  - Sentry monitored for 1 week; fix any uncaught exceptions
+  - Load test (k6) simulating 200 intervenants × 5 interventions/day at
+    peak concurrency; verify p95 < 500ms on dashboard
+  - Run security-review Claude skill on the whole module
+  - Book external pentester for Phase 1 end-of-quarter test
+  - Staging walkthrough with product team
+
+  Month 3 acceptance: Incidents declared on web (mobile not yet),
+  auto-classified, auto-notified, tracked to closure. Dashboard loads
+  < 500ms under realistic load. 200+ Pest tests green.
+
+--------------------------------------------------------------------------------
+Month 4 — Mobile API + React Native app + Pilot onboarding
+--------------------------------------------------------------------------------
+
+Week 1    Mobile API
+  Routes:   /api/v1/auth/*, /api/v1/interventions/*, /api/v1/incidents/*,
+            /api/v1/beneficiaires/*, /api/v1/sync/*
+  Auth:     Sanctum personal access tokens with MFA-gated issuance for
+            sensitive roles
+  Resources: InterventionResource, IncidentResource, BeneficiaireResource —
+             consistent JSON response shape
+  Middleware: idempotency (reads Idempotency-Key header, checks Redis
+              for stored response, replays or executes)
+  Docs:     OpenAPI 3.0 auto-generated via Scramble, published internally
+  Limits:   300 req/min per authenticated user, 30/min on login
+
+Week 2    React Native app skeleton (mobile team)
+  (Backend stays stable; mobile team consumes the API.)
+  Features: auth with secure keychain storage, today's tour view,
+            intervention detail (plan tasks, report entry, photo + signature
+            capture), incident declaration form (< 2 minutes per CDC §4.2)
+  Offline:  local SQLite schema mirroring server, offline queue, pending-sync
+            indicator, auto-sync on reconnect
+
+Week 3    Offline sync protocol hardening
+  Server:   every write endpoint accepts both server-assigned and
+            client-assigned UUIDs (offline mobile generates IDs before sync)
+  Conflict: last-writer-wins for most fields; both writers preserved as
+            notes for free-text reports with conflict markers
+  Endpoint: POST /api/v1/sync/batch — accepts array of queued operations,
+            processes in order, returns success/failure per operation
+  Tests:    simulated offline scenarios (two intervenants edit same
+            bénéficiaire offline, sync, verify resolution)
+
+Week 4    Pilot onboarding
+  - Deploy production environment (AWS Paris, HDS-certified configuration)
+  - Seed 10 pilot structures via manual onboarding (real customers)
+  - Train coordinators (2-hour session per structure)
+  - Distribute mobile app to ~200 intervenants (internal TestFlight / Play)
+  - Monitoring dashboards active; on-call rotation established
+  - Feedback channel opened (Slack, Intercom, or phone line)
+
+--------------------------------------------------------------------------------
+Phase 1 acceptance criteria (end of Month 4)
+--------------------------------------------------------------------------------
+[x] 10 pilot structures using the system
+[x] 200 intervenants logging interventions + declaring incidents
+[x] Coordinators managing incidents to closure
+[x] Dashboard live and accurate
+[x] All 12 engineering concerns addressed at some level
+[x] External pentest completed with no critical findings
+[x] RPO < 1h, RTO < 4h validated via disaster recovery drill
+[x] ~400 Pest tests green, every domain model has cross-tenant leak test
+[x] NPS from first pilot users captured (CDC target > 40 at 1 year)
+
+
+================================================================================
+5. PHASE 2 — QUALITÉ (Months 5–8, target: 50 structures + 1,000 intervenants)
+================================================================================
+
+Goal: Convert MVP into commercial Pro offering with QVCT + HAS audits +
+enriched communication + basic skills tracking.
+
+Module delivery order:
+
+  Month 5   M3 QVCT — barometer questionnaires, anonymous response storage,
+            weak-signal detection service, individualized RPS tracking with
+            alerts to référent RH, psychosocial risk cartography per team
+
+  Month 6   M6 Audits et conformité — grid library (HAS, ISO 9001, AFNOR
+            NF X50-056), customizable grids, mobile audit execution,
+            auto-scoring, PAC auto-generation from gaps, HAS preparation
+            guide
+
+  Month 7   M4 Communication interne — WebSocket messaging (Reverb already
+            scaffolded in Phase 1), discussion groups, news feed,
+            document library, Q&A forum
+
+  Month 8   M5 Compétences & formation basique — habilitation tracking,
+            certification expiry alerts, basic training plan (e-learning
+            micro-learning deferred to Phase 3 Premium)
+
+  Commercial readiness — Pro tier billing integration (Stripe / Laravel
+            Cashier), CRM integration, onboarding automation for new
+            structures
+
+Engineering concerns added this phase:
+  - Full APM (Datadog or New Relic) instrumentation
+  - Circuit breakers on outbound calls (ARS, email, future ML ping)
+  - Feature flags (Pennant) for risky rollouts
+  - Access reviews quarterly
+  - HDS certification documentation compiled for audit-readiness
+
+Phase 2 acceptance:
+  [x] 50 client structures (from 10)
+  [x] Pro offering live with billing
+  [x] QVCT baromètre running across pilot structures with measurable
+      weak-signal alerts
+  [x] First HAS évaluation externe prepared via the platform
+  [x] 99.9% uptime maintained
+
+
+================================================================================
+6. PHASE 3 — IA & DATA (Months 9–14, target: 200 structures)
+================================================================================
+
+Goal: Ship Premium offering with predictive AI + beneficiary portal + sector
+benchmark.
+
+Deliverables:
+
+  M9 IA prédictive
+    Python microservice (scikit-learn + transformers + LLM API), exposed
+    via REST initially, migrate to gRPC if call volume justifies.
+    Predictions: burnout risk, autonomy loss detection, preventive action
+    suggestions, semantic analysis of intervention reports.
+    Integration: Laravel queues ML jobs, Python service consumes and
+    writes results back to PostgreSQL analytics schema. Laravel reads
+    results via standard Eloquent.
+    Fallback: if Python service is down, predictions show "en calcul"
+    placeholder — never error out the main flow.
+
+  M8 Portail bénéficiaires
+    New Inertia app (or Next.js PWA) for bénéficiaires and familles,
+    separate auth, access to their care plan + intervention history +
+    satisfaction survey + direct incident reporting. Anonymous tokens
+    for family members (signed URL access with limited scope).
+
+  Benchmark anonymisé
+    The single approved CrossTenantQueryService usage: aggregate
+    anonymized indicators across all structures of comparable size,
+    publish monthly sector report. Every access logged and auditable.
+
+  Reporting engine
+    Annual quality report auto-generated per structure (PDF), sent to
+    authorities as required.
+
+Engineering concerns scaled:
+  - Read replicas for dashboard / analytics workloads
+  - Table partitioning enabled on interventions, audit_logs,
+    qvct_reponses (by structure_id, date)
+  - Caching matured (layered: Redis hot + CDN edge)
+  - Contract tests run in CI against OpenAPI spec
+
+Phase 3 acceptance:
+  [x] 200 client structures
+  [x] Premium offering live
+  [x] First sector benchmark report published
+  [x] Burnout predictions operational with measurable precision/recall
+  [x] 99.9% uptime maintained under 10× load
+
+
+================================================================================
+7. PHASE 4 — EXPANSION (Months 15–24, target: 500 structures)
+================================================================================
+
+Goal: National scale + institutional partnerships.
+
+Deliverables:
+  - API connectors for major scheduling software in the sector
+  - Webhooks for external integrations
+  - Partner integrator sandbox
+  - Institutional licenses (Conseils Départementaux, ARS) — bulk
+    deployment, per-CD dashboards, aggregated reporting for regional
+    authorities
+  - Certification qualité partenaire label (structures earn visible
+    certification badge)
+  - Anonymized sector data sold to institutional customers (new revenue)
+
+Engineering concerns scaled:
+  - Operational excellence: full runbooks, on-call rotation, blameless
+    post-mortems, SLO definitions, error budget tracking
+  - One enterprise tenant migrated to its own PostgreSQL schema (hybrid
+    tenancy) as a capability demonstration
+  - Cost monitoring discipline (AWS Cost Explorer tags, per-tenant cost
+    attribution)
+
+Phase 4 acceptance:
+  [x] 500 client structures
+  [x] 3 Conseils Départementaux signed as institutional customers
+  [x] API partner ecosystem active
+  [x] Operational maturity benchmarked (DORA metrics)
+
+
+================================================================================
+8. PHASE 5 — EUROPE (Months 25–36, target: 1,000–3,000 structures)
+================================================================================
+
+Goal: International expansion with per-country data residency.
+
+Deliverables:
+  - Multi-region deployment: France cluster (primary), Belgium cluster,
+    Switzerland cluster, Luxembourg cluster
+  - Per-country RGPD localization (Swiss nLPD, Belgian GDPR adaptations)
+  - Localized versions (French variants per country; eventually Dutch
+    for Flanders, German for German Switzerland)
+  - Per-region licensing compliance verified
+
+Engineering concerns scaled:
+  - Multi-region data residency enforcement
+  - Per-region observability (separate Sentry projects, regional
+    dashboards)
+  - Cross-region data flow audit (none for personal data; aggregated
+    only for central benchmarks)
+
+Phase 5 acceptance:
+  [x] 1,000–3,000 client structures across France + Belgium + Switzerland
+      + Luxembourg
+  [x] €18M ARR trajectory (per CDC §7.3)
+
+
+================================================================================
+9. CROSS-PHASE OPERATIONAL DISCIPLINES
+================================================================================
+
+These run continuously from Day 1, not in phases:
+
+  Weekly (automated):
+    - Security patch + dependency scan (Dependabot, composer audit)
+    - Pest full suite on every commit via CI
+    - Cross-tenant leak tests on every commit (specifically)
+    - Static analysis (Larastan) on every commit
+
+  Daily:
+    - Sentry error review
+    - APM slow-endpoint review (Phase 2+)
+    - DB slow query log review (Phase 2+)
+
+  Monthly:
+    - Infrastructure cost review
+
+  Quarterly:
+    - Access reviews (who has prod DB access, admin access)
+    - Backup restore drill
+
+  Annually:
+    - External security pentest (CDC §5.2 mandatory)
+    - RGPD register update
+
+  Every production incident:
+    - Blameless post-mortem within 48 hours of resolution
+
+  Every PR:
+    - 12-concern checklist review
+    - 1+ reviewer required
+    - security-review skill invocation on auth/policy/migration PRs
+
+  Every phase milestone:
+    - 12-concern checklist review against all work delivered in phase
+    - Gaps documented with remediation plan before phase is marked complete
+
+
+================================================================================
+10. RISKS & MITIGATIONS (from CDC §10, with project-specific additions)
+================================================================================
+
+  Risk                              Prob   Impact    Mitigation
+  -----------------------------------------------------------------------------
+  Low field adoption (intervenants) HIGH   Critical  Ultra-simplified UX,
+                                                     short training, super-
+                                                     users per structure
+  Leadership resistance             MED    High      ROI demo, 3-month free
+                                                     pilot, implementation
+                                                     accompaniment
+  Health data security incident     LOW    Critical  HDS, reinforced
+                                                     encryption, annual
+                                                     audit, cyber insurance
+  Offline mode failure              MED    High      Intensive white-zone
+                                                     testing, SMS fallback
+                                                     for urgences
+  Regulatory evolution (HAS, RGPD)  HIGH   Medium    Active reg watch,
+                                                     quarterly audit grid
+                                                     updates
+  Established sector competitors    MED    Medium    Differentiation via
+                                                     QVCT module + AI
+  -----------------------------------------------------------------------------
+  Project-specific additions:
+  -----------------------------------------------------------------------------
+  Tenant isolation failure          LOW    Critical  Global scope on every
+                                                     model, cross-tenant
+                                                     leak test per model
+                                                     mandatory
+  Phase 1 timeline slip             MED    High      Tight module-by-module
+                                                     weekly cadence, no
+                                                     scope creep
+  Mobile offline sync bugs          HIGH   High      Idempotency keys, extensive
+                                                     simulated-offline tests,
+                                                     phased mobile rollout
+  PHP/Laravel hiring pool           LOW    Medium    French-speaking African
+                                                     market has healthy PHP
+                                                     pool; plan team
+                                                     growth accordingly
+
+
+================================================================================
+11. DEFINITION OF DONE (PER PHASE)
+================================================================================
+
+A phase is NOT complete until:
+  1. All listed deliverables are shipped to production
+  2. All 12 engineering concerns have been verified against phase work
+  3. Test suite is 100% green
+  4. Load test passes for the phase's target user count
+  5. Security review has no open critical or high findings
+  6. Observability is live and alerting correctly
+  7. Documentation is current (runbooks, RGPD register, ADRs)
+  8. A post-mortem has been written for any incident during the phase
+  9. A retrospective has been held with the team; lessons captured
+ 10. The acceptance criteria listed in each phase section are all checked
+
+
+================================================================================
+END OF IMPLEMENTATION PLAN
+================================================================================
+
+Contact / owner: Muma Brian
+Version:         1.0 (2026-04-16)
+Review cadence:  Update at each phase milestone (end of P0, P1, P2, ...)

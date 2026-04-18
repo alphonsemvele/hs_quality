@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class CommunicationController extends Controller {
-    public function index() {
+class CommunicationController extends Controller
+{
+    public function index()
+    {
         return Inertia::render('dashboard/communication/index');
     }
 }
- 

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
-use App\Models\User;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +15,11 @@ use Inertia\Response;
 class UserController extends Controller
 {
     const STATUT_EN_SERVICE = 'actif';
+
     const STATUT_EN_CONGE = 'conge';
+
     const STATUT_EN_MISSION = 'mission';
+
     const STATUT_INACTIF = 'inactif';
 
     const FONCTIONS = [
@@ -27,7 +30,7 @@ class UserController extends Controller
         'Pharmacien(ne)',
         'Technicien(ne)',
         'Administratif',
-        'Admin'
+        'Admin',
     ];
 
     const ROLES = [
@@ -59,10 +62,10 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('lastname', 'like', "%{$search}%")
-                  ->orWhere('matricule', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('specialite', 'like', "%{$search}%");
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('matricule', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('specialite', 'like', "%{$search}%");
             });
         }
 
@@ -107,8 +110,8 @@ class UserController extends Controller
     public function store(UserStoreRequest $request): RedirectResponse
     {
         // Générer un matricule unique
-        
-        $prefix = match($request->fonction) {
+
+        $prefix = match ($request->fonction) {
             'Médecin' => 'MED',
             'Infirmière', 'Infirmière Chef' => 'INF',
             'Sage-femme' => 'SF',
@@ -116,9 +119,9 @@ class UserController extends Controller
             'Technicien(ne)' => 'TECH',
             default => 'ADM',
         };
-        $lastUser = User::where('matricule', 'like', $prefix . '-%')->orderBy('id', 'desc')->first();
+        $lastUser = User::where('matricule', 'like', $prefix.'-%')->orderBy('id', 'desc')->first();
         $number = $lastUser ? intval(substr($lastUser->matricule, -3)) + 1 : 1;
-        $matricule = $prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+        $matricule = $prefix.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
 
         $data = $request->validated();
 
@@ -136,9 +139,9 @@ class UserController extends Controller
     public function update(UserUpdateRequest $request, User $user): RedirectResponse
     {
         $data = $request->validated();
-        
+
         // Si un nouveau mot de passe est fourni
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);

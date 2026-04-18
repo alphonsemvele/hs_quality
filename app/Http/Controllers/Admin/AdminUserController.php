@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
-use App\Models\User;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,10 +15,13 @@ use Inertia\Response;
 
 class AdminUserController extends Controller
 {
-    const STATUT_ACTIF    = 'actif';
-    const STATUT_CONGE    = 'conge';
-    const STATUT_MISSION  = 'mission';
-    const STATUT_INACTIF  = 'inactif';
+    const STATUT_ACTIF = 'actif';
+
+    const STATUT_CONGE = 'conge';
+
+    const STATUT_MISSION = 'mission';
+
+    const STATUT_INACTIF = 'inactif';
 
     const FONCTIONS = [
         'Médecin',
@@ -61,11 +64,11 @@ class AdminUserController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name',       'like', "%{$search}%")
-                  ->orWhere('lastname',  'like', "%{$search}%")
-                  ->orWhere('matricule', 'like', "%{$search}%")
-                  ->orWhere('email',     'like', "%{$search}%")
-                  ->orWhere('specialite','like', "%{$search}%");
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('matricule', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('specialite', 'like', "%{$search}%");
             });
         }
 
@@ -82,23 +85,23 @@ class AdminUserController extends Controller
         }
 
         $stats = [
-            'total'     => User::count(),
-            'actifs'    => User::where('statut', self::STATUT_ACTIF)->count(),
-            'inactifs'  => User::where('statut', self::STATUT_INACTIF)->count(),
+            'total' => User::count(),
+            'actifs' => User::where('statut', self::STATUT_ACTIF)->count(),
+            'inactifs' => User::where('statut', self::STATUT_INACTIF)->count(),
             'suspendus' => User::where('statut', self::STATUT_CONGE)->count(),   // adapter si besoin
-            'medecins'  => User::where('fonction', 'Médecin')->count(),
+            'medecins' => User::where('fonction', 'Médecin')->count(),
         ];
 
-        $users    = $query->latest()->paginate(15)->withQueryString();
+        $users = $query->latest()->paginate(15)->withQueryString();
         $services = Service::where('actif', true)->get();
 
         return Inertia::render('admin/users', [
-            'users'    => $users,
-            'stats'    => $stats,
-            'filters'  => $request->only(['search', 'fonction', 'service_id', 'statut']),
-            'statuts'  => self::getStatuts(),
-            'fonctions'=> self::FONCTIONS,
-            'roles'    => self::ROLES,
+            'users' => $users,
+            'stats' => $stats,
+            'filters' => $request->only(['search', 'fonction', 'service_id', 'statut']),
+            'statuts' => self::getStatuts(),
+            'fonctions' => self::FONCTIONS,
+            'roles' => self::ROLES,
             'services' => $services,
         ]);
     }
@@ -109,25 +112,25 @@ class AdminUserController extends Controller
     public function store(UserStoreRequest $request): RedirectResponse
     {
         $prefix = match ($request->fonction) {
-            'Médecin'                       => 'MED',
+            'Médecin' => 'MED',
             'Infirmière', 'Infirmière Chef' => 'INF',
-            'Sage-femme'                    => 'SF',
-            'Pharmacien(ne)'                => 'PHAR',
-            'Technicien(ne)'                => 'TECH',
-            default                         => 'ADM',
+            'Sage-femme' => 'SF',
+            'Pharmacien(ne)' => 'PHAR',
+            'Technicien(ne)' => 'TECH',
+            default => 'ADM',
         };
 
-        $lastUser  = User::where('matricule', 'like', $prefix . '-%')->orderBy('id', 'desc')->first();
-        $number    = $lastUser ? intval(substr($lastUser->matricule, -3)) + 1 : 1;
-        $matricule = $prefix . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+        $lastUser = User::where('matricule', 'like', $prefix.'-%')->orderBy('id', 'desc')->first();
+        $number = $lastUser ? intval(substr($lastUser->matricule, -3)) + 1 : 1;
+        $matricule = $prefix.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
 
         $data = $request->validated();
 
         User::create([
             ...$data,
             'matricule' => $matricule,
-            'password'  => Hash::make($data['password'] ?? 'password123'),
-            'statut'    => $data['statut'] ?? self::STATUT_ACTIF,
+            'password' => Hash::make($data['password'] ?? 'password123'),
+            'statut' => $data['statut'] ?? self::STATUT_ACTIF,
         ]);
 
         return redirect()->route('admin.utilisateurs.index')
@@ -141,7 +144,7 @@ class AdminUserController extends Controller
     {
         $data = $request->validated();
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
@@ -159,7 +162,7 @@ class AdminUserController extends Controller
     public function updateStatut(Request $request, User $user): RedirectResponse
     {
         $request->validate([
-            'statut' => ['required', 'in:' . implode(',', self::getStatuts())],
+            'statut' => ['required', 'in:'.implode(',', self::getStatuts())],
         ]);
 
         $user->update(['statut' => $request->statut]);
