@@ -23,6 +23,13 @@ return [
     // When left empty or `null` the Laravel environment will be used (usually discovered from `APP_ENV` in your `.env`)
     'environment' => env('SENTRY_ENVIRONMENT'),
 
+    // HTTP transport timeouts. Defaults in the SDK are 2s connect / 5s total,
+    // which are too tight on slow / IPv6-degraded dev networks. Generous
+    // values keep event delivery reliable without stalling requests for long
+    // since event sending is already async via Laravel's queue / shutdown hook.
+    'http_connect_timeout' => (float) env('SENTRY_HTTP_CONNECT_TIMEOUT', 10),
+    'http_timeout' => (float) env('SENTRY_HTTP_TIMEOUT', 15),
+
     // Override the organization ID used for trace continuation checks.
     'org_id' => env('SENTRY_ORG_ID') === null ? null : (int) env('SENTRY_ORG_ID'),
 
