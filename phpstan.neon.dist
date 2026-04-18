@@ -1,0 +1,26 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - database
+        - routes
+        - tests
+
+    level: 5
+
+    # Allow Inertia's dynamic response props and Laravel's magic query methods
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+
+    # Exclude generated code
+    excludePaths:
+        - vendor
+        - storage
+        - bootstrap/cache
+        - public

@@ -5,6 +5,7 @@ use App\Http\Controllers\BeneficiaireController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\IndicateurController;
 use App\Http\Controllers\InterventionController;
@@ -12,6 +13,12 @@ use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\QvctController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// ─── Health checks (unauthenticated, no tenant) ───────────────────────────────
+// Laravel's built-in /up remains for backward compat; /health/* are the
+// canonical ALB/ECS probe targets.
+Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
+Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
 
 // ─── Page d'accueil publique ───────────────────────────────────────────────────
 Route::get('/', function () {

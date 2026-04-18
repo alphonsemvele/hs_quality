@@ -1,0 +1,22 @@
+# Local state (use S3 backend in real deployments)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Real tfvars files — contain secrets (db_password, keys, etc.)
+# Keep only the .example templates in git.
+*.auto.tfvars
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+
+# Provider plugins and lockfile cache
+.terraform/
+.terraform.lock.hcl
+
+# Plan output files
+*.tfplan
