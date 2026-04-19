@@ -13,6 +13,20 @@ class StoreCarePlanRequest extends BaseFormRequest
         return $this->user()->can('create', CarePlan::class);
     }
 
+    /**
+     * Inject beneficiary_id from the route parameter if the endpoint is
+     * nested (POST /beneficiaries/{beneficiary}/care-plans). For a future
+     * flat POST /care-plans endpoint, callers would include it in the body.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->route('beneficiary') && ! $this->has('beneficiary_id')) {
+            $this->merge([
+                'beneficiary_id' => $this->route('beneficiary')->getKey(),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

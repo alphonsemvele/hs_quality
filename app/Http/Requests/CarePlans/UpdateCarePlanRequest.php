@@ -10,7 +10,7 @@ class UpdateCarePlanRequest extends BaseFormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('care_plan'));
+        return $this->user()->can('update', $this->route('carePlan'));
     }
 
     public function rules(): array

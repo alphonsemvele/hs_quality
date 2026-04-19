@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\BeneficiaryController;
+use App\Http\Controllers\CarePlanController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
@@ -68,6 +69,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/beneficiaries/{beneficiary}/dossier', [BeneficiaryController::class, 'dossier'])
             ->middleware('log_sensitive_read:beneficiary_dossier')
             ->name('beneficiaries.dossier');
+
+        // ── Care plans (plans d'accompagnement) ─────────────────────────────
+        // List + create nested under beneficiary (a plan requires a
+        // beneficiary). Show/edit/update/destroy + lifecycle actions
+        // (activate, archive, copy) flat on the plan.
+        Route::get('/beneficiaries/{beneficiary}/care-plans', [CarePlanController::class, 'indexForBeneficiary'])
+            ->name('beneficiaries.care-plans.index');
+        Route::get('/beneficiaries/{beneficiary}/care-plans/create', [CarePlanController::class, 'createForBeneficiary'])
+            ->name('beneficiaries.care-plans.create');
+        Route::post('/beneficiaries/{beneficiary}/care-plans', [CarePlanController::class, 'storeForBeneficiary'])
+            ->name('beneficiaries.care-plans.store');
+
+        Route::get('/care-plans/{carePlan}', [CarePlanController::class, 'show'])->name('care-plans.show');
+        Route::get('/care-plans/{carePlan}/edit', [CarePlanController::class, 'edit'])->name('care-plans.edit');
+        Route::put('/care-plans/{carePlan}', [CarePlanController::class, 'update'])->name('care-plans.update');
+        Route::delete('/care-plans/{carePlan}', [CarePlanController::class, 'destroy'])->name('care-plans.destroy');
+
+        Route::post('/care-plans/{carePlan}/activate', [CarePlanController::class, 'activate'])->name('care-plans.activate');
+        Route::post('/care-plans/{carePlan}/archive', [CarePlanController::class, 'archive'])->name('care-plans.archive');
+        Route::post('/care-plans/{carePlan}/copy', [CarePlanController::class, 'copy'])->name('care-plans.copy');
     });
 
     // ── Qualité ───────────────────────────────────────────────────────────────
