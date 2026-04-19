@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Beneficiary;
+use App\Models\CarePlan;
 use App\Policies\BeneficiaryPolicy;
+use App\Policies\CarePlanPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected array $policies = [
         Beneficiary::class => BeneficiaryPolicy::class,
+        CarePlan::class => CarePlanPolicy::class,
     ];
 
     public function register(): void

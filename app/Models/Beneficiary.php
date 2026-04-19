@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Concerns\BelongsToStructure;
 use App\Enums\BeneficiaryStatus;
+use App\Enums\CarePlanStatus;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -119,5 +122,17 @@ class Beneficiary extends Model implements AuditableContract
     public function isErased(): bool
     {
         return $this->erased_at !== null;
+    }
+
+    public function carePlans(): HasMany
+    {
+        return $this->hasMany(CarePlan::class);
+    }
+
+    public function activeCarePlan(): HasOne
+    {
+        return $this->hasOne(CarePlan::class)
+            ->where('status', CarePlanStatus::Active->value)
+            ->latest('start_date');
     }
 }
