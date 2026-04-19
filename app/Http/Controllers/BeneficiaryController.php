@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserType;
 use App\Http\Requests\Beneficiaries\StoreBeneficiaryRequest;
 use App\Http\Requests\Beneficiaries\UpdateBeneficiaryRequest;
 use App\Http\Resources\BeneficiaryDossierResource;
 use App\Http\Resources\BeneficiaryResource;
+use App\Http\Resources\IntervenantAssignmentResource;
 use App\Models\Beneficiary;
+use App\Models\IntervenantAssignment;
+use App\Models\User;
 use App\Services\BeneficiaryService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -34,7 +38,24 @@ class BeneficiaryController extends Controller
     {
         $this->authorize('viewAny', Beneficiary::class);
 
-        $beneficiaries = Beneficiary::query()
+        $user = request()->user();
+        $query = Beneficiary::query();
+
+        // Intervenants with only the .assigned permission see exclusively
+        // beneficiaries they are actively assigned to. Users with
+        // .view.structure see the full tenant list.
+        if (! $user->hasPermissionTo('beneficiaries.view.structure')
+            && $user->hasPermissionTo('beneficiaries.view.assigned')) {
+            $query->whereIn(
+                'id',
+                IntervenantAssignment::query()
+                    ->active()
+                    ->where('user_id', $user->id)
+                    ->select('beneficiary_id'),
+            );
+        }
+
+        $beneficiaries = $query
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20);
@@ -53,8 +74,43 @@ class BeneficiaryController extends Controller
     {
         $this->authorize('view', $beneficiary);
 
+        $assignments = IntervenantAssignment::query()
+            ->where('beneficiary_id', $beneficiary->id)
+            ->with(['intervenant', 'assignedBy'])
+            ->orderByDesc('assigned_at')
+            ->get();
+
+        // Eligible = intervenants in this tenant who are not currently
+        // actively assigned. Surfacing only the unassigned pool keeps the
+        // attach UI focused; the unique-active constraint at the DB also
+        // catches duplicates if the page is stale.
+        $activeIntervenantIds = $assignments
+            ->where('unassigned_at', null)
+            ->pluck('user_id')
+            ->all();
+
+        $canAssign = request()->user()->can('update', $beneficiary);
+
+        $eligibleIntervenants = $canAssign
+            ? User::query()
+                ->where('type', UserType::Intervenant->value)
+                ->whereNotIn('id', $activeIntervenantIds)
+                ->orderBy('last_name')
+                ->orderBy('first_name')
+                ->get(['id', 'first_name', 'last_name', 'email'])
+                ->map(fn (User $u) => [
+                    'id' => $u->id,
+                    'full_name' => $u->fullName(),
+                    'email' => $u->email,
+                ])
+                ->values()
+            : collect();
+
         return Inertia::render('dashboard/beneficiaries/show', [
             'beneficiary' => BeneficiaryResource::make($beneficiary),
+            'assignments' => IntervenantAssignmentResource::collection($assignments),
+            'eligible_intervenants' => $eligibleIntervenants,
+            'can_assign' => $canAssign,
         ]);
     }
 

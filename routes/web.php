@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\CarePlanController;
@@ -89,6 +90,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/care-plans/{carePlan}/activate', [CarePlanController::class, 'activate'])->name('care-plans.activate');
         Route::post('/care-plans/{carePlan}/archive', [CarePlanController::class, 'archive'])->name('care-plans.archive');
         Route::post('/care-plans/{carePlan}/copy', [CarePlanController::class, 'copy'])->name('care-plans.copy');
+
+        // ── Assignations intervenant ↔ bénéficiaire ─────────────────────────
+        // Attach is nested under the beneficiary (the parent context). Detach
+        // is flat on the assignment row — BasePolicy::before() still verifies
+        // the assignment belongs to the current tenant.
+        Route::post('/beneficiaries/{beneficiary}/assignments', [AssignmentController::class, 'store'])
+            ->name('beneficiaries.assignments.store');
+        Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])
+            ->name('assignments.destroy');
     });
 
     // ── Qualité ───────────────────────────────────────────────────────────────
