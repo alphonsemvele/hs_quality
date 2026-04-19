@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -80,5 +82,35 @@ class User extends Authenticatable
     public function requiresMandatoryMfa(): bool
     {
         return $this->type?->requiresMfa() ?? false;
+    }
+
+    /**
+     * Every intervenant assignment this user has (active + historical).
+     */
+    public function intervenantAssignments(): HasMany
+    {
+        return $this->hasMany(IntervenantAssignment::class);
+    }
+
+    /**
+     * All beneficiaries ever assigned to this intervenant (active +
+     * historical). For active-only, use assignedBeneficiaries().
+     */
+    public function allAssignedBeneficiaries(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Beneficiary::class,
+            'intervenant_assignments',
+            'user_id',
+            'beneficiary_id',
+        )->withPivot(['assigned_at', 'unassigned_at', 'notes'])->withTimestamps();
+    }
+
+    /**
+     * Currently-assigned beneficiaries (unassigned_at IS NULL).
+     */
+    public function assignedBeneficiaries(): BelongsToMany
+    {
+        return $this->allAssignedBeneficiaries()->wherePivotNull('unassigned_at');
     }
 }

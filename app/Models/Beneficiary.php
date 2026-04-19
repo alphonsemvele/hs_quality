@@ -135,4 +135,33 @@ class Beneficiary extends Model implements AuditableContract
             ->where('status', CarePlanStatus::Active->value)
             ->latest('start_date');
     }
+
+    /**
+     * Every intervenant assignment for this beneficiary (active + historical).
+     */
+    public function intervenantAssignments(): HasMany
+    {
+        return $this->hasMany(IntervenantAssignment::class);
+    }
+
+    /**
+     * All intervenants ever assigned (active + historical).
+     */
+    public function allAssignedIntervenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'intervenant_assignments',
+            'beneficiary_id',
+            'user_id',
+        )->withPivot(['assigned_at', 'unassigned_at', 'notes'])->withTimestamps();
+    }
+
+    /**
+     * Currently-assigned intervenants (active assignments only).
+     */
+    public function assignedIntervenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->allAssignedIntervenants()->wherePivotNull('unassigned_at');
+    }
 }

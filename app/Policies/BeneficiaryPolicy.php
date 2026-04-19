@@ -71,12 +71,19 @@ class BeneficiaryPolicy extends BasePolicy
     }
 
     /**
-     * Intervenant assignment check — stub for Phase 1 Week 4 when the
-     * intervenant_beneficiary pivot ships. Today: no pivot, so
-     * intervenants see nothing until they're explicitly assigned.
+     * Intervenant assignment check. Checks for an ACTIVE assignment
+     * (unassigned_at IS NULL) linking this user to this beneficiary.
+     *
+     * Implemented by the intervenant_assignments table added in
+     * Phase 1 Week 4. Queries via the exists() pattern to avoid
+     * loading a full collection when we only need a boolean.
      */
     private function isAssignedTo(User $user, Beneficiary $beneficiary): bool
     {
-        return false;
+        return \App\Models\IntervenantAssignment::query()
+            ->active()
+            ->where('user_id', $user->id)
+            ->where('beneficiary_id', $beneficiary->id)
+            ->exists();
     }
 }
