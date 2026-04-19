@@ -22,6 +22,12 @@ use Spatie\Permission\PermissionRegistrar;
 
 pest()->extend(Tests\TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Inertia renders a Blade view that loads the Vite manifest; in tests
+        // we have no built assets, so we tell the framework to skip Vite
+        // entirely. assertInertia()/JSON inspection still works.
+        test()->withoutVite();
+    })
     ->in('Feature');
 
 pest()->extend(Tests\TestCase::class)

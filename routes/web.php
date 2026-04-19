@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuditController;
-use App\Http\Controllers\BeneficiaireController;
+use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
@@ -53,12 +53,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/incidents/{id}/statut', [IncidentController::class, 'updateStatut'])->name('incidents.statut');
     Route::delete('/incidents/{id}', [IncidentController::class, 'destroy'])->name('incidents.destroy');
 
-    // Bénéficiaires
-    Route::get('/beneficiaires', [BeneficiaireController::class, 'index'])->name('beneficiaires.index');
-    Route::get('/beneficiaires/create', [BeneficiaireController::class, 'create'])->name('beneficiaires.create');
-    Route::post('/beneficiaires', [BeneficiaireController::class, 'store'])->name('beneficiaires.store');
-    Route::get('/beneficiaires/{id}', [BeneficiaireController::class, 'show'])->name('beneficiaires.show');
-    Route::put('/beneficiaires/{id}', [BeneficiaireController::class, 'update'])->name('beneficiaires.update');
+    // Bénéficiaires (CRUD + dossier médical with sensitive-read audit)
+    Route::middleware(['tenant'])->group(function () {
+        Route::get('/beneficiaries', [BeneficiaryController::class, 'index'])->name('beneficiaries.index');
+        Route::get('/beneficiaries/create', [BeneficiaryController::class, 'create'])->name('beneficiaries.create');
+        Route::post('/beneficiaries', [BeneficiaryController::class, 'store'])->name('beneficiaries.store');
+        Route::get('/beneficiaries/{beneficiary}', [BeneficiaryController::class, 'show'])->name('beneficiaries.show');
+        Route::get('/beneficiaries/{beneficiary}/edit', [BeneficiaryController::class, 'edit'])->name('beneficiaries.edit');
+        Route::put('/beneficiaries/{beneficiary}', [BeneficiaryController::class, 'update'])->name('beneficiaries.update');
+        Route::delete('/beneficiaries/{beneficiary}', [BeneficiaryController::class, 'destroy'])->name('beneficiaries.destroy');
+
+        // Dossier médical — encrypted health-data fields. Every access is
+        // audit-logged via log_sensitive_read middleware per CDC §5.2.
+        Route::get('/beneficiaries/{beneficiary}/dossier', [BeneficiaryController::class, 'dossier'])
+            ->middleware('log_sensitive_read:beneficiary_dossier')
+            ->name('beneficiaries.dossier');
+    });
 
     // ── Qualité ───────────────────────────────────────────────────────────────
 

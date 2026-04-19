@@ -103,6 +103,14 @@ class Beneficiary extends Model implements AuditableContract
         return trim($this->first_name.' '.$this->last_name);
     }
 
+    public function initials(): string
+    {
+        $first = mb_strtoupper(mb_substr((string) $this->first_name, 0, 1));
+        $last = mb_strtoupper(mb_substr((string) $this->last_name, 0, 1));
+
+        return $first.$last;
+    }
+
     public function getAgeAttribute(): ?int
     {
         return $this->date_of_birth?->age;
