@@ -12,6 +12,7 @@ use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\IndicateurController;
 use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\PlanAmeliorationController;
+use App\Http\Controllers\PlannedTaskController;
 use App\Http\Controllers\QvctController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -99,6 +100,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('beneficiaries.assignments.store');
         Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])
             ->name('assignments.destroy');
+
+        // ── Tâches planifiées (inside a care plan) ──────────────────────────
+        // Append nested under the parent plan; edit + delete flat on the
+        // task row. Service refuses mutations on archived plans (409).
+        Route::post('/care-plans/{carePlan}/tasks', [PlannedTaskController::class, 'store'])
+            ->name('care-plans.tasks.store');
+        Route::put('/tasks/{task}', [PlannedTaskController::class, 'update'])
+            ->name('tasks.update');
+        Route::delete('/tasks/{task}', [PlannedTaskController::class, 'destroy'])
+            ->name('tasks.destroy');
     });
 
     // ── Qualité ───────────────────────────────────────────────────────────────

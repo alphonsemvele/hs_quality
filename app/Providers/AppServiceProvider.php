@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
 use App\Models\IntervenantAssignment;
+use App\Models\PlannedTask;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
+use App\Policies\PlannedTaskPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         Beneficiary::class => BeneficiaryPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
+        PlannedTask::class => PlannedTaskPolicy::class,
     ];
 
     public function register(): void
