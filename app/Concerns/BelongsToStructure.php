@@ -27,6 +27,33 @@ trait BelongsToStructure
         });
     }
 
+    /**
+     * Route model binding runs inside SubstituteBindings (api group middleware),
+     * which executes before auth:sanctum (route middleware) and TenantResolver.
+     * At that point currentStructure() returns null, so StructureScope applies
+     * "WHERE 1=0" and every binding returns 404 — even for valid resources.
+     *
+     * Fix: bypass StructureScope in the query, but enforce structure_id manually
+     * using Sanctum's lazy user resolution. Sanctum resolves the Bearer token on
+     * the first auth()->user() call anywhere in the request — even before the
+     * auth:sanctum middleware has formally run — so we can filter by the real
+     * user's structure_id here, preserving the 404-on-cross-tenant invariant
+     * without relying on TenantResolver having already executed.
+     */
+    public function resolveRouteBinding($value, $field = null): ?static
+    {
+        $query = $this->newQueryWithoutScope(StructureScope::class)
+            ->where($field ?? $this->getRouteKeyName(), $value);
+
+        $user = auth()->user();
+
+        if ($user !== null && ! empty($user->structure_id)) {
+            $query->where($this->qualifyColumn('structure_id'), $user->structure_id);
+        }
+
+        return $query->first();
+    }
+
     public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
