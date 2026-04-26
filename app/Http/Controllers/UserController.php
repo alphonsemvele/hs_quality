@@ -1,163 +1,156 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserStoreRequest;
-use App\Http\Requests\UserUpdateRequest;
-use App\Models\Service;
+use App\Enums\UserType;
+use App\Http\Requests\Users\InviteUserRequest;
 use App\Models\User;
+use App\Services\UserInvitationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * In-tenant user management surface (admin within a structure invites
+ * + manages their team).
+ *
+ * Sister controller to Admin/StructureController:
+ *   - Admin/StructureController = platform operator → manages tenants
+ *   - UserController            = tenant admin     → manages users in
+ *                                                    THEIR tenant
+ *
+ * All endpoints are inside the `tenant` middleware group, so the global
+ * BelongsToStructure scope hides foreign-tenant users from queries.
+ */
 class UserController extends Controller
 {
-    const STATUT_EN_SERVICE = 'actif';
+    public function __construct(
+        private readonly UserInvitationService $service,
+    ) {}
 
-    const STATUT_EN_CONGE = 'conge';
+    public function index(): Response
+    {
+        $this->authorize('viewAny', User::class);
 
-    const STATUT_EN_MISSION = 'mission';
+        $users = User::query()
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->paginate(25)
+            ->through(fn (User $u) => $this->summary($u));
 
-    const STATUT_INACTIF = 'inactif';
+        return Inertia::render('dashboard/users/index', [
+            'users' => $users,
+            'roles' => $this->roleOptions(),
+        ]);
+    }
 
-    const FONCTIONS = [
-        'Médecin',
-        'Infirmière',
-        'Infirmière Chef',
-        'Sage-femme',
-        'Pharmacien(ne)',
-        'Technicien(ne)',
-        'Administratif',
-        'Admin',
-    ];
+    public function create(): Response
+    {
+        $this->authorize('viewAny', User::class);
 
-    const ROLES = [
-        'admin',
-        'medecin',
-        'infirmier',
-        'pharmacien',
-        'laborantin',
-        'receptionniste',
-        'comptable',
-    ];
+        return Inertia::render('dashboard/users/create', [
+            'roles' => $this->roleOptions(),
+        ]);
+    }
 
-    public static function getStatuts(): array
+    public function store(InviteUserRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        // Role-specific gate AFTER validation so a legitimate inviter sees
+        // field errors when both shape and role are wrong, but a request
+        // for a forbidden role (portal, super_admin) is still rejected.
+        $this->authorize('invite', [User::class, $data['type']]);
+
+        $result = $this->service->invite(
+            data: $data,
+            structure: currentStructure(),
+            invitedBy: $request->user(),
+        );
+
+        return redirect()->route('users.show', $result['user'])
+            ->with('success', sprintf(
+                'Invitation envoyée à %s.',
+                $result['user']->email,
+            ))
+            ->with('invitation_url', $result['invitation_url']);
+    }
+
+    public function show(User $user): Response
+    {
+        $this->authorize('view', $user);
+
+        return Inertia::render('dashboard/users/show', [
+            'user' => $this->detail($user),
+        ]);
+    }
+
+    public function deactivate(User $user): RedirectResponse
+    {
+        $this->authorize('deactivate', $user);
+
+        $this->service->deactivate($user);
+
+        return back()->with('success', 'Utilisateur désactivé.');
+    }
+
+    public function reactivate(User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        $this->service->reactivate($user);
+
+        return back()->with('success', 'Utilisateur réactivé.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function summary(User $user): array
     {
         return [
-            self::STATUT_EN_SERVICE,
-            self::STATUT_EN_CONGE,
-            self::STATUT_EN_MISSION,
-            self::STATUT_INACTIF,
+            'id' => $user->id,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'name' => trim($user->first_name.' '.$user->last_name),
+            'email' => $user->email,
+            'type' => $user->type instanceof UserType ? $user->type->value : (string) $user->type,
+            'type_label' => $user->type instanceof UserType ? $user->type->label() : '',
+            'status' => $user->status,
+            'has_mfa_enrolled' => $user->two_factor_confirmed_at !== null,
+            'requires_mfa' => $user->requiresMandatoryMfa(),
+            'pending_invite' => $user->email_verified_at === null,
+            'created_at' => $user->created_at?->toIso8601String(),
         ];
     }
 
-    public function index(Request $request): Response
+    /**
+     * @return array<string, mixed>
+     */
+    private function detail(User $user): array
     {
-        $query = User::with('service');
-
-        // Recherche
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('lastname', 'like', "%{$search}%")
-                    ->orWhere('matricule', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('specialite', 'like', "%{$search}%");
-            });
-        }
-
-        // Filtre par fonction
-        if ($request->filled('fonction')) {
-            $query->where('fonction', $request->fonction);
-        }
-
-        // Filtre par service
-        if ($request->filled('service_id')) {
-            $query->where('service_id', $request->service_id);
-        }
-
-        // Filtre par statut
-        if ($request->filled('statut')) {
-            $query->where('statut', $request->statut);
-        }
-
-        // Statistiques
-        $stats = [
-            'total' => User::count(),
-            'medecins' => User::where('fonction', 'Médecin')->count(),
-            'infirmiers' => User::whereIn('fonction', ['Infirmière', 'Infirmière Chef', 'Sage-femme'])->count(),
-            'enService' => User::where('statut', self::STATUT_EN_SERVICE)->count(),
-            'enConge' => User::where('statut', self::STATUT_EN_CONGE)->count(),
+        return [
+            ...$this->summary($user),
+            'phone' => $user->phone,
+            'employee_number' => $user->employee_number,
         ];
-
-        $personnel = $query->latest()->paginate(10)->withQueryString();
-        $services = Service::where('actif', true)->get();
-
-        return Inertia::render('dashboard/personnel', [
-            'personnel' => $personnel,
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'fonction', 'service_id', 'statut']),
-            'statuts' => self::getStatuts(),
-            'fonctions' => self::FONCTIONS,
-            'roles' => self::ROLES,
-            'services' => $services,
-        ]);
     }
 
-    public function store(UserStoreRequest $request): RedirectResponse
+    /**
+     * @return list<array{value: string, label: string}>
+     */
+    private function roleOptions(): array
     {
-        // Générer un matricule unique
-
-        $prefix = match ($request->fonction) {
-            'Médecin' => 'MED',
-            'Infirmière', 'Infirmière Chef' => 'INF',
-            'Sage-femme' => 'SF',
-            'Pharmacien(ne)' => 'PHAR',
-            'Technicien(ne)' => 'TECH',
-            default => 'ADM',
-        };
-        $lastUser = User::where('matricule', 'like', $prefix.'-%')->orderBy('id', 'desc')->first();
-        $number = $lastUser ? intval(substr($lastUser->matricule, -3)) + 1 : 1;
-        $matricule = $prefix.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
-
-        $data = $request->validated();
-
-        User::create([
-            ...$data,
-            'matricule' => $matricule,
-            'password' => Hash::make($data['password'] ?? 'password123'),
-            'statut' => $data['statut'] ?? self::STATUT_EN_SERVICE,
-        ]);
-
-        return redirect()->route('personnel.index')
-            ->with('success', 'Personnel ajouté avec succès.');
-    }
-
-    public function update(UserUpdateRequest $request, User $user): RedirectResponse
-    {
-        $data = $request->validated();
-
-        // Si un nouveau mot de passe est fourni
-        if (! empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $user->update($data);
-
-        return redirect()->route('personnel.index')
-            ->with('success', 'Personnel mis à jour avec succès.');
-    }
-
-    public function destroy(User $user): RedirectResponse
-    {
-        $user->update(['statut' => self::STATUT_INACTIF]);
-
-        return redirect()->route('personnel.index')
-            ->with('success', 'Personnel désactivé avec succès.');
+        // Role dropdown matches the 5 invitable tenant personas (the portal
+        // role isn't invitable from this admin surface).
+        return collect([
+            UserType::Intervenant,
+            UserType::Coordinateur,
+            UserType::Dirigeant,
+            UserType::ReferentQualite,
+            UserType::Rh,
+        ])->map(fn (UserType $t) => ['value' => $t->value, 'label' => $t->label()])->all();
     }
 }
