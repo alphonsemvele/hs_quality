@@ -21,14 +21,9 @@ interface Props {
     stats: { planifiees: number; en_cours: number; realisees: number; annulees: number };
 }
 
-const DEFAULT_INTERVENTIONS: Intervention[] = [
-    { id: 1, initials: 'ME', intervenant: 'Marie Essomba',   beneficiaire: 'Pierre Mbarga',    structure: 'SAAD Horizon Douala',   date_heure_debut: '08/04/2026 08:00', date_heure_fin: '08/04/2026 10:00', duree_minutes: 120, statut: 'realisee',     compte_rendu: 'RAS. Bénéficiaire en forme.',   sync_offline: false },
-    { id: 2, initials: 'JK', intervenant: 'Jean Koffi',      beneficiaire: 'Élise Ngo',         structure: 'SSIAD Centre Yaoundé',  date_heure_debut: '08/04/2026 09:30', date_heure_fin: null,               duree_minutes: null,  statut: 'en_cours',     compte_rendu: null,                            sync_offline: false },
-    { id: 3, initials: 'AF', intervenant: 'Amina Fofana',    beneficiaire: 'Jules Atangana',    structure: 'SPASAD Nord',           date_heure_debut: '08/04/2026 11:00', date_heure_fin: null,               duree_minutes: null,  statut: 'planifiee',    compte_rendu: null,                            sync_offline: false },
-    { id: 4, initials: 'PB', intervenant: 'Paul Biya Jr.',   beneficiaire: 'Cécile Fouda',      structure: 'SAAD Sud Littoral',     date_heure_debut: '07/04/2026 14:00', date_heure_fin: '07/04/2026 16:30', duree_minutes: 150, statut: 'realisee',     compte_rendu: 'Soins effectués. Famille présente.', sync_offline: false },
-    { id: 5, initials: 'FN', intervenant: 'Fatima Ndiaye',   beneficiaire: 'Robert Owona',      structure: 'SAAD Horizon Douala',   date_heure_debut: '08/04/2026 07:00', date_heure_fin: '08/04/2026 09:00', duree_minutes: 120, statut: 'realisee',     compte_rendu: 'Ménage + repas préparé.',       sync_offline: true  },
-    { id: 6, initials: 'CT', intervenant: 'Clément Touré',   beneficiaire: 'Agnès Belinga',     structure: 'SSIAD Centre Yaoundé',  date_heure_debut: '08/04/2026 13:00', date_heure_fin: null,               duree_minutes: null,  statut: 'annulee',      compte_rendu: null,                            sync_offline: false },
-];
+// Fallback removed (Wave 1 / C1) — previously contained named individuals
+// that would render even when the controller passed empty data, leaking
+// fictional-but-realistic personal data to every viewer regardless of tenant.
 
 const STATUT_MAP = {
     planifiee:    { label: 'Planifiée',    bg: '#EFF6FF', text: '#1D4ED8', dot: '#3B82F6' },
@@ -38,7 +33,7 @@ const STATUT_MAP = {
     non_realisee: { label: 'Non réalisée', bg: '#F8FAFC', text: '#475569', dot: '#94A3B8' },
 };
 
-export default function Interventions({ interventions = DEFAULT_INTERVENTIONS, total = DEFAULT_INTERVENTIONS.length, stats = { planifiees: 3, en_cours: 1, realisees: 3, annulees: 1 } }: Partial<Props>) {
+export default function Interventions({ interventions = [], total = 0, stats = { planifiees: 0, en_cours: 0, realisees: 0, annulees: 0 } }: Partial<Props>) {
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
 

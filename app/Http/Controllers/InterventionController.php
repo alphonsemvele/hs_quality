@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Interventions\CancelInterventionRequest;
 use App\Http\Requests\Interventions\CheckOutInterventionRequest;
+use App\Http\Requests\Interventions\StoreInterventionPhotoRequest;
 use App\Http\Requests\Interventions\StoreInterventionRequest;
+use App\Http\Requests\Interventions\StoreInterventionSignatureRequest;
 use App\Http\Requests\Interventions\UpdateInterventionRequest;
 use App\Models\Intervention;
+use App\Models\InterventionPhoto;
+use App\Services\InterventionMediaService;
 use App\Services\InterventionService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -14,7 +18,10 @@ use Inertia\Response;
 
 class InterventionController extends Controller
 {
-    public function __construct(private readonly InterventionService $service) {}
+    public function __construct(
+        private readonly InterventionService $service,
+        private readonly InterventionMediaService $mediaService,
+    ) {}
 
     public function index(): Response
     {
@@ -112,5 +119,37 @@ class InterventionController extends Controller
         $this->service->cancel($intervention, $request->validated('cancellation_reason'));
 
         return back()->with('success', 'Intervention annulée.');
+    }
+
+    // ── Media ──────────────────────────────────────────────────────────────
+
+    public function storePhoto(StoreInterventionPhotoRequest $request, Intervention $intervention): RedirectResponse
+    {
+        $this->mediaService->storePhoto($intervention, $request->file('photo'), $request->user());
+
+        return back()->with('success', 'Photo ajoutée.');
+    }
+
+    public function destroyPhoto(Intervention $intervention, InterventionPhoto $photo): RedirectResponse
+    {
+        $this->authorize('update', $intervention);
+
+        abort_if($photo->intervention_id !== $intervention->id, 404);
+
+        $this->mediaService->deletePhoto($photo);
+
+        return back()->with('success', 'Photo supprimée.');
+    }
+
+    public function storeSignature(StoreInterventionSignatureRequest $request, Intervention $intervention): RedirectResponse
+    {
+        $this->mediaService->storeSignature(
+            $intervention,
+            $request->validated('signature'),
+            $request->validated('signer_type'),
+            $request->user(),
+        );
+
+        return back()->with('success', 'Signature enregistrée.');
     }
 }

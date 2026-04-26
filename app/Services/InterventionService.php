@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\InterventionStatus;
 use App\Enums\VisitMode;
+use App\Events\InterventionStatusChanged;
 use App\Models\Beneficiary;
 use App\Models\Intervention;
 use App\Models\User;
@@ -63,7 +64,10 @@ class InterventionService
                 'checkin_longitude' => $data['longitude'] ?? null,
             ]);
 
-            return $intervention->fresh();
+            $fresh = $intervention->fresh();
+            InterventionStatusChanged::dispatch($fresh, InterventionStatus::InProgress);
+
+            return $fresh;
         });
     }
 
@@ -84,7 +88,10 @@ class InterventionService
                 'report_text' => $data['report_text'] ?? $intervention->report_text,
             ]);
 
-            return $intervention->fresh();
+            $fresh = $intervention->fresh();
+            InterventionStatusChanged::dispatch($fresh, InterventionStatus::Completed);
+
+            return $fresh;
         });
     }
 
@@ -103,7 +110,10 @@ class InterventionService
                 'cancellation_reason' => $reason,
             ]);
 
-            return $intervention->fresh();
+            $fresh = $intervention->fresh();
+            InterventionStatusChanged::dispatch($fresh, InterventionStatus::Cancelled);
+
+            return $fresh;
         });
     }
 
@@ -119,8 +129,66 @@ class InterventionService
         return DB::transaction(function () use ($intervention): Intervention {
             $intervention->update(['status' => InterventionStatus::Missed->value]);
 
-            return $intervention->fresh();
+            $fresh = $intervention->fresh();
+            InterventionStatusChanged::dispatch($fresh, InterventionStatus::Missed);
+
+            return $fresh;
         });
+    }
+
+    /**
+     * Sweep all `planned` interventions whose scheduled end time + grace
+     * window has passed without check-in and flag them as `missed`.
+     *
+     * Called from the `interventions:sweep-missed` Artisan command on a
+     * cron schedule (see routes/console.php). Returns the count of
+     * interventions transitioned, so the command's exit log + the audit
+     * trail show what was swept and when.
+     *
+     * The grace window absorbs late check-ins (intervenant arrived but
+     * hasn't tapped "check-in" yet — common in zones blanches).
+     */
+    public function sweepMissed(int $graceMinutes = 30): int
+    {
+        $cutoff = now()->subMinutes($graceMinutes);
+
+        // Coarse filter at the DB layer (planned status, end_time present,
+        // dated on or before today). Then refine the date+time combination
+        // in PHP — `planned_date + planned_end_time` is a Postgres-specific
+        // interval cast that doesn't run on SQLite (the test driver).
+        // Keeping the comparison in PHP keeps the query DB-portable.
+        //
+        // Volume: a 200-intervenant tenant rarely has more than ~hundred
+        // pending-sweep rows at any moment, so the in-PHP refinement has
+        // negligible cost.
+        //
+        // Bypass tenant scope — this runs from console and must affect
+        // every tenant simultaneously.
+        $candidates = Intervention::query()
+            ->withoutGlobalScopes()
+            ->where('status', InterventionStatus::Planned->value)
+            ->whereNotNull('planned_end_time')
+            ->whereDate('planned_date', '<=', $cutoff->toDateString())
+            ->get();
+
+        $count = 0;
+        foreach ($candidates as $intervention) {
+            $endAt = $intervention->planned_date->copy()->setTimeFromTimeString(
+                (string) $intervention->planned_end_time,
+            );
+
+            if ($endAt->greaterThan($cutoff)) {
+                continue;
+            }
+
+            DB::transaction(function () use ($intervention): void {
+                $intervention->update(['status' => InterventionStatus::Missed->value]);
+                InterventionStatusChanged::dispatch($intervention->fresh(), InterventionStatus::Missed);
+            });
+            $count++;
+        }
+
+        return $count;
     }
 
     public function delete(Intervention $intervention): void

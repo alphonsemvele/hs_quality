@@ -1,26 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Phase 2 Module M6 — HAS / AFNOR / ISO 9001 audit grids and conformity scoring.
+ *
+ * Currently a placeholder. Previously returned hardcoded sample data
+ * including named individuals — that constituted an RGPD breach for any
+ * authenticated user (Wave 1 / C1 in the security sweep). Until the
+ * domain ships in Phase 2 Month 6, this controller renders a "coming soon"
+ * page so the sidebar entry remains discoverable without leaking data.
+ */
 class AuditController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
-        return Inertia::render('dashboard/audits/index', [
-            'audits' => $this->defaultAudits(),
+        return Inertia::render('dashboard/coming-soon', [
+            'feature' => 'M6 Audits & Conformité',
+            'feature_label' => 'Audits & Conformité',
+            'description' => 'Préparation aux évaluations HAS, audits AFNOR NF X50-056 et ISO 9001, '
+                .'grilles personnalisables, scoring automatique et génération du PAC à partir des écarts.',
+            'eta' => 'Phase 2 — Mois 6 (T3 2026)',
+            'tier_required' => 'pro',
         ]);
-    }
-
-    private function defaultAudits(): array
-    {
-        return [
-            ['id' => 1, 'structure' => 'SAAD Horizon Douala', 'type_grille' => 'HAS Évaluation externe', 'score_global' => 84, 'ecarts_critiques' => 1, 'ecarts_majeurs' => 3, 'date_audit' => '05/04/2026', 'statut' => 'finalise', 'referent' => 'Sophie Ateba', 'date_prochain_audit' => '05/04/2027'],
-            ['id' => 2, 'structure' => 'SSIAD Centre Yaoundé', 'type_grille' => 'AFNOR NF X50-056', 'score_global' => 71, 'ecarts_critiques' => 2, 'ecarts_majeurs' => 5, 'date_audit' => '08/04/2026', 'statut' => 'en_cours', 'referent' => 'Bruno Ngono', 'date_prochain_audit' => null],
-            ['id' => 3, 'structure' => 'SPASAD Nord', 'type_grille' => 'ISO 9001', 'score_global' => 0, 'ecarts_critiques' => 0, 'ecarts_majeurs' => 0, 'date_audit' => '15/04/2026', 'statut' => 'planifie', 'referent' => 'Pascaline Eko', 'date_prochain_audit' => null],
-            ['id' => 4, 'structure' => 'SAAD Sud Littoral', 'type_grille' => 'Caphandeo', 'score_global' => 91, 'ecarts_critiques' => 0, 'ecarts_majeurs' => 1, 'date_audit' => '02/04/2026', 'statut' => 'finalise', 'referent' => 'Sophie Ateba', 'date_prochain_audit' => '02/04/2027'],
-            ['id' => 5, 'structure' => 'ESAD Centre', 'type_grille' => 'Interne', 'score_global' => 78, 'ecarts_critiques' => 1, 'ecarts_majeurs' => 2, 'date_audit' => '01/04/2026', 'statut' => 'clos', 'referent' => 'Bruno Ngono', 'date_prochain_audit' => '01/10/2026'],
-        ];
     }
 }

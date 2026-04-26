@@ -29,7 +29,14 @@ class AssignmentController extends Controller
 
     public function store(AttachIntervenantRequest $request, Beneficiary $beneficiary): RedirectResponse
     {
-        $intervenant = User::query()->findOrFail($request->validated('intervenant_id'));
+        // Tenant-bound lookup against the *beneficiary's* structure. The form
+        // request's Rule::exists already scopes to the current structure;
+        // pinning to $beneficiary->structure_id closes a (currently impossible)
+        // edge case where the request's tenant context drifts from the
+        // route-bound beneficiary.
+        $intervenant = User::query()
+            ->where('structure_id', $beneficiary->structure_id)
+            ->findOrFail($request->validated('intervenant_id'));
 
         $this->service->assign(
             intervenant: $intervenant,

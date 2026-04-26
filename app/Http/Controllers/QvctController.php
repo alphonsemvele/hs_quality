@@ -1,28 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Phase 2 Module M3 — QVCT (Qualité de Vie et Conditions de Travail).
+ *
+ * Currently a placeholder. Previously returned hardcoded sample data
+ * including named individuals with mental-health distress flags — that
+ * constituted an RGPD Art 9 special-category data breach for any
+ * authenticated user (Wave 1 / C1 in the security sweep).
+ */
 class QvctController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
-        return Inertia::render('dashboard/qvct/index', [
-            'questionnaires' => $this->defaultQuestionnaires(),
-            'stats' => ['moy_global' => 5.0, 'alertes' => 3, 'reponses' => 6, 'taux_reponse' => 69],
+        return Inertia::render('dashboard/coming-soon', [
+            'feature' => 'M3 Baromètre QVCT',
+            'feature_label' => 'Baromètre QVCT',
+            'description' => 'Baromètres QVCT anonymes, détection des signaux faibles, '
+                .'cartographie des risques psychosociaux par équipe et alertes individualisées '
+                .'au référent RH.',
+            'eta' => 'Phase 2 — Mois 5 (T2 2026)',
+            'tier_required' => 'pro',
         ]);
     }
 
-    private function defaultQuestionnaires(): array
+    /**
+     * Stub kept so existing routes don't 404; will be redesigned when M3 ships.
+     */
+    public function questionnaire(): Response
     {
-        return [
-            ['id' => 1, 'intervenant' => 'Marie Essomba', 'structure' => 'SAAD Horizon Douala', 'periode' => '2026-04', 'score_bienetre' => 7, 'score_charge' => 4, 'score_relations' => 8, 'score_global' => 6.9, 'alerte_rh' => false, 'signaux' => []],
-            ['id' => 2, 'intervenant' => 'Sophie Ateba', 'structure' => 'SAAD Horizon Douala', 'periode' => '2026-04', 'score_bienetre' => 3, 'score_charge' => 8, 'score_relations' => 4, 'score_global' => 2.8, 'alerte_rh' => true, 'signaux' => ['Score bas 2 périodes', 'Surcharge']],
-            ['id' => 3, 'intervenant' => 'Jean Koffi', 'structure' => 'SSIAD Centre Yaoundé', 'periode' => '2026-04', 'score_bienetre' => 6, 'score_charge' => 5, 'score_relations' => 7, 'score_global' => 6.2, 'alerte_rh' => false, 'signaux' => []],
-            ['id' => 4, 'intervenant' => 'Bruno Ngono', 'structure' => 'SSIAD Centre Yaoundé', 'periode' => '2026-04', 'score_bienetre' => 4, 'score_charge' => 9, 'score_relations' => 5, 'score_global' => 3.1, 'alerte_rh' => true, 'signaux' => ['Surcharge détectée']],
-            ['id' => 5, 'intervenant' => 'Amina Fofana', 'structure' => 'SPASAD Nord', 'periode' => '2026-04', 'score_bienetre' => 8, 'score_charge' => 3, 'score_relations' => 9, 'score_global' => 7.8, 'alerte_rh' => false, 'signaux' => []],
-            ['id' => 6, 'intervenant' => 'Pascaline Eko', 'structure' => 'SPASAD Nord', 'periode' => '2026-04', 'score_bienetre' => 4, 'score_charge' => 6, 'score_relations' => 4, 'score_global' => 3.4, 'alerte_rh' => true, 'signaux' => ['Isolement signalé']],
-        ];
+        return $this->index();
+    }
+
+    public function store(): Response
+    {
+        return $this->index();
     }
 }

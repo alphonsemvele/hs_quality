@@ -53,52 +53,35 @@ interface Props {
 }
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
+//
+// Wave 1 / C1 — all hardcoded fallback data was removed. Earlier defaults
+// listed real-looking named individuals (declarants, QVCT distress signals,
+// audit referents) that rendered to every authenticated user regardless of
+// tenant. Empty defaults make the empty state explicit.
 
-const DEFAULT_STATS: Stats = {
-    interventions_ce_mois:       1842,
-    interventions_en_cours:      23,
-    incidents_declares:          14,
-    incidents_en_cours:          3,
-    score_conformite:            78,
-    taux_completion_pac:         62,
-    score_qvct_moyen:            6.8,
-    formations_expirant_bientot: 5,
-    intervenants_actifs:         87,
-    structures_actives:          12,
+const EMPTY_STATS: Stats = {
+    interventions_ce_mois:       0,
+    interventions_en_cours:      0,
+    incidents_declares:          0,
+    incidents_en_cours:          0,
+    score_conformite:            0,
+    taux_completion_pac:         0,
+    score_qvct_moyen:            0,
+    formations_expirant_bientot: 0,
+    intervenants_actifs:         0,
+    structures_actives:          0,
 };
-
-const DEFAULT_INCIDENTS: IncidentRecent[] = [
-    { id: 1, initials: 'ME', declarant: 'Marie Essomba',    categorie: 'Chute',                gravite: 'significatif', statut: 'en_analyse',   structure: 'SAAD Horizon Douala',   depuis: '2h' },
-    { id: 2, initials: 'JK', declarant: 'Jean Koffi',       categorie: 'Erreur médicamenteuse', gravite: 'grave',        statut: 'plan_actions', structure: 'SSIAD Centre Yaoundé',   depuis: '5h' },
-    { id: 3, initials: 'AF', declarant: 'Amina Fofana',     categorie: 'Agression',             gravite: 'critique',     statut: 'declare',      structure: 'SPASAD Nord',            depuis: '18 min' },
-    { id: 4, initials: 'PB', declarant: 'Paul Biya Jr.',    categorie: 'Maltraitance suspectée', gravite: 'grave',       statut: 'en_analyse',   structure: 'SAAD Sud Littoral',      depuis: '1j' },
-    { id: 5, initials: 'FN', declarant: 'Fatima Ndiaye',    categorie: 'Chute',                gravite: 'mineur',       statut: 'clos',         structure: 'SAAD Horizon Douala',   depuis: '3j' },
-    { id: 6, initials: 'CT', declarant: 'Clément Touré',    categorie: 'Accident de travail',   gravite: 'significatif', statut: 'plan_actions', structure: 'SSIAD Centre Yaoundé',   depuis: '2j' },
-];
-
-const DEFAULT_ALERTES_QVCT: AlerteQvct[] = [
-    { id: 1, intervenant: 'Sophie Ateba',   structure: 'SAAD Horizon Douala',  score: 2.8, signal: 'Score bas 2 périodes consécutives', depuis: '7 jours' },
-    { id: 2, intervenant: 'Bruno Ngono',    structure: 'SSIAD Centre Yaoundé', score: 3.1, signal: 'Surcharge de travail détectée',      depuis: '3 jours' },
-    { id: 3, intervenant: 'Pascaline Eko',  structure: 'SPASAD Nord',          score: 3.4, signal: 'Isolement professionnel signalé',    depuis: '5 jours' },
-];
-
-const DEFAULT_AUDITS: AuditRecent[] = [
-    { id: 1, structure: 'SAAD Horizon Douala',   type_grille: 'HAS Évaluation externe', score: 84, statut: 'finalise',  date: '05/04/2026' },
-    { id: 2, structure: 'SSIAD Centre Yaoundé',  type_grille: 'AFNOR NF X50-056',       score: 71, statut: 'en_cours',  date: '08/04/2026' },
-    { id: 3, structure: 'SPASAD Nord',           type_grille: 'ISO 9001',               score: 0,  statut: 'planifie',  date: '15/04/2026' },
-    { id: 4, structure: 'SAAD Sud Littoral',     type_grille: 'Caphandeo',              score: 91, statut: 'finalise',  date: '02/04/2026' },
-];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Dashboard({
-    stats             = DEFAULT_STATS,
-    incidents_recents = DEFAULT_INCIDENTS,
-    alertes_qvct      = DEFAULT_ALERTES_QVCT,
-    audits_recents    = DEFAULT_AUDITS,
+    stats             = EMPTY_STATS,
+    incidents_recents = [],
+    alertes_qvct      = [],
+    audits_recents    = [],
 }: Partial<Props>) {
 
-    const s = stats ?? DEFAULT_STATS;
+    const s = stats ?? EMPTY_STATS;
 
     const incidentsGraves = incidents_recents.filter(i => i.gravite === 'grave' || i.gravite === 'critique');
 

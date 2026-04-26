@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\BeneficiaryController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\PlannedTaskController;
 use App\Http\Controllers\QvctController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -52,14 +54,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/interventions/{intervention}/checkout', [InterventionController::class, 'checkOut'])->name('interventions.checkout');
         Route::post('/interventions/{intervention}/cancel', [InterventionController::class, 'cancel'])->name('interventions.cancel');
 
-        // ── Incidents & Événements indésirables (stub — full build Phase 1 M3) ─
+        Route::post('/interventions/{intervention}/photos', [InterventionController::class, 'storePhoto'])->name('interventions.photos.store');
+        Route::delete('/interventions/{intervention}/photos/{photo}', [InterventionController::class, 'destroyPhoto'])->name('interventions.photos.destroy');
+        Route::post('/interventions/{intervention}/signature', [InterventionController::class, 'storeSignature'])->name('interventions.signature.store');
+
+        // ── Incidents & Événements indésirables (M3 — full state machine) ───
         Route::get('/incidents', [IncidentController::class, 'index'])->name('incidents.index');
         Route::get('/incidents/create', [IncidentController::class, 'create'])->name('incidents.create');
         Route::post('/incidents', [IncidentController::class, 'store'])->name('incidents.store');
-        Route::get('/incidents/{id}', [IncidentController::class, 'show'])->name('incidents.show');
-        Route::put('/incidents/{id}', [IncidentController::class, 'update'])->name('incidents.update');
-        Route::put('/incidents/{id}/statut', [IncidentController::class, 'updateStatut'])->name('incidents.statut');
-        Route::delete('/incidents/{id}', [IncidentController::class, 'destroy'])->name('incidents.destroy');
+        Route::get('/incidents/{incident}', [IncidentController::class, 'show'])->name('incidents.show');
+        Route::put('/incidents/{incident}', [IncidentController::class, 'update'])->name('incidents.update');
+        Route::delete('/incidents/{incident}', [IncidentController::class, 'destroy'])->name('incidents.destroy');
+
+        Route::post('/incidents/{incident}/assign', [IncidentController::class, 'assign'])->name('incidents.assign');
+        Route::post('/incidents/{incident}/analyse', [IncidentController::class, 'analyse'])->name('incidents.analyse');
+        Route::post('/incidents/{incident}/close', [IncidentController::class, 'close'])->name('incidents.close');
+        Route::post('/incidents/{incident}/actions', [IncidentController::class, 'storeAction'])->name('incidents.actions.store');
 
         // ── Bénéficiaires ─────────────────────────────────────────────────────
         Route::get('/beneficiaries', [BeneficiaryController::class, 'index'])->name('beneficiaries.index');
@@ -105,6 +115,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('tasks.update');
         Route::delete('/tasks/{task}', [PlannedTaskController::class, 'destroy'])
             ->name('tasks.destroy');
+
+        // ── In-tenant user management (#52 — invite + lifecycle) ──────────────
+        // Phase 1 M1 W4 closeout. The tenant's dirigeant (and RH for some
+        // ops) invites coordinateurs / intervenants / référents qualité /
+        // RH to their structure. Public registration is disabled (Wave 0
+        // C2) so this is the ONLY path users take into the system after
+        // their tenant is provisioned.
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+        Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
     });
 
     // ── Qualité ───────────────────────────────────────────────────────────────
@@ -135,4 +158,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/communication', [CommunicationController::class, 'index'])->name('communication.index');
     Route::post('/communication/message', [CommunicationController::class, 'sendMessage'])->name('communication.send');
+
+    // ── Platform admin (super_admin only) ─────────────────────────────────────
+    // Tenants are managed here. NOT inside the `tenant` middleware group —
+    // these endpoints operate on the structure rows themselves and do not
+    // belong to any tenant. EnsureSuperAdmin returns 404 (not 403) on
+    // failure so the surface is invisible to tenant-scoped users.
+    Route::middleware(['super_admin'])
+        ->prefix('admin/structures')
+        ->name('admin.structures.')
+        ->group(function (): void {
+            Route::get('/', [AdminStructureController::class, 'index'])->name('index');
+            Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
+            Route::post('/', [AdminStructureController::class, 'store'])->name('store');
+            Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
+            Route::put('/{structure}', [AdminStructureController::class, 'update'])->name('update');
+            Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');
+            Route::post('/{structure}/suspend', [AdminStructureController::class, 'suspend'])->name('suspend');
+            Route::post('/{structure}/reactivate', [AdminStructureController::class, 'reactivate'])->name('reactivate');
+        });
 });

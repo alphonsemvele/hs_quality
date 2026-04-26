@@ -38,24 +38,11 @@ class BeneficiaryController extends Controller
     {
         $this->authorize('viewAny', Beneficiary::class);
 
-        $user = request()->user();
-        $query = Beneficiary::query();
-
-        // Intervenants with only the .assigned permission see exclusively
-        // beneficiaries they are actively assigned to. Users with
-        // .view.structure see the full tenant list.
-        if (! $user->hasPermissionTo('beneficiaries.view.structure')
-            && $user->hasPermissionTo('beneficiaries.view.assigned')) {
-            $query->whereIn(
-                'id',
-                IntervenantAssignment::query()
-                    ->active()
-                    ->where('user_id', $user->id)
-                    ->select('beneficiary_id'),
-            );
-        }
-
-        $beneficiaries = $query
+        // Wave 1 / H2 — assigned-vs-structure scope lives in the service
+        // so this same logic applies on the mobile API. Don't reintroduce
+        // an inline scope here; keep both surfaces in sync via the service.
+        $beneficiaries = $this->service
+            ->listForUser(request()->user())
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20);

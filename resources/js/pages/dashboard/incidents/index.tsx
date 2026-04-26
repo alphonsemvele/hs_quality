@@ -20,14 +20,9 @@ interface Props {
     stats: { declare: number; en_analyse: number; plan_actions: number; clos: number; graves: number };
 }
 
-const DEFAULT: Incident[] = [
-    { id: 1, initials: 'ME', declarant: 'Marie Essomba',   categorie: 'Chute',                  gravite: 'significatif', statut: 'en_analyse',   structure: 'SAAD Horizon Douala',  date_heure: '08/04/2026 08:45', description: 'Bénéficiaire a chuté en se levant du fauteuil.', notifie_responsable: true,  notifie_autorites: false },
-    { id: 2, initials: 'JK', declarant: 'Jean Koffi',      categorie: 'Erreur médicamenteuse',   gravite: 'grave',        statut: 'plan_actions', structure: 'SSIAD Centre Yaoundé', date_heure: '07/04/2026 14:20', description: 'Mauvais dosage administré au bénéficiaire.', notifie_responsable: true,  notifie_autorites: false },
-    { id: 3, initials: 'AF', declarant: 'Amina Fofana',    categorie: 'Agression',               gravite: 'critique',     statut: 'declare',      structure: 'SPASAD Nord',          date_heure: '08/04/2026 09:10', description: 'Intervenant agressé verbalement par un tiers au domicile.', notifie_responsable: true,  notifie_autorites: true  },
-    { id: 4, initials: 'PB', declarant: 'Paul Biya Jr.',   categorie: 'Maltraitance suspectée',  gravite: 'grave',        statut: 'en_analyse',   structure: 'SAAD Sud Littoral',    date_heure: '07/04/2026 10:00', description: 'Traces suspectes observées sur le bénéficiaire.', notifie_responsable: true,  notifie_autorites: true  },
-    { id: 5, initials: 'FN', declarant: 'Fatima Ndiaye',   categorie: 'Chute',                  gravite: 'mineur',       statut: 'clos',         structure: 'SAAD Horizon Douala',  date_heure: '05/04/2026 07:30', description: 'Petite chute sans blessure. Bénéficiaire choqué.', notifie_responsable: true,  notifie_autorites: false },
-    { id: 6, initials: 'CT', declarant: 'Clément Touré',   categorie: 'Accident de travail',     gravite: 'significatif', statut: 'plan_actions', structure: 'SSIAD Centre Yaoundé', date_heure: '06/04/2026 15:40', description: 'Intervenant blessé au dos lors d\'un transfert.', notifie_responsable: true,  notifie_autorites: false },
-];
+// Fallback removed (Wave 1 / C1) — previously contained named individuals
+// that would render even when the controller passed empty data, leaking
+// fictional-but-realistic personal data to every viewer regardless of tenant.
 
 const GRAVITE = {
     mineur:       { bg: '#F8FAFC', text: '#475569', dot: '#94A3B8', border: '#E2E8F0' },
@@ -43,7 +38,7 @@ const STATUT = {
     clos:         { label: 'Clos',            bg: '#F1F5F9', text: '#64748B' },
 };
 
-export default function Incidents({ incidents = DEFAULT, stats = { declare: 1, en_analyse: 2, plan_actions: 2, clos: 1, graves: 4 } }: Partial<Props>) {
+export default function Incidents({ incidents = [], stats = { declare: 0, en_analyse: 0, plan_actions: 0, clos: 0, graves: 0 } }: Partial<Props>) {
     return (
         <DashboardLayout title="Incidents & Événements indésirables" subtitle="Déclaration, analyse et suivi des incidents">
 

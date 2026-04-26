@@ -1,27 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Phase 2 Module M6 — Plans d'Amélioration Continue (PAC).
+ *
+ * Currently a placeholder. Previously returned hardcoded sample data
+ * including named individuals (Wave 1 / C1 in the security sweep).
+ */
 class PlanAmeliorationController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
-        return Inertia::render('dashboard/plans-amelioration/index', [
-            'pacs' => $this->defaultPacs(),
+        return Inertia::render('dashboard/coming-soon', [
+            'feature' => 'M6 Plans d\'Amélioration',
+            'feature_label' => 'Plans d\'amélioration',
+            'description' => 'Génération automatique des plans d\'action correctifs à partir '
+                .'des incidents et des écarts d\'audit, suivi de l\'avancement, et clôture '
+                .'avec preuves d\'efficacité.',
+            'eta' => 'Phase 2 — Mois 6 (T3 2026)',
+            'tier_required' => 'pro',
         ]);
-    }
-
-    private function defaultPacs(): array
-    {
-        return [
-            ['id' => 1, 'titre' => 'Mise en place protocole anti-chute', 'structure' => 'SAAD Horizon Douala', 'responsable' => 'Sophie Ateba', 'priorite' => 'haute', 'echeance' => '30/04/2026', 'avancement_pct' => 60, 'statut' => 'en_cours', 'source' => 'incident'],
-            ['id' => 2, 'titre' => 'Formation gestion médicamenteuse', 'structure' => 'SSIAD Centre Yaoundé', 'responsable' => 'Bruno Ngono', 'priorite' => 'critique', 'echeance' => '15/04/2026', 'avancement_pct' => 30, 'statut' => 'en_cours', 'source' => 'audit'],
-            ['id' => 3, 'titre' => 'Révision du plan d\'accompagnement type', 'structure' => 'SPASAD Nord', 'responsable' => 'Pascaline Eko', 'priorite' => 'moyenne', 'echeance' => '31/05/2026', 'avancement_pct' => 10, 'statut' => 'ouvert', 'source' => 'audit'],
-            ['id' => 4, 'titre' => 'Audit interne trimestriel automatisé', 'structure' => 'SAAD Sud Littoral', 'responsable' => 'Jean Koffi', 'priorite' => 'basse', 'echeance' => '30/06/2026', 'avancement_pct' => 0, 'statut' => 'ouvert', 'source' => 'manuel'],
-            ['id' => 5, 'titre' => 'Déploiement mode offline sur smartphones', 'structure' => 'Toutes structures', 'responsable' => 'Amina Fofana', 'priorite' => 'haute', 'echeance' => '20/04/2026', 'avancement_pct' => 85, 'statut' => 'en_cours', 'source' => 'manuel'],
-            ['id' => 6, 'titre' => 'Renouvellement certifications DEAS', 'structure' => 'SSIAD Centre Yaoundé', 'responsable' => 'Bruno Ngono', 'priorite' => 'haute', 'echeance' => '01/05/2026', 'avancement_pct' => 100, 'statut' => 'realise', 'source' => 'audit'],
-        ];
     }
 }

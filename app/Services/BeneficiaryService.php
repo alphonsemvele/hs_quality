@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Auditing\TenantAwareAudit;
 use App\Models\Beneficiary;
+use App\Models\IntervenantAssignment;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -17,6 +19,43 @@ use Illuminate\Support\Facades\DB;
  */
 class BeneficiaryService
 {
+    /**
+     * Build a tenant-scoped beneficiary query that respects the user's
+     * permission level.
+     *
+     *   - `beneficiaries.view.structure` → full tenant list
+     *   - `beneficiaries.view.assigned`  → only beneficiaries the user is
+     *     actively assigned to (intervenants à domicile)
+     *   - neither permission → caller should reject upstream via Policy;
+     *     this method returns an unsatisfiable query as a safety net
+     *
+     * Wave 1 / H2. Both web (BeneficiaryController) and API
+     * (Api/V1/BeneficiaryController) use this so the assigned-only scope
+     * can never drift between surfaces.
+     */
+    public function listForUser(User $user): Builder
+    {
+        $query = Beneficiary::query();
+
+        if ($user->hasPermissionTo('beneficiaries.view.structure')) {
+            return $query;
+        }
+
+        if ($user->hasPermissionTo('beneficiaries.view.assigned')) {
+            return $query->whereIn(
+                'id',
+                IntervenantAssignment::query()
+                    ->active()
+                    ->where('user_id', $user->id)
+                    ->select('beneficiary_id'),
+            );
+        }
+
+        // Defensive: caller's authorize() should have already denied. Return
+        // a query that yields zero rows so a missed gate fails closed.
+        return $query->whereRaw('1 = 0');
+    }
+
     public function create(array $data): Beneficiary
     {
         return DB::transaction(function () use ($data): Beneficiary {

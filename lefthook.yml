@@ -32,7 +32,10 @@ pre-commit:
       # suite even runs.
       glob: "*.{php,tsx,ts}"
       run: |
-        if grep -lE "Sophie Ateba|Bruno Ngono|Marie Essomba|Pascaline Eko|Jean Koffi|Amina Fofana|Clément Touré|Paul Biya Jr|Fatima Ndiaye|Pierre Mbarga" {staged_files} 2>/dev/null; then
+        # Exclude NoLeakyDemoDataTest.php — it lists the forbidden names
+        # as the definition of what to block; flagging it is a false positive.
+        FILES=$(echo "{staged_files}" | tr ' ' '\n' | grep -v "NoLeakyDemoDataTest.php" | tr '\n' ' ')
+        if [ -n "$FILES" ] && grep -lE "Sophie Ateba|Bruno Ngono|Marie Essomba|Pascaline Eko|Jean Koffi|Amina Fofana|Clément Touré|Paul Biya Jr|Fatima Ndiaye|Pierre Mbarga" $FILES 2>/dev/null; then
           echo "ERROR: hardcoded demo individual detected. See Wave 1 / C1."
           exit 1
         fi
