@@ -32,7 +32,15 @@ return new class extends Migration
             $table->string($morphPrefix.'_type')->nullable();
             $table->unsignedBigInteger($morphPrefix.'_id')->nullable();
             $table->string('event');
-            $table->morphs('auditable');
+            // Wave 1 / C4 — domain models on this project use UUID primary
+            // keys (HasUuids trait). Default $table->morphs() creates an
+            // unsigned bigint auditable_id, which silently rejects UUID
+            // inserts — owen-it swallows the exception and no audit row is
+            // ever written. Use string + manual indexes instead so UUID and
+            // bigint primary keys both round-trip correctly.
+            $table->string('auditable_type');
+            $table->string('auditable_id');
+            $table->index(['auditable_type', 'auditable_id'], 'audits_auditable_type_id_index');
             $table->text('old_values')->nullable();
             $table->text('new_values')->nullable();
             $table->text('url')->nullable();

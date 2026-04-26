@@ -1,9 +1,8 @@
 # QualitéDomicile SaaS — Project Status & Model Design Reference
 
-**Generated:** 2026-04-20  
-**Branch:** `feature/muma-setup`  
-**Last commit:** `c502aac`  
-**Test suite:** 139 tests · 485 assertions · **ALL GREEN**
+**Generated:** 2026-04-24
+**Branch:** `main`
+**Test suite:** 263 tests · 738 assertions · **ALL GREEN**
 
 Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier des Charges, Feb 2024)
 
@@ -13,16 +12,17 @@ Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier de
 
 1. [What QualitéDomicile Is](#1-what-qualitédomicile-is)
 2. [Phase 0 — Foundation (complete)](#2-phase-0--foundation-complete)
-3. [Phase 1 Month 1 — Core Entities (complete)](#3-phase-1-month-1--core-entities-complete)
-4. [All Working HTTP Endpoints](#4-all-working-http-endpoints)
-5. [Model Design: Beneficiary](#5-model-design--beneficiary)
-6. [Model Design: CarePlan](#6-model-design--careplan)
-7. [Model Design: PlannedTask](#7-model-design--plannedtask)
-8. [Model Design: IntervenantAssignment](#8-model-design--intervenantassignment)
-9. [Testing Strategy](#9-testing-strategy)
-10. [Security Architecture](#10-security-architecture)
-11. [Manual API Testing Guide](#11-manual-api-testing-guide)
-12. [What's Next — Phase 1 Month 2+](#12-whats-next--phase-1-month-2)
+3. [Phase 1 — Progress Map](#3-phase-1--progress-map)
+4. [All Working HTTP Endpoints (web)](#4-all-working-http-endpoints-web)
+5. [Mobile REST API — `/api/v1/*`](#5-mobile-rest-api--apiv1)
+6. [Model Design — Intervention](#6-model-design--intervention)
+7. [Model Design — Incident](#7-model-design--incident)
+8. [Realtime — Reverb broadcast](#8-realtime--reverb-broadcast)
+9. [Dashboard caching strategy](#9-dashboard-caching-strategy)
+10. [Testing Strategy](#10-testing-strategy)
+11. [Security Architecture](#11-security-architecture)
+12. [Manual Testing Guide (Postman / browser)](#12-manual-testing-guide-postman--browser)
+13. [What's Next — Phase 1 M4 W2+](#13-whats-next--phase-1-m4-w2)
 
 ---
 
@@ -41,7 +41,7 @@ A multi-tenant SaaS for French home-care organisations:
 Each subscribing organisation is a **structure** (tenant). Two frontends share one backend:
 
 - **Web admin** (Inertia + React) — coordinateurs, dirigeants, référents qualité, RH
-- **Mobile** (React Native, offline-first) — field intervenants — served by `/api/v1/*` REST API *(not yet built)*
+- **Mobile** (React Native, offline-first) — field intervenants — served by `/api/v1/*` REST API ✅ **live since M4 W1**
 
 **Tenancy model:** Row-level isolation via `structure_id` on every domain table + `BelongsToStructure` global scope. Cross-tenant rows are invisible at query time (404, not 403, on cross-tenant access).
 
@@ -51,568 +51,517 @@ Each subscribing organisation is a **structure** (tenant). Two frontends share o
 
 ## 2. Phase 0 — Foundation (complete)
 
-| Commit | What was built |
-|--------|---------------|
-| `430e869` | `CLAUDE.md` locked rules · custom `qualite-domicile-backend` skill |
-| `4e5aacf` | `structures` table · `BelongsToStructure` trait · `StructureScope` (fails safe: `whereRaw('1 = 0')` when no tenant bound) · `TenantMiddleware` · `CrossTenantQueryService` · Pest helpers (`actingAsRole`, `actingAsStructure`, `twoStructures`) |
-| `65f34a8` | `users` table extended (`structure_id`, `type` enum) · Spatie `laravel-permission` with `team_foreign_key = structure_id` · `RoleSeeder` (6 roles, ~70 permissions) · `BasePolicy` · `BaseFormRequest` |
-| `e6bd1e7` | `TenantAwareAudit` model · `log_sensitive_read` middleware · Security headers (HSTS, CSP, X-Frame-Options…) · Rate limiters (api 60/min, login 5/min, two-factor 5/min, incident-declare 30/min, sync 20/min) |
-| `5bd2d77` | `/health/live` · `/health/ready` · Terraform scaffold for AWS Paris (ECS + RDS + ElastiCache + S3 + CloudFront + ALB) |
-| `3206e11` | All French code identifiers translated to English (French kept for domain acronyms: gir, qvct, pac, ssiad…) |
+`structures` + `users` extended · `BelongsToStructure` trait · `StructureScope` (fails safe to `1=0`) · `TenantResolver` middleware · `CrossTenantQueryService` · Spatie `laravel-permission` with `team_foreign_key = structure_id` · `RoleSeeder` (6 roles, ~70 permissions) · `BasePolicy` · `BaseFormRequest` · `TenantAwareAudit` · `log_sensitive_read` middleware · Security headers (HSTS, CSP, X-Frame-Options…) · Rate limiters (api 60/min, login 5/min, two-factor 5/min, incident-declare 30/min, sync 20/min, mobile-api 300/min) · `/health/live` + `/health/ready` · Terraform scaffold for AWS Paris · all identifiers Anglicised (French kept for domain acronyms)
 
 ---
 
-## 3. Phase 1 Month 1 — Core Entities (complete)
+## 3. Phase 1 — Progress Map
 
-| Commit | What was built |
-|--------|---------------|
-| `34c478a` | `beneficiaries` table · `Beneficiary` model (HasUuids, BelongsToStructure, Auditable, SoftDeletes, encrypted medical fields) · `BeneficiaryPolicy` · `BeneficiaryService` (create, update, anonymize) · `BeneficiaryResource` / `BeneficiaryDossierResource` · factory |
-| `a95c322` | `BeneficiaryController` (index, create, store, show, edit, update, destroy, dossier) · Inertia pages · Routes |
-| `96b0882` | `care_plans` table · `planned_tasks` table · `CarePlan` model · `PlannedTask` model (structure_id mirrored from parent via `booted()` listener) · `CarePlanPolicy` · `CarePlanService` (create, update, activate, archive, copyFromTemplate) · factories |
-| `a636f10` | `CarePlanController` (indexForBeneficiary, createForBeneficiary, storeForBeneficiary, show, edit, update, destroy, activate, archive, copy) · Inertia pages · Routes |
-| `e039944` | `intervenant_assignments` table (partial unique index on active assignments) · `IntervenantAssignment` model (NO SoftDeletes — history must persist) · `IntervenantAssignmentService` (assign, unassign) · User model extended with assignment relations |
-| `450300e` | `AttachIntervenantRequest` · `IntervenantAssignmentResource` · `IntervenantAssignmentPolicy` · `AssignmentController` (store, destroy) · Routes · BeneficiaryController show() enhanced with assignment data |
-| `f6e89e1` | `PlannedTaskService` (create, update, delete + archived guard) · `PlannedTaskPolicy` · `StorePlannedTaskRequest` / `UpdatePlannedTaskRequest` · `PlannedTaskController` · Routes · 19 Pest tests |
+| Month | Week | Scope | Status |
+|-------|------|-------|--------|
+| **M1** | W1–W4 | Beneficiaries · CarePlans · PlannedTasks · IntervenantAssignments | ✅ done |
+| **M2** | W1 | Intervention model + state machine | ✅ done |
+| **M2** | W2 | InterventionService · Controller · CheckIn/CheckOut/Cancel | ✅ done |
+| **M2** | W3 | InterventionPhotos + InterventionSignatures (S3 + signed URLs) | ✅ done |
+| **M2** | W4 | Reverb broadcast events + dashboard stats v1 | ✅ done |
+| **M3** | W1 | Incident model + GraviteClassifier + ARS notification jobs | ✅ done |
+| **M3** | W2 | IncidentService state machine + Controller + Form Requests | ✅ done |
+| **M3** | W3 | DashboardStatsService Redis tag-cache + Observers + Scramble | ✅ done |
+| **M4** | W1 | **Mobile REST API `/api/v1/*` + Sanctum + idempotency** | ✅ done |
+| **M4** | W2 | React Native skeleton (mobile team) | ⏳ next |
+| **M4** | W3 | Offline sync protocol hardening (`/api/v1/sync/batch`) | ⏳ |
+| **M4** | W4 | Pilot onboarding | ⏳ |
 
 ---
 
-## 4. All Working HTTP Endpoints
+## 4. All Working HTTP Endpoints (web)
 
-> All endpoints are inside the `auth + verified + tenant` middleware stack.  
-> Unauthenticated → redirect to `/login` · Cross-tenant access → `404` · Insufficient permission → `403`
+> Inside `auth + verified + tenant` middleware stack. Unauthenticated → redirect to `/login` · Cross-tenant access → `404` · Insufficient permission → `403`
 
 ### Health (unauthenticated)
-
 | Method | URL | Description |
 |--------|-----|-------------|
-| `GET` | `/health/live` | ALB liveness probe |
-| `GET` | `/health/ready` | Readiness probe (DB + Redis + S3) |
+| `GET` | `/up` | ALB liveness probe |
 
 ### Beneficiaries
-
-| Method | URL | Auth required | Description |
-|--------|-----|---------------|-------------|
-| `GET` | `/beneficiaries` | `beneficiaries.viewAny` | List (intervenants: only assigned) |
-| `GET` | `/beneficiaries/create` | `beneficiaries.create` | Create form |
-| `POST` | `/beneficiaries` | `beneficiaries.create` | Store |
-| `GET` | `/beneficiaries/{id}` | `BeneficiaryPolicy::view` | Show (no health data) |
-| `GET` | `/beneficiaries/{id}/edit` | `BeneficiaryPolicy::update` | Edit form |
-| `PUT` | `/beneficiaries/{id}` | `BeneficiaryPolicy::update` | Update |
-| `DELETE` | `/beneficiaries/{id}` | `BeneficiaryPolicy::delete` | Soft-delete |
-| `GET` | `/beneficiaries/{id}/dossier` | `BeneficiaryPolicy::view` + `log_sensitive_read` | Full encrypted health dossier (access-logged) |
+`GET POST /beneficiaries` · `GET /beneficiaries/create` · `GET PUT DELETE /beneficiaries/{id}` · `GET /beneficiaries/{id}/edit` · `GET /beneficiaries/{id}/dossier` (audit-logged)
 
 ### Care Plans
-
-| Method | URL | Auth required | Description |
-|--------|-----|---------------|-------------|
-| `GET` | `/beneficiaries/{id}/care-plans` | `CarePlanPolicy::viewAny` | List plans for beneficiary |
-| `GET` | `/beneficiaries/{id}/care-plans/create` | `CarePlanPolicy::create` | Create form |
-| `POST` | `/beneficiaries/{id}/care-plans` | `CarePlanPolicy::create` | Store |
-| `GET` | `/care-plans/{id}` | `CarePlanPolicy::view` | Show (tasks read-only) |
-| `GET` | `/care-plans/{id}/edit` | `CarePlanPolicy::update` | Edit form |
-| `PUT` | `/care-plans/{id}` | `CarePlanPolicy::update` | Update (blocked if archived) |
-| `DELETE` | `/care-plans/{id}` | `CarePlanPolicy::delete` (dirigeant) | Soft-delete |
-| `POST` | `/care-plans/{id}/activate` | `CarePlanPolicy::update` | Activate (auto-archives current active plan) |
-| `POST` | `/care-plans/{id}/archive` | `CarePlanPolicy::archive` | Archive (requires reason string) |
-| `POST` | `/care-plans/{id}/copy` | `CarePlanPolicy::create` | Copy as new draft template |
+`GET POST /beneficiaries/{id}/care-plans` · `GET /beneficiaries/{id}/care-plans/create` · `GET PUT DELETE /care-plans/{id}` · `GET /care-plans/{id}/edit` · `POST /care-plans/{id}/{activate|archive|copy}`
 
 ### Planned Tasks
-
-| Method | URL | Auth required | Description |
-|--------|-----|---------------|-------------|
-| `POST` | `/care-plans/{id}/tasks` | `PlannedTaskPolicy::create` | Add task (blocked if plan archived → 403) |
-| `PUT` | `/tasks/{id}` | `PlannedTaskPolicy::update` | Update task (blocked if plan archived → 403) |
-| `DELETE` | `/tasks/{id}` | `PlannedTaskPolicy::delete` | Soft-delete task (blocked if plan archived → 403) |
+`POST /care-plans/{id}/tasks` · `PUT DELETE /tasks/{id}` (all blocked if plan archived → 403)
 
 ### Intervenant Assignments
+`POST /beneficiaries/{id}/assignments` (409 if already active) · `DELETE /assignments/{id}` (409 if already closed)
 
-| Method | URL | Auth required | Description |
-|--------|-----|---------------|-------------|
-| `POST` | `/beneficiaries/{id}/assignments` | `BeneficiaryPolicy::update` | Assign intervenant (409 if already active) |
-| `DELETE` | `/assignments/{id}` | `IntervenantAssignmentPolicy::delete` | Unassign (sets `unassigned_at`; 409 if already closed) |
+### Interventions
+| Method | URL | Description |
+|--------|-----|-------------|
+| `GET` | `/interventions` | List (intervenants see own only) |
+| `GET POST` | `/interventions[/create]` · `/interventions/{id}[/edit]` | Standard CRUD |
+| `POST` | `/interventions/{id}/checkin` | Planned → in_progress (records GPS + actual_start_at) |
+| `POST` | `/interventions/{id}/checkout` | In-progress → completed |
+| `POST` | `/interventions/{id}/cancel` | Cancel with required reason |
+| `POST DELETE` | `/interventions/{id}/photos[/{photo}]` | S3 upload + signed-URL retrieval |
+| `POST` | `/interventions/{id}/signatures` | Base64 PNG → S3 |
 
----
+### Incidents
+| Method | URL | Description |
+|--------|-----|-------------|
+| `GET POST` | `/incidents` | List + declare (auto-classifies gravity) |
+| `GET PUT DELETE` | `/incidents/{id}` | Show / update analysis / soft-delete |
+| `POST` | `/incidents/{id}/{assign\|launch-analysis\|close}` | State machine transitions |
+| `POST` | `/incidents/{id}/actions` | Add corrective action |
 
-## 5. Model Design — Beneficiary
+### Dashboard
+| Method | URL | Description |
+|--------|-----|-------------|
+| `GET` | `/dashboard` | Cached intervention + incident stats per structure (Redis tag-flush on writes) |
 
-**File:** `app/Models/Beneficiary.php`  
-**Table:** `beneficiaries`
-
-### Purpose
-
-The care recipient — the person at the centre of every workflow. Contains the highest-sensitivity data in the system (RGPD Art 9 special category — health data).
-
-### Key Columns
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | UUID | `HasUuids` — no sequential IDs exposed; offline-sync safe |
-| `structure_id` | FK → structures | Tenant anchor |
-| `first_name`, `last_name` | string | |
-| `date_of_birth` | date | nullable |
-| `gender` | enum | male / female / other / not_specified |
-| `address`, `postal_code`, `city` | string | nullable |
-| `gir` | integer 1–6 | AGGIR autonomy scale; nullable |
-| `medical_notes` | text | **ENCRYPTED** (RGPD Art 9) |
-| `allergies` | text | **ENCRYPTED** |
-| `medical_history` | text | **ENCRYPTED** |
-| `current_treatments` | text | **ENCRYPTED** |
-| `status` | enum | active / exited / deceased / erased |
-| `is_erased` | boolean | RGPD Art 17 anonymisation flag |
-| `deleted_at` | datetime | SoftDeletes |
-
-### Encrypted Casts
-
-```php
-protected function casts(): array {
-    return [
-        'medical_notes'      => 'encrypted',
-        'allergies'          => 'encrypted',
-        'medical_history'    => 'encrypted',
-        'current_treatments' => 'encrypted',
-    ];
-}
-```
-
-Values are AES-256-CBC encrypted using `APP_KEY`. They are **never** included in `BeneficiaryResource` (public-facing API shape). They only appear in `BeneficiaryDossierResource`, which is gated behind the `log_sensitive_read` middleware (every access is audit-logged).
-
-### Relationships
-
-```
-Beneficiary
-  ├── BelongsTo    Structure
-  ├── HasMany      CarePlan            (all plans)
-  ├── HasOne       CarePlan (active)   (where status = 'active')
-  ├── HasMany      IntervenantAssignment
-  ├── BelongsToMany User (active)     (via IntervenantAssignment, wherePivotNull)
-  └── BelongsToMany User (all)        (full history)
-```
-
-### Access Control
-
-| Role | Access |
-|------|--------|
-| coordinateur | All beneficiaries in own structure |
-| dirigeant | All beneficiaries in own structure |
-| referent_qualite | All (read-only) |
-| rh | Basic profile only (no health data) |
-| **intervenant** | **ONLY beneficiaries they are actively assigned to** |
-
-The intervenant restriction is enforced in `BeneficiaryPolicy::view()`:
-
-```php
-if ($user->hasRole('intervenant')) {
-    return IntervenantAssignment::active()
-        ->where('user_id', $user->id)
-        ->where('beneficiary_id', $model->id)
-        ->exists();
-}
-```
-
-### RGPD Erasure (anonymize)
-
-`BeneficiaryService::anonymize()` replaces personal fields with anonymised values, sets `is_erased = true` and `status = 'erased'`. The record is **never deleted** — the legal audit trail must survive. This cannot be undone.
+### OpenAPI docs
+| `GET` | `/docs/api` | Auto-generated via Scramble (Bearer-secured), zero annotations needed |
 
 ---
 
-## 6. Model Design — CarePlan
+## 5. Mobile REST API — `/api/v1/*`
 
-**File:** `app/Models/CarePlan.php`  
-**Table:** `care_plans`
+**Auth:** Sanctum personal access tokens (Bearer header) · **Throttle:** 300 req/min per user (`mobile-api`) · **Idempotency:** `Idempotency-Key` header replays cached 2xx response for 24h on POST/PUT/PATCH/DELETE.
 
-### Purpose
+| Method | URL | Notes |
+|--------|-----|-------|
+| `POST` | `/api/v1/auth/login` | unauthenticated · throttle:login (5/min) |
+| `POST` | `/api/v1/auth/logout` | revokes current token |
+| `GET` | `/api/v1/auth/me` | returns UserResource |
+| `GET` | `/api/v1/interventions[?date=YYYY-MM-DD]` | paginated 50, intervenants see own only |
+| `GET` | `/api/v1/interventions/{id}` | nested beneficiary loaded |
+| `POST` | `/api/v1/interventions/{id}/check-in` | idempotent · accepts `{latitude, longitude}` |
+| `POST` | `/api/v1/interventions/{id}/check-out` | idempotent · accepts `{report_text}` |
+| `POST` | `/api/v1/interventions/{id}/cancel` | idempotent |
+| `POST DELETE` | `/api/v1/interventions/{id}/photos[/{photo}]` | idempotent · multipart upload |
+| `POST` | `/api/v1/interventions/{id}/signatures` | idempotent · base64 PNG |
+| `GET POST` | `/api/v1/incidents` | list + declare (auto-classified gravity + ARS dispatch) |
+| `GET` | `/api/v1/incidents/{id}` | |
+| `GET` | `/api/v1/beneficiaries` | paginated 100, ordered last/first name |
+| `GET` | `/api/v1/beneficiaries/{id}` | |
 
-The *plan d'accompagnement* (individualized care plan) is the legal document that governs how a beneficiary's care is delivered. Per CDC §4, every beneficiary must have a signed care plan. A beneficiary has **at most one active plan** at any time.
-
-### Key Columns
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | UUID | |
-| `structure_id` | FK → structures | Tenant anchor |
-| `beneficiary_id` | FK → beneficiaries | |
-| `title` | string | |
-| `objectives` | text | **ENCRYPTED** — may contain medical prognosis |
-| `start_date`, `end_date` | date | nullable |
-| `status` | enum | **draft → active → archived** |
-| `archived_at` | datetime | Set on archive |
-| `archived_reason` | text | Required on archive (HAS §4.3) |
-| `created_by` | FK → users | nullable |
-
-### Status Lifecycle
-
-```
-draft ──── activate ────► active ──── archive ────► archived
-  │                                                    │
-  └───────────────── soft-delete ─────────────────────┘
-                     (dirigeant only)
-```
-
-`CarePlanService::activate()` runs in a `DB::transaction` and atomically archives any currently active plan for the same beneficiary before activating the new one. Two plans can never be active simultaneously.
-
-### The Archive Freeze
-
-Once archived, a care plan is **immutable**. Enforced at two layers:
-
-1. **Policy** — `CarePlanPolicy::update()` returns `false` → 403
-2. **Policy** — `PlannedTaskPolicy::create/update/delete` returns `false` → 403
-3. **Service** — `PlannedTaskService::guardArchived()` throws `HttpException(409)`
-
-This satisfies the requirement that archived plans serve as permanent historical records of care delivered during a past period.
+All single-resource shows return the resource at the root (no `data` wrapper); collections paginate with the standard `{ data, links, meta }` envelope.
 
 ---
 
-## 7. Model Design — PlannedTask
+## 6. Model Design — Intervention
 
-**File:** `app/Models/PlannedTask.php`  
-**Table:** `planned_tasks`
+**File:** `app/Models/Intervention.php` · **Table:** `interventions`
 
-### Purpose
-
-One line item within a care plan: a specific care activity to perform on each visit (e.g. "Morning wash — 30 min, daily, mandatory"). The complete set of tasks forms the checklist field intervenants follow.
-
-### Key Columns
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | UUID | |
-| `structure_id` | FK → structures | **Auto-mirrored from parent CarePlan** |
-| `care_plan_id` | FK → care_plans | |
-| `title` | string max:200 | |
-| `frequency` | enum | daily / weekly / monthly / on_demand / custom |
-| `duration_minutes` | integer | nullable; 1–600 |
-| `task_order` | integer | Display sequence within the plan |
-| `mandatory` | boolean | default true |
-
-### structure_id Auto-Mirroring
-
-Tasks are never created independently — they always belong to a `CarePlan`. The `booted()` listener overwrites `structure_id` unconditionally:
-
-```php
-static::creating(function (PlannedTask $task): void {
-    if ($task->care_plan_id) {
-        $plan = CarePlan::find($task->care_plan_id);
-        if ($plan) {
-            $task->structure_id = $plan->structure_id;
-        }
-    }
-});
+### Lifecycle (state machine)
+```
+planned ──checkIn──► in_progress ──checkOut──► completed
+   │                                                │
+   └──cancel──► cancelled                           │
+   │                                                │
+   └──auto-miss──► missed                           │
+                                                    │
+                              isTerminal() ◄────────┘
 ```
 
-This means passing a different `structure_id` in your payload has no effect — the tenant identity always comes from the parent plan.
+`InterventionService` enforces transitions:
+- `checkIn()` requires `isPlanned()` else 409 (and policy denies → 403)
+- `checkOut()` requires `isInProgress()` else 409
+- `cancel()` rejects if `isTerminal()`
+- `update()` strips `structure_id` and `beneficiary_id` (no reparenting)
 
-### Auto Task Order
+Each transition fires `InterventionStatusChanged` (see §8).
 
-`PlannedTaskService::create()` calculates order automatically:
-
-```php
-$data['task_order'] ??= ($plan->tasks()->max('task_order') ?? -1) + 1;
-```
-
-- First task in a new plan → `task_order = 0`
-- Each subsequent task → `max + 1`
-- Pass an explicit `task_order` to insert at a specific position
-
-### Reparenting Prevention
-
-`PlannedTaskService::update()` strips two fields before saving:
-
-```php
-unset($data['care_plan_id'], $data['structure_id']);
-```
-
-A task cannot be moved to a different care plan or a different structure through the update endpoint. A future `moveTo()` service method would handle legitimate cross-plan moves with explicit validation.
-
-### TaskFrequency Enum
-
-| Value | French label |
-|-------|-------------|
-| `Daily` | Quotidien |
-| `Weekly` | Hebdomadaire |
-| `Monthly` | Mensuel |
-| `OnDemand` | À la demande |
-| `Custom` | Personnalisé |
+### Media submodels
+- `InterventionPhoto` (UUID PK · structure_id · disk · path · mime · size_bytes · uploaded_by) — **no SoftDeletes** (S3 delete must be physical)
+- `InterventionSignature` (UUID PK · structure_id · path · signer_type · signed_by · signed_at)
+- `InterventionMediaService` — MIME whitelist (jpeg/png/webp), 5MB cap, signed URLs (1h TTL), SSE-KMS at rest
 
 ---
 
-## 8. Model Design — IntervenantAssignment
+## 7. Model Design — Incident
 
-**File:** `app/Models/IntervenantAssignment.php`  
-**Table:** `intervenant_assignments`
+**File:** `app/Models/Incident.php` · **Table:** `incidents` · `Auditable` (description encrypted)
 
-### Purpose
-
-The assignment pivot formally records which intervenants serve which beneficiaries. This is a **time-stamped, audited, legally significant record** — not merely a many-to-many join.
-
-Per CDC §3 (confidentialité) and RGPD minimal-access principle: an intervenant may only access data of beneficiaries they are **formally and actively assigned to**. Without an active assignment row, an intervenant cannot see the beneficiary in their list, access their profile, view the care plan, or log an intervention.
-
-### Key Columns
-
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | UUID | |
-| `structure_id` | FK → structures | Tenant anchor |
-| `user_id` | FK → users | The intervenant |
-| `beneficiary_id` | FK → beneficiaries | |
-| `assigned_by_user_id` | FK → users | nullable — who performed the assignment |
-| `assigned_at` | datetime | When the assignment was opened |
-| `unassigned_at` | datetime | **nullable** — when it was closed |
-| `notes` | text | nullable — reason, instructions |
-
-> **No `deleted_at` column** — history must never be destroyed. Closing an assignment sets `unassigned_at`; the row remains permanently visible.
-
-### Partial Unique Index — No Duplicate Active Assignments
-
-```sql
-CREATE UNIQUE INDEX ON intervenant_assignments (user_id, beneficiary_id)
-WHERE (unassigned_at IS NULL);
+### Lifecycle
+```
+declare ──assign──► en_analyse ──launchAnalysis──► plan_actions ──close──► clos
 ```
 
-- Same intervenant cannot be assigned to the same beneficiary twice while both are active
-- After closing (setting `unassigned_at`), a new assignment for the same pair is allowed
-- The service also checks at the application layer (409 before the DB constraint fires)
+### GraviteClassifier (pure static)
+Per CDC §6.2 — runs at declaration time, zero DB:
 
-### Scopes
+| Trigger | Result |
+|---------|--------|
+| `avec_deces = true` | `critique` (overrides all) |
+| `MaltraitanceSuspecte` or `SituationDanger` | `critique` |
+| `avec_hospitalisation` or `ErreurMedicamenteuse` | `grave` |
+| `avec_blessure_physique` or `Agression` | `significatif` |
+| default | `mineur` |
 
-```php
-active()   → where('unassigned_at', null)
-inactive() → whereNotNull('unassigned_at')
-```
+### Async jobs
+- `NotifyResponsableSecteurJob` — fires on every declare; idempotent on `notifie_responsable_at`
+- `NotifyARSJob` — fires only when `gravite->requiresARSNotification()` (grave/critique); idempotent on `notifie_ars_at`
 
-Used in: `BeneficiaryPolicy::view()`, `BeneficiaryController::show()`, `User::assignedBeneficiaries()`
-
-### Assignment Workflow
-
-```
-Coordinateur opens beneficiary profile
-  └── GET /beneficiaries/{id}
-       └── Controller loads eligible intervenants (same structure, type=intervenant,
-           not already actively assigned to this beneficiary)
-
-Coordinateur submits form
-  └── POST /beneficiaries/{id}/assignments
-       ├── AttachIntervenantRequest validates intervenant_id
-       ├── authorize() checks BeneficiaryPolicy::update
-       └── IntervenantAssignmentService::assign()
-            ├── 422 if cross-structure
-            ├── 409 if already actively assigned
-            └── Creates row with assigned_at = now()
-
-Coordinateur ends assignment
-  └── DELETE /assignments/{id}
-       ├── IntervenantAssignmentPolicy::delete
-       └── IntervenantAssignmentService::unassign()
-            ├── 409 if already closed
-            └── Sets unassigned_at = now()
-            └── Intervenant immediately loses access to beneficiary data
-```
+`IncidentDeclared` event broadcasts on `private-structure.{id}` so dashboards refresh in realtime.
 
 ---
 
-## 9. Testing Strategy
+## 8. Realtime — Reverb broadcast
 
-**Framework:** Pest (NOT PHPUnit — overrides Laravel Boost default)  
+**Channel:** `private-structure.{structureId}` (auth gate in `routes/channels.php` checks `$user->structure_id === $structureId`)
+
+| Event | broadcastAs | Fired when |
+|-------|-------------|-----------|
+| `InterventionStatusChanged` | `intervention.status.changed` | check-in / check-out / cancel |
+| `IncidentDeclared` | `incident.declared` | any new incident |
+
+The mobile/web client subscribes to its tenant's private channel and updates UI without polling.
+
+---
+
+## 9. Dashboard caching strategy
+
+**Pattern:** Redis tag-based cache, 5-min TTL, observer-driven invalidation.
+
+```php
+Cache::tags(["structure:{$id}:dashboard"])->remember('stats', 300, fn() => …);
+```
+
+`InterventionObserver` and `IncidentObserver` flush the tenant's tag on `saved` / `deleted` / `restored`. Subsequent dashboard hits within the TTL serve from Redis with **0 DB queries** (verified by Pest test).
+
+`DashboardStatsService::stats($structureId)` returns:
+- `interventions_today`, `interventions_ce_mois`, `in_progress_count`, `completed/cancelled/missed_today`
+- `incidents_declares`, `incidents_en_cours`, `incidents_graves`, `incidents_ce_mois`
+
+`recentIncidents()` is intentionally **not cached** — always fresh.
+
+---
+
+## 10. Testing Strategy
+
+**Framework:** Pest (NOT PHPUnit — overrides Laravel Boost default)
 **Rule:** Every feature ships with both a feature test AND a unit test.
+**Current:** 263 tests · 738 assertions · all green
 
-**Current count:** 139 tests · 485 assertions · all green
+### Layout
+```
+tests/
+├── Feature/
+│   ├── Api/V1/                    ← M4 W1 (33 tests)
+│   │   ├── AuthApiTest.php        login, logout, /me, token rotation
+│   │   ├── InterventionApiTest.php CRUD, lifecycle, idempotency replay, cross-tenant
+│   │   ├── IncidentApiTest.php    declare, gravity auto-classify, leak test
+│   │   └── BeneficiaryApiTest.php list, show, leak test
+│   ├── Domain/Beneficiaries/*     M1
+│   ├── Domain/CarePlans/*         M1
+│   ├── Domain/PlannedTasks/*      M1
+│   ├── Domain/Assignments/*       M1
+│   ├── Domain/Interventions/      M2
+│   │   ├── InterventionHttpTest, InterventionMediaTest, InterventionEventsTest
+│   │   └── InterventionTenantIsolationTest
+│   ├── Domain/Incidents/          M3
+│   │   ├── IncidentHttpTest, IncidentTenantIsolationTest
+│   ├── Auditing, Rbac, Tenancy, Middleware, RateLimiting, HealthCheckTest
+└── Unit/Services/
+    ├── BeneficiaryServiceTest, CarePlanServiceTest
+    ├── IntervenantAssignmentServiceTest, PlannedTaskServiceTest
+    ├── InterventionServiceTest                M2
+    ├── GraviteClassifierTest, IncidentServiceTest    M3
+    └── DashboardStatsServiceTest              M3 (cache-hit test asserts 0 DB queries)
+```
 
-### Feature Tests (`tests/Feature/`)
-
-| File | Tests |
-|------|-------|
-| `Domain/Beneficiaries/BeneficiaryHttpTest.php` | HTTP happy paths, validation, role denials |
-| `Domain/Beneficiaries/BeneficiaryPolicyTest.php` | Policy rules |
-| `Domain/Beneficiaries/BeneficiaryTenantIsolationTest.php` | Cross-tenant leak (mandatory) |
-| `Domain/CarePlans/CarePlanHttpTest.php` | HTTP endpoints |
-| `Domain/CarePlans/CarePlanPolicyTest.php` | Policy rules |
-| `Domain/CarePlans/CarePlanTenantIsolationTest.php` | Cross-tenant leak |
-| `Domain/PlannedTasks/PlannedTaskHttpTest.php` | 11 tests: store/update/delete happy + denied + 404 + archive freeze |
-| `Domain/Assignments/AssignmentHttpTest.php` | 12 tests |
-| `Domain/Assignments/BeneficiaryPolicyAssignmentTest.php` | Assignment policy |
-| `Domain/Assignments/IntervenantAssignmentTenantIsolationTest.php` | Cross-tenant leak |
-| `Domain/Assignments/IntervenantRelationshipsTest.php` | Relationship queries |
-| `Auditing/TenantAwareAuditTest.php` | Audit entries stamped with structure_id |
-| `Rbac/RoleSeederTest.php` | All permissions seeded |
-| `Rbac/TenantScopedRolesTest.php` | Roles scoped per tenant |
-| `Tenancy/StructureScopeTest.php` | Global scope enforcement |
-| `Middleware/SecurityHeadersTest.php` | HSTS, CSP, etc. present |
-| `RateLimiting/LoginRateLimitTest.php` | Rate limits fire correctly |
-| `HealthCheckTest.php` | /health/live + /health/ready |
-
-### Unit Tests (`tests/Unit/Services/`)
-
-| File | Coverage |
-|------|----------|
-| `BeneficiaryServiceTest.php` | create, update, anonymize |
-| `CarePlanServiceTest.php` | create, update, activate, archive, copyFromTemplate |
-| `IntervenantAssignmentServiceTest.php` | assign, unassign, conflict detection |
-| `PlannedTaskServiceTest.php` | 8 tests: auto-order, explicit order, update, reparenting prevention, soft-delete, archive freeze (3 mutations) |
+### Helpers (`tests/Pest.php`)
+- `twoStructures()` — bootstraps two tenants + coordinateur users with roles assigned
+- `actingAsRole($role)` — session auth + binds tenant context + Spatie team_id
+- `actingAsApiRole($role)` — same but `actingAs($user, 'sanctum')` for `/api/v1/*` tests
 
 ---
 
-## 10. Security Architecture
-
-Every write operation flows through this chain — no shortcuts:
+## 11. Security Architecture
 
 ```
 Request
-  │
-  ├─ 1. Tenant scope  (BelongsToStructure global scope)
-  │      Foreign rows are invisible → 404, not 403
-  │
-  ├─ 2. Policy        (BasePolicy::before checks ownership; named methods check permission)
-  │      Insufficient role/permission → 403
-  │
-  ├─ 3. Form Request  (authorize() + validation rules)
-  │      Invalid input → 422 with error bag
-  │
-  ├─ 4. Service       (DB::transaction + business invariants)
-  │      Business rule violations → HttpException(409/422)
-  │
-  └─ 5. Audit log     (Auditable trait — automatic on every create/update/delete)
-         Logged: user_id, structure_id, old_values, new_values, IP, user agent
+  ├─ 1. Tenant scope     (BelongsToStructure global scope; foreign rows → 404)
+  ├─ 2. Policy           (BasePolicy::before checks ownership; 403 on denial)
+  ├─ 3. Form Request     (authorize() + validation; 422 with error bag)
+  ├─ 4. Service          (DB::transaction + business invariants; 409/422)
+  └─ 5. Audit log        (Auditable trait — automatic on create/update/delete)
 ```
 
 ### HDS Compliance Checklist
 
 | Item | Status |
 |------|--------|
-| Encrypted health data at rest | ✅ `'encrypted'` cast on all medical fields |
-| Audit trail on all health data reads/writes | ✅ Auditable + log_sensitive_read |
+| Encrypted health data at rest | ✅ `'encrypted'` cast on medical fields + incident description |
+| Audit trail on all health data reads/writes | ✅ Auditable + `log_sensitive_read` |
 | MFA (TOTP via Fortify) | ✅ Mandatory for coordinateurs+ |
 | Rate limiting on auth endpoints | ✅ 5/min login, 5/min two-factor |
 | Security headers (HSTS, CSP, X-Frame-Options) | ✅ |
-| Row-level multi-tenancy | ✅ Zero cross-tenant leakage (tested) |
-| Soft deletes (legal retention) | ✅ All domain models |
-| Partial unique index (no duplicate active assignments) | ✅ PostgreSQL constraint |
-| S3 SSE-KMS encryption | ⏳ Configured in env; not yet E2E tested |
-| PostgreSQL audit extension | ⏳ Phase 2 |
-| Data retention policy enforcement | ⏳ Phase 2 |
+| Row-level multi-tenancy | ✅ Zero cross-tenant leakage (tested across 13 leak tests) |
+| Soft deletes (legal retention) | ✅ All domain models except media |
+| S3 SSE-KMS encryption + signed URLs | ✅ M2 W3 |
+| Idempotency on mobile writes | ✅ M4 W1 — Redis 24h replay |
+| Realtime tenant-scoped broadcast | ✅ M2 W4 (private-structure.{id}) |
+| Reverb / WebSocket auth | ✅ channel guard in `routes/channels.php` |
 
 ---
 
-## 11. Manual API Testing Guide
+## 12. Manual Testing Guide — step-by-step
 
-Since the mobile REST API (`/api/v1/*`) is not yet built, all manual testing is via browser with a seeded database.
+Covers every feature shipped through Phase 1 M4 W1. Follow §12.3 for the web app and §12.4 for the mobile REST API. All steps assume the server is on `http://127.0.0.1:8000`.
 
-### Setup
-
-```bash
-# Reset database and seed
-php artisan migrate:fresh --seed
-
-# Start dev server
-composer run dev   # or: php artisan serve + npm run dev in separate terminals
-```
-
-### Seed Creates
-
-After `php artisan db:seed`:
-- 1 Structure: *Structure Test*
-- 1 coordinateur user: `coordinateur@test.fr` / `password`
-- 1 intervenant user: `intervenant@test.fr` / `password`
-- 2–3 sample beneficiaries (check `database/seeders/`)
-
-### Key Test Scenarios
-
-#### Beneficiary show + dossier
-
-```
-1. Log in as coordinateur@test.fr
-2. GET /beneficiaries  → should list all beneficiaries
-3. Click any beneficiary → GET /beneficiaries/{id} → read-only profile (no medical fields)
-4. Click "Dossier médical" → GET /beneficiaries/{id}/dossier → medical fields visible, access logged
-5. Log in as intervenant@test.fr
-6. GET /beneficiaries → should list ONLY assigned beneficiaries (empty if none assigned)
-```
-
-#### Care plan lifecycle
-
-```
-1. Log in as coordinateur
-2. GET /beneficiaries/{id}/care-plans  → list plans
-3. Create a plan → POST (form) → should land in draft status
-4. Open plan → POST /care-plans/{id}/activate → status changes to active
-5. POST /care-plans/{id}/archive (with reason) → status changes to archived
-6. Try PUT /care-plans/{id} on the archived plan → expect 403
-```
-
-#### Planned task — archive freeze
-
-```
-1. Ensure you have an archived plan (from above)
-2. Try POST /care-plans/{id}/tasks → expect 403
-3. Try PUT /tasks/{any-task-id} on a task in the archived plan → expect 403
-4. On a DRAFT plan, POST /care-plans/{id}/tasks with valid payload → expect redirect + task appears
-```
-
-#### Intervenant assignment
-
-```
-1. Log in as coordinateur
-2. GET /beneficiaries/{id} → see "Équipe d'intervention" section
-3. POST /beneficiaries/{id}/assignments with intervenant_id → intervenant assigned
-4. Log in as intervenant → beneficiary now appears in their list
-5. Log in as coordinateur → DELETE /assignments/{id} → unassigned
-6. Log in as intervenant → beneficiary no longer appears
-```
-
-#### Cross-tenant isolation test
-
-```
-1. Create two structures with different coordinateur accounts
-2. Log in as coordinateur A
-3. Note a beneficiary UUID from structure B (if you can get it)
-4. GET /beneficiaries/{structure-B-uuid} → expect 404 (not 403)
-```
-
-### Testing via cURL (session cookie required)
+### 12.1 One-time setup
 
 ```bash
-# Login first — get session cookie
-curl -c cookies.txt -X POST https://your-app/login \
-  -d "email=coordinateur@test.fr&password=password&_token=..."
-
-# Then hit any endpoint with the cookie
-curl -b cookies.txt https://your-app/beneficiaries
+docker compose up -d                           # Postgres 16 + Redis 7
+php artisan migrate:fresh                      # rebuilds the schema
+php artisan db:seed --class=DevSeeder          # 4 demo users + 5 bénéficiaires + 15 interventions
+composer run dev                               # php serve + vite + queue in one command
 ```
+
+If `composer run dev` is unavailable, run each in its own terminal: `php artisan serve`, `npm run dev`, `php artisan queue:work`.
+
+### 12.2 Demo accounts (password: `password`)
+
+| Email | Role | Use for |
+|-------|------|---------|
+| `dirigeant@demo.fr` | dirigeant | full access incl. deletions |
+| `coordinateur@demo.fr` | coordinateur | **main test account** — planning, CRUD |
+| `qualite@demo.fr` | referent_qualite | read + audit |
+| `intervenant@demo.fr` | intervenant | mobile API — sees own interventions only |
+
+MFA (TOTP) is **not enforced** in dev — you can log straight in with email + password.
+
+### 12.3 Web UI walkthrough (exercises M1–M3)
+
+Open `http://127.0.0.1:8000/login` in a browser.
+
+1. **Log in** as `coordinateur@demo.fr` / `password`.
+2. **Dashboard** (`/dashboard`) — intervention and incident stat tiles. Cached 5 min per tenant (Redis tag-flushed on writes).
+3. **Beneficiaries** (`/beneficiaries`)
+   - List shows the 5 seeded rows.
+   - **New** → create one (first name, last name, date of birth, address required).
+   - **Edit** / **Delete** (soft).
+   - Open `/beneficiaries/{id}/dossier` — the detailed view writes an audit entry via `log_sensitive_read`.
+4. **Care Plans** — from a beneficiary's page: **New Care Plan**.
+   - Fill the form, save (state = `draft`).
+   - **Activate** → `active`. **Archive** → `archived` (tasks become read-only). **Copy** → duplicates into a fresh `draft`.
+5. **Planned Tasks** — inline on the care-plan page.
+   - Add: title, frequency (daily / weekly / one-off), time-of-day.
+   - Edit / delete any task.
+   - Try adding a task to an **archived** plan → `403`.
+6. **Intervenant Assignments** — on a beneficiary page, assign `intervenant@demo.fr`.
+   - Assigning the same intervenant again while the previous is still active → `409`.
+   - Close the assignment, then try to close it again → `409`.
+7. **Interventions** (`/interventions`)
+   - List shows the 15 seeded rows.
+   - **New** → create one (beneficiary + intervenant + scheduled time).
+   - Click **Check-in** on a `planned` intervention → transitions to `in_progress`, records `actual_start_at` (and GPS if provided).
+   - **Upload photo** on the intervention page — JPG/PNG/WebP ≤ 5MB. Retrieval is via a 1-hour signed S3 URL.
+   - **Upload signature** — beneficiary signature canvas.
+   - **Check-out** → requires `report_text`; status becomes `completed`, fires `intervention.status.changed` on the tenant Reverb channel.
+   - On a different intervention, **Cancel** with a reason → `cancelled`.
+8. **Incidents** (`/incidents`)
+   - **Declare** → category, description, location, and at least one of: `avec_deces`, `avec_hospitalisation`, `avec_blessure_physique`.
+   - Gravity is **auto-classified** server-side by `GraviteClassifier` — no manual gravity field is exposed.
+   - If `grave` or `critique`, a `NotifyARSJob` is queued (run `php artisan queue:work` in another terminal to watch it fire).
+   - `IncidentDeclared` broadcasts on the tenant channel.
+9. **Incident lifecycle** — from the incident show page:
+   - **Assign to someone** → `en_analyse`
+   - **Launch Analysis** → `plan_actions`
+   - **Add Corrective Action**
+   - **Close** → `clos`
+10. **Dashboard refresh** — back to `/dashboard`; counts reflect everything above. Cache hit on reload serves with 0 DB queries (verified by the Pest test in `DashboardStatsServiceTest`).
+11. **Log out** from the top-right menu.
+
+### 12.4 Mobile REST API walkthrough — Postman (exercises M4 W1)
+
+> The mobile API lives at **`/api/v1/*`**. The Fortify `/login` URL is web-only and CSRF-protected — sending JSON there returns 419.
+
+**Step 1 — Log in** (no auth needed)
+
+```
+POST http://127.0.0.1:8000/api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "coordinateur@demo.fr", "password": "password" }
+```
+
+Response → `{ "token": "1|…", "user": {…} }`. Copy the token.
+
+In Postman: **Authorization tab → Bearer Token → paste**. All subsequent steps assume this header is set.
+
+**Step 2 — Current user**
+
+```
+GET /api/v1/auth/me
+```
+
+**Step 3 — List interventions** (paginated 50)
+
+```
+GET /api/v1/interventions
+GET /api/v1/interventions?date=2026-04-24       # filter by scheduled date
+```
+
+Log in as `intervenant@demo.fr` instead → only their own interventions are returned (policy check).
+
+**Step 4 — Show one** (includes beneficiary)
+
+```
+GET /api/v1/interventions/{id}
+```
+
+**Step 5 — Check-in**
+
+```
+POST /api/v1/interventions/{id}/check-in
+Content-Type: application/json
+
+{ "latitude": "48.8566", "longitude": "2.3522" }
+```
+
+Transitions `planned → in_progress`. Attempting check-in on a non-planned one → `403`.
+
+**Step 6 — Check-out**
+
+```
+POST /api/v1/interventions/{id}/check-out
+{ "report_text": "Visite bien déroulée." }
+```
+
+**Step 7 — Cancel** (terminal transitions are blocked — must not be already completed)
+
+```
+POST /api/v1/interventions/{id}/cancel
+{ "cancellation_reason": "Bénéficiaire hospitalisé." }
+```
+
+**Step 8 — Upload photo** (multipart/form-data)
+
+In Postman: **Body → form-data** → key `file` (type **File**) → choose a JPG/PNG/WebP ≤ 5MB.
+
+```
+POST /api/v1/interventions/{id}/photos
+```
+
+Response includes the photo record + 1-hour signed S3 URL.
+
+**Step 9 — Upload signature** (base64 PNG)
+
+```
+POST /api/v1/interventions/{id}/signatures
+{
+  "signer_type": "beneficiary",
+  "signature_base64": "iVBORw0KGgoAAAANSUhEUg..."
+}
+```
+
+**Step 10 — List incidents**
+
+```
+GET /api/v1/incidents
+```
+
+**Step 11 — Declare incident**
+
+```
+POST /api/v1/incidents
+Idempotency-Key: 550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+
+{
+  "occurred_at": "2026-04-24T08:30:00Z",
+  "categorie": "chute",
+  "description": "Le bénéficiaire est tombé dans la cuisine.",
+  "lieu": "Cuisine",
+  "avec_blessure_physique": true
+}
+```
+
+Response carries `gravite: "significatif"` (auto-classified). Re-declare with `"avec_deces": true` → `gravite: "critique"` and `requires_ars_notification: true`.
+
+**Step 12 — Show incident**
+
+```
+GET /api/v1/incidents/{id}
+```
+
+**Step 13 — List / show beneficiaries**
+
+```
+GET /api/v1/beneficiaries
+GET /api/v1/beneficiaries/{id}
+```
+
+**Step 14 — Idempotency replay** (retry-safe mobile writes)
+
+Pick any POST from above. Send it with `Idempotency-Key: <uuid>`. Send it again with the **same** key. The second response:
+
+- Has the identical status + body
+- Carries `X-Idempotent-Replayed: true`
+- Does not re-execute server-side (check Postgres — no new row)
+
+Cached for 24 h in Redis.
+
+**Step 15 — Log out**
+
+```
+POST /api/v1/auth/logout
+```
+
+Revokes the current token. Any subsequent `/api/v1/*` call → `401`.
+
+### 12.5 OpenAPI docs — Scramble
+
+Open `http://127.0.0.1:8000/docs/api`. Every `/api/v1/*` route is listed with request/response schemas. Click **Try It** on any endpoint — paste the Bearer token into the auth panel first. File uploads (photos) work better in Postman than in the Scramble UI.
+
+### 12.6 Architecture smoke tests (2 minutes, very satisfying)
+
+- **Cross-tenant isolation** — log in from Postman as tenant A, save an intervention ID; log in as tenant B (a different `structure_id`), `GET /api/v1/interventions/{that-id}` → `404`, **not** `403`. Foreign rows are invisible, not forbidden.
+- **Unauthenticated** — delete the Bearer header, hit any `/api/v1/*` → `401`.
+- **Login rate limit** — send `POST /api/v1/auth/login` with wrong credentials 6× in a minute → the 6th returns `429`.
+- **Policy vs service rejection** — log in as `intervenant@demo.fr`, try to `POST /api/v1/interventions/{foreign-id}/check-in` → `403` (policy). Try to check in one that's already `completed` → `403` (policy denies before the service can return 409 — a known quirk, documented in `InterventionApiTest`).
+
+### 12.7 Run the automated suite
+
+```bash
+php artisan test --compact                                  # 263 / 738 — full suite
+php artisan test --compact tests/Feature/Api/V1/            # mobile API only (33 tests)
+php artisan test --compact --filter='idempotency'           # single behaviour
+```
+
+### 12.8 Reset between sessions
+
+```bash
+php artisan migrate:fresh --seed                            # nukes + reseeds default
+php artisan migrate:fresh && php artisan db:seed --class=DevSeeder   # same but only the DevSeeder set
+```
+
+Redis cache entries are tenant-tagged and flush themselves as data changes — no manual Redis action needed.
 
 ---
 
-## 12. What's Next — Phase 1 Month 2+
+## 13. What's Next — Phase 1 M4 W2+
 
-### Month 2 — Interventions (M-TRACE)
+### M4 W2 — React Native skeleton
+Mobile team scaffolds the Expo app, wires Sanctum login flow, configures SQLite + WatermelonDB for offline storage, builds the intervention list and check-in screens. Backend stays stable through this work — no API changes expected.
 
-The central tracking table. An intervention is a visit record: who visited, when, what was done.
+### M4 W3 — Offline sync hardening
+- `POST /api/v1/sync/batch` — accepts a JSON array of operations (check-in, check-out, photo upload, incident declare) collected while offline
+- Each operation carries its own `Idempotency-Key` so partial replays are safe
+- Conflict resolution: last-write-wins on intervention status, append-only on incidents/photos
+- `throttle:sync` (20 req/min) protects against runaway clients
 
-**Planned columns:** `intervenant_id`, `beneficiary_id`, `care_plan_id`, `planned_date`, `actual_start/end`, GPS checkin coordinates, `status` (planned / in_progress / completed / cancelled / missed), `visit_mode` (mobile / web), `rapport_texte` (encrypted)
-
-This module ties the care plan to actual delivery. A `PlannedTask` on the care plan maps to a task execution on the intervention record.
-
-### Month 2 — Incidents / Événements Indésirables (M-INC)
-
-Adverse events during care delivery. Per HAS §4.2, all incidents must be recorded within 24h and reviewed within 72h.
-
-**Planned:** Severity enum (minor / moderate / serious / critical) · categorisation · status workflow (declared → under_review → resolved / escalated) · mandatory escalation to ARS for serious events · linked to beneficiary + intervenant + care plan
-
-The existing `IncidentController` is a stub and will be fully replaced.
-
-### Month 3 — QVCT Baromètre
-
-Anonymous working-conditions survey for intervenants. Min 2 per year (CDC §6.1). Responses anonymised at storage time — the link between respondent and response is never stored.
-
-### Month 3 — Plans d'Amélioration Continue (PAC)
-
-Quality improvement plans generated from audit results and incident analysis. Each action has an owner, deadline, and status. Links to HAS referential quality criteria.
-
-### Month 4 — Mobile REST API (`/api/v1/*`)
-
-Sanctum personal access tokens · same Services as web controllers · offline SQLite sync · GPS checkin/checkout · binary upload for incident photos · conflict resolution strategy
+### M4 W4 — Pilot onboarding
+- 1 pilot SAAD structure goes live read-only first, then writes
+- Real GPS check-in/out captured
+- Reverb dashboard monitored for production behaviour
+- Sentry breadcrumbs collected for any silent failures
 
 ### Phase 2 (Months 5–8) — Pro offering
-
-Complete HAS audit module (~150 criteria) · Formation & habilitation tracking · Document management (signed care plan PDFs) · Advanced reporting dashboard · Automated notifications
+HAS audit module (~150 criteria) · Formation & habilitation tracking · Document management (signed care plan PDFs) · Advanced reporting dashboard · Automated notifications
 
 ### Phase 3 (Months 9–14) — Premium / AI
-
-AI-assisted care plan suggestions · Predictive scheduling optimisation · Voice-to-structured-form incident reporting · Longitudinal QVCT trend analysis
+AI-assisted care plan suggestions · Predictive scheduling · Voice-to-structured-form incident reporting · Longitudinal QVCT trend analysis

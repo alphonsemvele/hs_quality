@@ -114,6 +114,7 @@ class RoleSeeder extends Seeder
         'audit_logs.view.structure',
         'rgpd.erasure.request',
         'rgpd.erasure.execute',
+
     ];
 
     /** @var array<string, list<string>> */
