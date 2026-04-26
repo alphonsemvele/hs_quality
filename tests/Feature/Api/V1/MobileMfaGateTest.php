@@ -19,6 +19,11 @@ use Spatie\Permission\PermissionRegistrar;
  * a sensitive role can NOT mint a Sanctum token without TOTP.
  */
 beforeEach(function (): void {
+    // phpunit.xml sets REQUIRE_MFA_ENROLLMENT=false globally so other test
+    // suites can skip enrollment. This file tests the MFA gate itself, so
+    // opt back in for every test here.
+    config(['auth.require_mfa_enrollment' => true]);
+
     $this->seed(RoleSeeder::class);
 });
 
