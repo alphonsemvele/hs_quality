@@ -80,6 +80,8 @@ return [
 
     'mobile_api_rate_limit_per_minute' => (int) env('MOBILE_API_RATE_LIMIT_PER_MINUTE', 300),
 
+    'sync_rate_limit_per_minute' => (int) env('SYNC_RATE_LIMIT_PER_MINUTE', 20),
+
     /*
     |--------------------------------------------------------------------------
     | Token Prefix

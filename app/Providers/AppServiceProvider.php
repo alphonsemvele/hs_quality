@@ -162,7 +162,7 @@ class AppServiceProvider extends ServiceProvider
         // Mobile sync — bulk endpoint, tuned for offline-first clients that
         // queue many operations and flush them on reconnect.
         RateLimiter::for('sync', function (Request $request) {
-            return Limit::perMinute(20)->by(
+            return Limit::perMinute(config('sanctum.sync_rate_limit_per_minute', 20))->by(
                 $request->user()?->getKey() ?: $request->ip(),
             );
         });
