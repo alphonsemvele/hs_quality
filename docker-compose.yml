@@ -70,6 +70,91 @@ services:
       echo 'MinIO bucket ready: qualite-domicile'
       "
 
+  # ── Load-test stack (option 3) ─────────────────────────────────────────────
+  # FrankenPHP — single container with Caddy + PHP 8.3 + every required
+  # extension (gd, intl, pdo_pgsql, redis, opcache, …) baked in. Used to
+  # validate the k6 SLAs (Phase 1 acceptance, IMPLEMENTATION_PLAN.txt:362).
+  # NOT for everyday dev — use `php artisan serve` for that. Bring up
+  # only when running load tests:
+  #   docker compose up -d app
+  #
+  # Binds to host port 8080 (avoids conflict with artisan serve on 8000).
+  # Point k6 at http://host.docker.internal:8080 (or http://localhost:8080
+  # from the host).
+  #
+  # Why FrankenPHP and not php-fpm + nginx: building php-fpm with all the
+  # extensions requires apt-get update which fails inside Docker on this
+  # host's network setup (DNS issue with the default bridge). FrankenPHP
+  # ships pre-built — just pull and run. It's also production-realistic:
+  # uses Caddy (HTTP/2, HTTP/3, automatic TLS) with a worker mode for
+  # high-throughput Laravel apps.
+  app:
+    # Pre-built image from serversideup/php — bundles nginx + php-fpm + the
+    # required extensions (pdo_pgsql, redis, opcache, zip, pcntl). gd is
+    # NOT included; not needed for the load-test scenarios (no photo
+    # uploads in dashboard/lifecycle/sync). Build-from-scratch is blocked
+    # by Docker Desktop's build-time DNS issue on this host, hence the
+    # pre-built image.
+    image: serversideup/php:8.3-fpm-nginx
+    container_name: qualite-domicile-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/var/www/html
+    environment:
+      # serversideup/php expects the app at /var/www/html/public.
+      # Tuned higher than prod-default for load testing (default 30 saturates
+      # at the 30th concurrent VU). 80 children matches a reasonable
+      # 4-core / 8GB prod tier.
+      PHP_OPCACHE_ENABLE: "1"
+      PHP_OPCACHE_REVALIDATE_FREQ: "0"
+      # pm=dynamic: workers stay alive → OPcache stays warm between requests.
+      # ondemand (the image default) kills workers after 10s idle and forces a
+      # cold Laravel boot (500+ files compiled) on every new spawn — that adds
+      # 1-3s latency under sustained concurrency.
+      PHP_FPM_PM_CONTROL: "dynamic"
+      PHP_FPM_PM_MAX_CHILDREN: "40"
+      PHP_FPM_PM_START_SERVERS: "10"
+      PHP_FPM_PM_MIN_SPARE_SERVERS: "5"
+      PHP_FPM_PM_MAX_SPARE_SERVERS: "20"
+      # Container-internal env — Compose service names resolve to right IPs.
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: qualite_domicile
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      BROADCAST_CONNECTION: 'null'
+      MAIL_MAILER: log
+      FILESYSTEM_DISK: local
+      AWS_ENDPOINT: http://minio:9000
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      # Load-test stack: turn MFA enforcement OFF so seeded coord/dirigeant
+      # accounts can log in without going through TOTP enrollment. This is
+      # ONLY for the load-test container — production keeps it ON.
+      REQUIRE_MFA_ENROLLMENT: "false"
+      # Lift the per-user mobile-api throttle so k6 VUs sharing one token
+      # don't all 429 ~6 seconds in. 100k/min is way above any realistic
+      # single-user pattern; we just want the limiter out of the way for
+      # throughput measurements. Production keeps the 300/min default.
+      MOBILE_API_RATE_LIMIT_PER_MINUTE: "100000"
+      # Disable last_used_at writes: 50 VUs share one token → 50 concurrent
+      # writes to the same personal_access_tokens row → row-level lock
+      # serialisation → every request waits. Production keeps this ON.
+      SANCTUM_TRACK_LAST_USED: "false"
+
 volumes:
   postgres-data:
   redis-data:

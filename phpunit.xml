@@ -31,5 +31,14 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Wave 1 / C3 — keep MFA enforcement OFF in tests by default.
+             The MFA enforcement test specifically opts in via config(). -->
+        <env name="REQUIRE_MFA_ENROLLMENT" value="false"/>
+        <!-- Block C / #51 — turn on owen-it auto-instrumentation in console
+             mode (php artisan test runs in console). MUST be set via env so
+             it's true BEFORE any model class boots; setting via config()
+             mid-test is too late because bootAuditable runs once per
+             process at first class load. -->
+        <env name="AUDITING_CONSOLE" value="true"/>
     </php>
 </phpunit>
