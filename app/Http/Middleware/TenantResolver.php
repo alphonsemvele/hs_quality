@@ -29,6 +29,15 @@ class TenantResolver
             return $next($request);
         }
 
+        // Platform-operator accounts (is_platform_admin) deliberately have no
+        // tenant. They access /admin/* routes guarded by EnsureSuperAdmin,
+        // which is responsible for gating those endpoints. Don't abort here —
+        // and don't bind a tenant context, so any accidental tenant-scoped
+        // query will return zero rows rather than leak across structures.
+        if ($user->is_platform_admin === true) {
+            return $next($request);
+        }
+
         if (empty($user->structure_id)) {
             abort(403, 'User is not associated with any structure.');
         }

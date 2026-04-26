@@ -144,7 +144,12 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Public registration intentionally OFF — CDC §3 mandates that all
+        // users be provisioned by their structure's dirigeant. Self-registered
+        // accounts would land orphaned (no structure_id, no role) and could
+        // be abused to mint Sanctum tokens or pollute the users table.
+        // New tenant onboarding goes through `php artisan tenant:provision`
+        // (admin-driven); user invites go through the admin UI.
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

@@ -114,4 +114,21 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mandatory MFA Enrollment (Wave 1 / C3)
+    |--------------------------------------------------------------------------
+    |
+    | When true, the RequireMfa middleware blocks privileged personas
+    | (dirigeant, coordinateur, référent qualité, RH) from accessing the
+    | platform until they have confirmed TOTP enrollment. Required by CDC §5
+    | for HDS / RGPD compliance. SMS / email OTP are explicitly forbidden.
+    |
+    | Default: ON. Override only in environments where the demo/dev workflow
+    | needs to bypass enrollment. Production MUST keep it on.
+    |
+    */
+
+    'require_mfa_enrollment' => env('REQUIRE_MFA_ENROLLMENT', true),
+
 ];

@@ -6,6 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+# Block A / #59 — CI hardening:
+#   - Pin PHP 8.3 (was 8.2; project requires 8.3+ now)
+#   - Drop continue-on-error so static analysis + TS + lint actually fail builds
+#   - Add `php-gd` extension (Wave 1 / H8 — required for photo upload)
+#   - Add `npm audit --audit-level=high` parallel to `composer audit`
+#   - Add load-test smoke step (k6 smoke.js — fast sanity check)
+
+env:
+  PHP_VERSION: '8.3'
+  PHP_EXTENSIONS: bcmath, curl, dom, fileinfo, gd, intl, mbstring, pdo, pdo_pgsql, pgsql, redis, zip
+
 jobs:
   lint-and-analyze:
     name: Lint + static analysis
@@ -17,15 +28,16 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
           tools: composer:v2
-          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, pdo, pdo_pgsql, pgsql, redis, zip
+          extensions: ${{ env.PHP_EXTENSIONS }}
 
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
           path: vendor
-          key: composer-v1
+          key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ env.PHP_VERSION }}-
 
       - name: Install composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
@@ -35,7 +47,6 @@ jobs:
 
       - name: Run Larastan (static analysis)
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
-        continue-on-error: true
 
   security-scan:
     name: Dependency security scan
@@ -47,7 +58,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
           tools: composer:v2
 
       - name: Install composer dependencies
@@ -55,6 +66,17 @@ jobs:
 
       - name: composer audit
         run: composer audit --no-interaction
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: npm audit (high+)
+        # Block A / #59 — match composer audit's strictness on the JS side.
+        # Production dependencies only; dev deps are linters/test tools.
+        run: npm audit --audit-level=high --omit=dev
 
   test:
     name: Pest tests
@@ -83,9 +105,9 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
           tools: composer:v2
-          extensions: bcmath, curl, dom, fileinfo, intl, mbstring, pdo, pdo_pgsql, pgsql, redis, sqlite3, pdo_sqlite, zip
+          extensions: ${{ env.PHP_EXTENSIONS }}, sqlite3, pdo_sqlite
           coverage: pcov
 
       - name: Install composer dependencies
@@ -134,11 +156,9 @@ jobs:
 
       - name: TypeScript type check
         run: npm run types
-        continue-on-error: true
 
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Build assets
         run: npm run build

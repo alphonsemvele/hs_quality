@@ -37,7 +37,11 @@ class SecurityHeaders
 
         // Content-Security-Policy — conservative baseline; loosen only when
         // a specific feature needs it and document the reason.
-        if (! $response->headers->has('Content-Security-Policy')) {
+        // Scramble's docs UI loads Stoplight Elements from unpkg.com and is
+        // already restricted to the local env by RestrictedDocsAccess, so the
+        // strict CSP is skipped for docs/* to keep the dev UI usable without
+        // widening the production policy.
+        if (! $response->headers->has('Content-Security-Policy') && ! $request->is('docs', 'docs/*')) {
             $response->headers->set('Content-Security-Policy', $this->buildCsp());
         }
 
@@ -52,9 +56,17 @@ class SecurityHeaders
         $reverbScheme = config('reverb.servers.reverb.options.tls', false) === false ? 'ws' : 'wss';
         $reverbOrigin = "{$reverbScheme}://{$reverbHost}:{$reverbPort}";
 
+        // Wave 1 / M4 — the dynamic-script CSP keyword defeats most XSS
+        // protection CSP would otherwise give. React 19's production build
+        // does not require it; only the dev runtime (vite/HMR with React
+        // Refresh) does. Gate it behind non-production environments.
+        $scriptSrc = app()->environment('production', 'staging')
+            ? "script-src 'self'"
+            : "script-src 'self' 'unsafe-eval'";
+
         $parts = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-eval'",   // 'unsafe-eval' needed by some React dev tools; review in prod
+            $scriptSrc,
             "style-src 'self' 'unsafe-inline'",   // Tailwind + Inertia inline styles; pin when feasible
             "img-src 'self' data: blob:",
             "font-src 'self' data:",

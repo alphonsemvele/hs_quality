@@ -1,0 +1,49 @@
+# Lefthook git hooks (Block A / #58).
+#
+# Install once per clone:
+#   npm install --save-dev lefthook
+#   npx lefthook install
+#
+# After installation, every `git commit` and `git push` runs the relevant
+# checks below. To run a stage manually:
+#   npx lefthook run pre-commit
+#   npx lefthook run pre-push
+#
+# Bypass (use VERY sparingly, e.g. urgent hotfix WIP commits):
+#   git commit --no-verify
+
+pre-commit:
+  parallel: true
+  commands:
+    pint:
+      glob: "*.php"
+      run: vendor/bin/pint {staged_files}
+      stage_fixed: true
+    php-syntax:
+      glob: "*.php"
+      run: |
+        for f in {staged_files}; do
+          php -l "$f" >/dev/null || exit 1
+        done
+    no-named-individuals:
+      # Wave 1 / C1 — guard against re-introducing hardcoded named-individual
+      # demo data into controllers / pages / seeders. Mirrors the assertion
+      # in tests/Feature/NoLeakyDemoDataTest.php so it fires before the test
+      # suite even runs.
+      glob: "*.{php,tsx,ts}"
+      run: |
+        if grep -lE "Sophie Ateba|Bruno Ngono|Marie Essomba|Pascaline Eko|Jean Koffi|Amina Fofana|Clément Touré|Paul Biya Jr|Fatima Ndiaye|Pierre Mbarga" {staged_files} 2>/dev/null; then
+          echo "ERROR: hardcoded demo individual detected. See Wave 1 / C1."
+          exit 1
+        fi
+
+pre-push:
+  parallel: false
+  commands:
+    composer-audit:
+      run: composer audit --no-interaction
+    pest:
+      # Run the full suite on push so a broken commit can't make it to
+      # the remote. ~7 min on a dev workstation; skip via --no-verify
+      # only for emergencies.
+      run: php artisan test --compact

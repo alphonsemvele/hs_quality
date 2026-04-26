@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
+    use HasApiTokens;
     use HasFactory;
     use HasRoles;
     use Notifiable;
@@ -34,6 +36,7 @@ class User extends Authenticatable
         'specialty',
         'hired_at',
         'status',
+        'is_platform_admin',
     ];
 
     protected $hidden = [
@@ -53,6 +56,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'erased_at' => 'datetime',
+            'is_platform_admin' => 'boolean',
         ];
     }
 

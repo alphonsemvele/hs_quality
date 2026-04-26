@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\InertiaUserResource;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -42,8 +43,18 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
+            // Wave 1 / M1 — narrow shape via InertiaUserResource. Never share
+            // the full Eloquent model here; pages that need more fields
+            // should fetch them via a page-specific prop.
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user()
+                    ? (new InertiaUserResource($request->user()))->toArray($request)
+                    : null,
+            ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'password_reset_url' => fn () => $request->session()->get('password_reset_url'),
             ],
         ];
     }

@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\HandleIdempotency;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\LogSensitiveRead;
+use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TenantResolver;
+use App\Http\Middleware\ThrottlePasswordEndpoints;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant' => TenantResolver::class,
             'log_sensitive_read' => LogSensitiveRead::class,
+            'idempotent' => HandleIdempotency::class,
+            'super_admin' => EnsureSuperAdmin::class,
         ]);
 
         // Security headers apply to every response (web, api, health check).
@@ -29,13 +35,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(SecurityHeaders::class);
 
         $middleware->web(append: [
+            ThrottlePasswordEndpoints::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             TenantResolver::class,
+            RequireMfa::class,
         ]);
 
         $middleware->api(append: [
             TenantResolver::class,
+            RequireMfa::class,
         ]);
 
         // Rate limiters configured in App\Providers\AppServiceProvider; applied
