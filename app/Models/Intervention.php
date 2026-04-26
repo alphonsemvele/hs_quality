@@ -56,6 +56,35 @@ class Intervention extends Model implements AuditableContract
         ];
     }
 
+    /**
+     * Whitelist of fields that ARE audited. Encrypted health-data fields
+     * (report_text, report_voice_transcript) are deliberately omitted —
+     * including them would (a) bloat the audit table with ciphertext,
+     * (b) leave it unreadable after an APP_KEY rotation, (c) duplicate
+     * the encrypted source of truth.
+     *
+     * Wave 1 / C4. We use auditInclude (whitelist) rather than auditExclude
+     * (blacklist) for parity with Beneficiary and to fail-closed: a new
+     * column is silently NOT audited until it's explicitly added here,
+     * which prevents accidental PHI leakage into the audit table.
+     */
+    protected $auditInclude = [
+        'structure_id',
+        'intervenant_id',
+        'beneficiary_id',
+        'care_plan_id',
+        'planned_date',
+        'planned_start_time',
+        'planned_end_time',
+        'actual_start_at',
+        'actual_end_at',
+        'checkin_latitude',
+        'checkin_longitude',
+        'status',
+        'visit_mode',
+        'cancellation_reason',
+    ];
+
     // ── Relationships ──────────────────────────────────────────────────────
 
     public function structure(): BelongsTo
@@ -81,6 +110,16 @@ class Intervention extends Model implements AuditableContract
     public function completedTasks(): HasMany
     {
         return $this->hasMany(InterventionCompletedTask::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(InterventionPhoto::class);
+    }
+
+    public function signatures(): HasMany
+    {
+        return $this->hasMany(InterventionSignature::class);
     }
 
     // ── State helpers ──────────────────────────────────────────────────────

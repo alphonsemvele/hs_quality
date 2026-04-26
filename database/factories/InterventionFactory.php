@@ -19,6 +19,7 @@ class InterventionFactory extends Factory
     public function definition(): array
     {
         return [
+            'intervenant_id' => User::factory(),
             'planned_date' => fake()->dateTimeBetween('-7 days', '+7 days')->format('Y-m-d'),
             'planned_start_time' => fake()->time('H:i:s'),
             'planned_end_time' => null,
