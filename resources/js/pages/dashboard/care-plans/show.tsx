@@ -1,164 +1,212 @@
-import { Link, router } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import {
+    Badge,
+    Button,
+    Card,
+    CardBody,
+    CardHeader,
+    CarePlanStatusBadge,
+    EmptyState,
+    PageHeader,
+} from '@/components/ui';
+import { Form, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
 
-interface Beneficiary {
-    id: string;
-    full_name: string;
-}
-
-interface Task {
-    id: string;
+interface PlannedTask {
+    id: number;
     title: string;
     description: string | null;
+    frequency: string;
     frequency_label: string;
     duration_minutes: number | null;
     task_order: number;
     mandatory: boolean;
 }
 
-interface CarePlan {
+interface Plan {
     id: string;
     title: string;
     objectives: string | null;
     start_date: string | null;
     end_date: string | null;
-    status: string;
+    status: 'draft' | 'active' | 'archived';
     status_label: string;
     is_active: boolean;
     is_archived: boolean;
     archived_at: string | null;
     archived_reason: string | null;
-    tasks: { data: Task[] } | Task[];
+    created_by?: { id: number; name: string };
+    tasks?: PlannedTask[] | { data: PlannedTask[] };
 }
 
-interface Props {
-    plan: { data: CarePlan };
-    beneficiary: { data: Beneficiary };
+interface Beneficiary {
+    id: string;
+    full_name: string;
 }
 
-const getTasksArray = (tasks: CarePlan['tasks']): Task[] => {
-    if (Array.isArray(tasks)) return tasks;
-    if (tasks && 'data' in tasks && Array.isArray(tasks.data)) return tasks.data;
-    return [];
-};
+function unwrap<T>(value: { data: T } | T): T {
+    if (value && typeof value === 'object' && 'data' in (value as object)) {
+        return (value as { data: T }).data;
+    }
+    return value as T;
+}
 
-export default function CarePlanShow({ plan: { data: plan }, beneficiary: { data: b } }: Props) {
-    const [archiveOpen, setArchiveOpen] = useState(false);
-    const [archiveReason, setArchiveReason] = useState('');
-    const tasks = getTasksArray(plan.tasks);
+export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan } | Plan; beneficiary: { data: Beneficiary } | Beneficiary }) {
+    const p = unwrap<Plan>(plan);
+    const b = unwrap<Beneficiary>(beneficiary);
+    const tasks = unwrap<PlannedTask[]>(p.tasks ?? []) ?? [];
+
+    const [showArchive, setShowArchive] = useState(false);
 
     const activate = () => {
-        if (!confirm('Activer ce plan ? Tout plan actuellement actif pour ce bénéficiaire sera automatiquement archivé.')) return;
-        router.post(`/care-plans/${plan.id}/activate`);
-    };
-
-    const submitArchive = (e: FormEvent) => {
-        e.preventDefault();
-        router.post(`/care-plans/${plan.id}/archive`, { reason: archiveReason });
+        if (confirm("Activer ce plan ? Tout plan déjà actif pour ce bénéficiaire sera automatiquement archivé.")) {
+            router.post(`/care-plans/${p.id}/activate`);
+        }
     };
 
     return (
-        <DashboardLayout title={plan.title} subtitle={`Plan d'accompagnement — ${b.full_name}`}>
-
-            <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'center' }}>
-                <Link href={`/beneficiaries/${b.id}/care-plans`} style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>
-                    ← Tous les plans
-                </Link>
-                <span style={{ flex: 1 }} />
-                {!plan.is_archived && (
+        <DashboardLayout title={p.title} subtitle="">
+            <PageHeader
+                title={p.title}
+                subtitle={`Bénéficiaire : ${b.full_name} · ${p.start_date ?? '?'} → ${p.end_date ?? 'sans terme'}`}
+                breadcrumb={[
+                    { label: 'Tableau de bord', href: '/dashboard' },
+                    { label: 'Bénéficiaires', href: '/beneficiaries' },
+                    { label: b.full_name, href: `/beneficiaries/${b.id}` },
+                    { label: 'Plans', href: `/beneficiaries/${b.id}/care-plans` },
+                    { label: p.title },
+                ]}
+                actions={
                     <>
-                        <Link href={`/care-plans/${plan.id}/edit`} style={{
-                            background: '#F1F5F9', color: 'var(--navy)',
-                            fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 8, textDecoration: 'none',
-                        }}>Modifier</Link>
-                        {!plan.is_active && (
-                            <button onClick={activate} style={{
-                                background: '#15803D', color: 'white',
-                                fontSize: 12, fontWeight: 700, padding: '8px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                            }}>Activer</button>
+                        <CarePlanStatusBadge statut={p.status} />
+                        {p.status === 'draft' && (
+                            <Button variant="secondary" onClick={activate}>
+                                Activer
+                            </Button>
                         )}
-                        <button onClick={() => setArchiveOpen(o => !o)} style={{
-                            background: '#FEF3C7', color: '#92400E',
-                            fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        }}>Archiver</button>
+                        {!p.is_archived && (
+                            <Button variant="secondary" onClick={() => setShowArchive(!showArchive)}>
+                                {showArchive ? 'Annuler' : 'Archiver'}
+                            </Button>
+                        )}
+                        {!p.is_archived && (
+                            <Link href={`/care-plans/${p.id}/edit`}>
+                                <Button>Modifier</Button>
+                            </Link>
+                        )}
                     </>
-                )}
-            </div>
+                }
+            />
 
-            {archiveOpen && (
-                <form onSubmit={submitArchive} style={{ background: '#FEF3C7', borderRadius: 10, padding: 16, marginBottom: 14 }}>
-                    <label style={{ fontSize: 12, color: '#92400E', fontWeight: 600, display: 'block', marginBottom: 6 }}>
-                        Raison de l'archivage
-                    </label>
-                    <input
-                        autoFocus required
-                        value={archiveReason} onChange={e => setArchiveReason(e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #FCD34D', fontSize: 13 }}
-                    />
-                    <button type="submit" style={{
-                        marginTop: 10, background: '#92400E', color: 'white',
-                        fontSize: 12, fontWeight: 700, padding: '8px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                    }}>Confirmer</button>
-                </form>
+            {showArchive && (
+                <div className="mb-5 rounded-2xl border border-warning-200 bg-warning-50 p-4">
+                    <Form action={`/care-plans/${p.id}/archive`} method="post">
+                        {({ processing }) => (
+                            <div className="space-y-3">
+                                <label className="block">
+                                    <span className="text-xs font-semibold uppercase tracking-wider text-warning-700">
+                                        Motif d'archivage (optionnel)
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="reason"
+                                        maxLength={500}
+                                        className="mt-1.5 h-10 w-full rounded-lg border border-warning-200 bg-white px-3 text-sm"
+                                    />
+                                </label>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => setShowArchive(false)}>
+                                        Annuler
+                                    </Button>
+                                    <Button type="submit" variant="danger" loading={processing}>
+                                        Confirmer l'archivage
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </Form>
+                </div>
             )}
 
-            <div style={{ background: 'white', borderRadius: 14, padding: 20, marginBottom: 14 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Informations</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-                    <div>
-                        <div style={{ fontSize: 11, color: '#64748B' }}>Statut</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>{plan.status_label}</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: 11, color: '#64748B' }}>Début</div>
-                        <div style={{ fontSize: 13, color: 'var(--navy)' }}>{plan.start_date ?? '—'}</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: 11, color: '#64748B' }}>Fin</div>
-                        <div style={{ fontSize: 13, color: 'var(--navy)' }}>{plan.end_date ?? 'En cours'}</div>
-                    </div>
-                </div>
-                {plan.archived_at && (
-                    <div style={{ marginTop: 14, padding: 10, background: '#FEF3C7', borderRadius: 8, fontSize: 12, color: '#92400E' }}>
-                        Archivé le {plan.archived_at.split('T')[0]} — {plan.archived_reason}
-                    </div>
-                )}
-            </div>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                <Card className="lg:col-span-2">
+                    <CardHeader title="Objectifs" subtitle="Donnée chiffrée — accès tracé" />
+                    <CardBody>
+                        {p.objectives ? (
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700">{p.objectives}</p>
+                        ) : (
+                            <p className="text-sm italic text-ink-500">Aucun objectif renseigné.</p>
+                        )}
+                    </CardBody>
+                </Card>
 
-            <div style={{ background: 'white', borderRadius: 14, padding: 20, marginBottom: 14 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Objectifs</h3>
-                <p style={{ fontSize: 13, color: 'var(--navy)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                    {plan.objectives || <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>Aucun objectif renseigné.</span>}
-                </p>
-            </div>
+                <Card>
+                    <CardHeader title="Métadonnées" />
+                    <CardBody>
+                        <dl className="space-y-3.5">
+                            <Row label="Statut" value={<CarePlanStatusBadge statut={p.status} />} />
+                            <Row label="Début" value={<span className="font-mono text-xs">{p.start_date ?? '—'}</span>} />
+                            <Row label="Fin" value={<span className="font-mono text-xs">{p.end_date ?? 'sans terme'}</span>} />
+                            <Row label="Tâches" value={`${tasks.length}`} />
+                            {p.created_by && <Row label="Créé par" value={p.created_by.name} />}
+                            {p.archived_at && (
+                                <Row
+                                    label="Archivé"
+                                    value={<span className="font-mono text-xs">{p.archived_at.slice(0, 10)}</span>}
+                                />
+                            )}
+                        </dl>
+                    </CardBody>
+                </Card>
 
-            <div style={{ background: 'white', borderRadius: 14, padding: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Tâches planifiées ({tasks.length})
-                </h3>
-                {tasks.length === 0 ? (
-                    <p style={{ fontSize: 12, color: '#64748B', fontStyle: 'italic' }}>Aucune tâche planifiée pour le moment.</p>
-                ) : (
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {tasks.map(t => (
-                            <li key={t.id} style={{ padding: '10px 0', borderBottom: '1px solid #F1F5F9' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>
-                                        {t.task_order + 1}. {t.title}
-                                        {!t.mandatory && <span style={{ marginLeft: 8, fontSize: 10, color: '#64748B', fontWeight: 400 }}>(optionnel)</span>}
-                                    </span>
-                                    <span style={{ fontSize: 11, color: '#64748B' }}>
-                                        {t.frequency_label}
-                                        {t.duration_minutes ? ` · ${t.duration_minutes} min` : ''}
-                                    </span>
-                                </div>
-                                {t.description && <p style={{ fontSize: 12, color: '#64748B', marginTop: 4, marginBottom: 0 }}>{t.description}</p>}
-                            </li>
-                        ))}
-                    </ul>
-                )}
+                <Card className="lg:col-span-3">
+                    <CardHeader title="Tâches planifiées" subtitle={`${tasks.length} tâche(s)`} />
+                    <CardBody>
+                        {tasks.length > 0 ? (
+                            <ul className="divide-y divide-ink-100">
+                                {tasks.map((t) => (
+                                    <li key={t.id} className="flex items-start gap-4 py-3">
+                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700">
+                                            {t.task_order}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <p className="text-sm font-medium text-ink-900">{t.title}</p>
+                                                {t.mandatory && (
+                                                    <Badge tone="danger" size="xs">
+                                                        Obligatoire
+                                                    </Badge>
+                                                )}
+                                                <Badge tone="brand" size="xs">
+                                                    {t.frequency_label}
+                                                </Badge>
+                                                {t.duration_minutes && (
+                                                    <span className="text-xs text-ink-500">{t.duration_minutes} min</span>
+                                                )}
+                                            </div>
+                                            {t.description && <p className="mt-1 text-xs text-ink-500">{t.description}</p>}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <EmptyState
+                                title="Aucune tâche planifiée"
+                                description="Ajoutez les tâches récurrentes que les intervenants devront cocher pendant chaque visite."
+                            />
+                        )}
+                    </CardBody>
+                </Card>
             </div>
         </DashboardLayout>
+    );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="flex items-center justify-between gap-3">
+            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
+            <dd className="text-sm font-medium text-ink-900">{value}</dd>
+        </div>
     );
 }

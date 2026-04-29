@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CategorieIncident;
+use App\Enums\GraviteIncident;
+use App\Enums\StatutIncident;
 use App\Http\Requests\Incidents\AnalyseIncidentRequest;
 use App\Http\Requests\Incidents\AssignIncidentRequest;
 use App\Http\Requests\Incidents\CloseIncidentRequest;
 use App\Http\Requests\Incidents\StoreActionCorrectiveRequest;
 use App\Http\Requests\Incidents\StoreIncidentRequest;
 use App\Http\Requests\Incidents\UpdateIncidentRequest;
+use App\Models\Beneficiary;
 use App\Models\Incident;
+use App\Models\Intervention;
 use App\Models\User;
 use App\Services\IncidentService;
 use Illuminate\Http\RedirectResponse;
@@ -26,23 +31,64 @@ class IncidentController extends Controller
         $user = request()->user();
 
         $query = Incident::query()
-            ->with(['declarant:id,first_name,last_name', 'assignee:id,first_name,last_name'])
+            ->with([
+                'declarant:id,first_name,last_name',
+                'assignee:id,first_name,last_name',
+                'structure:id,name',
+            ])
             ->orderByDesc('occurred_at');
 
-        if ($user->hasPermissionTo('incidents.view.own') && ! $user->hasPermissionTo('incidents.view.structure')) {
+        $scopedToOwn = $user->hasPermissionTo('incidents.view.own')
+            && ! $user->hasPermissionTo('incidents.view.structure');
+
+        if ($scopedToOwn) {
             $query->where('declared_by', $user->id);
         }
 
+        $categorieLabels = [
+            CategorieIncident::Chute->value => 'Chute',
+            CategorieIncident::Agression->value => 'Agression',
+            CategorieIncident::ErreurMedicamenteuse->value => 'Erreur médicamenteuse',
+            CategorieIncident::MaltraitanceSuspecte->value => 'Maltraitance suspectée',
+            CategorieIncident::SituationDanger->value => 'Situation de danger',
+            CategorieIncident::Autre->value => 'Autre',
+        ];
+
+        $paginator = $query->paginate(20)->through(fn (Incident $i): array => [
+            'id' => $i->id,
+            'initials' => mb_strtoupper(
+                mb_substr($i->declarant?->first_name ?? '?', 0, 1)
+                .mb_substr($i->declarant?->last_name ?? '', 0, 1),
+            ),
+            'declarant' => trim(($i->declarant?->first_name ?? '').' '.($i->declarant?->last_name ?? '')),
+            'categorie' => $categorieLabels[$i->categorie->value] ?? $i->categorie->value,
+            'gravite' => $i->gravite->value,
+            'statut' => $i->statut->value,
+            'structure' => $i->structure?->name ?? '',
+            'date_heure' => $i->occurred_at?->format('d/m/Y H:i') ?? '',
+            'description' => (string) $i->description,
+            'notifie_responsable' => $i->notifie_responsable_at !== null,
+            'notifie_autorites' => $i->notifie_ars_at !== null,
+        ]);
+
+        $statsBase = Incident::query();
+        if ($scopedToOwn) {
+            $statsBase->where('declared_by', $user->id);
+        }
+
         $stats = [
-            'declare' => Incident::query()->where('statut', 'declare')->count(),
-            'en_analyse' => Incident::query()->where('statut', 'en_analyse')->count(),
-            'plan_actions' => Incident::query()->where('statut', 'plan_actions')->count(),
-            'clos' => Incident::query()->where('statut', 'clos')->count(),
-            'graves' => Incident::query()->whereIn('gravite', ['grave', 'critique'])->count(),
+            'declare' => (clone $statsBase)->where('statut', StatutIncident::Declare->value)->count(),
+            'en_analyse' => (clone $statsBase)->where('statut', StatutIncident::EnAnalyse->value)->count(),
+            'plan_actions' => (clone $statsBase)->where('statut', StatutIncident::PlanActions->value)->count(),
+            'clos' => (clone $statsBase)->where('statut', StatutIncident::Clos->value)->count(),
+            'graves' => (clone $statsBase)
+                ->whereIn('gravite', [GraviteIncident::Grave->value, GraviteIncident::Critique->value])
+                ->count(),
         ];
 
         return Inertia::render('dashboard/incidents/index', [
-            'incidents' => $query->paginate(20),
+            'incidents' => $paginator->items(),
+            'total' => $paginator->total(),
             'stats' => $stats,
         ]);
     }
@@ -51,7 +97,48 @@ class IncidentController extends Controller
     {
         $this->authorize('create', Incident::class);
 
-        return Inertia::render('dashboard/incidents/create');
+        $structureId = request()->user()->structure_id;
+
+        $beneficiaries = Beneficiary::query()
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name'])
+            ->map(fn (Beneficiary $b) => [
+                'id' => $b->id,
+                'name' => trim($b->first_name.' '.$b->last_name),
+            ])
+            ->all();
+
+        $interventions = Intervention::query()
+            ->where('structure_id', $structureId)
+            ->orderByDesc('planned_date')
+            ->limit(50)
+            ->get(['id', 'planned_date', 'beneficiary_id'])
+            ->map(fn (Intervention $i) => [
+                'id' => $i->id,
+                'label' => $i->planned_date?->format('d/m/Y').' — '.($i->beneficiary_id ? '#'.substr($i->beneficiary_id, 0, 8) : ''),
+            ])
+            ->all();
+
+        $categories = collect(CategorieIncident::cases())->map(fn (CategorieIncident $c) => [
+            'value' => $c->value,
+            'label' => match ($c) {
+                CategorieIncident::Chute => 'Chute',
+                CategorieIncident::Agression => 'Agression',
+                CategorieIncident::ErreurMedicamenteuse => 'Erreur médicamenteuse',
+                CategorieIncident::MaltraitanceSuspecte => 'Maltraitance suspectée',
+                CategorieIncident::SituationDanger => 'Situation de danger',
+                CategorieIncident::Autre => 'Autre',
+            },
+        ])->all();
+
+        return Inertia::render('dashboard/incidents/create', [
+            'options' => [
+                'beneficiaries' => $beneficiaries,
+                'interventions' => $interventions,
+                'categories' => $categories,
+            ],
+        ]);
     }
 
     public function store(StoreIncidentRequest $request): RedirectResponse
@@ -74,8 +161,66 @@ class IncidentController extends Controller
             'suivis.author:id,first_name,last_name',
         ]);
 
+        $categorieLabels = [
+            CategorieIncident::Chute->value => 'Chute',
+            CategorieIncident::Agression->value => 'Agression',
+            CategorieIncident::ErreurMedicamenteuse->value => 'Erreur médicamenteuse',
+            CategorieIncident::MaltraitanceSuspecte->value => 'Maltraitance suspectée',
+            CategorieIncident::SituationDanger->value => 'Situation de danger',
+            CategorieIncident::Autre->value => 'Autre',
+        ];
+
         return Inertia::render('dashboard/incidents/show', [
-            'incident' => $incident,
+            'incident' => [
+                'id' => $incident->id,
+                'declarant' => [
+                    'id' => $incident->declarant?->id,
+                    'name' => trim(($incident->declarant?->first_name ?? '').' '.($incident->declarant?->last_name ?? '')),
+                ],
+                'assignee' => $incident->assignee
+                    ? [
+                        'id' => $incident->assignee->id,
+                        'name' => trim($incident->assignee->first_name.' '.$incident->assignee->last_name),
+                    ]
+                    : null,
+                'beneficiaire' => $incident->beneficiary
+                    ? [
+                        'id' => $incident->beneficiary->id,
+                        'name' => trim($incident->beneficiary->first_name.' '.$incident->beneficiary->last_name),
+                    ]
+                    : null,
+                'categorie' => $categorieLabels[$incident->categorie->value] ?? $incident->categorie->value,
+                'gravite' => $incident->gravite->value,
+                'statut' => $incident->statut->value,
+                'description' => (string) $incident->description,
+                'lieu' => $incident->lieu,
+                'occurred_at' => $incident->occurred_at?->format('d/m/Y H:i'),
+                'avec_deces' => (bool) $incident->avec_deces,
+                'avec_hospitalisation' => (bool) $incident->avec_hospitalisation,
+                'avec_blessure_physique' => (bool) $incident->avec_blessure_physique,
+                'analyse_causes' => (string) $incident->analyse_causes,
+                'closed_at' => $incident->closed_at?->format('d/m/Y H:i'),
+                'notifie_responsable' => $incident->notifie_responsable_at !== null,
+                'notifie_autorites' => $incident->notifie_ars_at !== null,
+                'actions_correctives' => $incident->actionsCorrectives->map(fn ($a) => [
+                    'id' => $a->id,
+                    'description' => $a->description,
+                    'echeance' => $a->echeance?->format('d/m/Y'),
+                    'statut' => $a->statut,
+                    'responsable' => $a->responsable
+                        ? trim($a->responsable->first_name.' '.$a->responsable->last_name)
+                        : null,
+                    'realise_at' => $a->realise_at?->format('d/m/Y H:i'),
+                ])->all(),
+                'suivis' => $incident->suivis->map(fn ($s) => [
+                    'id' => $s->id,
+                    'note' => $s->note,
+                    'author' => $s->author
+                        ? trim($s->author->first_name.' '.$s->author->last_name)
+                        : null,
+                    'created_at' => $s->created_at?->format('d/m/Y H:i'),
+                ])->all(),
+            ],
         ]);
     }
 

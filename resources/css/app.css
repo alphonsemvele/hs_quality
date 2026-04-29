@@ -3,7 +3,82 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+/*
+ * HS Quality — design system
+ *
+ * Palette: bleu-acier `brand` (action), vert sauge `sage` (sémantique santé /
+ * conformité), neutres `ink` (90% de l'UI), sémantiques `danger` / `warning`.
+ * Cible accessibilité RGAA AA — chaque pair texte/fond utilisée dans l'UI
+ * doit garder un contraste >= 4.5:1.
+ */
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --color-brand-50: #f2f7fc;
+    --color-brand-100: #e5f0fa;
+    --color-brand-200: #c2d9ef;
+    --color-brand-300: #93bcdf;
+    --color-brand-400: #5996cd;
+    --color-brand-500: #2a7ac2;
+    --color-brand-600: #1565ac;
+    --color-brand-700: #0f4c81;
+    --color-brand-800: #0b385e;
+    --color-brand-900: #082443;
+
+    --color-sage-50: #f4faf6;
+    --color-sage-100: #e2f1e9;
+    --color-sage-200: #bfe0cc;
+    --color-sage-300: #95c9a9;
+    --color-sage-400: #62ab80;
+    --color-sage-500: #4a9568;
+    --color-sage-600: #3f9670;
+    --color-sage-700: #2f7b5c;
+    --color-sage-800: #245c45;
+    --color-sage-900: #163828;
+
+    --color-ink-50: #f8fafc;
+    --color-ink-100: #f1f5f9;
+    --color-ink-200: #e2e8f0;
+    --color-ink-300: #cbd5e1;
+    --color-ink-400: #94a3b8;
+    --color-ink-500: #64748b;
+    --color-ink-600: #475569;
+    --color-ink-700: #334155;
+    --color-ink-800: #1e293b;
+    --color-ink-900: #0f172a;
+
+    --color-danger-50: #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-200: #fecaca;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+
+    --color-warning-50: #fffbeb;
+    --color-warning-100: #fef3c7;
+    --color-warning-200: #fde68a;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-700: #b45309;
+}
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: 'cv11', 'ss01';
+    }
+
+    body {
+        font-family: var(--font-sans);
+        color: var(--color-ink-900);
+        background: var(--color-ink-50);
+    }
+
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
 }

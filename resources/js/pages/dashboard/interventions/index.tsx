@@ -1,8 +1,24 @@
+import {
+    Badge,
+    Button,
+    Card,
+    EmptyState,
+    InterventionStatusBadge,
+    PageHeader,
+    TBody,
+    THead,
+    Table,
+    Td,
+    Th,
+    Tr,
+} from '@/components/ui';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
+type Statut = 'planifiee' | 'en_cours' | 'realisee' | 'annulee' | 'non_realisee';
+
 interface Intervention {
-    id: number;
+    id: number | string;
     initials: string;
     intervenant: string;
     beneficiaire: string;
@@ -10,7 +26,7 @@ interface Intervention {
     date_heure_debut: string;
     date_heure_fin: string | null;
     duree_minutes: number | null;
-    statut: 'planifiee' | 'en_cours' | 'realisee' | 'annulee' | 'non_realisee';
+    statut: Statut;
     compte_rendu: string | null;
     sync_offline: boolean;
 }
@@ -21,103 +37,128 @@ interface Props {
     stats: { planifiees: number; en_cours: number; realisees: number; annulees: number };
 }
 
-// Fallback removed (Wave 1 / C1) — previously contained named individuals
-// that would render even when the controller passed empty data, leaking
-// fictional-but-realistic personal data to every viewer regardless of tenant.
-
-const STATUT_MAP = {
-    planifiee:    { label: 'Planifiée',    bg: '#EFF6FF', text: '#1D4ED8', dot: '#3B82F6' },
-    en_cours:     { label: 'En cours',     bg: '#FFFBEB', text: '#92400E', dot: '#F59E0B' },
-    realisee:     { label: 'Réalisée',     bg: '#F0FDF4', text: '#166534', dot: '#16A34A' },
-    annulee:      { label: 'Annulée',      bg: '#FEF2F2', text: '#991B1B', dot: '#EF4444' },
-    non_realisee: { label: 'Non réalisée', bg: '#F8FAFC', text: '#475569', dot: '#94A3B8' },
-};
-
-export default function Interventions({ interventions = [], total = 0, stats = { planifiees: 0, en_cours: 0, realisees: 0, annulees: 0 } }: Partial<Props>) {
+export default function Interventions({
+    interventions = [],
+    total = 0,
+    stats = { planifiees: 0, en_cours: 0, realisees: 0, annulees: 0 },
+}: Partial<Props>) {
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
+            <PageHeader
+                title="Interventions"
+                subtitle={`${total} intervention(s) au total`}
+                breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Interventions' }]}
+                actions={
+                    <Link href="/interventions/create">
+                        <Button leadingIcon={<PlusIcon />}>Nouvelle intervention</Button>
+                    </Link>
+                }
+            />
 
-            {/* Header actions */}
-            <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-3 flex-wrap">
-                    {[
-                        { label: 'Toutes', count: total,          active: true  },
-                        { label: 'En cours',  count: stats.en_cours,  active: false },
-                        { label: 'Planifiées',count: stats.planifiees,active: false },
-                        { label: 'Réalisées', count: stats.realisees, active: false },
-                    ].map(f => (
-                        <button key={f.label} style={{
-                            fontSize: 13, fontWeight: 600, padding: '7px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                            background: f.active ? 'var(--navy)' : 'white',
-                            color: f.active ? 'white' : '#64748B',
-                            // border: f.active ? 'none' : '1px solid #E2E8F0',
-                        }}>
-                            {f.label} <span style={{ fontSize: 11, opacity: .7 }}>({f.count})</span>
-                        </button>
-                    ))}
-                </div>
-                <Link href="/interventions/create" style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    background: 'var(--gold)', color: 'var(--navy)',
-                    fontSize: 13, fontWeight: 700, padding: '9px 18px', borderRadius: 10, textDecoration: 'none',
-                }}>
-                    <svg width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14"/></svg>
-                    Nouvelle intervention
-                </Link>
+            {/* Filtres / stats */}
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+                <FilterChip label="Toutes" count={total} active />
+                <FilterChip label="En cours" count={stats.en_cours} />
+                <FilterChip label="Planifiées" count={stats.planifiees} />
+                <FilterChip label="Réalisées" count={stats.realisees} />
+                <FilterChip label="Annulées" count={stats.annulees} />
             </div>
 
-            {/* Table */}
-            <div style={{ background: 'white', borderRadius: 16, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid #F1F5F9', background: '#FAFAFA' }}>
-                            {['Intervenant', 'Bénéficiaire', 'Structure', 'Date & Heure', 'Durée', 'Statut', 'CR', ''].map(h => (
-                                <th key={h} style={{ padding: '11px 16px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textAlign: 'left', letterSpacing: '.04em', textTransform: 'uppercase' }}>{h}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {interventions.map((i, idx) => {
-                            const st = STATUT_MAP[i.statut];
-                            return (
-                                <tr key={i.id} style={{ borderBottom: idx < interventions.length - 1 ? '1px solid #F8FAFC' : 'none', transition: 'background .15s', cursor: 'default' }}
-                                    onMouseEnter={e => (e.currentTarget as HTMLTableRowElement).style.background = '#FAFAFA'}
-                                    onMouseLeave={e => (e.currentTarget as HTMLTableRowElement).style.background = 'transparent'}
-                                >
-                                    <td style={{ padding: '12px 16px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                            <div style={{ width: 32, height: 32, borderRadius: 9, background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: 'var(--navy)', flexShrink: 0 }}>{i.initials}</div>
-                                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--navy)' }}>{i.intervenant}</span>
+            <Card>
+                {interventions.length > 0 ? (
+                    <Table>
+                        <THead>
+                            <Tr>
+                                <Th>Intervenant</Th>
+                                <Th>Bénéficiaire</Th>
+                                <Th>Date & heure</Th>
+                                <Th>Durée</Th>
+                                <Th>Statut</Th>
+                                <Th>CR</Th>
+                                <Th></Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {interventions.map((i) => (
+                                <Tr key={i.id}>
+                                    <Td>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700">
+                                                {i.initials}
+                                            </div>
+                                            <span className="font-medium text-ink-900">{i.intervenant}</span>
                                         </div>
-                                    </td>
-                                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#475569' }}>{i.beneficiaire}</td>
-                                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#94A3B8' }}>{i.structure}</td>
-                                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#475569', fontFamily: "'DM Mono', monospace" }}>{i.date_heure_debut}</td>
-                                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#475569', fontFamily: "'DM Mono', monospace" }}>
+                                    </Td>
+                                    <Td>{i.beneficiaire}</Td>
+                                    <Td className="font-mono text-xs text-ink-600">{i.date_heure_debut}</Td>
+                                    <Td className="font-mono text-xs">
                                         {i.duree_minutes ? `${i.duree_minutes} min` : '—'}
-                                    </td>
-                                    <td style={{ padding: '12px 16px' }}>
-                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 600, background: st.bg, color: st.text, padding: '3px 9px', borderRadius: 20 }}>
-                                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: st.dot }} />
-                                            {st.label}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '12px 16px' }}>
-                                        {i.compte_rendu
-                                            ? <span style={{ fontSize: 11, color: '#16A34A' }}>✓</span>
-                                            : <span style={{ fontSize: 11, color: '#CBD5E1' }}>—</span>
-                                        }
-                                        {i.sync_offline && <span style={{ marginLeft: 6, fontSize: 10, background: '#FFFBEB', color: '#92400E', padding: '1px 6px', borderRadius: 6, fontWeight: 600 }}>offline</span>}
-                                    </td>
-                                    <td style={{ padding: '12px 16px' }}>
-                                        <Link href={`/interventions/${i.id}`} style={{ fontSize: 12, color: 'var(--gold)', textDecoration: 'none', fontWeight: 600 }}>Voir →</Link>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                                    </Td>
+                                    <Td>
+                                        <InterventionStatusBadge statut={i.statut} />
+                                    </Td>
+                                    <Td>
+                                        <div className="flex items-center gap-1.5">
+                                            {i.compte_rendu ? (
+                                                <span className="text-sage-600">✓</span>
+                                            ) : (
+                                                <span className="text-ink-300">—</span>
+                                            )}
+                                            {i.sync_offline && (
+                                                <Badge tone="warning" size="xs">
+                                                    offline
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </Td>
+                                    <Td className="text-right">
+                                        <Link
+                                            href={`/interventions/${i.id}`}
+                                            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                                        >
+                                            Voir →
+                                        </Link>
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </TBody>
+                    </Table>
+                ) : (
+                    <EmptyState
+                        title="Aucune intervention"
+                        description="Planifiez votre première intervention pour démarrer le suivi terrain."
+                        action={
+                            <Link href="/interventions/create">
+                                <Button>Nouvelle intervention</Button>
+                            </Link>
+                        }
+                    />
+                )}
+            </Card>
         </DashboardLayout>
+    );
+}
+
+function FilterChip({ label, count, active }: { label: string; count: number; active?: boolean }) {
+    return (
+        <button
+            type="button"
+            className={
+                active
+                    ? 'inline-flex items-center gap-1.5 rounded-lg bg-ink-900 px-3.5 py-1.5 text-xs font-semibold text-white'
+                    : 'inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-600 hover:border-ink-300'
+            }
+        >
+            {label}
+            <span className={active ? 'text-white/70' : 'text-ink-400'}>({count})</span>
+        </button>
+    );
+}
+
+function PlusIcon() {
+    return (
+        <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
     );
 }

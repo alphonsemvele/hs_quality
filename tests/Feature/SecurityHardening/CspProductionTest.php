@@ -38,3 +38,17 @@ it('omits unsafe-eval from the staging CSP', function (): void {
 it('keeps unsafe-eval in local for vite dev runtime', function (): void {
     expect(buildCspFor('local'))->toContain('unsafe-eval');
 });
+
+it('omits script-src unsafe-inline from the production CSP', function (): void {
+    $csp = buildCspFor('production');
+    [$scriptDirective] = array_values(array_filter(
+        array_map('trim', explode(';', $csp)),
+        fn (string $part): bool => str_starts_with($part, 'script-src'),
+    ));
+
+    expect($scriptDirective)->not->toContain("'unsafe-inline'");
+});
+
+it('whitelists the vite dev origin in local script-src', function (): void {
+    expect(buildCspFor('local'))->toContain('http://localhost:5173');
+});

@@ -254,3 +254,47 @@ it('soft-deletes an intervention', function () {
     expect(Intervention::count())->toBe(0)
         ->and(Intervention::withTrashed()->count())->toBe(1);
 });
+
+// ── INDEX (Inertia page contract) ──────────────────────────────────────────────
+
+it('index page returns interventions in the shape the React component expects', function () {
+    $coord = actingAsRole('coordinateur');
+    $beneficiary = Beneficiary::factory()->forStructure($coord->structure)->create([
+        'first_name' => 'Marie', 'last_name' => 'Dubois',
+    ]);
+    $intervenant = User::factory()->create([
+        'structure_id' => $coord->structure_id,
+        'first_name' => 'Pierre',
+        'last_name' => 'Martin',
+        'type' => 'intervenant',
+    ]);
+    Intervention::factory()
+        ->forStructure($coord->structure)
+        ->forBeneficiary($beneficiary)
+        ->forIntervenant($intervenant)
+        ->state(['status' => InterventionStatus::Planned->value])
+        ->create();
+
+    $response = $this->get('/interventions');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard/interventions/index')
+        ->has('interventions', 1)
+        ->has('interventions.0', fn ($item) => $item
+            ->where('initials', 'PM')
+            ->where('intervenant', 'Pierre Martin')
+            ->where('beneficiaire', 'Marie Dubois')
+            ->where('statut', 'planifiee')
+            ->where('sync_offline', false)
+            ->etc()
+        )
+        ->where('total', 1)
+        ->has('stats', fn ($stats) => $stats
+            ->where('planifiees', 1)
+            ->where('en_cours', 0)
+            ->where('realisees', 0)
+            ->where('annulees', 0)
+        )
+    );
+});
