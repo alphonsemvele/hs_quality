@@ -29,7 +29,7 @@ export function TBody({ className, children, ...rest }: HTMLAttributes<HTMLTable
 
 export function Tr({ className, children, ...rest }: HTMLAttributes<HTMLTableRowElement>) {
     return (
-        <tr className={cn('transition-colors hover:bg-ink-50/40', className)} {...rest}>
+        <tr className={cn('transition-colors hover:bg-ink-50/60', className)} {...rest}>
             {children}
         </tr>
     );

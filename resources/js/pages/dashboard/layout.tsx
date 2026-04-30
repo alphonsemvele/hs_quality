@@ -136,14 +136,14 @@ export default function DashboardLayout({
                                                         active
                                                             ? 'bg-brand-600 text-white'
                                                             : 'text-white/60 hover:bg-white/5 hover:text-white',
-                                                        !active && link.danger && 'text-danger-300 hover:text-danger-200',
+                                                        !active && link.danger && 'text-danger-200 hover:text-danger-100',
                                                     )}
                                                 >
                                                     <span
                                                         className={cn(
                                                             'shrink-0',
                                                             active ? 'text-white' : 'text-white/40 group-hover:text-white',
-                                                            !active && link.danger && 'text-danger-300',
+                                                            !active && link.danger && 'text-danger-200',
                                                         )}
                                                     >
                                                         {link.icon}

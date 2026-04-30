@@ -1,27 +1,272 @@
 import { Head, Link } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HOOKS & ANIMATION PRIMITIVES
+// ════════════════════════════════════════════════════════════════════════════
+
+function useInView(options?: IntersectionObserverInit): [RefObject<HTMLDivElement | null>, boolean] {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const [inView, setInView] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+            { threshold: 0.15, ...options },
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+    return [ref, inView];
+}
+
+function useCountUp(target: number, duration = 1800): [RefObject<HTMLSpanElement | null>, string] {
+    const ref = useRef<HTMLSpanElement | null>(null);
+    const [value, setValue] = useState('0');
+    const started = useRef(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && !started.current) {
+                started.current = true;
+                const start = performance.now();
+                const step = (now: number) => {
+                    const t = Math.min((now - start) / duration, 1);
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    const current = Math.round(ease * target);
+                    setValue(current.toLocaleString('fr-FR'));
+                    if (t < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+                obs.disconnect();
+            }
+        }, { threshold: 0.3 });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, [target, duration]);
+    return [ref, value];
+}
+
+function Reveal({ children, className = '', delay = 0, direction = 'up' }: {
+    children: ReactNode; className?: string; delay?: number;
+    direction?: 'up' | 'left' | 'right';
+}) {
+    const [ref, inView] = useInView();
+    const transforms: Record<string, string> = {
+        up: 'translateY(30px)',
+        left: 'translateX(40px)',
+        right: 'translateX(-40px)',
+    };
+    return (
+        <div ref={ref} className={className} style={{
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translate(0,0)' : transforms[direction],
+            transition: `opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
+        }}>
+            {children}
+        </div>
+    );
+}
+
+function AnimatedBar({ width, className = '' }: { width: number; className?: string }) {
+    const [ref, inView] = useInView();
+    return (
+        <div ref={ref} className="h-1.5 overflow-hidden rounded-full bg-ink-200">
+            <div className={`h-full rounded-full transition-all duration-1000 ease-out ${className}`}
+                style={{ width: inView ? `${width}%` : '0%' }} />
+        </div>
+    );
+}
+
+function FeatureCard({ icon, title, desc }: { icon: ReactNode; title: string; desc: string }) {
+    const cardRef = useRef<HTMLDivElement | null>(null);
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const el = cardRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        el.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        el.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    }, []);
+    return (
+        <div ref={cardRef} onMouseMove={handleMouseMove}
+            className="glow-hover card-hover group relative rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="relative z-10">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-ink-50 text-ink-600 transition-all duration-300 group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:shadow-md group-hover:shadow-brand-100">
+                    {icon}
+                </div>
+                <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-500">{desc}</p>
+            </div>
+        </div>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ICONS
+// ════════════════════════════════════════════════════════════════════════════
+
+function Arrow({ className = 'size-4' }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+    );
+}
+
+function IconClipboard() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+    );
+}
+
+function IconShield() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+    );
+}
+
+function IconChart() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+    );
+}
+
+function IconHeart() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+    );
+}
+
+function IconAcademic() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+        </svg>
+    );
+}
+
+function IconPhone() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+    );
+}
+
+function IconCheck() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════════════════════════════
 
 type Faq = { q: string; a: string };
 
-const PHOTO_HERO =
-    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1900&auto=format&fit=crop&q=85';
-const PHOTO_JOURNEY =
-    'https://images.unsplash.com/photo-1581579186913-45ac3e6efe93?w=1400&auto=format&fit=crop&q=85';
-const PHOTO_TEAM =
-    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1400&auto=format&fit=crop&q=85';
+const FEATURES = [
+    { icon: <IconClipboard />, title: 'Traçabilité terrain', desc: `Pointage géolocalisé, voice-to-text, signature électronique. Chaque intervention est documentée et consultable en temps réel par l'équipe de coordination.` },
+    { icon: <IconShield />, title: 'Gestion des incidents', desc: `Déclaration mobile en moins de 2 minutes, classification automatique par gravité, analyse 5-pourquoi, notification ARS si événement indésirable grave.` },
+    { icon: <IconChart />, title: 'Audits & conformité', desc: `Audits HAS, AFNOR NF X50-056, ISO 9001 sur tablette. Scoring automatique, plan d'amélioration continue généré depuis les écarts détectés.` },
+    { icon: <IconHeart />, title: 'Baromètre QVCT', desc: `Enquêtes régulières sur la qualité de vie au travail des intervenants. Cartographie des signaux faibles, prévention de l'épuisement professionnel.` },
+    { icon: <IconAcademic />, title: 'Formation continue', desc: `Gestion du plan de développement des compétences, suivi des habilitations, rappels automatiques des échéances réglementaires.` },
+    { icon: <IconPhone />, title: 'Application mobile', desc: `React Native offline-first pour les intervenants en zones blanches. Synchronisation dès retour réseau, interface pensée pour le terrain.` },
+];
+
+const FAQS: Faq[] = [
+    {
+        q: 'Que comprend exactement HS Quality ?',
+        a: `Une plateforme complète : suivi des interventions terrain (mobile + web), gestion des incidents et EI, audits qualité (HAS, AFNOR, ISO 9001, Caphandeo), baromètre QVCT, gestion des compétences et plans de soins. Tout est intégré et conforme HAS / RGPD / HDS.`,
+    },
+    {
+        q: `À quelle fréquence dois-je faire des audits qualité ?`,
+        a: `L'évaluation externe HAS doit avoir lieu tous les 5 ans. En interne, un point trimestriel est recommandé. HS Quality vous permet de programmer ces audits, de scorer en temps réel et de générer le PAC depuis les écarts détectés.`,
+    },
+    {
+        q: 'Combien de temps pour mettre en place HS Quality ?',
+        a: `Deux semaines en moyenne. Provisioning de votre tenant, import de vos bénéficiaires et intervenants, formation des coordinateurs (2h), puis déploiement progressif. Un référent qualité vous accompagne tout au long du pilote.`,
+    },
+    {
+        q: 'Mes données sont-elles bien sécurisées ?',
+        a: `Hébergement HDS en France (AWS Paris ou OVHcloud), chiffrement AES-256 au repos et TLS 1.3 en transit, MFA obligatoire pour les rôles privilégiés. Audit complet de chaque accès aux données de santé. Conformité RGPD et code de la santé publique.`,
+    },
+    {
+        q: `Puis-je essayer avant de m'engager ?`,
+        a: `Oui, l'essai pilote est gratuit pendant 3 mois, sans carte bancaire et avec un référent dédié. Si la solution ne correspond pas à vos besoins, vos données sont restituées ou supprimées sur simple demande.`,
+    },
+];
+
+const PRICING = [
+    {
+        name: 'Essentiel',
+        price: '149',
+        desc: 'Pour les petites structures qui démarrent leur démarche qualité.',
+        features: [
+            'Jusqu\'à 20 intervenants',
+            'Interventions & traçabilité',
+            'Gestion des incidents',
+            'Application mobile',
+            'Support par email',
+        ],
+        highlighted: false,
+    },
+    {
+        name: 'Professionnel',
+        price: '349',
+        desc: 'Pour les structures engagées dans une démarche qualité complète.',
+        features: [
+            'Jusqu\'à 80 intervenants',
+            'Tout Essentiel +',
+            'Audits HAS / AFNOR / ISO',
+            'Baromètre QVCT',
+            'Formation continue',
+            'API & connecteurs',
+            'Référent qualité dédié',
+        ],
+        highlighted: true,
+    },
+    {
+        name: 'Groupe',
+        price: 'Sur mesure',
+        desc: 'Pour les groupes multi-sites et les grandes associations.',
+        features: [
+            'Intervenants illimités',
+            'Tout Professionnel +',
+            'Multi-sites & consolidation',
+            'IA prédictive',
+            'SLA garanti 99,9%',
+            'Onboarding personnalisé',
+            'Accompagnement continu',
+        ],
+        highlighted: false,
+    },
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MAIN COMPONENT
+// ════════════════════════════════════════════════════════════════════════════
 
 export default function Welcome() {
     const [navSolid, setNavSolid] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [faqOpen, setFaqOpen] = useState<number | null>(0);
-    const [scrollY, setScrollY] = useState(0);
 
     useEffect(() => {
-        const fn = () => {
-            const y = window.scrollY;
-            setScrollY(y);
-            setNavSolid(y > 32);
-        };
+        const fn = () => setNavSolid(window.scrollY > 32);
         window.addEventListener('scroll', fn, { passive: true });
         return () => window.removeEventListener('scroll', fn);
     }, []);
@@ -33,102 +278,96 @@ export default function Welcome() {
             <style>{`
                 html { scroll-behavior: smooth; }
 
-                /* ── Animations ── */
-                @keyframes fadeUp     { from { opacity:0; transform: translateY(28px) } to { opacity:1; transform: translateY(0) } }
-                @keyframes slideLeft  { from { opacity:0; transform: translateX(36px) } to { opacity:1; transform: translateX(0) } }
-                @keyframes slideRight { from { opacity:0; transform: translateX(-36px) } to { opacity:1; transform: translateX(0) } }
-                @keyframes pulseDot   { 0%,100% { opacity:1 } 50% { opacity:.4 } }
-                @keyframes glowPulse  { 0%,100% { box-shadow: 0 0 0 0 rgba(21,101,172,.35) } 50% { box-shadow: 0 0 0 14px rgba(21,101,172,0) } }
-                @keyframes float      { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
-                @keyframes marquee    { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-                @keyframes spinSlow   { from { transform: rotate(0) } to { transform: rotate(360deg) } }
-                @keyframes brandShine { 0% { background-position: 0% 50% } 50% { background-position: 100% 50% } 100% { background-position: 0% 50% } }
+                @keyframes fadeIn { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+                @keyframes meshMove { 0%,100% { transform:translate(0,0) scale(1) } 50% { transform:translate(30px,-20px) scale(1.05) } }
+                @keyframes meshMove2 { 0%,100% { transform:translate(0,0) scale(1) } 50% { transform:translate(-20px,30px) scale(1.08) } }
+                @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+                @keyframes marquee { from { transform:translateX(0) } to { transform:translateX(-50%) } }
+                @keyframes float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-8px) } }
+                @keyframes glowPulse { 0%,100% { box-shadow:0 0 20px 0 rgba(21,101,172,0.15) } 50% { box-shadow:0 0 48px 12px rgba(21,101,172,0.28) } }
+                @keyframes textGradientMove { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
 
-                .fade-up      { animation: fadeUp .9s cubic-bezier(.16,1,.3,1) both; }
-                .slide-left   { animation: slideLeft .9s cubic-bezier(.16,1,.3,1) both; }
-                .slide-right  { animation: slideRight .9s cubic-bezier(.16,1,.3,1) both; }
-                .au-1 { animation-delay: .12s; }
-                .au-2 { animation-delay: .24s; }
-                .au-3 { animation-delay: .36s; }
-                .au-4 { animation-delay: .48s; }
-                .au-5 { animation-delay: .60s; }
-                .float        { animation: float 5s ease-in-out infinite; }
-                .glow-cta     { animation: glowPulse 3s ease-out infinite; }
-                .spin-slow    { animation: spinSlow 30s linear infinite; }
+                .fade-in { animation: fadeIn .8s cubic-bezier(.22,1,.36,1) both; }
+                .delay-1 { animation-delay: .1s; }
+                .delay-2 { animation-delay: .2s; }
+                .delay-3 { animation-delay: .35s; }
+                .delay-4 { animation-delay: .5s; }
+                .delay-5 { animation-delay: .65s; }
 
-                /* Brand-sage gradient text with shimmer (replaces gold) */
-                .accent-text {
-                    background: linear-gradient(110deg, #1565AC 0%, #3F9670 35%, #1565AC 70%, #3F9670 100%);
-                    background-size: 250% 100%;
+                .gradient-text {
+                    background: linear-gradient(135deg, #5996cd 0%, #62ab80 50%, #5996cd 100%);
+                    background-size: 200% auto;
                     background-clip: text;
                     -webkit-background-clip: text;
                     color: transparent;
-                    animation: brandShine 8s ease-in-out infinite;
-                    font-style: italic;
-                    font-weight: 600;
+                    animation: textGradientMove 6s ease-in-out infinite;
+                }
+                .gradient-text-light {
+                    background: linear-gradient(135deg, #93bcdf 0%, #95c9a9 50%, #93bcdf 100%);
+                    background-size: 200% auto;
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    color: transparent;
+                    animation: textGradientMove 6s ease-in-out infinite;
                 }
 
-                /* Subtle grain overlay */
+                .card-hover {
+                    transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s, border-color .35s;
+                }
+                .card-hover:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 24px 48px -12px rgba(15,23,42,0.1);
+                    border-color: rgba(21,101,172,0.2);
+                }
+
+                .glow-hover { position: relative; overflow: hidden; }
+                .glow-hover::before {
+                    content: '';
+                    position: absolute; inset: 0; opacity: 0;
+                    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(21,101,172,0.06), transparent 60%);
+                    transition: opacity 0.4s; pointer-events: none; z-index: 1;
+                }
+                .glow-hover:hover::before { opacity: 1; }
+
+                .btn-glow { position: relative; }
+                .btn-glow::after {
+                    content: ''; position: absolute; inset: -1px; border-radius: inherit;
+                    background: linear-gradient(135deg, rgba(21,101,172,0.4), rgba(63,150,112,0.4));
+                    opacity: 0; z-index: -1; filter: blur(14px); transition: opacity 0.4s;
+                }
+                .btn-glow:hover::after { opacity: 1; }
+
+                .dashboard-glow { animation: glowPulse 4s ease-in-out infinite; }
+
+                .marquee-track { animation: marquee 40s linear infinite; }
+                .marquee:hover .marquee-track { animation-play-state: paused; }
+
+                .mono { font-family: 'JetBrains Mono', monospace; }
+
                 .grain {
                     position: absolute; inset: 0; pointer-events: none;
                     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
                     opacity: .04;
                 }
 
-                /* Marquee */
-                .marquee-track  { animation: marquee 40s linear infinite; }
-                .marquee:hover .marquee-track { animation-play-state: paused; }
-
-                /* Reveal-on-scroll */
-                @supports (animation-timeline: view()) {
-                    .reveal {
-                        animation: fadeUp 1s cubic-bezier(.16,1,.3,1) both;
-                        animation-timeline: view();
-                        animation-range: entry 0% cover 30%;
-                    }
-                }
-
-                /* Card hover */
-                .lift { transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s; }
-                .lift:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(15,23,42,.10); }
-                .img-zoom { transition: transform 1.4s cubic-bezier(.16,1,.3,1); }
-                .group:hover .img-zoom { transform: scale(1.06); }
-
-                /* Display heading: Poppins light + tight tracking, italique sur les accents */
-                .h-display {
-                    font-family: 'Poppins', sans-serif;
-                    font-weight: 300;
-                    letter-spacing: -0.025em;
-                    line-height: 1.04;
-                }
-                .h-display em {
-                    font-style: italic;
-                    font-weight: 600;
-                }
-
                 ::-webkit-scrollbar { width: 8px; }
                 ::-webkit-scrollbar-track { background: #FAFAFA; }
                 ::-webkit-scrollbar-thumb { background: #1565AC; border-radius: 4px; }
                 ::-webkit-scrollbar-thumb:hover { background: #0F4C81; }
-
-                body { font-family: 'Poppins', sans-serif; color: #0F172A; }
-                .mono { font-family: 'JetBrains Mono', monospace; }
             `}</style>
 
             <div className="min-h-screen bg-white">
                 <Nav solid={navSolid} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
-                <Hero scrollY={scrollY} />
-                <TrustBar />
-                <Intro />
-                <HowItWorks />
-                <Coverage />
-                <Lifetime />
-                <DecisionsSection />
-                <Testimonial />
-                <BeginJourney />
+                <HeroSection />
+                <LogoBar />
+                <FeaturesSection />
+                <BentoGrid />
+                <MetricsSection />
+                <TestimonialSection />
+                <PricingSection />
                 <FaqSection open={faqOpen} setOpen={setFaqOpen} />
                 <FinalCta />
-                <Footer />
+                <FooterSection />
             </div>
         </>
     );
@@ -138,113 +377,83 @@ export default function Welcome() {
 //  NAV
 // ════════════════════════════════════════════════════════════════════════════
 
-function Nav({
-    solid,
-    mobileOpen,
-    setMobileOpen,
-}: {
-    solid: boolean;
-    mobileOpen: boolean;
-    setMobileOpen: (v: boolean) => void;
+function Nav({ solid, mobileOpen, setMobileOpen }: {
+    solid: boolean; mobileOpen: boolean; setMobileOpen: (v: boolean) => void;
 }) {
     const links: [string, string][] = [
-        ['Accueil', '#hero'],
+        ['Fonctionnalités', '#features'],
         ['Modules', '#modules'],
-        ['Approche', '#approach'],
         ['Tarifs', '#pricing'],
-        ['À propos', '#about'],
+        ['FAQ', '#faq'],
     ];
     return (
-        <nav
-            className={
-                'fixed inset-x-0 top-0 z-50 transition-all duration-300 ' +
-                (solid ? 'border-b border-white/5 bg-ink-900/95 backdrop-blur' : 'bg-transparent')
-            }
-        >
+        <nav className={
+            'fixed inset-x-0 top-0 z-50 transition-all duration-300 ' +
+            (solid ? 'border-b border-ink-200/60 bg-white/80 backdrop-blur-xl shadow-sm' : 'bg-transparent')
+        }>
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
                 <Link href="/" className="flex items-center gap-2.5">
                     <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-semibold italic text-white">
                         Q
                     </div>
                     <div className="leading-none">
-                        <div className="text-[15px] font-semibold tracking-tight text-white">HS Quality</div>
-                        <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-brand-300">
+                        <div className={`text-[15px] font-semibold tracking-tight ${solid ? 'text-ink-900' : 'text-white'}`}>HS Quality</div>
+                        <div className={`mt-0.5 text-[10px] font-semibold uppercase tracking-widest ${solid ? 'text-brand-600' : 'text-brand-300'}`}>
                             Qualité & QVCT
                         </div>
                     </div>
                 </Link>
 
-                <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur lg:flex">
-                    {links.map(([label, href], i) => (
-                        <a
-                            key={href}
-                            href={href}
-                            className={
-                                'rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ' +
-                                (i === 0
-                                    ? 'bg-brand-600 text-white'
-                                    : 'text-white/70 hover:bg-white/10 hover:text-white')
-                            }
-                        >
+                <div className="hidden items-center gap-1 lg:flex">
+                    {links.map(([label, href]) => (
+                        <a key={href} href={href}
+                            className={`rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                                solid ? 'text-ink-600 hover:bg-ink-50 hover:text-ink-900' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                            }`}>
                             {label}
                         </a>
                     ))}
                 </div>
 
                 <div className="hidden items-center gap-2 lg:flex">
-                    <Link
-                        href="/login"
-                        className="rounded-full px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:text-white"
-                    >
+                    <Link href="/login" className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        solid ? 'text-ink-600 hover:text-ink-900' : 'text-white/70 hover:text-white'
+                    }`}>
                         Connexion
                     </Link>
-                    <a
-                        href="#cta"
-                        className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:bg-ink-50 hover:shadow-lg"
-                    >
-                        Démarrer gratuit
+                    <a href="#cta" className={`rounded-full px-5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+                        solid ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-white text-ink-900 hover:bg-ink-50'
+                    }`}>
+                        Démarrer gratuitement
                     </a>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                    className="rounded-full p-2 text-white hover:bg-white/10 lg:hidden"
-                    aria-label="Menu"
-                >
+                <button type="button" onClick={() => setMobileOpen(!mobileOpen)}
+                    className={`rounded-full p-2 lg:hidden ${solid ? 'text-ink-700 hover:bg-ink-50' : 'text-white hover:bg-white/10'}`}
+                    aria-label="Menu">
                     <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        {mobileOpen ? (
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        ) : (
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                        )}
+                        {mobileOpen
+                            ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
                     </svg>
                 </button>
             </div>
 
             {mobileOpen && (
-                <div className="border-t border-white/10 bg-ink-900 px-5 pb-5 pt-3 lg:hidden">
+                <div className={`border-t px-5 pb-5 pt-3 lg:hidden ${solid ? 'border-ink-100 bg-white' : 'border-white/10 bg-ink-900'}`}>
                     {links.map(([label, href]) => (
-                        <a
-                            key={href}
-                            href={href}
-                            onClick={() => setMobileOpen(false)}
-                            className="block py-2.5 text-[15px] font-medium text-white/85"
-                        >
+                        <a key={href} href={href} onClick={() => setMobileOpen(false)}
+                            className={`block py-2.5 text-[15px] font-medium ${solid ? 'text-ink-700' : 'text-white/85'}`}>
                             {label}
                         </a>
                     ))}
                     <div className="mt-3 flex gap-2">
-                        <Link
-                            href="/login"
-                            className="flex-1 rounded-full border border-white/15 px-4 py-2.5 text-center text-sm font-medium text-white/85"
-                        >
+                        <Link href="/login" className={`flex-1 rounded-full border px-4 py-2.5 text-center text-sm font-medium ${
+                            solid ? 'border-ink-200 text-ink-700' : 'border-white/15 text-white/85'
+                        }`}>
                             Connexion
                         </Link>
-                        <a
-                            href="#cta"
-                            className="flex-1 rounded-full bg-white px-4 py-2.5 text-center text-sm font-semibold text-ink-900"
-                        >
+                        <a href="#cta" className="flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
                             Démarrer
                         </a>
                     </div>
@@ -258,109 +467,151 @@ function Nav({
 //  HERO
 // ════════════════════════════════════════════════════════════════════════════
 
-function Hero({ scrollY }: { scrollY: number }) {
-    return (
-        <section id="hero" className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
-            <div
-                className="absolute inset-0 -z-10"
-                style={{
-                    transform: `translateY(${scrollY * 0.25}px) scale(${1 + scrollY * 0.0001})`,
-                    transition: 'transform 0.05s linear',
-                }}
-            >
-                <div className="size-full bg-cover bg-center" style={{ backgroundImage: `url(${PHOTO_HERO})` }} />
-            </div>
+const HERO_PHOTO = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&auto=format&fit=crop&q=80';
+const TESTIMONIAL_PHOTO = 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=900&auto=format&fit=crop&q=80';
 
-            <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                    background:
-                        'linear-gradient(110deg, rgba(15,23,42,0.93) 0%, rgba(15,23,42,0.78) 45%, rgba(15,23,42,0.5) 100%)',
-                }}
-            />
+function HeroSection() {
+    return (
+        <section className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
+            {/* Background photo */}
+            <div className="absolute inset-0">
+                <img src={HERO_PHOTO} alt="" className="size-full object-cover" loading="eager" />
+                <div className="absolute inset-0" style={{
+                    background: 'linear-gradient(135deg, rgba(8,36,67,0.92) 0%, rgba(15,23,42,0.82) 40%, rgba(15,23,42,0.70) 100%)',
+                }} />
+            </div>
+            {/* Mesh gradient orbs — on top of photo for color accent */}
+            <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 size-[700px] rounded-full opacity-40"
+                style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.35), transparent 70%)', animation: 'meshMove 12s ease-in-out infinite' }} />
+            <div aria-hidden className="pointer-events-none absolute -left-32 bottom-[-20%] size-[600px] rounded-full opacity-30"
+                style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.25), transparent 70%)', animation: 'meshMove2 14s ease-in-out infinite' }} />
             <div className="grain" aria-hidden />
 
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -right-32 -top-40 size-[700px] rounded-full"
-                style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.30), transparent 70%)' }}
-            />
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -left-32 bottom-[-30%] size-[600px] rounded-full"
-                style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.22), transparent 70%)' }}
-            />
-
-            <div className="relative mx-auto max-w-7xl px-5 pb-32 pt-32 sm:px-8 sm:pt-44">
-                <div className="fade-up au-4 mb-12 flex flex-wrap justify-end gap-10 lg:absolute lg:right-8 lg:top-32 lg:mb-0">
-                    <Stat n="10+" label="années d'expertise" />
-                    <Stat n="50+" label="structures pilotes" />
-                </div>
-
-                <div className="max-w-4xl">
-                    <span className="fade-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[12px] font-medium text-white/85 backdrop-blur">
-                        <span
-                            className="size-1.5 rounded-full bg-brand-300"
-                            style={{ animation: 'pulseDot 2s infinite' }}
-                        />
-                        Bâtir une démarche qualité durable
+            <div className="relative mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-40 lg:pt-48">
+                {/* Badge */}
+                <div className="fade-in delay-1 flex justify-center">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[12px] font-medium text-white/85 backdrop-blur">
+                        <span className="size-1.5 rounded-full bg-sage-400" style={{ animation: 'pulse 2s infinite' }} />
+                        Plateforme conforme HAS · RGPD · HDS
                     </span>
-
-                    <h1 className="h-display fade-up au-1 mt-7 text-5xl text-white sm:text-6xl lg:text-[80px]">
-                        Pilotez la <em className="accent-text">qualité</em>
-                        <br />
-                        de votre service
-                        <br />
-                        <em className="text-white/70">à domicile.</em>
-                    </h1>
-
-                    <p className="fade-up au-2 mt-8 max-w-xl text-base font-light leading-relaxed text-white/75 sm:text-lg">
-                        HS Quality structure le pilotage qualité et QVCT des structures médico-sociales —
-                        interventions, incidents, audits, formations. Du terrain à la direction, en temps réel,
-                        en conformité <span className="font-medium text-white">HAS / RGPD / HDS</span>.
-                    </p>
-
-                    <div className="fade-up au-3 mt-10 flex flex-wrap gap-3">
-                        <a
-                            href="#cta"
-                            className="glow-cta inline-flex items-center gap-2 rounded-full bg-brand-600 px-7 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-2xl"
-                        >
-                            Démarrer gratuit
-                            <Arrow />
-                        </a>
-                        <a
-                            href="#approach"
-                            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur transition-all hover:border-white/35 hover:bg-white/10"
-                        >
-                            En savoir plus
-                        </a>
-                    </div>
                 </div>
 
-                <div className="fade-up au-5 mt-20 flex items-center gap-3 text-xs text-white/50">
-                    <span className="block h-px w-10 bg-white/30" />
-                    Faites défiler
+                {/* Headline */}
+                <h1 className="fade-in delay-2 mx-auto mt-8 max-w-4xl text-center text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-7xl" style={{ lineHeight: 1.1 }}>
+                    La qualité du soin à domicile,{' '}
+                    <span className="gradient-text-light">enfin pilotée.</span>
+                </h1>
+
+                {/* Subtitle */}
+                <p className="fade-in delay-3 mx-auto mt-6 max-w-xl text-center text-base font-light leading-relaxed text-white/65 sm:text-lg">
+                    HS Quality structure le pilotage qualité et QVCT des services à domicile — interventions, incidents, audits, formations. Du terrain à la direction, en temps réel.
+                </p>
+
+                {/* CTAs */}
+                <div className="fade-in delay-4 mt-10 flex flex-wrap items-center justify-center gap-3">
+                    <a href="#cta"
+                        className="btn-glow inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl">
+                        Démarrer gratuitement
+                        <Arrow />
+                    </a>
+                    <a href="#modules"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition-all hover:border-white/35 hover:bg-white/10">
+                        Voir la démo
+                    </a>
+                </div>
+
+                {/* Social proof */}
+                <p className="fade-in delay-4 mt-8 text-center text-sm text-white/45">
+                    50+ structures · 94% traçabilité · &lt; 2 min par incident
+                </p>
+
+                {/* Dashboard preview */}
+                <div className="fade-in delay-5 mx-auto mt-14 max-w-4xl pb-20">
+                    <DashboardPreview />
                 </div>
             </div>
         </section>
     );
 }
 
-function Stat({ n, label }: { n: string; label: string }) {
+function DashboardPreview() {
     return (
-        <div className="text-right">
-            <div className="text-3xl font-light text-white sm:text-4xl">{n}</div>
-            <div className="mt-1 text-[11px] uppercase tracking-widest text-white/55">{label}</div>
+        <div className="dashboard-glow relative">
+            <div className="overflow-hidden rounded-t-2xl border border-white/10 bg-ink-800 shadow-2xl">
+                {/* Window chrome */}
+                <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
+                    <div className="size-2.5 rounded-full bg-danger-500/60" />
+                    <div className="size-2.5 rounded-full bg-warning-500/60" />
+                    <div className="size-2.5 rounded-full bg-sage-500/60" />
+                    <span className="ml-3 text-[11px] text-white/40">app.hsquality.fr/dashboard</span>
+                </div>
+
+                {/* KPI grid */}
+                <div className="p-4 sm:p-6">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {[
+                            { label: 'Score qualité', value: '87', sub: '/100', accent: true },
+                            { label: 'Interventions', value: '1 248', sub: 'ce mois', accent: false },
+                            { label: 'Incidents ouverts', value: '3', sub: 'à traiter', accent: false },
+                            { label: 'Traçabilité', value: '94%', sub: '↑ +6%', accent: false },
+                        ].map((kpi) => (
+                            <div key={kpi.label} className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                                <p className="text-[11px] text-white/50">{kpi.label}</p>
+                                <div className="mt-1.5 flex items-baseline gap-1">
+                                    <span className={`mono text-2xl font-semibold ${kpi.accent ? 'text-sage-300' : 'text-white'}`}>{kpi.value}</span>
+                                    <span className="text-[11px] text-white/40">{kpi.sub}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Chart + incidents list */}
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                            <p className="text-[11px] text-white/50">Interventions / semaine</p>
+                            <div className="mt-3 flex items-end gap-1.5" style={{ height: 64 }}>
+                                {[40, 55, 35, 70, 60, 85, 75, 90, 65, 80, 72, 88].map((h, i) => (
+                                    <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-brand-700 to-brand-400"
+                                        style={{ height: `${h}%`, minHeight: 4 }} />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[11px] text-white/50">Incidents récents</p>
+                                <span className="rounded-full bg-danger-500/20 px-2 py-0.5 text-[10px] font-semibold text-danger-200">2 graves</span>
+                            </div>
+                            <div className="mt-3 space-y-2">
+                                {[
+                                    { who: 'Chute · Mme D.', tag: 'Grave', tone: 'danger' as const },
+                                    { who: 'Erreur médic. · M. P.', tag: 'En analyse', tone: 'warning' as const },
+                                    { who: 'Retard · Mme R.', tag: 'Clos', tone: 'mute' as const },
+                                ].map((row) => (
+                                    <div key={row.who} className="flex items-center justify-between text-[11px]">
+                                        <span className="text-white/70">{row.who}</span>
+                                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                                            row.tone === 'danger' ? 'bg-danger-500/20 text-danger-200'
+                                                : row.tone === 'warning' ? 'bg-warning-500/20 text-warning-200'
+                                                    : 'bg-white/10 text-white/40'
+                                        }`}>{row.tag}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Fade to background */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900 to-transparent" />
         </div>
     );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  TRUST BAR
+//  LOGO BAR (marquee)
 // ════════════════════════════════════════════════════════════════════════════
 
-function TrustBar() {
+function LogoBar() {
     const items = [
         'HAS · Évaluation externe',
         'AFNOR NF X50-056',
@@ -376,10 +627,7 @@ function TrustBar() {
         <div className="marquee relative overflow-hidden border-y border-ink-100 bg-ink-50/60 py-5">
             <div className="marquee-track flex gap-12 whitespace-nowrap">
                 {[...items, ...items].map((it, i) => (
-                    <span
-                        key={i}
-                        className="flex shrink-0 items-center gap-3 text-xs font-medium uppercase tracking-widest text-ink-500"
-                    >
+                    <span key={i} className="flex shrink-0 items-center gap-3 text-xs font-medium uppercase tracking-widest text-ink-500">
                         <span className="size-1 rounded-full bg-brand-500" />
                         {it}
                     </span>
@@ -392,581 +640,290 @@ function TrustBar() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  INTRO
+//  FEATURES (6 cards, 3x2 grid)
 // ════════════════════════════════════════════════════════════════════════════
 
-function Intro() {
+function FeaturesSection() {
     return (
-        <section className="relative bg-white px-5 py-24 sm:px-8 sm:py-32">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 lg:grid-cols-3">
-                <div className="reveal slide-right">
-                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
-                        Notre approche
-                    </span>
-                    <p className="mt-6 max-w-sm text-sm leading-relaxed text-ink-600">
-                        Résolvez vos enjeux qualité avec des outils éprouvés —{' '}
-                        <span className="font-medium text-ink-900">déployés en deux semaines</span>, sans
-                        bouleverser vos équipes.
-                    </p>
-                    <a
-                        href="#approach"
-                        className="mt-8 inline-flex items-center gap-2 rounded-full bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-lg"
-                    >
-                        Découvrir
-                        <Arrow />
-                    </a>
-                </div>
-
-                <div className="reveal text-center lg:col-span-2">
-                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
-                        Métriques
-                    </span>
-                    <h2 className="h-display mt-6 text-3xl sm:text-5xl">
-                        Transformer la qualité du soin pour
-                        <br />
-                        <em className="accent-text">un avenir plus serein.</em>
-                    </h2>
-                    <p className="mx-auto mt-5 max-w-xl text-base font-light leading-relaxed text-ink-600">
-                        Un outil pensé pour les coordinateurs, dirigeants et référents qualité — qui mesure ce qui
-                        compte vraiment et accompagne la décision au quotidien.
-                    </p>
-
-                    <div className="float mt-12">
-                        <DashboardMockup />
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function DashboardMockup() {
-    return (
-        <div className="mx-auto max-w-2xl">
-            <div
-                className="relative overflow-hidden rounded-3xl p-6 shadow-2xl ring-1 ring-brand-500/20 sm:p-8"
-                style={{
-                    background:
-                        'linear-gradient(135deg, #082443 0%, #0B385E 60%, #0F4C81 100%)',
-                }}
-            >
-                <div className="grain" aria-hidden />
-                <div className="relative grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl bg-white/[0.06] p-5 backdrop-blur ring-1 ring-white/10">
-                        <p className="text-xs font-medium text-white/70">Score qualité</p>
-                        <div className="mt-2 flex items-baseline gap-1">
-                            <span className="mono text-4xl font-semibold text-white">87</span>
-                            <span className="text-xs font-medium text-brand-200">/100</span>
-                        </div>
-                        <p className="mt-1 text-[11px] text-sage-300">↑ +6 vs trimestre</p>
-                        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
-                            <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-brand-400 to-sage-400" />
-                        </div>
-                    </div>
-                    <div className="rounded-2xl bg-white/[0.06] p-5 backdrop-blur ring-1 ring-white/10">
-                        <p className="text-xs font-medium text-white/70">Interventions</p>
-                        <div className="mono mt-2 text-4xl font-semibold text-white">1 248</div>
-                        <p className="mt-1 text-[11px] text-white/55">ce mois-ci</p>
-                        <div className="mt-3 flex items-end gap-1">
-                            {[40, 55, 35, 70, 60, 85, 75].map((h, i) => (
-                                <div
-                                    key={i}
-                                    className="flex-1 rounded-sm bg-gradient-to-t from-brand-700 to-brand-300"
-                                    style={{ height: `${h}%`, minHeight: 6 }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <div className="relative mt-4 rounded-2xl bg-white/[0.06] p-5 backdrop-blur ring-1 ring-white/10">
-                    <div className="flex items-center justify-between">
-                        <p className="text-xs font-medium text-white/70">Incidents récents</p>
-                        <span className="rounded-full bg-rose-400/20 px-2 py-0.5 text-[10px] font-semibold text-rose-200">
-                            2 graves à traiter
-                        </span>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                        {[
-                            { who: 'Chute · Mme D.', tag: 'Grave', tone: 'rose' },
-                            { who: 'Erreur médic. · M. P.', tag: 'En analyse', tone: 'amber' },
-                            { who: 'Situation danger · Mme R.', tag: 'Clos', tone: 'mute' },
-                        ].map((row) => (
-                            <div key={row.who} className="flex items-center justify-between text-xs">
-                                <span className="text-white/85">{row.who}</span>
-                                <span
-                                    className={
-                                        'rounded-full px-2 py-0.5 text-[10px] font-semibold ' +
-                                        (row.tone === 'rose'
-                                            ? 'bg-rose-400/20 text-rose-200'
-                                            : row.tone === 'amber'
-                                              ? 'bg-amber-400/20 text-amber-200'
-                                              : 'bg-white/10 text-white/55')
-                                    }
-                                >
-                                    {row.tag}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-//  HOW IT WORKS
-// ════════════════════════════════════════════════════════════════════════════
-
-function HowItWorks() {
-    return (
-        <section id="approach" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+        <section id="features" className="bg-white px-5 py-24 sm:px-8 sm:py-32">
             <div className="mx-auto max-w-7xl">
-                <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-2 lg:gap-16">
-                    <div className="reveal">
-                        <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
-                            Notre méthode
-                        </span>
-                        <h2 className="h-display mt-5 text-4xl sm:text-5xl">
-                            Mesurer ce qui se passe
-                            <br />
-                            <em className="accent-text">vraiment sur le terrain.</em>
-                        </h2>
-                    </div>
-                    <p className="reveal text-base font-light leading-relaxed text-ink-600 lg:max-w-md">
-                        De la traçabilité de chaque intervention à l'analyse des incidents et des audits, HS Quality
-                        donne aux équipes des outils simples, conformes, et qui s'utilisent réellement au quotidien.
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Fonctionnalités
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Tout ce dont vous avez besoin,{' '}
+                        <span className="gradient-text">rien de superflu.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Six modules pensés pour le quotidien des structures médico-sociales, du terrain à la direction.
                     </p>
-                </div>
+                </Reveal>
 
-                <div id="modules" className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
-                    <HowCard
-                        n="1"
-                        title="Tracer chaque intervention"
-                        desc="Pointage géolocalisé, voice-to-text, signature électronique. Chaque visite est documentée et consultable en temps réel."
-                        mock={<MockInterventions />}
-                    />
-                    <HowCard
-                        n="2"
-                        title="Analyser les incidents"
-                        desc="Déclaration mobile en moins de 2 minutes, classification automatique, analyse 5-pourquoi, notification ARS si grave."
-                        mock={<MockIncidents />}
-                    />
-                    <HowCard
-                        n="3"
-                        title="Piloter la conformité"
-                        desc="Audits HAS / AFNOR / ISO 9001 sur tablette, scoring automatique, plan d'amélioration généré depuis les écarts."
-                        mock={<MockAudit />}
-                    />
+                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {FEATURES.map((f, i) => (
+                        <Reveal key={f.title} delay={0.06 * i}>
+                            <FeatureCard icon={f.icon} title={f.title} desc={f.desc} />
+                        </Reveal>
+                    ))}
                 </div>
             </div>
         </section>
     );
 }
 
-function HowCard({ n, title, desc, mock }: { n: string; title: string; desc: string; mock: React.ReactNode }) {
-    return (
-        <article className="lift group flex flex-col overflow-hidden rounded-3xl border border-ink-100 bg-white p-6">
-            <div className="flex items-start justify-between">
-                <h3 className="text-base font-semibold text-ink-900">{title}</h3>
-                <span className="mono text-[11px] text-ink-400">[{n}]</span>
-            </div>
-            <p className="mt-3 text-sm font-light leading-relaxed text-ink-600">{desc}</p>
-            <div className="mt-6 -mx-1 -mb-1 overflow-hidden rounded-2xl">{mock}</div>
-        </article>
-    );
-}
-
-function MockInterventions() {
-    return (
-        <div
-            className="relative overflow-hidden rounded-2xl p-5 ring-1 ring-brand-500/20"
-            style={{ background: 'linear-gradient(135deg, #082443, #0F4C81)' }}
-        >
-            <div className="grain" aria-hidden />
-            <div className="relative">
-                <div className="mono text-5xl font-semibold tracking-tight text-white">94%</div>
-                <p className="mt-1 text-xs text-brand-200">Interventions tracées</p>
-                <div className="mt-5 space-y-1.5 text-[11px]">
-                    {[
-                        ['Lun', 'Mme Dupont', 95],
-                        ['Mar', 'M. Bernard', 70],
-                        ['Mer', 'Mme Léon', 100],
-                    ].map(([d, n, p]) => (
-                        <div key={String(d)} className="flex items-center gap-2">
-                            <span className="w-8 text-white/45">{d}</span>
-                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-                                <div
-                                    className="h-full rounded-full bg-gradient-to-r from-brand-500 to-sage-400"
-                                    style={{ width: `${p}%` }}
-                                />
-                            </div>
-                            <span className="mono w-8 text-right text-white/70">{p}%</span>
-                            <span className="hidden flex-1 truncate text-white/55 sm:block">{n}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function MockIncidents() {
-    return (
-        <div
-            className="relative overflow-hidden rounded-2xl p-5 ring-1 ring-brand-500/20"
-            style={{ background: 'linear-gradient(135deg, #0F4C81, #082443)' }}
-        >
-            <div className="grain" aria-hidden />
-            <div className="relative">
-                <p className="text-[11px] uppercase tracking-widest text-brand-200">Données incidents</p>
-                <div className="mt-3 space-y-2">
-                    {[
-                        ['Déclarés ce mois', '12'],
-                        ['Délai moyen', '3,2 j'],
-                        ['Critiques', '0'],
-                    ].map(([k, v]) => (
-                        <div
-                            key={k}
-                            className="flex items-center justify-between rounded-lg bg-white/[0.06] px-3 py-1.5 ring-1 ring-white/10"
-                        >
-                            <span className="text-xs text-white/70">{k}</span>
-                            <span className="mono text-xs font-semibold text-white">{v}</span>
-                        </div>
-                    ))}
-                </div>
-                <div className="mt-3 rounded-lg bg-sage-400/15 px-3 py-2 text-xs text-sage-200 ring-1 ring-sage-400/20">
-                    ✓ 100% des graves notifiés ARS sous 24h
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function MockAudit() {
-    return (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sage-50 to-white p-5 ring-1 ring-sage-100">
-            <div className="flex items-center justify-between">
-                <p className="text-[11px] uppercase tracking-widest text-ink-500">Audit HAS · 2026</p>
-                <span className="rounded-full bg-sage-100 px-2 py-0.5 text-[10px] font-semibold text-sage-700">
-                    Finalisé
-                </span>
-            </div>
-            <div className="mt-4 flex items-baseline gap-1">
-                <span className="mono text-5xl font-semibold tracking-tight text-ink-900">87</span>
-                <span className="text-sm text-ink-500">/100</span>
-            </div>
-            <div className="mt-4 space-y-1.5">
-                {[
-                    ['Bientraitance', 92],
-                    ['Coordination', 84],
-                    ['Traçabilité', 88],
-                ].map(([k, p]) => (
-                    <div key={String(k)}>
-                        <div className="flex justify-between text-[11px] text-ink-600">
-                            <span>{k}</span>
-                            <span className="mono">{p}%</span>
-                        </div>
-                        <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-ink-100">
-                            <div
-                                className="h-full rounded-full bg-gradient-to-r from-sage-500 to-brand-500"
-                                style={{ width: `${p}%` }}
-                            />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
 // ════════════════════════════════════════════════════════════════════════════
-//  COVERAGE
+//  BENTO GRID
 // ════════════════════════════════════════════════════════════════════════════
 
-function Coverage() {
-    const types = [
-        'SAAD',
-        'SSIAD',
-        'SPASAD',
-        'ESAD',
-        'CCAS',
-        'Mandataires',
-        'EHPAD',
-        'Foyers de vie',
-        'CSI',
-        'ITEP',
+function BentoGrid() {
+    return (
+        <section id="modules" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
+                        Modules
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Une vue sur chaque dimension{' '}
+                        <span className="gradient-text">qualité.</span>
+                    </h2>
+                </Reveal>
+
+                {/* Top row: 2+1 */}
+                <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <Reveal delay={0} className="lg:col-span-2">
+                        <BentoInterventions />
+                    </Reveal>
+                    <Reveal delay={0.08}>
+                        <BentoIncidents />
+                    </Reveal>
+                </div>
+
+                {/* Bottom row: 1+2 */}
+                <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <Reveal delay={0.14}>
+                        <BentoAudits />
+                    </Reveal>
+                    <Reveal delay={0.2} className="lg:col-span-2">
+                        <BentoQvct />
+                    </Reveal>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function BentoInterventions() {
+    const interventions = [
+        { time: '08:30', name: 'Mme Dupont', type: 'Aide à la toilette', status: 'Terminée' },
+        { time: '09:15', name: 'M. Bernard', type: 'Préparation repas', status: 'En cours' },
+        { time: '10:00', name: 'Mme Léon', type: 'Accompagnement', status: 'Planifiée' },
+        { time: '11:30', name: 'M. Petit', type: 'Aide au ménage', status: 'Planifiée' },
     ];
     return (
-        <section className="bg-white px-5 py-20 sm:px-8 sm:py-24">
-            <div className="mx-auto max-w-5xl text-center">
-                <h2 className="h-display text-3xl sm:text-4xl">
-                    Pensé pour toutes les structures,
-                    <br />
-                    <em className="accent-text">avec l'aide de nos référents qualité.</em>
-                </h2>
-                <p className="mx-auto mt-5 max-w-xl text-base font-light text-ink-600">
-                    Nos référents qualité accompagnent chaque type de structure médico-sociale dans la mise en
-                    place.
-                </p>
-
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5">
-                    {types.map((t, i) => (
-                        <span
-                            key={t}
-                            className={
-                                'rounded-full border px-5 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 hover:scale-105 ' +
-                                (i % 4 === 1
-                                    ? 'border-ink-200 bg-white text-ink-900 shadow-sm'
-                                    : i % 4 === 2
-                                      ? 'border-sage-200 bg-sage-50 text-sage-800'
-                                      : 'border-ink-100 bg-ink-50 text-ink-500')
-                            }
-                        >
-                            {t}
-                        </span>
-                    ))}
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-base font-semibold text-ink-900">Interventions du jour</h3>
+                    <p className="mt-1 text-sm text-ink-500">Suivi en temps réel</p>
                 </div>
+                <span className="mono rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-700">12 / 14</span>
             </div>
-        </section>
+            <div className="mt-5 space-y-2.5">
+                {interventions.map((item) => (
+                    <div key={item.time + item.name} className="flex items-center gap-3 rounded-xl bg-ink-50/80 px-4 py-2.5">
+                        <span className="mono w-12 text-xs text-ink-400">{item.time}</span>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-ink-900">{item.name}</p>
+                            <p className="text-xs text-ink-500">{item.type}</p>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                            item.status === 'Terminée' ? 'bg-sage-50 text-sage-700'
+                                : item.status === 'En cours' ? 'bg-brand-50 text-brand-700'
+                                    : 'bg-ink-100 text-ink-500'
+                        }`}>{item.status}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-//  LIFETIME
-// ════════════════════════════════════════════════════════════════════════════
-
-function Lifetime() {
-    const items = ['Interventions', 'Incidents & EI', 'Plans de soins', 'Audits HAS', 'QVCT'];
+function BentoIncidents() {
     return (
-        <section className="relative overflow-hidden bg-white px-5 py-24 sm:px-8 sm:py-32">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
-                <ul className="reveal slide-right space-y-3.5">
-                    {items.map((label, i) => (
-                        <li key={label} className="flex items-center gap-3">
-                            <div
-                                className={
-                                    'mono flex size-9 items-center justify-center rounded-xl text-xs font-semibold ' +
-                                    (i === 2 ? 'bg-brand-700 text-white' : 'bg-ink-100 text-ink-600')
-                                }
-                            >
-                                {String(i + 1).padStart(2, '0')}
-                            </div>
-                            <span
-                                className={
-                                    'text-sm font-medium ' + (i === 2 ? 'text-ink-900' : 'text-ink-500')
-                                }
-                            >
-                                {label}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <h3 className="text-base font-semibold text-ink-900">Incidents</h3>
+            <p className="mt-1 text-sm text-ink-500">Ce mois-ci</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-danger-50 p-3 text-center">
+                    <span className="mono text-2xl font-semibold text-danger-600">2</span>
+                    <p className="mt-0.5 text-[11px] text-danger-600">Graves</p>
+                </div>
+                <div className="rounded-xl bg-warning-50 p-3 text-center">
+                    <span className="mono text-2xl font-semibold text-warning-600">5</span>
+                    <p className="mt-0.5 text-[11px] text-warning-600">En analyse</p>
+                </div>
+            </div>
+            <div className="mt-4 rounded-xl bg-sage-50 px-4 py-3">
+                <div className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-sage-500" style={{ animation: 'pulse 2s infinite' }} />
+                    <span className="text-xs font-medium text-sage-700">100% notifiés ARS &lt; 24h</span>
+                </div>
+            </div>
+            <div className="mt-3 space-y-1.5">
+                {[
+                    { label: 'Déclarés ce mois', val: '12' },
+                    { label: 'Délai moyen résolution', val: '3,2 j' },
+                ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-xs">
+                        <span className="text-ink-500">{row.label}</span>
+                        <span className="mono font-semibold text-ink-900">{row.val}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
-                <div className="reveal slide-left relative mx-auto aspect-square w-full max-w-md">
-                    <svg className="spin-slow absolute inset-0 size-full" viewBox="0 0 360 360" aria-hidden>
-                        <g stroke="currentColor" className="text-ink-300">
-                            {Array.from({ length: 60 }).map((_, i) => {
-                                const angle = (i * 6 * Math.PI) / 180;
-                                const x1 = 180 + Math.cos(angle) * 168;
-                                const y1 = 180 + Math.sin(angle) * 168;
-                                const x2 = 180 + Math.cos(angle) * 178;
-                                const y2 = 180 + Math.sin(angle) * 178;
-                                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} strokeWidth={1} />;
-                            })}
+function BentoAudits() {
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-ink-900">Audit HAS · 2026</h3>
+                <span className="rounded-full bg-sage-50 px-2.5 py-0.5 text-[11px] font-semibold text-sage-700">Finalisé</span>
+            </div>
+            <div className="mt-5 flex items-baseline gap-1">
+                <span className="mono text-4xl font-semibold tracking-tight text-ink-900">87</span>
+                <span className="text-sm text-ink-400">/100</span>
+            </div>
+            <div className="mt-5 space-y-3">
+                {[
+                    { label: 'Bientraitance', pct: 92 },
+                    { label: 'Coordination', pct: 84 },
+                    { label: 'Traçabilité', pct: 88 },
+                    { label: 'Droits & éthique', pct: 79 },
+                ].map((item) => (
+                    <div key={item.label}>
+                        <div className="flex justify-between text-[11px]">
+                            <span className="text-ink-600">{item.label}</span>
+                            <span className="mono font-medium text-ink-900">{item.pct}%</span>
+                        </div>
+                        <div className="mt-1">
+                            <AnimatedBar width={item.pct} className="bg-gradient-to-r from-sage-500 to-brand-400" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BentoQvct() {
+    const dimensions = ['Sens du travail', 'Charge', 'Autonomie', 'Relations', 'Reconnaissance'];
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-base font-semibold text-ink-900">Baromètre QVCT</h3>
+                    <p className="mt-1 text-sm text-ink-500">Dernier trimestre</p>
+                </div>
+                <span className="mono rounded-lg bg-sage-50 px-3 py-1.5 text-sm font-semibold text-sage-700">7.2 / 10</span>
+            </div>
+            <div className="mt-5 grid grid-cols-1 items-center gap-6 sm:grid-cols-2">
+                {/* Radar chart SVG */}
+                <div className="flex justify-center">
+                    <svg viewBox="0 0 200 200" className="size-48" aria-hidden>
+                        {/* Grid */}
+                        <g stroke="currentColor" className="text-ink-200" fill="none">
+                            <polygon points="100,30 165,65 145,140 55,140 35,65" />
+                            <polygon points="100,50 148,75 133,125 67,125 52,75" />
+                            <polygon points="100,70 130,85 120,110 80,110 70,85" />
+                        </g>
+                        {/* Data */}
+                        <polygon
+                            points="100,38 158,70 138,132 62,125 45,68"
+                            fill="rgba(63,150,112,.25)"
+                            stroke="rgb(63,150,112)"
+                            strokeWidth="2"
+                        />
+                        {/* Labels */}
+                        <g fill="currentColor" className="text-ink-500" fontSize="8" fontFamily="Poppins">
+                            <text x="100" y="22" textAnchor="middle">Sens</text>
+                            <text x="175" y="68" textAnchor="start">Charge</text>
+                            <text x="152" y="148" textAnchor="start">Autonomie</text>
+                            <text x="48" y="148" textAnchor="end">Relations</text>
+                            <text x="25" y="68" textAnchor="end">Reconn.</text>
+                        </g>
+                        {/* Dots */}
+                        <g fill="rgb(63,150,112)">
+                            <circle cx="100" cy="38" r="3" />
+                            <circle cx="158" cy="70" r="3" />
+                            <circle cx="138" cy="132" r="3" />
+                            <circle cx="62" cy="125" r="3" />
+                            <circle cx="45" cy="68" r="3" />
                         </g>
                     </svg>
-
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span className="rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
-                            Suivi qualité
-                        </span>
-                        <h3 className="h-display mt-4 max-w-[10ch] text-3xl sm:text-4xl">
-                            Un suivi qui s'inscrit dans <em className="accent-text">la durée.</em>
-                        </h3>
-                        <p className="mt-3 max-w-[18ch] text-sm font-light leading-relaxed text-ink-500">
-                            Toutes vos données qualité conservées 10 ans en France, accessibles instantanément.
-                        </p>
-                    </div>
+                </div>
+                {/* Tags */}
+                <div className="space-y-2">
+                    {dimensions.map((dim, i) => {
+                        const scores = [8.1, 6.4, 7.8, 7.5, 6.8];
+                        return (
+                            <div key={dim} className="flex items-center justify-between rounded-lg bg-ink-50/80 px-3 py-2">
+                                <span className="text-sm text-ink-700">{dim}</span>
+                                <span className={`mono text-sm font-semibold ${scores[i] >= 7.5 ? 'text-sage-600' : scores[i] >= 6.5 ? 'text-warning-600' : 'text-danger-600'}`}>
+                                    {scores[i]}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
-        </section>
+        </div>
     );
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  DECISIONS — dark brand-sage
+//  METRICS (count-up)
 // ════════════════════════════════════════════════════════════════════════════
 
-function DecisionsSection() {
+function MetricsSection() {
+    const [refYears, valYears] = useCountUp(10);
+    const [refStructures, valStructures] = useCountUp(50);
+    const [refTrace, valTrace] = useCountUp(94);
+
     return (
-        <section
-            className="relative overflow-hidden px-5 py-24 text-white sm:px-8 sm:py-32"
-            style={{
-                background:
-                    'linear-gradient(135deg, #082443 0%, #0B385E 50%, #0F4C81 100%)',
-            }}
-        >
-            <div className="grain" aria-hidden />
-            <div
-                aria-hidden
-                className="pointer-events-none absolute -right-20 top-20 size-[600px] rounded-full"
-                style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.28), transparent 70%)' }}
-            />
-
-            <div className="relative mx-auto max-w-7xl text-center">
-                <span className="reveal inline-block rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-white/85 backdrop-blur">
-                    Système de décision
-                </span>
-
-                <h2 className="reveal h-display mx-auto mt-7 max-w-3xl text-4xl text-white sm:text-5xl lg:text-6xl">
-                    Transformer la donnée en
-                    <br />
-                    <em className="accent-text">décisions de qualité.</em>
-                </h2>
-
-                <p className="reveal mx-auto mt-6 max-w-xl text-base font-light leading-relaxed text-white/70">
-                    Du suivi temps réel à l'analyse longitudinale — les bonnes informations, au bon moment, pour
-                    les bons acteurs.
-                </p>
-
-                <div className="mt-16 grid grid-cols-1 gap-5 lg:grid-cols-3">
-                    <DecisionCard
-                        kicker="Anticipation"
-                        title="Détecter avant que ça arrive."
-                        desc="Analyse des tendances, signaux faibles QVCT, prédiction des risques par bénéficiaire et intervenant."
-                        mock={<MockPredictive />}
-                    />
-                    <DecisionCard
-                        kicker="Équilibre"
-                        title="Mettre en lumière l'invisible."
-                        desc="Cartographie des dimensions qualité, comparaison sectorielle anonymisée, vision multi-sites."
-                        mock={<MockRadar />}
-                    />
-                    <DecisionCard
-                        kicker="Continuité"
-                        title="Petites actions, grands effets."
-                        desc="Plan d'amélioration suivi au quotidien, rappels intelligents, célébration des progrès."
-                        mock={<MockCalendar />}
-                    />
+        <section className="bg-white px-5 py-20 sm:px-8 sm:py-28">
+            <div className="mx-auto max-w-5xl">
+                <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+                    <Reveal className="text-center">
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refYears}>{valYears}</span>+
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">années d'expertise</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.08}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refStructures}>{valStructures}</span>+
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">structures accompagnées</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.16}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refTrace}>{valTrace}</span>%
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">traçabilité terrain</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.24}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            &lt; 2 min
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">par incident déclaré</p>
+                    </Reveal>
                 </div>
             </div>
         </section>
-    );
-}
-
-function DecisionCard({
-    kicker,
-    title,
-    desc,
-    mock,
-}: {
-    kicker: string;
-    title: string;
-    desc: string;
-    mock: React.ReactNode;
-}) {
-    return (
-        <article className="lift group rounded-3xl bg-white/[0.05] p-6 text-left ring-1 ring-white/10 backdrop-blur transition-all hover:bg-white/[0.08] hover:ring-sage-400/30">
-            <div className="overflow-hidden rounded-2xl">{mock}</div>
-            <span className="mt-6 inline-block rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-200">
-                {kicker}
-            </span>
-            <h3 className="mt-4 text-2xl font-light text-white">{title}</h3>
-            <p className="mt-2 text-sm font-light leading-relaxed text-white/65">{desc}</p>
-        </article>
-    );
-}
-
-function MockPredictive() {
-    return (
-        <div
-            className="relative aspect-[3/2] overflow-hidden p-4"
-            style={{ background: 'linear-gradient(135deg, #0F4C81, #082443)' }}
-        >
-            <div className="absolute inset-x-4 bottom-4 flex gap-1.5">
-                {['LU', 'MA', 'ME', 'JE', 'VE', 'SA'].map((d, i) => (
-                    <div
-                        key={d}
-                        className={
-                            'flex flex-1 flex-col items-center rounded-md py-2 ring-1 ring-inset transition-all ' +
-                            (i === 3 ? 'bg-sage-400/20 ring-sage-400/40' : 'bg-white/5 ring-white/10')
-                        }
-                    >
-                        <span className="text-[10px] uppercase text-white/60">{d}</span>
-                        <span className="mono mt-1 text-xs font-semibold text-white">{15 + i}</span>
-                    </div>
-                ))}
-            </div>
-            <span className="absolute left-4 top-4 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/85 backdrop-blur">
-                Prédictif
-            </span>
-        </div>
-    );
-}
-
-function MockRadar() {
-    return (
-        <div
-            className="relative aspect-[3/2] overflow-hidden p-4"
-            style={{ background: 'linear-gradient(135deg, #0B385E, #082443)' }}
-        >
-            <svg viewBox="0 0 200 130" className="absolute inset-0 size-full" aria-hidden>
-                <g stroke="white" strokeOpacity=".25" fill="none">
-                    <polygon points="100,30 160,65 140,110 60,110 40,65" />
-                    <polygon points="100,45 145,70 130,100 70,100 55,70" />
-                    <polygon points="100,60 130,75 120,90 80,90 70,75" />
-                </g>
-                <polygon
-                    points="100,40 150,68 125,105 70,100 55,70"
-                    fill="rgba(63,150,112,.45)"
-                    stroke="rgb(98,171,128)"
-                    strokeWidth="1.5"
-                />
-                <g fill="white" fontSize="8" fontFamily="Poppins">
-                    <text x="100" y="22" textAnchor="middle" opacity=".7">
-                        Énergie
-                    </text>
-                    <text x="170" y="68" textAnchor="middle" opacity=".7">
-                        Santé
-                    </text>
-                    <text x="22" y="68" textAnchor="middle" opacity=".7">
-                        Stress
-                    </text>
-                </g>
-            </svg>
-            <span className="absolute right-4 top-4 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/85 backdrop-blur">
-                Cartographie
-            </span>
-        </div>
-    );
-}
-
-function MockCalendar() {
-    return (
-        <div
-            className="relative aspect-[3/2] overflow-hidden p-4"
-            style={{ background: 'linear-gradient(135deg, #0F4C81, #082443)' }}
-        >
-            <span className="absolute left-4 top-4 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/85 backdrop-blur">
-                Janvier
-            </span>
-            <div className="absolute inset-x-4 bottom-4 grid grid-cols-7 gap-1">
-                {Array.from({ length: 14 }).map((_, i) => (
-                    <div
-                        key={i}
-                        className={
-                            'mono aspect-square rounded-md text-[10px] ' +
-                            (i === 5 || i === 9
-                                ? 'bg-sage-400 text-ink-900'
-                                : 'bg-white/[0.08] text-white/65 ring-1 ring-inset ring-white/10')
-                        }
-                    >
-                        <span className="flex h-full items-center justify-center">{i + 1}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
     );
 }
 
@@ -974,42 +931,48 @@ function MockCalendar() {
 //  TESTIMONIAL
 // ════════════════════════════════════════════════════════════════════════════
 
-function Testimonial() {
+function TestimonialSection() {
     return (
-        <section className="bg-white px-5 py-24 sm:px-8 sm:py-32">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2">
-                <div className="reveal group relative aspect-[4/5] overflow-hidden rounded-3xl">
-                    <img
-                        src={PHOTO_TEAM}
-                        alt="Équipe en visite à domicile"
-                        className="img-zoom absolute inset-0 size-full object-cover"
-                        loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink-900/85 via-transparent to-transparent" />
-                    <div className="absolute inset-x-6 bottom-6 text-white">
-                        <p className="text-[11px] font-semibold uppercase tracking-widest text-sage-300">Pilote</p>
-                        <p className="mt-1 text-2xl font-light italic">SAAD Horizon · Douala</p>
-                    </div>
-                </div>
+        <section className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
+                    {/* Photo */}
+                    <Reveal direction="right">
+                        <div className="group relative aspect-[4/5] overflow-hidden rounded-3xl lg:aspect-[3/4]">
+                            <img
+                                src={TESTIMONIAL_PHOTO}
+                                alt="Équipe de soins à domicile"
+                                className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-ink-900/70 via-transparent to-transparent" />
+                            <div className="absolute inset-x-6 bottom-6 text-white">
+                                <p className="text-[11px] font-semibold uppercase tracking-widest text-sage-300">Structure pilote</p>
+                                <p className="mt-1 text-xl font-light italic">SAAD Horizon · Douala</p>
+                            </div>
+                        </div>
+                    </Reveal>
 
-                <div className="reveal slide-left">
-                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
-                        Témoignage
-                    </span>
-                    <h3 className="h-display mt-5 text-3xl sm:text-4xl">
-                        <em className="accent-text">«&nbsp;</em>Nos coordinatrices déclarent les incidents en
-                        moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.
-                        <em className="accent-text">&nbsp;»</em>
-                    </h3>
-                    <div className="mt-8 flex items-center gap-4 border-t border-ink-100 pt-6">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-semibold text-white">
-                            MF
+                    {/* Quote */}
+                    <Reveal delay={0.15}>
+                        <div className="relative">
+                            <svg className="size-10 text-brand-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.166 11 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.166 21 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179z" />
+                            </svg>
+                            <blockquote className="mt-6 text-xl font-medium leading-relaxed text-ink-800 sm:text-2xl lg:text-3xl" style={{ lineHeight: 1.35 }}>
+                                Nos coordinatrices déclarent les incidents en moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.
+                            </blockquote>
+                            <div className="mt-8 flex items-center gap-4 border-t border-ink-100 pt-6">
+                                <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-semibold text-white">
+                                    MF
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-ink-900">Marie-France Essomba</p>
+                                    <p className="text-xs text-ink-500">Directrice qualité · SAAD Horizon</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-semibold text-ink-900">Marie-France Essomba</p>
-                            <p className="text-xs text-ink-500">Directrice qualité · SAAD Horizon</p>
-                        </div>
-                    </div>
+                    </Reveal>
                 </div>
             </div>
         </section>
@@ -1017,72 +980,71 @@ function Testimonial() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-//  BEGIN JOURNEY
+//  PRICING
 // ════════════════════════════════════════════════════════════════════════════
 
-function BeginJourney() {
+function PricingSection() {
     return (
-        <section id="about" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
-            <div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
-                <div className="lift group relative overflow-hidden rounded-3xl">
-                    <img
-                        src={PHOTO_JOURNEY}
-                        alt="Soin à domicile chaleureux"
-                        className="img-zoom absolute inset-0 size-full object-cover"
-                        loading="lazy"
-                    />
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            background:
-                                'linear-gradient(135deg, rgba(8,36,67,.88) 0%, rgba(8,36,67,.55) 100%)',
-                        }}
-                    />
-                    <div className="grain" aria-hidden />
-                    <div
-                        aria-hidden
-                        className="absolute -bottom-32 -right-20 size-[420px] rounded-full"
-                        style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.28), transparent 70%)' }}
-                    />
-                    <div className="relative p-10 sm:p-12">
-                        <h2 className="h-display text-4xl text-white sm:text-5xl">
-                            Démarrez votre <em className="accent-text">démarche qualité</em>
-                            <br />
-                            <em className="text-white/65">en toute sérénité.</em>
-                        </h2>
-                        <a
-                            href="#cta"
-                            className="mt-10 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:bg-ink-50 hover:shadow-2xl"
-                        >
-                            Démarrer gratuit
-                            <Arrow />
-                        </a>
-                    </div>
-                </div>
-
-                <div className="lift rounded-3xl bg-sage-50 p-10 sm:p-12">
-                    <div className="text-2xl font-light tracking-tight text-ink-900">
-                        HS<em className="accent-text">Q</em>uality
-                    </div>
-                    <p className="mt-6 max-w-md text-sm font-light leading-relaxed text-ink-700">
-                        Couvrez la traçabilité, la conformité HAS, la prévention QVCT et la formation continue —
-                        sur une seule plateforme, pensée pour les services à domicile.
+        <section id="pricing" className="bg-white px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Tarifs
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Un plan adapté à{' '}
+                        <span className="gradient-text">votre structure.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-lg text-base font-light text-ink-600">
+                        Essai pilote gratuit 3 mois. Sans engagement, sans carte bancaire.
                     </p>
+                </Reveal>
 
-                    <div className="mt-12 space-y-3 border-t border-sage-200/60 pt-8">
-                        {['Conditions générales', 'Politique de confidentialité', 'Conformité HDS / RGPD'].map(
-                            (label) => (
-                                <a
-                                    key={label}
-                                    href="#"
-                                    className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-ink-800 transition-colors hover:bg-white/60"
-                                >
-                                    {label}
-                                    <Arrow className="size-3.5" />
+                <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
+                    {PRICING.map((plan, i) => (
+                        <Reveal key={plan.name} delay={0.08 * i}>
+                            <div className={`card-hover relative flex h-full flex-col rounded-2xl border p-6 sm:p-8 ${
+                                plan.highlighted
+                                    ? 'border-brand-200 bg-brand-50/30 ring-1 ring-brand-200'
+                                    : 'border-ink-100 bg-white'
+                            }`}>
+                                {plan.highlighted && (
+                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-1 text-[11px] font-semibold text-white">
+                                        Recommandé
+                                    </span>
+                                )}
+                                <h3 className="text-lg font-semibold text-ink-900">{plan.name}</h3>
+                                <div className="mt-3 flex items-baseline gap-1">
+                                    {plan.price === 'Sur mesure' ? (
+                                        <span className="text-2xl font-bold text-ink-900">Sur mesure</span>
+                                    ) : (
+                                        <>
+                                            <span className="mono text-4xl font-bold text-ink-900">{plan.price}</span>
+                                            <span className="text-sm text-ink-500">€ / mois</span>
+                                        </>
+                                    )}
+                                </div>
+                                <p className="mt-3 text-sm text-ink-500">{plan.desc}</p>
+                                <ul className="mt-6 flex-1 space-y-2.5">
+                                    {plan.features.map((f) => (
+                                        <li key={f} className="flex items-start gap-2">
+                                            <span className={`mt-0.5 ${plan.highlighted ? 'text-brand-600' : 'text-sage-600'}`}>
+                                                <IconCheck />
+                                            </span>
+                                            <span className="text-sm text-ink-700">{f}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <a href="#cta" className={`mt-8 block rounded-full py-3 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 ${
+                                    plan.highlighted
+                                        ? 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg'
+                                        : 'bg-ink-900 text-white hover:bg-ink-800 hover:shadow-lg'
+                                }`}>
+                                    {plan.price === 'Sur mesure' ? 'Nous contacter' : 'Démarrer gratuitement'}
                                 </a>
-                            ),
-                        )}
-                    </div>
+                            </div>
+                        </Reveal>
+                    ))}
                 </div>
             </div>
         </section>
@@ -1093,103 +1055,53 @@ function BeginJourney() {
 //  FAQ
 // ════════════════════════════════════════════════════════════════════════════
 
-const FAQS: Faq[] = [
-    {
-        q: 'Que comprend exactement HS Quality ?',
-        a: "Une plateforme complète : suivi des interventions terrain (mobile + web), gestion des incidents et EI, audits qualité (HAS, AFNOR, ISO 9001, Caphandeo), baromètre QVCT, gestion des compétences et plans de soins. Tout est intégré et conforme HAS / RGPD / HDS.",
-    },
-    {
-        q: "À quelle fréquence dois-je faire des audits qualité ?",
-        a: "L'évaluation externe HAS doit avoir lieu tous les 5 ans. En interne, un point trimestriel est recommandé. HS Quality vous permet de programmer ces audits, de scorer en temps réel et de générer le PAC depuis les écarts détectés.",
-    },
-    {
-        q: 'Combien de temps pour mettre en place HS Quality ?',
-        a: 'Deux semaines en moyenne. Provisioning de votre tenant, import de vos bénéficiaires et intervenants, formation des coordinateurs (2h), puis déploiement progressif. Un référent qualité vous accompagne tout au long du pilote.',
-    },
-    {
-        q: 'Mes données sont-elles bien sécurisées ?',
-        a: "Hébergement HDS en France (AWS Paris ou OVHcloud), chiffrement AES-256 au repos et TLS 1.3 en transit, MFA obligatoire pour les rôles privilégiés. Audit complet de chaque accès aux données de santé. Conformité RGPD et code de la santé publique.",
-    },
-    {
-        q: "Puis-je essayer avant de m'engager ?",
-        a: "Oui, l'essai pilote est gratuit pendant 3 mois, sans carte bancaire et avec un référent dédié. Si la solution ne correspond pas à vos besoins, vos données sont restituées ou supprimées sur simple demande.",
-    },
-];
-
 function FaqSection({ open, setOpen }: { open: number | null; setOpen: (v: number | null) => void }) {
     return (
-        <section className="bg-white px-5 py-24 sm:px-8 sm:py-28">
+        <section id="faq" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-28">
             <div className="mx-auto max-w-3xl">
-                <div className="reveal text-center">
+                <Reveal className="text-center">
                     <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700 ring-1 ring-brand-100">
                         Questions fréquentes
                     </span>
-                    <h2 className="h-display mt-6 text-4xl sm:text-5xl">
-                        Tout ce que vous voulez <em className="accent-text">savoir.</em>
+                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Tout ce que vous voulez{' '}
+                        <span className="gradient-text">savoir.</span>
                     </h2>
-                </div>
+                </Reveal>
 
                 <div className="mt-12 space-y-3">
                     {FAQS.map((f, i) => {
                         const isOpen = open === i;
                         return (
-                            <div
-                                key={f.q}
-                                className={
-                                    'overflow-hidden rounded-2xl bg-white ring-1 transition-all ' +
-                                    (isOpen
-                                        ? 'shadow-[0_8px_32px_rgba(15,23,42,.06)] ring-brand-200'
-                                        : 'ring-ink-100 hover:ring-ink-200')
-                                }
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() => setOpen(isOpen ? null : i)}
+                            <div key={f.q} className={`overflow-hidden rounded-2xl bg-white ring-1 transition-all ${
+                                isOpen
+                                    ? 'shadow-[0_8px_32px_rgba(15,23,42,.06)] ring-brand-200'
+                                    : 'ring-ink-100 hover:ring-ink-200'
+                            }`}>
+                                <button type="button" onClick={() => setOpen(isOpen ? null : i)}
                                     className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
-                                    aria-expanded={isOpen}
-                                >
+                                    aria-expanded={isOpen}>
                                     <span className="text-base font-semibold text-ink-900">{f.q}</span>
-                                    <span
-                                        className={
-                                            'flex size-8 shrink-0 items-center justify-center rounded-full transition-all ' +
-                                            (isOpen
-                                                ? 'rotate-45 bg-brand-600 text-white'
-                                                : 'bg-ink-50 text-ink-600')
-                                        }
-                                    >
-                                        <svg
-                                            className="size-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth={2}
-                                            viewBox="0 0 24 24"
-                                        >
+                                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-all ${
+                                        isOpen ? 'rotate-45 bg-brand-600 text-white' : 'bg-ink-50 text-ink-600'
+                                    }`}>
+                                        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
                                         </svg>
                                     </span>
                                 </button>
-                                <FaqAnswer open={isOpen} answer={f.a} />
+                                <div className="grid transition-all duration-300 ease-out"
+                                    style={{ gridTemplateRows: isOpen ? '1fr' : '0fr', opacity: isOpen ? 1 : 0 }}>
+                                    <div className="overflow-hidden">
+                                        <p className="px-6 pb-6 text-sm font-light leading-relaxed text-ink-600">{f.a}</p>
+                                    </div>
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
         </section>
-    );
-}
-
-function FaqAnswer({ open, answer }: { open: boolean; answer: string }) {
-    const ref = useRef<HTMLDivElement>(null);
-    return (
-        <div
-            ref={ref}
-            className="grid transition-all duration-300 ease-out"
-            style={{ gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0 }}
-        >
-            <div className="overflow-hidden">
-                <p className="px-6 pb-6 text-sm font-light leading-relaxed text-ink-600">{answer}</p>
-            </div>
-        </div>
     );
 }
 
@@ -1201,52 +1113,35 @@ function FinalCta() {
     return (
         <section id="cta" className="bg-white px-5 py-20 sm:px-8 sm:py-24">
             <div className="mx-auto max-w-5xl">
-                <div
-                    className="relative overflow-hidden rounded-[32px] p-10 sm:p-16"
-                    style={{
-                        background:
-                            'linear-gradient(135deg, #082443 0%, #0B385E 50%, #0F4C81 100%)',
-                    }}
-                >
+                <div className="relative overflow-hidden rounded-[32px] p-10 sm:p-16"
+                    style={{ background: 'linear-gradient(135deg, #082443 0%, #0B385E 50%, #0F4C81 100%)' }}>
                     <div className="grain" aria-hidden />
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute -top-24 left-1/2 size-[640px] -translate-x-1/2 rounded-full"
-                        style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.40), transparent 70%)' }}
-                    />
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute -bottom-32 -right-32 size-[420px] rounded-full"
-                        style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.28), transparent 70%)' }}
-                    />
+                    {/* Mesh orbs */}
+                    <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 size-[640px] -translate-x-1/2 rounded-full"
+                        style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.40), transparent 70%)', animation: 'meshMove 12s ease-in-out infinite' }} />
+                    <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-32 size-[420px] rounded-full"
+                        style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.28), transparent 70%)', animation: 'meshMove2 14s ease-in-out infinite' }} />
+
                     <div className="relative text-center text-white">
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-medium text-white/85 backdrop-blur">
-                            <span
-                                className="size-1.5 rounded-full bg-sage-300"
-                                style={{ animation: 'pulseDot 2s infinite' }}
-                            />
+                            <span className="size-1.5 rounded-full bg-sage-300" style={{ animation: 'pulse 2s infinite' }} />
                             Pilote gratuit · 3 mois · accompagnement inclus
                         </span>
-                        <h2 className="h-display mx-auto mt-6 max-w-2xl text-4xl text-white sm:text-5xl lg:text-6xl">
-                            Prêt à structurer
-                            <br />
-                            <em className="accent-text">votre démarche qualité ?</em>
+                        <h2 className="mx-auto mt-6 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl" style={{ lineHeight: 1.15 }}>
+                            Prêt à structurer votre{' '}
+                            <span className="gradient-text-light">démarche qualité</span> ?
                         </h2>
                         <p className="mx-auto mt-5 max-w-md text-base font-light leading-relaxed text-white/65">
                             Échangeons sur vos enjeux et ouvrons un environnement pilote pour vos coordinateurs.
                         </p>
                         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-                            <a
-                                href="mailto:contact@hsquality.fr"
-                                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl"
-                            >
+                            <a href="mailto:contact@hsquality.fr"
+                                className="btn-glow inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl">
                                 Demander une démo
                                 <Arrow />
                             </a>
-                            <Link
-                                href="/login"
-                                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-7 py-3.5 text-sm font-medium text-white/85 transition-colors hover:border-white/40 hover:text-white"
-                            >
+                            <Link href="/login"
+                                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-3.5 text-sm font-medium text-white/85 transition-colors hover:border-white/40 hover:text-white">
                                 Déjà client ? Se connecter
                             </Link>
                         </div>
@@ -1261,7 +1156,7 @@ function FinalCta() {
 //  FOOTER
 // ════════════════════════════════════════════════════════════════════════════
 
-function Footer() {
+function FooterSection() {
     const cols = [
         { h: 'Plateforme', links: ['Modules', 'Mobile offline', 'API & connecteurs', 'IA prédictive'] },
         { h: 'Conformité', links: ['HAS', 'AFNOR NF X50-056', 'ISO 9001', 'Caphandeo'] },
@@ -1272,19 +1167,18 @@ function Footer() {
             <div className="mx-auto max-w-7xl">
                 <div className="grid grid-cols-2 gap-8 border-b border-ink-100 pb-10 lg:grid-cols-5">
                     <div className="col-span-2">
-                        <div className="text-xl font-light tracking-tight text-ink-900">
-                            HS<em className="accent-text">Q</em>uality
-                        </div>
+                        <Link href="/" className="flex items-center gap-2.5">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-semibold italic text-white">
+                                Q
+                            </div>
+                            <span className="text-lg font-semibold tracking-tight text-ink-900">HS Quality</span>
+                        </Link>
                         <p className="mt-4 max-w-xs text-sm font-light leading-relaxed text-ink-600">
-                            Pilotage qualité et QVCT pour les structures médico-sociales d'aide et de soins
-                            à domicile.
+                            Pilotage qualité et QVCT pour les structures médico-sociales d'aide et de soins à domicile.
                         </p>
                         <div className="mt-5 flex flex-wrap gap-1.5">
                             {['RGPD', 'HDS', 'HAS', 'ISO 9001', 'AFNOR'].map((b) => (
-                                <span
-                                    key={b}
-                                    className="rounded-md border border-ink-200 px-2 py-0.5 text-[11px] font-semibold text-ink-500"
-                                >
+                                <span key={b} className="rounded-md border border-ink-200 px-2 py-0.5 text-[11px] font-semibold text-ink-500">
                                     {b}
                                 </span>
                             ))}
@@ -1297,12 +1191,7 @@ function Footer() {
                             <ul className="mt-4 space-y-2.5">
                                 {col.links.map((l) => (
                                     <li key={l}>
-                                        <a
-                                            href="#"
-                                            className="text-sm text-ink-500 transition-colors hover:text-brand-600"
-                                        >
-                                            {l}
-                                        </a>
+                                        <a href="#" className="text-sm text-ink-500 transition-colors hover:text-brand-600">{l}</a>
                                     </li>
                                 ))}
                             </ul>
@@ -1311,28 +1200,14 @@ function Footer() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-6 text-xs text-ink-400">
-                    <p>© {new Date().getFullYear()} HS Quality · CDC-QUALITE-DOM-2024-v2.0</p>
+                    <p>&copy; {new Date().getFullYear()} HS Quality &middot; CDC-QUALITE-DOM-2024-v2.0</p>
                     <div className="flex gap-5">
                         {['Confidentialité', 'CGU', 'Mentions légales', 'Accessibilité'].map((l) => (
-                            <a key={l} href="#" className="transition-colors hover:text-ink-700">
-                                {l}
-                            </a>
+                            <a key={l} href="#" className="transition-colors hover:text-ink-700">{l}</a>
                         ))}
                     </div>
                 </div>
             </div>
         </footer>
-    );
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-//  ICONS
-// ════════════════════════════════════════════════════════════════════════════
-
-function Arrow({ className = 'size-4' }: { className?: string }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-        </svg>
     );
 }

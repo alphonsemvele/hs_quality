@@ -159,7 +159,7 @@ class InterventionController extends Controller
     }
 
     /** @return array{intervenants: array<int,array{id:int,name:string}>, beneficiaries: array<int,array{id:string,name:string}>, care_plans: array<int,array{id:string,title:string,beneficiary_id:string}>} */
-    private function formOptions(int $structureId): array
+    private function formOptions(int|string $structureId): array
     {
         $intervenants = User::query()
             ->where('structure_id', $structureId)

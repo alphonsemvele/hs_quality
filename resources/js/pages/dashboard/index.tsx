@@ -108,48 +108,48 @@ export default function Dashboard({
             )}
 
             {/* KPIs */}
-            <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+            <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
                 <KpiCard
-                    label="Interventions ce mois"
-                    value={s.interventions_ce_mois.toLocaleString('fr-FR')}
-                    sub={`${s.interventions_en_cours} en cours`}
+                    label="Interventions"
+                    value={s.interventions_ce_mois > 0 ? s.interventions_ce_mois.toLocaleString('fr-FR') : '0'}
+                    sub={`${s.interventions_en_cours || 0} en cours`}
                     icon={<ClipboardIcon />}
                     tone="brand"
                 />
                 <KpiCard
-                    label="Incidents déclarés"
-                    value={s.incidents_declares}
-                    sub={`${s.incidents_en_cours} non clôturés`}
+                    label="Incidents"
+                    value={s.incidents_declares ?? 0}
+                    sub={`${s.incidents_en_cours || 0} non clôturés`}
                     icon={<AlertIcon />}
                     tone="danger"
                 />
                 <KpiCard
-                    label="Score conformité"
-                    value={`${s.score_conformite}%`}
+                    label="Conformité"
+                    value={s.score_conformite ? `${s.score_conformite}%` : '—'}
                     sub="vs cible 85%"
                     icon={<BadgeIcon />}
                     tone="sage"
-                    progress={s.score_conformite}
+                    progress={s.score_conformite || 0}
                 />
                 <KpiCard
-                    label="Complétion PAC"
-                    value={`${s.taux_completion_pac}%`}
+                    label="PAC"
+                    value={s.taux_completion_pac ? `${s.taux_completion_pac}%` : '—'}
                     sub="cible > 60%"
                     icon={<CheckListIcon />}
                     tone="brand"
-                    progress={s.taux_completion_pac}
+                    progress={s.taux_completion_pac || 0}
                 />
                 <KpiCard
-                    label="Score QVCT"
-                    value={`${s.score_qvct_moyen}/10`}
-                    sub={`${alertes_qvct.length} alerte(s) active(s)`}
+                    label="QVCT"
+                    value={s.score_qvct_moyen ? `${s.score_qvct_moyen}/10` : '—'}
+                    sub={`${alertes_qvct.length} alerte(s)`}
                     icon={<HeartIcon />}
                     tone={alertes_qvct.length > 0 ? 'warning' : 'sage'}
-                    progress={s.score_qvct_moyen * 10}
+                    progress={(s.score_qvct_moyen || 0) * 10}
                 />
                 <KpiCard
-                    label="Intervenants actifs"
-                    value={s.intervenants_actifs}
+                    label="Intervenants"
+                    value={s.intervenants_actifs ?? 0}
                     sub={s.formations_expirant_bientot > 0 ? `${s.formations_expirant_bientot} formations expirent` : 'À jour'}
                     icon={<UsersIcon />}
                     tone={s.formations_expirant_bientot > 0 ? 'warning' : 'neutral'}
