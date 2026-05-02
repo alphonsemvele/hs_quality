@@ -357,11 +357,14 @@ export default function Welcome() {
             `}</style>
 
             <div className="min-h-screen bg-white">
+                <a href="#main-content" className="skip-link">Aller au contenu principal</a>
                 <Nav solid={navSolid} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
                 <HeroSection />
                 <LogoBar />
                 <FeaturesSection />
+                <HowItWorksSection />
                 <BentoGrid />
+                <StructureTypesSection />
                 <MetricsSection />
                 <TestimonialSection />
                 <PricingSection />
@@ -439,26 +442,51 @@ function Nav({ solid, mobileOpen, setMobileOpen }: {
                 </button>
             </div>
 
-            {mobileOpen && (
-                <div className={`border-t px-5 pb-5 pt-3 lg:hidden ${solid ? 'border-ink-100 bg-white' : 'border-white/10 bg-ink-900'}`}>
+            {/* Mobile overlay */}
+            <div
+                className={`fixed inset-0 z-40 bg-ink-900/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+                    mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+                }`}
+                onClick={() => setMobileOpen(false)}
+                aria-hidden="true"
+            />
+
+            {/* Mobile drawer */}
+            <div className={`fixed inset-y-0 right-0 z-50 w-[280px] transform transition-transform duration-300 ease-out lg:hidden ${
+                mobileOpen ? 'translate-x-0' : 'translate-x-full'
+            } ${solid ? 'bg-white' : 'bg-ink-900'}`}>
+                <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: solid ? 'rgb(241 245 249)' : 'rgba(255,255,255,0.1)' }}>
+                    <span className={`text-[15px] font-semibold ${solid ? 'text-ink-900' : 'text-white'}`}>Menu</span>
+                    <button type="button" onClick={() => setMobileOpen(false)}
+                        className={`rounded-full p-1.5 ${solid ? 'text-ink-500 hover:bg-ink-50' : 'text-white/70 hover:bg-white/10'}`}
+                        aria-label="Fermer le menu">
+                        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="px-5 py-4">
                     {links.map(([label, href]) => (
                         <a key={href} href={href} onClick={() => setMobileOpen(false)}
-                            className={`block py-2.5 text-[15px] font-medium ${solid ? 'text-ink-700' : 'text-white/85'}`}>
+                            className={`block rounded-lg px-3 py-3 text-[15px] font-medium transition-colors ${
+                                solid ? 'text-ink-700 hover:bg-ink-50' : 'text-white/85 hover:bg-white/10'
+                            }`}>
                             {label}
                         </a>
                     ))}
-                    <div className="mt-3 flex gap-2">
-                        <Link href="/login" className={`flex-1 rounded-full border px-4 py-2.5 text-center text-sm font-medium ${
-                            solid ? 'border-ink-200 text-ink-700' : 'border-white/15 text-white/85'
+                    <div className="mt-5 flex flex-col gap-2.5">
+                        <Link href="/login" className={`rounded-full border px-4 py-3 text-center text-sm font-medium transition-colors ${
+                            solid ? 'border-ink-200 text-ink-700 hover:bg-ink-50' : 'border-white/15 text-white/85 hover:bg-white/10'
                         }`}>
                             Connexion
                         </Link>
-                        <a href="#cta" className="flex-1 rounded-full bg-brand-600 px-4 py-2.5 text-center text-sm font-semibold text-white">
-                            Démarrer
+                        <a href="#cta" onClick={() => setMobileOpen(false)}
+                            className="rounded-full bg-brand-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-700">
+                            Démarrer gratuitement
                         </a>
                     </div>
                 </div>
-            )}
+            </div>
         </nav>
     );
 }
@@ -468,11 +496,10 @@ function Nav({ solid, mobileOpen, setMobileOpen }: {
 // ════════════════════════════════════════════════════════════════════════════
 
 const HERO_PHOTO = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&auto=format&fit=crop&q=80';
-const TESTIMONIAL_PHOTO = 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=900&auto=format&fit=crop&q=80';
 
 function HeroSection() {
     return (
-        <section className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
+        <section id="main-content" className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
             {/* Background photo */}
             <div className="absolute inset-0">
                 <img src={HERO_PHOTO} alt="" className="size-full object-cover" loading="eager" />
@@ -664,6 +691,97 @@ function FeaturesSection() {
                     {FEATURES.map((f, i) => (
                         <Reveal key={f.title} delay={0.06 * i}>
                             <FeatureCard icon={f.icon} title={f.title} desc={f.desc} />
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HOW IT WORKS (3 steps)
+// ════════════════════════════════════════════════════════════════════════════
+
+const STEPS = [
+    {
+        step: '01',
+        title: 'Provisioning en 48h',
+        desc: 'Création de votre espace sécurisé HDS, import de vos bénéficiaires et intervenants. Configuration des rôles et permissions adaptée à votre organigramme.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+            </svg>
+        ),
+    },
+    {
+        step: '02',
+        title: 'Formation & déploiement',
+        desc: 'Formation des coordinateurs (2h), prise en main par les intervenants via l\'app mobile. Un référent qualité dédié vous accompagne pendant tout le pilote.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+        ),
+    },
+    {
+        step: '03',
+        title: 'Pilotage en continu',
+        desc: 'Vos indicateurs qualité se remplissent automatiquement. Audits, incidents, QVCT, formations — tout converge vers un tableau de bord actionnable.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+        ),
+    },
+];
+
+function HowItWorksSection() {
+    return (
+        <section className="relative overflow-hidden bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
+                        Mise en place
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Opérationnel en{' '}
+                        <span className="gradient-text">2 semaines.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Un processus d'intégration pensé pour ne pas perturber votre activité quotidienne.
+                    </p>
+                </Reveal>
+
+                <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {STEPS.map((s, i) => (
+                        <Reveal key={s.step} delay={0.1 * i}>
+                            <div className="group relative flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-7 transition-all duration-300 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-50">
+                                {/* Step number + connector line */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
+                                        {s.icon}
+                                    </div>
+                                    <span className="mono text-[11px] font-semibold uppercase tracking-widest text-ink-300">
+                                        Étape {s.step}
+                                    </span>
+                                </div>
+
+                                {/* Content */}
+                                <h3 className="mt-5 text-lg font-semibold text-ink-900">{s.title}</h3>
+                                <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-500">{s.desc}</p>
+
+                                {/* Connector arrow (hidden on last card) */}
+                                {i < STEPS.length - 1 && (
+                                    <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:block">
+                                        <div className="flex size-6 items-center justify-center rounded-full bg-white shadow ring-1 ring-ink-100">
+                                            <svg className="size-3 text-ink-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 4l8 8-8 8" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </Reveal>
                     ))}
                 </div>
@@ -885,6 +1003,101 @@ function BentoQvct() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+//  STRUCTURE TYPES (Enterprise Gateway — "Solutions par type")
+// ════════════════════════════════════════════════════════════════════════════
+
+const STRUCTURE_TYPES = [
+    {
+        name: 'SAAD',
+        full: 'Service d\'Aide à Domicile',
+        desc: 'Traçabilité des interventions d\'aide (toilette, repas, ménage), gestion des incidents terrain, suivi qualité prestataire et mandataire.',
+        color: 'brand' as const,
+        modules: ['Interventions', 'Incidents', 'QVCT', 'Audits'],
+    },
+    {
+        name: 'SSIAD',
+        full: 'Service de Soins Infirmiers à Domicile',
+        desc: 'Coordination des soins infirmiers, suivi des plans de soins, traçabilité des actes, notification ARS des événements indésirables graves.',
+        color: 'sage' as const,
+        modules: ['Plans de soins', 'Incidents EIG', 'Formations', 'Conformité HAS'],
+    },
+    {
+        name: 'ESAD / SPASAD',
+        full: 'Service Polyvalent d\'Aide et de Soins',
+        desc: 'Pilotage unifié aide + soins, tableau de bord consolidé, audits croisés, indicateurs qualité multi-prestations.',
+        color: 'brand' as const,
+        modules: ['Dashboard unifié', 'Audits croisés', 'QVCT', 'API'],
+    },
+    {
+        name: 'CCAS / Associations',
+        full: 'Centres Communaux & Associations',
+        desc: 'Multi-sites, consolidation groupe, benchmark inter-structures, reporting automatique pour les tutelles et financeurs.',
+        color: 'sage' as const,
+        modules: ['Multi-sites', 'Consolidation', 'Reporting', 'Benchmark'],
+    },
+];
+
+function StructureTypesSection() {
+    const colorClasses = {
+        brand: {
+            badge: 'bg-brand-50 text-brand-700 ring-1 ring-brand-100',
+            icon: 'bg-brand-50 text-brand-600',
+            tag: 'bg-brand-50 text-brand-600',
+        },
+        sage: {
+            badge: 'bg-sage-50 text-sage-700 ring-1 ring-sage-100',
+            icon: 'bg-sage-50 text-sage-600',
+            tag: 'bg-sage-50 text-sage-600',
+        },
+    };
+
+    return (
+        <section className="bg-white px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Adapté à votre structure
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Une solution pour chaque{' '}
+                        <span className="gradient-text">type de service.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Que vous soyez SAAD, SSIAD, ESAD ou CCAS, HS Quality s'adapte à vos obligations réglementaires et vos processus métier.
+                    </p>
+                </Reveal>
+
+                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    {STRUCTURE_TYPES.map((st, i) => {
+                        const colors = colorClasses[st.color];
+                        return (
+                            <Reveal key={st.name} delay={0.08 * i}>
+                                <div className="card-hover group flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-6 sm:p-7">
+                                    <div className="flex items-center gap-3">
+                                        <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${colors.badge}`}>
+                                            {st.name}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1.5 text-xs font-medium text-ink-400">{st.full}</p>
+                                    <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{st.desc}</p>
+                                    <div className="mt-5 flex flex-wrap gap-1.5">
+                                        {st.modules.map((m) => (
+                                            <span key={m} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${colors.tag}`}>
+                                                {m}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </Reveal>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 //  METRICS (count-up)
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -931,48 +1144,80 @@ function MetricsSection() {
 //  TESTIMONIAL
 // ════════════════════════════════════════════════════════════════════════════
 
+const TESTIMONIALS = [
+    {
+        quote: 'Nos coordinatrices déclarent les incidents en moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.',
+        initials: 'MF',
+        name: 'Marie-France Essomba',
+        role: 'Directrice qualité · SAAD Horizon',
+        metric: '+23%',
+        metricLabel: 'conformité HAS',
+    },
+    {
+        quote: 'Le baromètre QVCT nous a permis de détecter un risque de turn-over chez nos aides-soignantes avant qu\'il ne devienne critique. On a pu agir à temps.',
+        initials: 'AT',
+        name: 'Alain Tchoupo',
+        role: 'DRH · SSIAD Solidarité',
+        metric: '-40%',
+        metricLabel: 'turn-over An 1',
+    },
+    {
+        quote: 'Avant HS Quality, nos audits HAS prenaient 3 semaines de préparation. Aujourd\'hui, le scoring est automatique et le PAC se génère depuis les écarts.',
+        initials: 'CN',
+        name: 'Claire Nguema',
+        role: 'Référente qualité · ESAD Lumière',
+        metric: '÷3',
+        metricLabel: 'temps de préparation',
+    },
+];
+
 function TestimonialSection() {
     return (
         <section className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
             <div className="mx-auto max-w-7xl">
-                <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-                    {/* Photo */}
-                    <Reveal direction="right">
-                        <div className="group relative aspect-[4/5] overflow-hidden rounded-3xl lg:aspect-[3/4]">
-                            <img
-                                src={TESTIMONIAL_PHOTO}
-                                alt="Équipe de soins à domicile"
-                                className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-ink-900/70 via-transparent to-transparent" />
-                            <div className="absolute inset-x-6 bottom-6 text-white">
-                                <p className="text-[11px] font-semibold uppercase tracking-widest text-sage-300">Structure pilote</p>
-                                <p className="mt-1 text-xl font-light italic">SAAD Horizon · Douala</p>
-                            </div>
-                        </div>
-                    </Reveal>
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Témoignages
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Ils pilotent leur qualité{' '}
+                        <span className="gradient-text">avec HS Quality.</span>
+                    </h2>
+                </Reveal>
 
-                    {/* Quote */}
-                    <Reveal delay={0.15}>
-                        <div className="relative">
-                            <svg className="size-10 text-brand-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                                <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.166 11 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.166 21 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179z" />
-                            </svg>
-                            <blockquote className="mt-6 text-xl font-medium leading-relaxed text-ink-800 sm:text-2xl lg:text-3xl" style={{ lineHeight: 1.35 }}>
-                                Nos coordinatrices déclarent les incidents en moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.
-                            </blockquote>
-                            <div className="mt-8 flex items-center gap-4 border-t border-ink-100 pt-6">
-                                <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-semibold text-white">
-                                    MF
+                <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    {TESTIMONIALS.map((t, i) => (
+                        <Reveal key={t.name} delay={0.08 * i}>
+                            <div className="card-hover flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-6 sm:p-7">
+                                {/* Quote icon */}
+                                <svg className="size-8 text-brand-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.166 11 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.166 21 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179z" />
+                                </svg>
+
+                                {/* Quote text */}
+                                <blockquote className="mt-4 flex-1 text-[15px] font-medium leading-relaxed text-ink-700" style={{ lineHeight: 1.55 }}>
+                                    "{t.quote}"
+                                </blockquote>
+
+                                {/* Metric badge */}
+                                <div className="mt-5 inline-flex self-start rounded-lg bg-sage-50 px-3 py-1.5">
+                                    <span className="mono text-sm font-bold text-sage-700">{t.metric}</span>
+                                    <span className="ml-1.5 text-xs text-sage-600">{t.metricLabel}</span>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-ink-900">Marie-France Essomba</p>
-                                    <p className="text-xs text-ink-500">Directrice qualité · SAAD Horizon</p>
+
+                                {/* Author */}
+                                <div className="mt-5 flex items-center gap-3 border-t border-ink-100 pt-5">
+                                    <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-semibold text-white">
+                                        {t.initials}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-ink-900">{t.name}</p>
+                                        <p className="text-xs text-ink-500">{t.role}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </Reveal>
+                        </Reveal>
+                    ))}
                 </div>
             </div>
         </section>

@@ -30,7 +30,7 @@ export default function Login({ status }: { status?: string }) {
                     {/* Top bar */}
                     <div className="flex items-center justify-between border-b border-ink-100 px-6 py-4 sm:px-10">
                         <Link href="/" className="flex items-center gap-2.5">
-                            <div className="flex size-8 items-center justify-center rounded-lg bg-ink-900 text-sm font-bold text-white">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold italic text-white">
                                 Q
                             </div>
                             <span className="text-[15px] font-semibold tracking-tight text-ink-900">HS Quality</span>
