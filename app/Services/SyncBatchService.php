@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\QvctExchangeAddresseeRole;
 use App\Enums\QvctMood;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\QvctCampaign;
+use App\Models\QvctExchangeRequest;
 use App\Models\QvctJournalEntry;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -53,6 +55,7 @@ class SyncBatchService
         private readonly IncidentService $incidents,
         private readonly QvctService $qvct,
         private readonly JournalEntryService $journal,
+        private readonly ExchangeRequestService $exchanges,
     ) {}
 
     /**
@@ -104,6 +107,7 @@ class SyncBatchService
                 'incident.create' => $this->incidentCreate($op, $actor),
                 'qvct.submit_response' => $this->qvctSubmitResponse($op, $actor),
                 'qvct.write_journal' => $this->qvctWriteJournal($op, $actor),
+                'qvct.request_exchange' => $this->qvctRequestExchange($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
 
@@ -285,6 +289,34 @@ class SyncBatchService
             'mood' => $entry->mood->value,
             'shared_with_rh' => $entry->shared_with_rh,
             'created_at' => $entry->created_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctRequestExchange(array $op, User $actor): array
+    {
+        $this->authorize($actor, 'create', QvctExchangeRequest::class);
+
+        $addresseeRoleValue = (string) ($op['payload']['addressee_role'] ?? '');
+        $addressee = QvctExchangeAddresseeRole::tryFrom($addresseeRoleValue);
+        if ($addressee === null) {
+            throw new HttpException(422, 'A qvct.request_exchange op requires a valid addressee_role.');
+        }
+
+        $exchange = $this->exchanges->create(
+            $actor,
+            $addressee,
+            $op['payload']['message'] ?? null,
+        );
+
+        return [
+            'id' => $exchange->id,
+            'addressee_role' => $exchange->addressee_role->value,
+            'status' => $exchange->status->value,
+            'created_at' => $exchange->created_at?->toIso8601String(),
         ];
     }
 

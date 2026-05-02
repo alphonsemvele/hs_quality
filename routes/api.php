@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\BeneficiaryController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
+use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
 use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
 use App\Http\Controllers\Api\V1\SyncController;
@@ -78,6 +79,14 @@ Route::prefix('v1')
         Route::post('qvct/journal', [QvctJournalController::class, 'store'])->middleware('idempotent');
         Route::get('qvct/journal/mine', [QvctJournalController::class, 'mine']);
         Route::get('qvct/journal/shared-with-rh', [QvctJournalController::class, 'sharedWithRh']);
+
+        // Exchange requests — intervenant asks to talk; RH or manager triages.
+        Route::post('qvct/exchange-requests', [QvctExchangeRequestController::class, 'store'])->middleware('idempotent');
+        Route::get('qvct/exchange-requests/mine', [QvctExchangeRequestController::class, 'mine']);
+        Route::get('qvct/exchange-requests/incoming', [QvctExchangeRequestController::class, 'incoming']);
+        Route::post('qvct/exchange-requests/{exchangeRequest}/accept', [QvctExchangeRequestController::class, 'accept'])->middleware('idempotent');
+        Route::post('qvct/exchange-requests/{exchangeRequest}/schedule', [QvctExchangeRequestController::class, 'schedule'])->middleware('idempotent');
+        Route::post('qvct/exchange-requests/{exchangeRequest}/close', [QvctExchangeRequestController::class, 'close'])->middleware('idempotent');
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)

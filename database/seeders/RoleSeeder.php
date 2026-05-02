@@ -65,6 +65,12 @@ class RoleSeeder extends Seeder
         'qvct.questionnaire.manage',
         'qvct.campaign.manage',
         'qvct.weak_signal.acknowledge',
+        // Exchange-request addressee triage. Distinct perms so the
+        // routing of incoming requests to RH vs manager is unambiguous —
+        // qvct.view.team_aggregates is too shared to use for queue
+        // separation.
+        'qvct.exchange.rh_triage',
+        'qvct.exchange.manager_triage',
 
         // M4 Communication
         'messages.send',
@@ -163,6 +169,7 @@ class RoleSeeder extends Seeder
             'qvct.respond',
             'qvct.view.team_aggregates',
             'qvct.alert.receive',
+            'qvct.exchange.manager_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',
@@ -200,6 +207,7 @@ class RoleSeeder extends Seeder
             'qvct.questionnaire.manage',
             'qvct.campaign.manage',
             'qvct.weak_signal.acknowledge',
+            'qvct.exchange.manager_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',
@@ -267,6 +275,7 @@ class RoleSeeder extends Seeder
             'qvct.questionnaire.manage',
             'qvct.campaign.manage',
             'qvct.weak_signal.acknowledge',
+            'qvct.exchange.rh_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',
