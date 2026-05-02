@@ -56,12 +56,12 @@
 | M3.6 | Models with `BelongsToStructure` + Auditable (where applicable) + cross-tenant leak tests | [x] | `app/Models/Qvct{Questionnaire,Campaign,Response,WeakSignal}.php` — Response intentionally NOT Auditable to preserve anonymity (audit row would carry the answers) |
 | M3.7 | `QvctService::launchCampaign()` + `recordResponse()` (anonymous) + `closeCampaign()` | [x] | `app/Services/QvctService.php` + `tests/Unit/Services/QvctServiceTest.php` (5 tests, anonymity asserted) |
 | M3.8 | `WeakSignalDetector` pure service — pure unit-tested; takes campaign aggregates returns flagged anomalies | [x] | `app/Services/WeakSignalDetector.php` + `tests/Unit/Services/WeakSignalDetectorTest.php` (7 tests covering threshold, sample-size guard, severity, team grouping, idempotent re-detection) |
-| M3.9 | `NotifyReferentRhJob` — queued, idempotent, fires on weak signal | [ ] | |
-| M3.10 | Form Requests: `LaunchCampaignRequest`, `SubmitResponseRequest` | [ ] | |
-| M3.11 | Policies: `QvctCampaignPolicy`, `QvctResponsePolicy` (anonymous-write rules) | [ ] | |
+| M3.9 | `NotifyReferentRhJob` — queued, idempotent, fires on weak signal | [x] | `app/Jobs/NotifyReferentRhJob.php` + `tests/Feature/Domain/Qvct/QvctNotifyReferentRhTest.php` (Bus::fake assertions; one job per emitted signal; no dispatch when no signals) |
+| M3.10 | Form Requests: `LaunchCampaignRequest`, `SubmitResponseRequest` (+ `StoreQuestionnaireRequest`) | [x] | `app/Http/Requests/Qvct/{StoreQvctQuestionnaire,LaunchQvctCampaign,SubmitQvctResponse}Request.php` |
+| M3.11 | Policies: `QvctCampaignPolicy`, `QvctResponsePolicy` (anonymous-write rules) + Questionnaire + WeakSignal | [x] | `app/Policies/Qvct{Questionnaire,Campaign,Response,WeakSignal}Policy.php` registered in `AppServiceProvider` + `tests/Feature/Domain/Qvct/QvctPolicyTest.php` (8 tests; anonymity guard asserts no role can read individual responses) |
 | M3.12 | Web controllers + Inertia pages (questionnaire builder, campaign list, weak-signal feed) | [ ] | |
 | M3.13 | API endpoints (mobile intervenants submit responses): `POST /api/v1/qvct/campaigns/{id}/responses` | [ ] | |
-| M3.14 | Sync batch op: `qvct.submit_response` | [ ] | |
+| M3.14 | Sync batch op: `qvct.submit_response` | [x] | `app/Services/SyncBatchService.php::qvctSubmitResponse` + `app/Http/Requests/Api/V1/SyncBatchRequest.php` (kind enum) + `tests/Feature/Api/V1/QvctSyncOpTest.php` (success / closed-conflict / cross-tenant rejected / missing-id error) |
 | M3.15 | Psychosocial risk cartography service — aggregates per-team (pure read service) | [ ] | |
 | M3.16 | Dashboard tile: open campaigns + weak-signal alerts | [ ] | |
 | M3.17 | Pest feature tests per endpoint (anonymous response, RH-only access to detail) | [ ] | |

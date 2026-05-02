@@ -8,6 +8,10 @@ use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
 use App\Models\PlannedTask;
+use App\Models\QvctCampaign;
+use App\Models\QvctQuestionnaire;
+use App\Models\QvctResponse;
+use App\Models\QvctWeakSignal;
 use App\Models\Structure;
 use App\Models\User;
 use App\Observers\IncidentObserver;
@@ -18,6 +22,10 @@ use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
+use App\Policies\QvctCampaignPolicy;
+use App\Policies\QvctQuestionnairePolicy;
+use App\Policies\QvctResponsePolicy;
+use App\Policies\QvctWeakSignalPolicy;
 use App\Policies\StructurePolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
@@ -42,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
+        QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
+        QvctCampaign::class => QvctCampaignPolicy::class,
+        QvctResponse::class => QvctResponsePolicy::class,
+        QvctWeakSignal::class => QvctWeakSignalPolicy::class,
         Structure::class => StructurePolicy::class,
         User::class => UserPolicy::class,
     ];

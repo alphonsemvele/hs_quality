@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\QvctCampaignStatus;
+use App\Jobs\NotifyReferentRhJob;
 use App\Models\QvctCampaign;
 use App\Models\QvctQuestionnaire;
 use App\Models\QvctResponse;
@@ -99,7 +100,15 @@ class QvctService
                 ]);
             }
 
-            $this->detector->detectFor($campaign->fresh());
+            $emitted = $this->detector->detectFor($campaign->fresh());
+
+            // One alert per emitted signal — RH gets fan-out per
+            // (team × signal_type) so they can route triage efficiently.
+            // afterCommit so a transaction rollback doesn't leave alerts
+            // pointing at signals that don't exist.
+            foreach ($emitted as $signal) {
+                NotifyReferentRhJob::dispatch($signal)->afterCommit();
+            }
 
             return $campaign->fresh();
         });

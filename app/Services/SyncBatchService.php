@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\QvctCampaign;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -30,9 +31,10 @@ use Throwable;
  * persistent dedup belongs to the caller via HandleIdempotency middleware
  * keyed on the batch envelope.
  *
- * Phase 1 supports five ops (sufficient for offline tour completion):
+ * Phase 1 + Phase 2 / M3 supports six ops:
  *   - intervention.check_in / check_out / cancel / submit_report
  *   - incident.create
+ *   - qvct.submit_response (anonymous; tenant-scoped via campaign FK)
  * Photos / signatures are NOT batchable (binary blobs); the mobile app
  * uploads those one-by-one to the existing endpoints once online.
  *
@@ -47,6 +49,7 @@ class SyncBatchService
     public function __construct(
         private readonly InterventionService $interventions,
         private readonly IncidentService $incidents,
+        private readonly QvctService $qvct,
     ) {}
 
     /**
@@ -96,6 +99,7 @@ class SyncBatchService
                 'intervention.cancel' => $this->interventionCancel($op, $actor),
                 'intervention.submit_report' => $this->interventionSubmitReport($op, $actor),
                 'incident.create' => $this->incidentCreate($op, $actor),
+                'qvct.submit_response' => $this->qvctSubmitResponse($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
 
@@ -206,6 +210,44 @@ class SyncBatchService
         $fresh = $this->interventions->submitReport($intervention, $reportText, $actor);
 
         return $this->interventionState($fresh);
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctSubmitResponse(array $op, User $actor): array
+    {
+        $campaignId = $op['resource_id'] ?? null;
+        if ($campaignId === null || $campaignId === '') {
+            throw new HttpException(422, 'resource_id (campaign id) is required for qvct.submit_response.');
+        }
+
+        $campaign = QvctCampaign::query()->find($campaignId);
+        if ($campaign === null) {
+            throw new HttpException(404, "Campaign {$campaignId} not found in your tenant.");
+        }
+
+        $this->authorize($actor, 'respond', $campaign);
+
+        $answers = $op['payload']['answers'] ?? null;
+        if (! is_array($answers) || $answers === []) {
+            throw new HttpException(422, 'A qvct.submit_response op requires non-empty answers.');
+        }
+
+        $response = $this->qvct->recordResponse(
+            $campaign,
+            $answers,
+            teamTag: $op['payload']['team_tag'] ?? null,
+        );
+
+        // Anonymity: never echo the response id back. The mobile client
+        // only needs to know "the server accepted my submission" to drop
+        // it from the offline queue.
+        return [
+            'campaign_id' => $campaign->id,
+            'submitted_at' => $response->submitted_at?->toIso8601String(),
+        ];
     }
 
     /**
