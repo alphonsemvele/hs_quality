@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
+use App\Enums\AuditRunStatus;
 use App\Enums\InterventionStatus;
+use App\Enums\PacActionStatus;
+use App\Enums\PacStatus;
 use App\Enums\QvctCampaignStatus;
+use App\Models\AuditRun;
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\Pac;
+use App\Models\PacAction;
 use App\Models\QvctCampaign;
 use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
@@ -25,8 +31,44 @@ class DashboardStatsService
                     ...$this->interventionStats(),
                     ...$this->incidentStats(),
                     ...$this->qvctStats(),
+                    ...$this->auditStats(),
                 ];
             });
+    }
+
+    /**
+     * Phase 2 / M6 — dashboard tile (PHASE2_PROGRESS.md M6.21). Référent
+     * qualité + dirigeant care about: how many audits are mid-flight,
+     * how many open PACs need attention, and how many PAC actions have
+     * blown past their due date.
+     *
+     * NOT cached at the per-row level — these counts are aggregates over
+     * tenant-scoped queries and the parent stats() call already wraps in
+     * a 5-min Redis tag-cache.
+     */
+    private function auditStats(): array
+    {
+        $today = Carbon::today()->toDateString();
+
+        return [
+            'audit_runs_in_progress' => AuditRun::query()
+                ->whereIn('status', [
+                    AuditRunStatus::Draft->value,
+                    AuditRunStatus::InProgress->value,
+                ])
+                ->count(),
+            'pacs_open' => Pac::query()
+                ->whereIn('status', [PacStatus::Draft->value, PacStatus::Active->value])
+                ->count(),
+            'pac_actions_overdue' => PacAction::query()
+                ->whereNotIn('status', [
+                    PacActionStatus::Done->value,
+                    PacActionStatus::Cancelled->value,
+                ])
+                ->whereNotNull('due_date')
+                ->whereDate('due_date', '<', $today)
+                ->count(),
+        ];
     }
 
     /**

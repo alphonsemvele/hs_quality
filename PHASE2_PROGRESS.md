@@ -125,8 +125,8 @@
 | M6.18 | Sync batch op: `audit.record_response` | [x] | `app/Services/SyncBatchService.php::auditRecordResponse` + `app/Http/Requests/Api/V1/SyncBatchRequest.php` (kind enum) + `tests/Feature/Api/V1/AuditSyncOpTest.php` (4: success / missing-id / cross-tenant rejected / intervenant-rejected) |
 | M6.19 | HAS preparation guide UI + service (gap analysis between current state and HAS expected score) | [ ] | |
 | M6.20 | PDF export of finalised audit run (queue job, S3-stored, signed-URL retrieval) | [ ] | |
-| M6.21 | Dashboard tile: in-progress audits + open PAC actions overdue | [ ] | |
-| M6.22 | Pest feature tests for end-to-end (start → record → finalise → PAC auto-generated) | [ ] | |
+| M6.21 | Dashboard tile: in-progress audits + open PAC actions overdue | [x] | `DashboardStatsService::auditStats` (audit_runs_in_progress / pacs_open / pac_actions_overdue) + observers `AuditRunObserver`, `PacObserver`, `PacActionObserver` flushing the dashboard cache on writes + 4 new dashboard tests |
+| M6.22 | Pest feature tests for end-to-end (start → record → finalise → PAC auto-generated) | [x] | `tests/Feature/Api/V1/AuditApiTest.php` "referent_qualite can record + finalise + generate PAC end-to-end" — exercises the full lifecycle through HTTP endpoints + asserts 2 PAC actions emitted from 2 gaps |
 | M6.23 | Pest unit tests for `AuditScoringService` covering CDC-spec'd scoring rules | [x] | `tests/Unit/Services/AuditScoringServiceTest.php` (3) |
 | M6.24 | Pest unit tests for `PacGenerationService` covering all non-conformity → action mappings | [x] | `tests/Unit/Services/PacGenerationServiceTest.php` (6) |
 | M6.25 | French validation + UI messages (lang/fr/audit.php) | [ ] | |

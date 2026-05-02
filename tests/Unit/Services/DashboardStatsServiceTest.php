@@ -1,10 +1,16 @@
 <?php
 
+use App\Enums\AuditRunStatus;
 use App\Enums\InterventionStatus;
+use App\Enums\PacActionStatus;
 use App\Enums\QvctCampaignStatus;
+use App\Models\AuditGrid;
+use App\Models\AuditRun;
 use App\Models\Beneficiary;
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\Pac;
+use App\Models\PacAction;
 use App\Models\QvctCampaign;
 use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
@@ -251,4 +257,59 @@ it('invalidates cache when a QVCT response is submitted', function () {
     ]);
 
     expect($this->service->stats($sid)['qvct_responses_ce_mois'])->toBe(1);
+});
+
+// ── Audit + PAC stats (Phase 2 / M6 — PHASE2_PROGRESS.md M6.21) ──────────────
+
+it('counts in-progress + draft audit runs', function () {
+    $grid = AuditGrid::factory()->forStructure($this->structure)->create();
+    AuditRun::factory()->forGrid($grid)->create(['status' => AuditRunStatus::Draft->value]);
+    AuditRun::factory()->forGrid($grid)->inProgress()->create();
+    AuditRun::factory()->forGrid($grid)->finalised()->create();
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['audit_runs_in_progress'])->toBe(2);
+});
+
+it('counts open PACs (draft + active, not closed)', function () {
+    Pac::factory()->forStructure($this->structure)->count(2)->create();
+    Pac::factory()->forStructure($this->structure)->active()->create();
+    Pac::factory()->forStructure($this->structure)->closed()->create();
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['pacs_open'])->toBe(3); // 2 draft + 1 active
+});
+
+it('counts overdue PAC actions (due_date past, not done/cancelled)', function () {
+    $pac = Pac::factory()->forStructure($this->structure)->create();
+
+    PacAction::factory()->forPac($pac)->create([
+        'due_date' => '2026-04-01', // past
+        'status' => PacActionStatus::InProgress->value,
+    ]);
+    PacAction::factory()->forPac($pac)->create([
+        'due_date' => '2026-04-15', // past but done — not overdue
+        'status' => PacActionStatus::Done->value,
+    ]);
+    PacAction::factory()->forPac($pac)->create([
+        'due_date' => '2026-06-01', // future — not overdue
+        'status' => PacActionStatus::Pending->value,
+    ]);
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['pac_actions_overdue'])->toBe(1);
+});
+
+it('invalidates cache when an audit run is created', function () {
+    $sid = $this->structure->id;
+    $grid = AuditGrid::factory()->forStructure($this->structure)->create();
+
+    expect($this->service->stats($sid)['audit_runs_in_progress'])->toBe(0);
+
+    AuditRun::factory()->forGrid($grid)->inProgress()->create();
+
+    expect($this->service->stats($sid)['audit_runs_in_progress'])->toBe(1);
 });

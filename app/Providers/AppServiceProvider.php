@@ -24,8 +24,11 @@ use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
 use App\Models\Structure;
 use App\Models\User;
+use App\Observers\AuditRunObserver;
 use App\Observers\IncidentObserver;
 use App\Observers\InterventionObserver;
+use App\Observers\PacActionObserver;
+use App\Observers\PacObserver;
 use App\Observers\QvctCampaignObserver;
 use App\Observers\QvctResponseObserver;
 use App\Observers\QvctWeakSignalObserver;
@@ -139,6 +142,9 @@ class AppServiceProvider extends ServiceProvider
         QvctCampaign::observe(QvctCampaignObserver::class);
         QvctResponse::observe(QvctResponseObserver::class);
         QvctWeakSignal::observe(QvctWeakSignalObserver::class);
+        AuditRun::observe(AuditRunObserver::class);
+        Pac::observe(PacObserver::class);
+        PacAction::observe(PacActionObserver::class);
     }
 
     private function configureScramble(): void
