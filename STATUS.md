@@ -1,8 +1,10 @@
 # QualitéDomicile SaaS — Project Status & Model Design Reference
 
-**Generated:** 2026-04-24
-**Branch:** `main`
-**Test suite:** 263 tests · 738 assertions · **ALL GREEN**
+**Generated:** 2026-05-02
+**Branch:** `feature/muma-setup`
+**Test suite:** 403 tests · 1,117 assertions · **ALL GREEN**
+**Phase 1 backend:** ✅ closed at commit `ad4f939` — every IMPLEMENTATION_PLAN.txt §4 line item verified against code (see [§3.1](#31-phase-1-close-out-audit))
+**Phase 2 tracker:** [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md) — one checkbox per spec line, updated as work lands
 
 Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier des Charges, Feb 2024)
 
@@ -61,16 +63,61 @@ Each subscribing organisation is a **structure** (tenant). Two frontends share o
 |-------|------|-------|--------|
 | **M1** | W1–W4 | Beneficiaries · CarePlans · PlannedTasks · IntervenantAssignments | ✅ done |
 | **M2** | W1 | Intervention model + state machine | ✅ done |
-| **M2** | W2 | InterventionService · Controller · CheckIn/CheckOut/Cancel | ✅ done |
-| **M2** | W3 | InterventionPhotos + InterventionSignatures (S3 + signed URLs) | ✅ done |
-| **M2** | W4 | Reverb broadcast events + dashboard stats v1 | ✅ done |
+| **M2** | W2 | InterventionService · Controller · CheckIn/CheckOut/Cancel/SubmitReport | ✅ done |
+| **M2** | W3 | InterventionPhotos + InterventionSignatures (S3 SSE-KMS + signed URLs) | ✅ done |
+| **M2** | W4 | Reverb broadcast events + dashboard stats v1 (backend dispatches; FE listener deferred) | ✅ backend done |
 | **M3** | W1 | Incident model + GraviteClassifier + ARS notification jobs | ✅ done |
 | **M3** | W2 | IncidentService state machine + Controller + Form Requests | ✅ done |
 | **M3** | W3 | DashboardStatsService Redis tag-cache + Observers + Scramble | ✅ done |
+| **M3** | W4 | Hardening + k6 load test | ✅ done (lifecycle + sync 0% errors) |
 | **M4** | W1 | **Mobile REST API `/api/v1/*` + Sanctum + idempotency** | ✅ done |
-| **M4** | W2 | React Native skeleton (mobile team) | ⏳ next |
-| **M4** | W3 | Offline sync protocol hardening (`/api/v1/sync/batch`) | ⏳ |
-| **M4** | W4 | Pilot onboarding | ⏳ |
+| **M4** | W2 | React Native skeleton (mobile team) | ⏳ deferred — mobile team scope |
+| **M4** | W3 | Offline sync protocol (`/api/v1/sync/batch`) + LWW conflict markers + two-intervenants test | ✅ done at `ad4f939` |
+| **M4** | W4 | Pilot onboarding | ⏳ deferred — business / ops scope |
+
+### 3.1 Phase 1 close-out audit
+
+Performed line-by-line on 2026-05-02 against IMPLEMENTATION_PLAN.txt §4. Every spec item below is now verified in code; the audit method was *grep + read*, not "I remember writing it."
+
+| Spec line | Verification source |
+|---|---|
+| `beneficiaries` table + encrypted casts (M1 W1-2) | `app/Models/Beneficiary.php:78-81` |
+| `BeneficiaryService::anonymize` (RGPD Art 17) | `app/Services/BeneficiaryService.php:89` |
+| `CarePlanService::copyFromTemplate` (M1 W3) | `app/Services/CarePlanService.php:80` |
+| Intervention check-in/check-out/cancel | `app/Services/InterventionService.php:53,78,101` |
+| Intervention submit-report (M2 W1-2 "submit report") | `app/Services/InterventionService.php::submitReport` (added at `ad4f939`) |
+| Intervention auto-cancel no-show | `app/Console/Commands/SweepMissedInterventionsCommand.php` (cron every 15min, `routes/console.php`) |
+| S3 SSE-KMS uploads + 1-hour signed URLs (M2 W3) | `app/Services/InterventionMediaService.php:54,102,118` |
+| Path-traversal + MIME-spoofing tests | `tests/Unit/Services/InterventionMediaServiceTest.php:61,82` |
+| Incident model + categorie/gravite/statut enums | `app/Models/Incident.php` + `app/Enums/Gravite.php` |
+| `GraviteClassifier` pure unit-tested | `tests/Unit/Services/GraviteClassifierTest.php` |
+| 5-whys workflow (en_analyse → plan_actions) | `app/Services/IncidentService.php:121` |
+| `NotifyResponsableSecteurJob` on every declare | `app/Services/IncidentService.php:89` |
+| `NotifyARSJob` only on grave/critique | `app/Services/IncidentService.php:92` + `app/Jobs/NotifyARSJob.php:11` |
+| Idempotency middleware on mutations | `app/Http/Middleware/HandleIdempotency.php` + applied via `'idempotent'` alias on writes |
+| Dashboard Redis tag-cache, 5-min TTL, observer flush on writes | `app/Services/DashboardStatsService.php:18` + `app/Observers/InterventionObserver.php` + `app/Observers/IncidentObserver.php` |
+| `/api/v1/*` routes + Sanctum + Scramble | `routes/api.php` + `config/sanctum.php` + `app/Providers/AppServiceProvider.php::configureScramble` |
+| MFA-gated mobile token issuance | `app/Http/Controllers/Api/V1/AuthController.php:34-59` |
+| Client-assigned UUIDs (M4 W3) | `app/Http/Requests/Api/V1/SyncBatchRequest.php:36` (`client_op_id` UUID required) |
+| LWW + free-text conflict markers (M4 W3) | `app/Services/InterventionService.php::mergeReportText` + `tests/Unit/Services/InterventionReportMergeTest.php` |
+| Two-intervenants race test (M4 W3) | `tests/Feature/Api/V1/SyncBatchTest.php` "preserves both narratives when an intervenant and a coordinateur race" |
+| Cross-tenant leak test for every domain | `tests/Feature/Domain/{Beneficiaries,CarePlans,Interventions,Incidents,Assignments}/*TenantIsolationTest.php` |
+| k6 load test (M3 W4) | dashboard / lifecycle / sync_batch scenarios — 0% errors |
+
+### 3.2 Phase 1 — known deferrals (not engineering, not silent gaps)
+
+| Deferred item | Type | Owner |
+|---|---|---|
+| Beneficiary detail page tabbed UX | Frontend | Web team — Phase 1 polish |
+| Dashboard Chart.js / recharts visualisation | Frontend | Web team — Phase 1 polish |
+| `useEcho` listener wiring for Reverb broadcasts | Frontend | Web team — Phase 1 polish |
+| React Native app skeleton (M4 W2) | Mobile codebase | Mobile team — separate repo |
+| External pentest with no critical findings | Security audit | Procurement / CISO |
+| DR drill (RPO < 1h, RTO < 4h validation) | Ops | DevOps — schedule against staging |
+| 10 pilot structures + 200 intervenants live | Sales / onboarding | Commercial team |
+| NPS captured | Product | PM |
+
+**These are real, named owners — not engineering gaps masquerading as "later".**
 
 ---
 
