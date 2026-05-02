@@ -109,8 +109,8 @@
 | M6.2 | `audit_grid_items` table — individual scoreable items (label, evidence required, scale) | [x] | `database/migrations/2026_05_02_140001_create_audit_grid_items_table.php` + `app/Models/AuditGridItem.php` + `app/Enums/AuditItemScale.php` (Binary / OneToFive / Percentage) + factory. Auditable. |
 | M6.3 | `audit_runs` table — execution of a grid against a structure on a date | [x] | `database/migrations/2026_05_02_140002_create_audit_runs_table.php` + `app/Models/AuditRun.php` + `app/Enums/AuditRunStatus.php` (Draft/InProgress/Finalised) + factory. Score + max_score frozen at finalise time so later grid edits don't mutate historical scores. Auditable + soft-delete. |
 | M6.4 | `audit_run_responses` table — per-item score, comment, evidence file ref | [x] | `database/migrations/2026_05_02_140003_create_audit_run_responses_table.php` + `app/Models/AuditRunResponse.php` + factory. Unique (audit_run_id, audit_grid_item_id) enforces one response per item per run; updates overwrite in place. |
-| M6.5 | `pacs` (plans d'amélioration continue) table — auto-generated from gaps | [ ] | |
-| M6.6 | `pac_actions` table — per-action assignment, due date, status, evidence | [ ] | |
+| M6.5 | `pacs` (plans d'amélioration continue) table — auto-generated from gaps | [x] | `database/migrations/2026_05_02_150000_create_pacs_table.php` + `app/Models/Pac.php` + `app/Enums/PacStatus.php` (Draft/Active/Closed). audit_run_id nullable so PACs may be auto-generated OR manually authored. Auditable + soft-delete. |
+| M6.6 | `pac_actions` table — per-action assignment, due date, status, evidence | [x] | `database/migrations/2026_05_02_150001_create_pac_actions_table.php` + `app/Models/PacAction.php` + `app/Enums/PacActionStatus.php` (Pending/InProgress/Done/Cancelled). source_audit_response_id back-pointer (nullOnDelete) preserves traceability without lifecycle coupling. Auditable. |
 | M6.7 | Migrations + factories + seeders (incl. seeded HAS grid skeleton) | [ ] | |
 | M6.8 | All models BelongsToStructure + cross-tenant leak tests | [ ] | |
 | M6.9 | `AuditGridLibrary` service — load HAS / ISO 9001 / AFNOR NF X50-056 templates from JSON fixtures | [ ] | |
