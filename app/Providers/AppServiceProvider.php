@@ -16,6 +16,9 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Observers\IncidentObserver;
 use App\Observers\InterventionObserver;
+use App\Observers\QvctCampaignObserver;
+use App\Observers\QvctResponseObserver;
+use App\Observers\QvctWeakSignalObserver;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
 use App\Policies\IncidentPolicy;
@@ -103,6 +106,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Intervention::observe(InterventionObserver::class);
         Incident::observe(IncidentObserver::class);
+        QvctCampaign::observe(QvctCampaignObserver::class);
+        QvctResponse::observe(QvctResponseObserver::class);
+        QvctWeakSignal::observe(QvctWeakSignalObserver::class);
     }
 
     private function configureScramble(): void

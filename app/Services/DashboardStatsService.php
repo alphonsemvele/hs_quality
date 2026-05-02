@@ -3,8 +3,12 @@
 namespace App\Services;
 
 use App\Enums\InterventionStatus;
+use App\Enums\QvctCampaignStatus;
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\QvctCampaign;
+use App\Models\QvctResponse;
+use App\Models\QvctWeakSignal;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -20,8 +24,37 @@ class DashboardStatsService
                 return [
                     ...$this->interventionStats(),
                     ...$this->incidentStats(),
+                    ...$this->qvctStats(),
                 ];
             });
+    }
+
+    /**
+     * Phase 2 / M3 — dashboard tile (PHASE2_PROGRESS.md M3.16). Operator
+     * + référent RH care about: how many campaigns are accepting
+     * responses right now, how much engagement we're getting in the
+     * current month, and how many weak signals are still untriaged.
+     *
+     * NOT included: any per-individual figure or any per-team breakdown
+     * below MIN_TEAM_SIZE — those would risk re-identifying respondents.
+     * The cartography service handles team-level views with its own
+     * minimum-sample guard.
+     */
+    private function qvctStats(): array
+    {
+        $monthStart = Carbon::today()->startOfMonth();
+
+        return [
+            'qvct_campaigns_open' => QvctCampaign::query()
+                ->where('status', QvctCampaignStatus::Active->value)
+                ->count(),
+            'qvct_responses_ce_mois' => QvctResponse::query()
+                ->where('submitted_at', '>=', $monthStart)
+                ->count(),
+            'qvct_weak_signals_outstanding' => QvctWeakSignal::query()
+                ->whereNull('acknowledged_at')
+                ->count(),
+        ];
     }
 
     private function interventionStats(): array

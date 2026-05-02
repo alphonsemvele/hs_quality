@@ -1,9 +1,13 @@
 <?php
 
 use App\Enums\InterventionStatus;
+use App\Enums\QvctCampaignStatus;
 use App\Models\Beneficiary;
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\QvctCampaign;
+use App\Models\QvctResponse;
+use App\Models\QvctWeakSignal;
 use App\Models\Structure;
 use App\Models\User;
 use App\Services\DashboardStatsService;
@@ -178,4 +182,73 @@ it('invalidates cache when an incident is written', function () {
 
     $after = $this->service->stats($sid)['incidents_declares'];
     expect($after)->toBe(1);
+});
+
+// ── QVCT stats (Phase 2 / M3 — PHASE2_PROGRESS.md M3.16) ──────────────────────
+
+it('counts open QVCT campaigns', function () {
+    QvctCampaign::factory()->forStructure($this->structure)->create([
+        'status' => QvctCampaignStatus::Active->value,
+    ]);
+    QvctCampaign::factory()->forStructure($this->structure)->closed()->create();
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['qvct_campaigns_open'])->toBe(1);
+});
+
+it('counts QVCT responses submitted in the current month', function () {
+    $campaign = QvctCampaign::factory()->forStructure($this->structure)->create();
+
+    QvctResponse::factory()->forCampaign($campaign)->count(3)->create([
+        'submitted_at' => Carbon::now(),
+    ]);
+    QvctResponse::factory()->forCampaign($campaign)->create([
+        'submitted_at' => Carbon::now()->subMonth(),
+    ]);
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['qvct_responses_ce_mois'])->toBe(3);
+});
+
+it('counts outstanding (un-acknowledged) QVCT weak signals', function () {
+    $campaign = QvctCampaign::factory()->forStructure($this->structure)->create();
+
+    QvctWeakSignal::factory()->forCampaign($campaign)->count(2)->create();
+    QvctWeakSignal::factory()->forCampaign($campaign)->create([
+        'acknowledged_by' => $this->intervenant->id,
+        'acknowledged_at' => now(),
+    ]);
+
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['qvct_weak_signals_outstanding'])->toBe(2);
+});
+
+it('invalidates cache when a QVCT campaign is launched', function () {
+    $sid = $this->structure->id;
+
+    $before = $this->service->stats($sid)['qvct_campaigns_open'];
+    expect($before)->toBe(0);
+
+    QvctCampaign::factory()->forStructure($this->structure)->create([
+        'status' => QvctCampaignStatus::Active->value,
+    ]);
+
+    $after = $this->service->stats($sid)['qvct_campaigns_open'];
+    expect($after)->toBe(1);
+});
+
+it('invalidates cache when a QVCT response is submitted', function () {
+    $sid = $this->structure->id;
+    $campaign = QvctCampaign::factory()->forStructure($this->structure)->create();
+
+    $this->service->stats($sid); // warm
+
+    QvctResponse::factory()->forCampaign($campaign)->create([
+        'submitted_at' => Carbon::now(),
+    ]);
+
+    expect($this->service->stats($sid)['qvct_responses_ce_mois'])->toBe(1);
 });

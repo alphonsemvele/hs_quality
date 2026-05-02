@@ -52,7 +52,7 @@
 | M3.2 | `qvct_campaigns` table — instantiation of a questionnaire over a window (start/end, target audience) | [x] | `database/migrations/2026_05_02_084132_create_qvct_campaigns_table.php` |
 | M3.3 | `qvct_responses` table — anonymous; only `campaign_id`, `team_tag`, `answers JSON`, no `user_id` | [x] | `database/migrations/2026_05_02_084133_create_qvct_responses_table.php` (anonymity asserted by `QvctTenantIsolationTest::responses carry no user_id`) |
 | M3.4 | `qvct_weak_signals` table — detected anomalies per campaign × team (low score, sharp drop, etc.) | [x] | `database/migrations/2026_05_02_084134_create_qvct_weak_signals_table.php` |
-| M3.5 | Migrations + factories + seeders for all four | [~] | Migrations + factories done; seeders pending (M3 row to be re-ticked when seeders land alongside service work) |
+| M3.5 | Migrations + factories + seeders for all four | [x] | Migrations + factories + `database/seeders/QvctSeeder.php` (idempotent default baromètre per structure) + `tests/Feature/Domain/Qvct/QvctSeederTest.php` |
 | M3.6 | Models with `BelongsToStructure` + Auditable (where applicable) + cross-tenant leak tests | [x] | `app/Models/Qvct{Questionnaire,Campaign,Response,WeakSignal}.php` — Response intentionally NOT Auditable to preserve anonymity (audit row would carry the answers) |
 | M3.7 | `QvctService::launchCampaign()` + `recordResponse()` (anonymous) + `closeCampaign()` | [x] | `app/Services/QvctService.php` + `tests/Unit/Services/QvctServiceTest.php` (5 tests, anonymity asserted) |
 | M3.8 | `WeakSignalDetector` pure service — pure unit-tested; takes campaign aggregates returns flagged anomalies | [x] | `app/Services/WeakSignalDetector.php` + `tests/Unit/Services/WeakSignalDetectorTest.php` (7 tests covering threshold, sample-size guard, severity, team grouping, idempotent re-detection) |
@@ -63,12 +63,12 @@
 | M3.13 | API endpoints (mobile intervenants submit responses): `POST /api/v1/qvct/campaigns/{id}/responses` | [x] | `app/Http/Controllers/Api/V1/Qvct{Campaign,WeakSignal}Controller.php` + routes (`GET qvct/campaigns`, `GET qvct/campaigns/{id}`, `POST qvct/campaigns/{id}/responses`, `GET qvct/weak-signals`, `POST qvct/weak-signals/{id}/acknowledge`) + `tests/Feature/Api/V1/QvctApiTest.php` (10 tests, anonymity asserted on submit response) |
 | M3.17 | Pest feature tests per endpoint (anonymous response, RH-only access to detail) | [x] | `tests/Feature/Domain/Qvct/Qvct{Questionnaire,Campaign}HttpTest.php` (16 web tests) + `tests/Feature/Api/V1/QvctApiTest.php` (10 API tests). Cross-tenant 404 + RBAC matrix covered. |
 | M3.14 | Sync batch op: `qvct.submit_response` | [x] | `app/Services/SyncBatchService.php::qvctSubmitResponse` + `app/Http/Requests/Api/V1/SyncBatchRequest.php` (kind enum) + `tests/Feature/Api/V1/QvctSyncOpTest.php` (success / closed-conflict / cross-tenant rejected / missing-id error) |
-| M3.15 | Psychosocial risk cartography service — aggregates per-team (pure read service) | [ ] | |
-| M3.16 | Dashboard tile: open campaigns + weak-signal alerts | [ ] | |
+| M3.15 | Psychosocial risk cartography service — aggregates per-team (pure read service) | [x] | `app/Services/PsychosocialRiskCartographyService.php` + `tests/Unit/Services/PsychosocialRiskCartographyServiceTest.php` (5 tests, MIN_TEAM_SIZE anonymity guard, mean-score aggregation, active-signal join) |
+| M3.16 | Dashboard tile: open campaigns + weak-signal alerts | [x] | `DashboardStatsService::qvctStats` (qvct_campaigns_open / qvct_responses_ce_mois / qvct_weak_signals_outstanding) + observers `Qvct{Campaign,Response,WeakSignal}Observer` (cache-flush on writes) + 5 new dashboard tests |
 | M3.17 | Pest feature tests per endpoint (anonymous response, RH-only access to detail) | [ ] | |
 | M3.18 | Pest cross-tenant leak test on every QVCT model | [x] | `tests/Feature/Domain/Qvct/QvctTenantIsolationTest.php` (10/10 green; covers Questionnaire/Campaign/Response/WeakSignal + asserts anonymity invariant on Response) |
 | M3.19 | Pest unit test on `WeakSignalDetector` covering CDC-spec'd thresholds | [x] | `tests/Unit/Services/WeakSignalDetectorTest.php` |
-| M3.20 | French validation messages in `lang/fr/qvct.php` | [ ] | |
+| M3.20 | French validation messages in `lang/fr/qvct.php` | [x] | `lang/fr/qvct.php` (module label + lifecycle messages + anonymity notice + weak-signal labels + frequency labels). Form-request inline messages remain for endpoint-specific overrides. |
 | M3.21 | Parametrable frequency on `qvct_questionnaires` (weekly/monthly/quarterly enum) | [ ] | |
 | M3.22 | `qvct_journal_entries` table — optional individualized emotional journal (private to user + référent RH) | [ ] | |
 | M3.23 | `JournalEntryService` — write, list-mine, list-as-RH (escalation visibility) | [ ] | |
