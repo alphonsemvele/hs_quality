@@ -8,6 +8,8 @@ use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
 use App\Models\PlannedTask;
+use App\Models\QvctActionPlan;
+use App\Models\QvctActionPlanItem;
 use App\Models\QvctCampaign;
 use App\Models\QvctExchangeRequest;
 use App\Models\QvctIndicator;
@@ -28,6 +30,8 @@ use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
+use App\Policies\QvctActionPlanItemPolicy;
+use App\Policies\QvctActionPlanPolicy;
 use App\Policies\QvctCampaignPolicy;
 use App\Policies\QvctExchangeRequestPolicy;
 use App\Policies\QvctIndicatorPolicy;
@@ -60,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
+        QvctActionPlan::class => QvctActionPlanPolicy::class,
+        QvctActionPlanItem::class => QvctActionPlanItemPolicy::class,
         QvctCampaign::class => QvctCampaignPolicy::class,
         QvctExchangeRequest::class => QvctExchangeRequestPolicy::class,
         QvctIndicator::class => QvctIndicatorPolicy::class,

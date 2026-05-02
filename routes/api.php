@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
+use App\Http\Controllers\Api\V1\QvctActionPlanController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
 use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
 use App\Http\Controllers\Api\V1\QvctIndicatorController;
@@ -94,6 +95,16 @@ Route::prefix('v1')
         Route::get('qvct/indicators', [QvctIndicatorController::class, 'index']);
         Route::put('qvct/indicators/{indicator}', [QvctIndicatorController::class, 'update']);
         Route::post('qvct/indicators/snapshot', [QvctIndicatorController::class, 'snapshot'])->middleware('idempotent');
+
+        // Action plans — RH-driven plans with measurable items.
+        Route::get('qvct/action-plans', [QvctActionPlanController::class, 'index']);
+        Route::post('qvct/action-plans', [QvctActionPlanController::class, 'store'])->middleware('idempotent');
+        Route::get('qvct/action-plans/{plan}', [QvctActionPlanController::class, 'show']);
+        Route::post('qvct/action-plans/{plan}/publish', [QvctActionPlanController::class, 'publish'])->middleware('idempotent');
+        Route::post('qvct/action-plans/{plan}/close', [QvctActionPlanController::class, 'close'])->middleware('idempotent');
+        Route::post('qvct/action-plans/{plan}/items', [QvctActionPlanController::class, 'storeItem'])->middleware('idempotent');
+        Route::post('qvct/action-plan-items/{item}/status', [QvctActionPlanController::class, 'updateItemStatus'])->middleware('idempotent');
+        Route::post('qvct/action-plan-items/{item}/impact', [QvctActionPlanController::class, 'recordImpact'])->middleware('idempotent');
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)
