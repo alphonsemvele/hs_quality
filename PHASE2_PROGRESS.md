@@ -106,9 +106,9 @@
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
 | M6.1 | `audit_grids` table — reusable grid templates (title, source: HAS/ISO9001/AFNOR/custom, sections, weight scheme) | [x] | `database/migrations/2026_05_02_140000_create_audit_grids_table.php` + `app/Models/AuditGrid.php` + `app/Enums/AuditGridSource.php` (Has / Iso9001 / AfnorX50056 / Custom) + factory + `tests/Feature/Domain/Audits/AuditGridTenantIsolationTest.php` (4 tests). Per-tenant: each structure gets its own seeded copy (no global templates) so customization stays isolated. |
-| M6.2 | `audit_grid_items` table — individual scoreable items (label, evidence required, scale) | [ ] | |
-| M6.3 | `audit_runs` table — execution of a grid against a structure on a date | [ ] | |
-| M6.4 | `audit_run_responses` table — per-item score, comment, evidence file ref | [ ] | |
+| M6.2 | `audit_grid_items` table — individual scoreable items (label, evidence required, scale) | [x] | `database/migrations/2026_05_02_140001_create_audit_grid_items_table.php` + `app/Models/AuditGridItem.php` + `app/Enums/AuditItemScale.php` (Binary / OneToFive / Percentage) + factory. Auditable. |
+| M6.3 | `audit_runs` table — execution of a grid against a structure on a date | [x] | `database/migrations/2026_05_02_140002_create_audit_runs_table.php` + `app/Models/AuditRun.php` + `app/Enums/AuditRunStatus.php` (Draft/InProgress/Finalised) + factory. Score + max_score frozen at finalise time so later grid edits don't mutate historical scores. Auditable + soft-delete. |
+| M6.4 | `audit_run_responses` table — per-item score, comment, evidence file ref | [x] | `database/migrations/2026_05_02_140003_create_audit_run_responses_table.php` + `app/Models/AuditRunResponse.php` + factory. Unique (audit_run_id, audit_grid_item_id) enforces one response per item per run; updates overwrite in place. |
 | M6.5 | `pacs` (plans d'amélioration continue) table — auto-generated from gaps | [ ] | |
 | M6.6 | `pac_actions` table — per-action assignment, due date, status, evidence | [ ] | |
 | M6.7 | Migrations + factories + seeders (incl. seeded HAS grid skeleton) | [ ] | |
