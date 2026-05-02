@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
+use App\Http\Controllers\Api\V1\QvctCampaignController;
+use App\Http\Controllers\Api\V1\QvctWeakSignalController;
 use App\Http\Controllers\Api\V1\SyncController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +56,20 @@ Route::prefix('v1')
         // Beneficiaries (read-only on mobile)
         Route::get('beneficiaries', [BeneficiaryController::class, 'index']);
         Route::get('beneficiaries/{beneficiary}', [BeneficiaryController::class, 'show']);
+
+        // QVCT — open-campaigns discovery + anonymous response submission +
+        // weak-signal triage (RH-only via QvctWeakSignalPolicy::viewAny).
+        // submitResponse is the HTTP fallback for the qvct.submit_response
+        // sync op; both go through QvctService::recordResponse so the
+        // anonymity invariant holds on either path.
+        Route::get('qvct/campaigns', [QvctCampaignController::class, 'index']);
+        Route::get('qvct/campaigns/{campaign}', [QvctCampaignController::class, 'show']);
+        Route::post('qvct/campaigns/{campaign}/responses', [QvctCampaignController::class, 'submitResponse'])
+            ->middleware('idempotent');
+
+        Route::get('qvct/weak-signals', [QvctWeakSignalController::class, 'index']);
+        Route::post('qvct/weak-signals/{signal}/acknowledge', [QvctWeakSignalController::class, 'acknowledge'])
+            ->middleware('idempotent');
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)
