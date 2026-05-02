@@ -7,6 +7,7 @@ use App\Http\Requests\Interventions\CancelInterventionRequest;
 use App\Http\Requests\Interventions\CheckOutInterventionRequest;
 use App\Http\Requests\Interventions\StoreInterventionPhotoRequest;
 use App\Http\Requests\Interventions\StoreInterventionSignatureRequest;
+use App\Http\Requests\Interventions\SubmitInterventionReportRequest;
 use App\Http\Resources\Api\V1\InterventionResource;
 use App\Models\Intervention;
 use App\Models\InterventionPhoto;
@@ -78,6 +79,17 @@ class InterventionController extends Controller
     public function cancel(CancelInterventionRequest $request, Intervention $intervention): JsonResponse
     {
         $updated = $this->service->cancel($intervention, $request->validated('cancellation_reason'));
+
+        return response()->json(new InterventionResource($updated));
+    }
+
+    public function submitReport(SubmitInterventionReportRequest $request, Intervention $intervention): JsonResponse
+    {
+        $updated = $this->service->submitReport(
+            $intervention,
+            $request->validated('report_text'),
+            $request->user(),
+        );
 
         return response()->json(new InterventionResource($updated));
     }

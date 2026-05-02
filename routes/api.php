@@ -40,6 +40,7 @@ Route::prefix('v1')
             Route::post('interventions/{intervention}/check-in', [InterventionController::class, 'checkIn']);
             Route::post('interventions/{intervention}/check-out', [InterventionController::class, 'checkOut']);
             Route::post('interventions/{intervention}/cancel', [InterventionController::class, 'cancel']);
+            Route::post('interventions/{intervention}/report', [InterventionController::class, 'submitReport']);
             Route::post('interventions/{intervention}/photos', [InterventionController::class, 'storePhoto']);
             Route::delete('interventions/{intervention}/photos/{photo}', [InterventionController::class, 'destroyPhoto']);
             Route::post('interventions/{intervention}/signatures', [InterventionController::class, 'storeSignature']);

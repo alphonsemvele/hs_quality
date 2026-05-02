@@ -226,3 +226,104 @@ it('rejects an empty operations array at validation', function (): void {
     $this->postJson('/api/v1/sync/batch', ['operations' => []])
         ->assertStatus(422);
 });
+
+it('submits a free-text report via intervention.submit_report', function (): void {
+    $intervenant = actingAsApiRole('intervenant');
+    $intervention = plannedIntervention($intervenant);
+    $intervention->update([
+        'status' => InterventionStatus::InProgress->value,
+        'actual_start_at' => now()->subMinutes(15),
+    ]);
+
+    $response = $this->postJson('/api/v1/sync/batch', [
+        'operations' => [[
+            'client_op_id' => (string) Str::uuid(),
+            'kind' => 'intervention.submit_report',
+            'resource_id' => $intervention->id,
+            'payload' => ['report_text' => 'Soins effectués, RAS.'],
+        ]],
+    ]);
+
+    $response->assertStatus(207);
+    expect($response->json('results.0.status'))->toBe('success');
+    expect($intervention->fresh()->report_text)->toBe('Soins effectués, RAS.');
+});
+
+it('rejects a submit_report op with empty payload', function (): void {
+    $intervenant = actingAsApiRole('intervenant');
+    $intervention = plannedIntervention($intervenant);
+    $intervention->update([
+        'status' => InterventionStatus::InProgress->value,
+        'actual_start_at' => now()->subMinutes(5),
+    ]);
+
+    $response = $this->postJson('/api/v1/sync/batch', [
+        'operations' => [[
+            'client_op_id' => (string) Str::uuid(),
+            'kind' => 'intervention.submit_report',
+            'resource_id' => $intervention->id,
+            'payload' => [],
+        ]],
+    ]);
+
+    $response->assertStatus(207);
+    expect($response->json('results.0.status'))->toBe('error');
+});
+
+/**
+ * Spec: M4 W3 — "simulated offline scenarios (two intervenants edit same
+ * bénéficiaire offline, sync, verify resolution)". Realistic shape: the
+ * intervenant assigned to the visit completes their report offline; their
+ * coordinateur (covering the same tour because the intervenant was late
+ * back online) also drafted a report and flushes it through sync. The
+ * merge helper must preserve both narratives with git-style conflict
+ * markers — neither account of the visit is silently lost.
+ */
+it('preserves both narratives when an intervenant and a coordinateur race a report submission', function (): void {
+    $structure = Structure::factory()->create();
+    $beneficiary = Beneficiary::factory()->forStructure($structure)->create();
+    $intervenant = User::factory()->forStructure($structure)->intervenant()->create();
+
+    $intervention = Intervention::factory()
+        ->forStructure($structure)
+        ->state([
+            'beneficiary_id' => $beneficiary->id,
+            'intervenant_id' => $intervenant->id,
+            'status' => InterventionStatus::Completed->value,
+            'actual_start_at' => now()->subHour(),
+            'actual_end_at' => now()->subMinutes(30),
+        ])
+        ->create();
+
+    // ── Intervenant flushes their offline queue first ──────────────────────
+    actingAsApiRole('intervenant', $structure, $intervenant);
+
+    $this->postJson('/api/v1/sync/batch', [
+        'operations' => [[
+            'client_op_id' => (string) Str::uuid(),
+            'kind' => 'intervention.submit_report',
+            'resource_id' => $intervention->id,
+            'payload' => ['report_text' => 'Narrative from the intervenant on the tour.'],
+        ]],
+    ])->assertStatus(207);
+
+    expect($intervention->fresh()->report_text)
+        ->toBe('Narrative from the intervenant on the tour.');
+
+    // ── Coordinateur (team-write permission) flushes a different draft ─────
+    actingAsApiRole('coordinateur', $structure);
+
+    $this->postJson('/api/v1/sync/batch', [
+        'operations' => [[
+            'client_op_id' => (string) Str::uuid(),
+            'kind' => 'intervention.submit_report',
+            'resource_id' => $intervention->id,
+            'payload' => ['report_text' => 'Coordinateur added supervisory notes.'],
+        ]],
+    ])->assertStatus(207);
+
+    // ── Both narratives preserved with git-style conflict markers ──────────
+    expect($intervention->fresh()->report_text)->toBe(
+        "<<<<<<< saved\nNarrative from the intervenant on the tour.\n=======\nCoordinateur added supervisory notes.\n>>>>>>> incoming"
+    );
+});

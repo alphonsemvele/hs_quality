@@ -134,6 +134,11 @@ class Intervention extends Model implements AuditableContract
         return $this->status === InterventionStatus::InProgress;
     }
 
+    public function isCompleted(): bool
+    {
+        return $this->status === InterventionStatus::Completed;
+    }
+
     public function isTerminal(): bool
     {
         return $this->status->isTerminal();

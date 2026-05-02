@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/interventions/{intervention}/checkin', [InterventionController::class, 'checkIn'])->name('interventions.checkin');
         Route::post('/interventions/{intervention}/checkout', [InterventionController::class, 'checkOut'])->name('interventions.checkout');
         Route::post('/interventions/{intervention}/cancel', [InterventionController::class, 'cancel'])->name('interventions.cancel');
+        Route::post('/interventions/{intervention}/report', [InterventionController::class, 'submitReport'])->name('interventions.report');
 
         Route::post('/interventions/{intervention}/photos', [InterventionController::class, 'storePhoto'])->name('interventions.photos.store');
         Route::delete('/interventions/{intervention}/photos/{photo}', [InterventionController::class, 'destroyPhoto'])->name('interventions.photos.destroy');

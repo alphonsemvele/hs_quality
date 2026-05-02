@@ -30,11 +30,17 @@ use Throwable;
  * persistent dedup belongs to the caller via HandleIdempotency middleware
  * keyed on the batch envelope.
  *
- * Phase 1 supports four ops (sufficient for offline tour completion):
- *   - intervention.check_in / check_out / cancel
+ * Phase 1 supports five ops (sufficient for offline tour completion):
+ *   - intervention.check_in / check_out / cancel / submit_report
  *   - incident.create
  * Photos / signatures are NOT batchable (binary blobs); the mobile app
  * uploads those one-by-one to the existing endpoints once online.
+ *
+ * Concurrency: free-text fields (intervention.report_text) are merged via
+ * git-style conflict markers when two writers arrive with different
+ * non-empty values. See InterventionService::mergeReportText() — same
+ * helper is used by direct check_out and report submission paths so the
+ * sync layer behaves identically to always-online clients.
  */
 class SyncBatchService
 {
@@ -88,6 +94,7 @@ class SyncBatchService
                 'intervention.check_in' => $this->interventionCheckIn($op, $actor),
                 'intervention.check_out' => $this->interventionCheckOut($op, $actor),
                 'intervention.cancel' => $this->interventionCancel($op, $actor),
+                'intervention.submit_report' => $this->interventionSubmitReport($op, $actor),
                 'incident.create' => $this->incidentCreate($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
@@ -178,6 +185,25 @@ class SyncBatchService
         }
 
         $fresh = $this->interventions->cancel($intervention, $reason);
+
+        return $this->interventionState($fresh);
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function interventionSubmitReport(array $op, User $actor): array
+    {
+        $intervention = $this->resolveIntervention($op);
+        $this->authorize($actor, 'submitReport', $intervention);
+
+        $reportText = (string) ($op['payload']['report_text'] ?? '');
+        if ($reportText === '') {
+            throw new HttpException(422, 'A submit_report op requires a non-empty report_text.');
+        }
+
+        $fresh = $this->interventions->submitReport($intervention, $reportText, $actor);
 
         return $this->interventionState($fresh);
     }
