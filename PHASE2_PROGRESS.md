@@ -119,16 +119,16 @@
 | M6.12 | `AuditScoringService` pure service — auto-scoring per item + per section + global, unit-tested | [x] | `app/Services/AuditScoringService.php` (pure: total / max / percentage; max counts ALL grid items so partial completion shows as low %; AuditGrid::items + ::runs HasMany relations added) + `tests/Unit/Services/AuditScoringServiceTest.php` (3) |
 | M6.13 | `PacGenerationService` — given finalised audit run, emit PAC with one action per non-conformity (auto, idempotent) | [x] | `app/Services/PacGenerationService.php` (THRESHOLD = 50% × max_points; idempotent at (pac_id, source_audit_response_id); operator-edited actions preserved across re-generations; refuses non-finalised runs) + `tests/Unit/Services/PacGenerationServiceTest.php` (6 tests). |
 | M6.14 | Form Requests: `StartAuditRunRequest`, `RecordAuditResponseRequest`, `UpdatePacActionRequest` | [ ] | |
-| M6.15 | Policies: `AuditRunPolicy`, `PacPolicy`, `PacActionPolicy` | [ ] | |
+| M6.15 | Policies: `AuditRunPolicy`, `PacPolicy`, `PacActionPolicy` (+ AuditGridPolicy + AuditRunResponsePolicy) | [x] | `app/Policies/{AuditGrid,AuditRun,AuditRunResponse,Pac,PacAction}Policy.php` registered in `AppServiceProvider` + `tests/Feature/Domain/Audits/AuditPolicyTest.php` (11 RBAC tests across all 5 policies + cross-tenant) |
 | M6.16 | Web controllers + Inertia pages (grid library browse, run execution, PAC kanban) | [ ] | |
 | M6.17 | API endpoints (mobile audit execution): `POST /api/v1/audit-runs/{id}/responses` | [ ] | |
-| M6.18 | Sync batch op: `audit.record_response` | [ ] | |
+| M6.18 | Sync batch op: `audit.record_response` | [x] | `app/Services/SyncBatchService.php::auditRecordResponse` + `app/Http/Requests/Api/V1/SyncBatchRequest.php` (kind enum) + `tests/Feature/Api/V1/AuditSyncOpTest.php` (4: success / missing-id / cross-tenant rejected / intervenant-rejected) |
 | M6.19 | HAS preparation guide UI + service (gap analysis between current state and HAS expected score) | [ ] | |
 | M6.20 | PDF export of finalised audit run (queue job, S3-stored, signed-URL retrieval) | [ ] | |
 | M6.21 | Dashboard tile: in-progress audits + open PAC actions overdue | [ ] | |
 | M6.22 | Pest feature tests for end-to-end (start → record → finalise → PAC auto-generated) | [ ] | |
-| M6.23 | Pest unit tests for `AuditScoringService` covering CDC-spec'd scoring rules | [ ] | |
-| M6.24 | Pest unit tests for `PacGenerationService` covering all non-conformity → action mappings | [ ] | |
+| M6.23 | Pest unit tests for `AuditScoringService` covering CDC-spec'd scoring rules | [x] | `tests/Unit/Services/AuditScoringServiceTest.php` (3) |
+| M6.24 | Pest unit tests for `PacGenerationService` covering all non-conformity → action mappings | [x] | `tests/Unit/Services/PacGenerationServiceTest.php` (6) |
 | M6.25 | French validation + UI messages (lang/fr/audit.php) | [ ] | |
 
 **Month 6 acceptance gate:** A référent qualité can run a HAS grid against their structure on the mobile app, auto-scoring works, PAC is auto-generated with one action per gap, coordinateur can complete actions, finalised audit exports to PDF. Cross-tenant leak tests green.

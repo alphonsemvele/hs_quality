@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Enums\QvctExchangeAddresseeRole;
 use App\Enums\QvctMood;
+use App\Models\AuditGridItem;
+use App\Models\AuditRun;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\QvctCampaign;
@@ -56,6 +58,7 @@ class SyncBatchService
         private readonly QvctService $qvct,
         private readonly JournalEntryService $journal,
         private readonly ExchangeRequestService $exchanges,
+        private readonly AuditExecutionService $audits,
     ) {}
 
     /**
@@ -108,6 +111,7 @@ class SyncBatchService
                 'qvct.submit_response' => $this->qvctSubmitResponse($op, $actor),
                 'qvct.write_journal' => $this->qvctWriteJournal($op, $actor),
                 'qvct.request_exchange' => $this->qvctRequestExchange($op, $actor),
+                'audit.record_response' => $this->auditRecordResponse($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
 
@@ -317,6 +321,52 @@ class SyncBatchService
             'addressee_role' => $exchange->addressee_role->value,
             'status' => $exchange->status->value,
             'created_at' => $exchange->created_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function auditRecordResponse(array $op, User $actor): array
+    {
+        $runId = $op['resource_id'] ?? null;
+        if ($runId === null || $runId === '') {
+            throw new HttpException(422, 'resource_id (audit run id) is required for audit.record_response.');
+        }
+
+        $run = AuditRun::query()->find($runId);
+        if ($run === null) {
+            throw new HttpException(404, "Audit run {$runId} not found in your tenant.");
+        }
+
+        $itemId = (string) ($op['payload']['audit_grid_item_id'] ?? '');
+        if ($itemId === '') {
+            throw new HttpException(422, 'payload.audit_grid_item_id is required for audit.record_response.');
+        }
+
+        $item = AuditGridItem::query()->find($itemId);
+        if ($item === null) {
+            throw new HttpException(404, "Audit grid item {$itemId} not found in your tenant.");
+        }
+
+        $this->authorize($actor, 'create', AuditRunResponse::class);
+
+        $response = $this->audits->recordResponse(
+            $run,
+            $item,
+            isset($op['payload']['score']) ? (float) $op['payload']['score'] : null,
+            $op['payload']['comment'] ?? null,
+            $op['payload']['evidence_url'] ?? null,
+            $actor,
+        );
+
+        return [
+            'id' => $response->id,
+            'audit_run_id' => $run->id,
+            'audit_grid_item_id' => $item->id,
+            'score' => $response->score !== null ? (float) $response->score : null,
+            'recorded_at' => $response->recorded_at?->toIso8601String(),
         ];
     }
 

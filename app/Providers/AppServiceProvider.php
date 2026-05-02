@@ -2,11 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\AuditGrid;
+use App\Models\AuditRun;
+use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
+use App\Models\Pac;
+use App\Models\PacAction;
 use App\Models\PlannedTask;
 use App\Models\QvctActionPlan;
 use App\Models\QvctActionPlanItem;
@@ -24,11 +29,16 @@ use App\Observers\InterventionObserver;
 use App\Observers\QvctCampaignObserver;
 use App\Observers\QvctResponseObserver;
 use App\Observers\QvctWeakSignalObserver;
+use App\Policies\AuditGridPolicy;
+use App\Policies\AuditRunPolicy;
+use App\Policies\AuditRunResponsePolicy;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
 use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
+use App\Policies\PacActionPolicy;
+use App\Policies\PacPolicy;
 use App\Policies\PlannedTaskPolicy;
 use App\Policies\QvctActionPlanItemPolicy;
 use App\Policies\QvctActionPlanPolicy;
@@ -57,11 +67,16 @@ class AppServiceProvider extends ServiceProvider
      * Policy mapping. Every new domain Policy is registered here.
      */
     protected array $policies = [
+        AuditGrid::class => AuditGridPolicy::class,
+        AuditRun::class => AuditRunPolicy::class,
+        AuditRunResponse::class => AuditRunResponsePolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
         Incident::class => IncidentPolicy::class,
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
+        Pac::class => PacPolicy::class,
+        PacAction::class => PacActionPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
         QvctActionPlan::class => QvctActionPlanPolicy::class,
