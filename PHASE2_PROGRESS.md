@@ -115,8 +115,8 @@
 | M6.8 | All models BelongsToStructure + cross-tenant leak tests | [x] | 6 models all use `BelongsToStructure`; leak tests in `tests/Feature/Domain/Audits/AuditGridTenantIsolationTest.php` (4) + `AuditExecutionTenantIsolationTest.php` (5) + `PacTenantIsolationTest.php` (4) — covers AuditGrid, AuditGridItem, AuditRun, AuditRunResponse, Pac, PacAction. |
 | M6.9 | `AuditGridLibrary` service — load HAS / ISO 9001 / AFNOR NF X50-056 templates from JSON fixtures | [ ] | |
 | M6.10 | Seed JSON fixtures for the three reference grids (sourced from official documents) | [~] | HAS fixture done at `database/seeders/fixtures/has-grid.json` (10 items, official HAS recommendations for SAAD/SSIAD/SPASAD). ISO 9001 + AFNOR NF X50-056 fixtures pending. |
-| M6.11 | `AuditExecutionService` — start run, record response, finalise (lock + score) | [ ] | |
-| M6.12 | `AuditScoringService` pure service — auto-scoring per item + per section + global, unit-tested | [ ] | |
+| M6.11 | `AuditExecutionService` — start run, record response, finalise (lock + score) | [x] | `app/Services/AuditExecutionService.php` (start / recordResponse / finalise; state guards: cannot record on finalised, cannot finalise twice; finalise freezes score + max_score so a later grid edit cannot mutate historical scores) + `tests/Unit/Services/AuditExecutionServiceTest.php` (8) |
+| M6.12 | `AuditScoringService` pure service — auto-scoring per item + per section + global, unit-tested | [x] | `app/Services/AuditScoringService.php` (pure: total / max / percentage; max counts ALL grid items so partial completion shows as low %; AuditGrid::items + ::runs HasMany relations added) + `tests/Unit/Services/AuditScoringServiceTest.php` (3) |
 | M6.13 | `PacGenerationService` — given finalised audit run, emit PAC with one action per non-conformity (auto, idempotent) | [ ] | |
 | M6.14 | Form Requests: `StartAuditRunRequest`, `RecordAuditResponseRequest`, `UpdatePacActionRequest` | [ ] | |
 | M6.15 | Policies: `AuditRunPolicy`, `PacPolicy`, `PacActionPolicy` | [ ] | |

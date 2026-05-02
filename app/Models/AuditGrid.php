@@ -7,6 +7,7 @@ use App\Enums\AuditGridSource;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
@@ -37,5 +38,15 @@ class AuditGrid extends Model implements AuditableContract
             'weight_scheme' => 'array',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(AuditGridItem::class, 'audit_grid_id')->orderBy('position');
+    }
+
+    public function runs(): HasMany
+    {
+        return $this->hasMany(AuditRun::class, 'audit_grid_id');
     }
 }
