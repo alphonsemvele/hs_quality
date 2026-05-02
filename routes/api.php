@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuditRunController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
+use App\Http\Controllers\Api\V1\PacController;
 use App\Http\Controllers\Api\V1\QvctActionPlanController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
 use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
@@ -105,6 +107,22 @@ Route::prefix('v1')
         Route::post('qvct/action-plans/{plan}/items', [QvctActionPlanController::class, 'storeItem'])->middleware('idempotent');
         Route::post('qvct/action-plan-items/{item}/status', [QvctActionPlanController::class, 'updateItemStatus'])->middleware('idempotent');
         Route::post('qvct/action-plan-items/{item}/impact', [QvctActionPlanController::class, 'recordImpact'])->middleware('idempotent');
+
+        // Audits — référent qualité executes a HAS/ISO/AFNOR grid against
+        // the structure on a date. Lifecycle invariants live in
+        // AuditExecutionService; the route layer just gates and routes.
+        Route::get('audit-runs', [AuditRunController::class, 'index']);
+        Route::post('audit-runs', [AuditRunController::class, 'store'])->middleware('idempotent');
+        Route::get('audit-runs/{auditRun}', [AuditRunController::class, 'show']);
+        Route::post('audit-runs/{auditRun}/responses', [AuditRunController::class, 'recordResponse'])->middleware('idempotent');
+        Route::post('audit-runs/{auditRun}/finalise', [AuditRunController::class, 'finalise'])->middleware('idempotent');
+        Route::post('audit-runs/{auditRun}/generate-pac', [AuditRunController::class, 'generatePac'])->middleware('idempotent');
+
+        // PACs.
+        Route::get('pacs', [PacController::class, 'index']);
+        Route::get('pacs/{pac}', [PacController::class, 'show']);
+        Route::post('pacs/{pac}/close', [PacController::class, 'close'])->middleware('idempotent');
+        Route::put('pac-actions/{action}', [PacController::class, 'updateAction']);
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)
