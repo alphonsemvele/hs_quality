@@ -31,20 +31,31 @@
 
 ---
 
-## Month 5 — M3 QVCT (lines 436-438)
+## Month 5 — M3 QVCT (lines 436-438 + CDC §M3)
 
-> Domain spec (CDC §QVCT, lines 436-438): *barometer questionnaires, anonymous response storage, weak-signal detection service, individualized RPS tracking with alerts to référent RH, psychosocial risk cartography per team*
+> IMPLEMENTATION_PLAN line 436-438: *barometer questionnaires, anonymous response storage, weak-signal detection service, individualized RPS tracking with alerts to référent RH, psychosocial risk cartography per team*
+>
+> Full CDC §M3 spec (sourced from `~/.claude/.../memory/project_cdc_specification.md` lines 81-93):
+> 1. Anonymous baromètre: satisfaction + wellbeing questionnaire
+> 2. Parametrable frequency: weekly / monthly / quarterly
+> 3. Weak-signal detection: morale drop, overload, relational conflicts
+> 4. Individualized psychosocial risk tracking with alert to référent RH
+> 5. Optional emotional journal
+> 6. Secure exchange-request tool with manager or référent RH
+> 7. Psychosocial risk cartography per team / secteur
+> 8. QVCT indicator tracking: absenteeism, turnover, work accidents, baromètre satisfaction
+> 9. QVCT action plan with impact measurement
 
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
-| M3.1 | `qvct_questionnaires` table — questionnaire templates (title, version, periodicity, questions JSON) | [ ] | |
-| M3.2 | `qvct_campaigns` table — instantiation of a questionnaire over a window (start/end, target audience) | [ ] | |
-| M3.3 | `qvct_responses` table — anonymous; only `campaign_id`, `team_id`, `answers JSON`, no `user_id` | [ ] | |
-| M3.4 | `qvct_weak_signals` table — detected anomalies per campaign × team (low score, sharp drop, etc.) | [ ] | |
-| M3.5 | Migrations + factories + seeders for all four | [ ] | |
-| M3.6 | Models with `BelongsToStructure` + Auditable (where applicable) + cross-tenant leak tests | [ ] | |
-| M3.7 | `QvctService::launchCampaign()` + `recordResponse()` (anonymous) + `closeCampaign()` | [ ] | |
-| M3.8 | `WeakSignalDetector` pure service — pure unit-tested; takes campaign aggregates returns flagged anomalies | [ ] | |
+| M3.1 | `qvct_questionnaires` table — questionnaire templates (title, version, periodicity, questions JSON) | [x] | `database/migrations/2026_05_02_084131_create_qvct_questionnaires_table.php` |
+| M3.2 | `qvct_campaigns` table — instantiation of a questionnaire over a window (start/end, target audience) | [x] | `database/migrations/2026_05_02_084132_create_qvct_campaigns_table.php` |
+| M3.3 | `qvct_responses` table — anonymous; only `campaign_id`, `team_tag`, `answers JSON`, no `user_id` | [x] | `database/migrations/2026_05_02_084133_create_qvct_responses_table.php` (anonymity asserted by `QvctTenantIsolationTest::responses carry no user_id`) |
+| M3.4 | `qvct_weak_signals` table — detected anomalies per campaign × team (low score, sharp drop, etc.) | [x] | `database/migrations/2026_05_02_084134_create_qvct_weak_signals_table.php` |
+| M3.5 | Migrations + factories + seeders for all four | [~] | Migrations + factories done; seeders pending (M3 row to be re-ticked when seeders land alongside service work) |
+| M3.6 | Models with `BelongsToStructure` + Auditable (where applicable) + cross-tenant leak tests | [x] | `app/Models/Qvct{Questionnaire,Campaign,Response,WeakSignal}.php` — Response intentionally NOT Auditable to preserve anonymity (audit row would carry the answers) |
+| M3.7 | `QvctService::launchCampaign()` + `recordResponse()` (anonymous) + `closeCampaign()` | [x] | `app/Services/QvctService.php` + `tests/Unit/Services/QvctServiceTest.php` (5 tests, anonymity asserted) |
+| M3.8 | `WeakSignalDetector` pure service — pure unit-tested; takes campaign aggregates returns flagged anomalies | [x] | `app/Services/WeakSignalDetector.php` + `tests/Unit/Services/WeakSignalDetectorTest.php` (7 tests covering threshold, sample-size guard, severity, team grouping, idempotent re-detection) |
 | M3.9 | `NotifyReferentRhJob` — queued, idempotent, fires on weak signal | [ ] | |
 | M3.10 | Form Requests: `LaunchCampaignRequest`, `SubmitResponseRequest` | [ ] | |
 | M3.11 | Policies: `QvctCampaignPolicy`, `QvctResponsePolicy` (anonymous-write rules) | [ ] | |
@@ -54,11 +65,21 @@
 | M3.15 | Psychosocial risk cartography service — aggregates per-team (pure read service) | [ ] | |
 | M3.16 | Dashboard tile: open campaigns + weak-signal alerts | [ ] | |
 | M3.17 | Pest feature tests per endpoint (anonymous response, RH-only access to detail) | [ ] | |
-| M3.18 | Pest cross-tenant leak test on every QVCT model | [ ] | |
-| M3.19 | Pest unit test on `WeakSignalDetector` covering CDC-spec'd thresholds | [ ] | |
+| M3.18 | Pest cross-tenant leak test on every QVCT model | [x] | `tests/Feature/Domain/Qvct/QvctTenantIsolationTest.php` (10/10 green; covers Questionnaire/Campaign/Response/WeakSignal + asserts anonymity invariant on Response) |
+| M3.19 | Pest unit test on `WeakSignalDetector` covering CDC-spec'd thresholds | [x] | `tests/Unit/Services/WeakSignalDetectorTest.php` |
 | M3.20 | French validation messages in `lang/fr/qvct.php` | [ ] | |
+| M3.21 | Parametrable frequency on `qvct_questionnaires` (weekly/monthly/quarterly enum) | [ ] | |
+| M3.22 | `qvct_journal_entries` table — optional individualized emotional journal (private to user + référent RH) | [ ] | |
+| M3.23 | `JournalEntryService` — write, list-mine, list-as-RH (escalation visibility) | [ ] | |
+| M3.24 | `qvct_exchange_requests` table — secure request to talk with manager / référent RH | [ ] | |
+| M3.25 | `ExchangeRequestService` — create, accept, schedule, close — notifies the addressee | [ ] | |
+| M3.26 | `qvct_indicators` table — periodic per-structure absenteeism / turnover / accidents / baromètre score | [ ] | |
+| M3.27 | `IndicatorIngestionService` — monthly snapshot job that aggregates current-period values | [ ] | |
+| M3.28 | `qvct_action_plans` + `qvct_action_plan_items` — action plan with impact measurement targets | [ ] | |
+| M3.29 | `ActionPlanService` — draft, publish, record-impact-measurement, close | [ ] | |
+| M3.30 | Pest tests covering journal privacy (intervenant cannot see another's; RH can; cross-tenant blocked) | [ ] | |
 
-**Month 5 acceptance gate (self-defined):** A référent RH can launch a campaign, intervenants can submit anonymously via mobile sync, weak-signal alerts auto-fire, dashboard reflects state. Cross-tenant leak tests green. ≥ 25 new Pest tests.
+**Month 5 acceptance gate (self-defined):** A référent RH can launch a campaign, intervenants can submit anonymously via mobile sync, weak-signal alerts auto-fire, intervenants can keep an optional journal + raise an exchange request, monthly QVCT indicators auto-snapshot, action plan tracks impact. Dashboard reflects state. Cross-tenant leak tests green. ≥ 35 new Pest tests.
 
 ---
 
