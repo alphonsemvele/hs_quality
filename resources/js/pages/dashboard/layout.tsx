@@ -93,7 +93,7 @@ export default function DashboardLayout({
         <>
             <Head title={`${title} — HS Quality`} />
 
-            <div className="flex min-h-screen bg-ink-50 font-sans">
+            <div className="flex min-h-dvh bg-ink-50 font-sans dark:bg-ink-900">
                 {/* Sidebar */}
                 <aside
                     className={cn(
@@ -185,7 +185,7 @@ export default function DashboardLayout({
                 {/* Main */}
                 <div className="flex min-w-0 flex-1 flex-col lg:ml-64">
                     {/* Header */}
-                    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-ink-100 bg-white/95 px-6 backdrop-blur">
+                    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-ink-100 bg-white/95 px-6 backdrop-blur dark:border-ink-700/60 dark:bg-ink-800/95">
                         <div className="flex min-w-0 items-center gap-4">
                             <button
                                 type="button"
@@ -198,15 +198,15 @@ export default function DashboardLayout({
                                 </svg>
                             </button>
                             <div className="min-w-0">
-                                <h1 className="truncate text-base font-semibold text-ink-900">{title}</h1>
-                                {subtitle && <p className="mt-0.5 truncate text-xs text-ink-500">{subtitle}</p>}
+                                <h1 className="truncate text-base font-semibold text-ink-900 dark:text-white">{title}</h1>
+                                {subtitle && <p className="mt-0.5 truncate text-xs text-ink-500 dark:text-ink-400">{subtitle}</p>}
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2">
                             <Link
                                 href="/incidents/create"
-                                className="hidden items-center gap-1.5 rounded-lg bg-danger-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-danger-700 md:inline-flex"
+                                className="hidden cursor-pointer items-center gap-1.5 rounded-lg bg-danger-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.97] md:inline-flex"
                             >
                                 <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
@@ -267,10 +267,10 @@ function UserMenu({
             <button
                 type="button"
                 onClick={onToggle}
-                className="flex items-center gap-2.5 rounded-lg border border-ink-200 bg-white px-2 py-1.5 transition-colors hover:border-ink-300"
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-ink-200 bg-white px-2 py-1.5 transition-colors hover:border-ink-300 dark:border-ink-600 dark:bg-ink-700 dark:hover:border-ink-500"
             >
                 <Avatar name={user.name} />
-                <span className="hidden text-sm font-medium text-ink-900 md:block">{user.name}</span>
+                <span className="hidden text-sm font-medium text-ink-900 md:block dark:text-white">{user.name}</span>
                 <svg
                     className={cn('size-3.5 text-ink-400 transition-transform', open && 'rotate-180')}
                     fill="none"
@@ -290,28 +290,28 @@ function UserMenu({
                         className="fixed inset-0 z-40 cursor-default"
                         onClick={onClose}
                     />
-                    <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl">
-                        <div className="flex items-center gap-3 border-b border-ink-100 bg-ink-50/60 px-4 py-3">
+                    <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl dark:border-ink-600 dark:bg-ink-800 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                        <div className="flex items-center gap-3 border-b border-ink-100 bg-ink-50/60 px-4 py-3 dark:border-ink-700 dark:bg-ink-900/50">
                             <Avatar name={user.name} size="md" />
                             <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-semibold text-ink-900">{user.name}</p>
-                                <p className="truncate text-xs text-ink-500">{user.email}</p>
+                                <p className="truncate text-sm font-semibold text-ink-900 dark:text-white">{user.name}</p>
+                                <p className="truncate text-xs text-ink-500 dark:text-ink-400">{user.email}</p>
                             </div>
                         </div>
                         <div className="p-1.5">
                             <Link
                                 href="/dashboard/profile"
                                 onClick={onClose}
-                                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50"
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700"
                             >
                                 <UserIcon />
                                 Mon profil
                             </Link>
-                            <div className="my-1.5 h-px bg-ink-100" />
+                            <div className="my-1.5 h-px bg-ink-100 dark:bg-ink-700" />
                             <button
                                 type="button"
                                 onClick={() => router.post('/logout')}
-                                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-danger-600 transition-colors hover:bg-danger-50"
+                                className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-danger-600 transition-colors hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/30"
                             >
                                 <LogoutIcon />
                                 Se déconnecter
