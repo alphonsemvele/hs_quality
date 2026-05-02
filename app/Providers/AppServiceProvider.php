@@ -10,6 +10,7 @@ use App\Models\Intervention;
 use App\Models\PlannedTask;
 use App\Models\QvctCampaign;
 use App\Models\QvctExchangeRequest;
+use App\Models\QvctIndicator;
 use App\Models\QvctJournalEntry;
 use App\Models\QvctQuestionnaire;
 use App\Models\QvctResponse;
@@ -29,6 +30,7 @@ use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
 use App\Policies\QvctCampaignPolicy;
 use App\Policies\QvctExchangeRequestPolicy;
+use App\Policies\QvctIndicatorPolicy;
 use App\Policies\QvctJournalEntryPolicy;
 use App\Policies\QvctQuestionnairePolicy;
 use App\Policies\QvctResponsePolicy;
@@ -60,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
         QvctCampaign::class => QvctCampaignPolicy::class,
         QvctExchangeRequest::class => QvctExchangeRequestPolicy::class,
+        QvctIndicator::class => QvctIndicatorPolicy::class,
         QvctJournalEntry::class => QvctJournalEntryPolicy::class,
         QvctResponse::class => QvctResponsePolicy::class,
         QvctWeakSignal::class => QvctWeakSignalPolicy::class,

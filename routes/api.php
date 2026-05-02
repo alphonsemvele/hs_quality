@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
 use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
+use App\Http\Controllers\Api\V1\QvctIndicatorController;
 use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
 use App\Http\Controllers\Api\V1\SyncController;
@@ -87,6 +88,12 @@ Route::prefix('v1')
         Route::post('qvct/exchange-requests/{exchangeRequest}/accept', [QvctExchangeRequestController::class, 'accept'])->middleware('idempotent');
         Route::post('qvct/exchange-requests/{exchangeRequest}/schedule', [QvctExchangeRequestController::class, 'schedule'])->middleware('idempotent');
         Route::post('qvct/exchange-requests/{exchangeRequest}/close', [QvctExchangeRequestController::class, 'close'])->middleware('idempotent');
+
+        // Indicators — RH dashboard. Snapshot endpoint triggers the
+        // ingestion service on-demand for the caller's tenant.
+        Route::get('qvct/indicators', [QvctIndicatorController::class, 'index']);
+        Route::put('qvct/indicators/{indicator}', [QvctIndicatorController::class, 'update']);
+        Route::post('qvct/indicators/snapshot', [QvctIndicatorController::class, 'snapshot'])->middleware('idempotent');
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)

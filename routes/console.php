@@ -26,3 +26,14 @@ Schedule::command('interventions:sweep-missed')
     ->onOneServer()
     ->runInBackground()
     ->name('interventions.sweep-missed');
+
+// Phase 2 / M3 — monthly QVCT indicator snapshot per structure.
+// Runs on the 1st of every month at 03:00 local time. Idempotent
+// (re-runs update auto-computed columns in place) so a missed
+// month can be backfilled by re-running manually with a date.
+Schedule::command('qvct:indicators:snapshot')
+    ->monthlyOn(1, '03:00')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->runInBackground()
+    ->name('qvct.indicators.snapshot');
