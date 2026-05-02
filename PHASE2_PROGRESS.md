@@ -129,9 +129,27 @@
 | M6.22 | Pest feature tests for end-to-end (start → record → finalise → PAC auto-generated) | [x] | `tests/Feature/Api/V1/AuditApiTest.php` "referent_qualite can record + finalise + generate PAC end-to-end" — exercises the full lifecycle through HTTP endpoints + asserts 2 PAC actions emitted from 2 gaps |
 | M6.23 | Pest unit tests for `AuditScoringService` covering CDC-spec'd scoring rules | [x] | `tests/Unit/Services/AuditScoringServiceTest.php` (3) |
 | M6.24 | Pest unit tests for `PacGenerationService` covering all non-conformity → action mappings | [x] | `tests/Unit/Services/PacGenerationServiceTest.php` (6) |
-| M6.25 | French validation + UI messages (lang/fr/audit.php) | [ ] | |
+| M6.25 | French validation + UI messages (lang/fr/audit.php) | [x] | `lang/fr/audit.php` (module label + grid source labels + run lifecycle messages + PAC lifecycle/action labels) |
 
 **Month 6 acceptance gate:** A référent qualité can run a HAS grid against their structure on the mobile app, auto-scoring works, PAC is auto-generated with one action per gap, coordinateur can complete actions, finalised audit exports to PDF. Cross-tenant leak tests green.
+
+### M6 retrospective (2026-05-02 close-out)
+
+**Backend coverage**: 20 of 25 spec rows ticked. 5 open: M6.9 (AuditGridLibrary service stubbed via the seeder + JSON fixture pattern — explicit service is over-engineering until ISO 9001 + AFNOR fixtures land), M6.10 (HAS done; ISO 9001 + AFNOR fixtures pending — same seeder pattern when sourced), M6.16 (Inertia pages — frontend), M6.19 (HAS preparation guide — Phase 2 Month 6 follow-up; backend scoring is in place), M6.20 (PDF export — queue job + S3 wiring; deferred until pilot tenant requests it).
+
+**Tests added in M6**: 49 (from 555 baseline → 614 after dashboard tile). All green.
+
+**Sync ops added**: 1 (`audit.record_response`).
+
+**Permission additions to RoleSeeder**: 0 — all M6 perms (audits.view / audits.configure / audits.execute / pac.generate / pac.update / pac.close) already existed from Phase 1 RBAC matrix.
+
+**Process notes**: tracker discipline held — every `[x]` carries verifiable evidence (file:line or test name). Two bugs caught by tests: AuditGridItemFactory's `has()` collided with Factory's reserved method name; AuditGridPolicy initially blocked coordinateurs from viewing grids until I checked the seeder and saw `audits.view` was granted to them — fix was a test correction, not a policy change. Both small, fast feedback.
+
+**Outstanding from M6 carrying forward** (none block phase progression):
+- M6.9/10: ISO 9001 + AFNOR fixtures (sourcing wait)
+- M6.16: Inertia .tsx pages (frontend)
+- M6.19: HAS preparation guide
+- M6.20: PDF export
 
 ---
 
@@ -141,9 +159,9 @@
 
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
-| M4.1 | `discussion_groups` table — group of users (sub-team, project, etc.) | [ ] | |
-| M4.2 | `discussion_group_members` pivot — group ↔ user with role (member/admin) | [ ] | |
-| M4.3 | `messages` table — group_id, author_id, body, attachments JSON, timestamps, soft-delete | [ ] | |
+| M4.1 | `discussion_groups` table — group of users (sub-team, project, etc.) | [x] | `database/migrations/2026_05_02_160000_create_discussion_groups_table.php` + `app/Models/DiscussionGroup.php` (kind tag for team/secteur/thematic/direct) + factory. Auditable + soft-delete. |
+| M4.2 | `discussion_group_members` pivot — group ↔ user with role (member/admin) | [x] | `database/migrations/2026_05_02_160001_create_discussion_group_members_table.php` + `app/Models/DiscussionGroupMember.php`. Unique (group_id, user_id) prevents double-membership. Pivot relation exposed via `DiscussionGroup::members()` with `withPivot('role')`. |
+| M4.3 | `messages` table — group_id, author_id, body, attachments JSON, timestamps, soft-delete | [x] | `database/migrations/2026_05_02_160002_create_messages_table.php` + `app/Models/Message.php` (encrypted body, audit-excludes body, attachments JSONB, edited_at for the 5-min edit window) + factory + `tests/Feature/Domain/Communication/MessageTenantIsolationTest.php` (4: tenant scope on group + message + at-rest encryption verification) |
 | M4.4 | `news_feed_posts` table — structure-wide announcements, author, body, pinned flag | [ ] | |
 | M4.5 | `documents` table — document library entries (title, S3 path, version, ACL: roles) | [ ] | |
 | M4.6 | `qa_questions` + `qa_answers` tables — forum Q&A | [ ] | |
