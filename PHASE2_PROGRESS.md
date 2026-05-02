@@ -111,10 +111,10 @@
 | M6.4 | `audit_run_responses` table — per-item score, comment, evidence file ref | [x] | `database/migrations/2026_05_02_140003_create_audit_run_responses_table.php` + `app/Models/AuditRunResponse.php` + factory. Unique (audit_run_id, audit_grid_item_id) enforces one response per item per run; updates overwrite in place. |
 | M6.5 | `pacs` (plans d'amélioration continue) table — auto-generated from gaps | [x] | `database/migrations/2026_05_02_150000_create_pacs_table.php` + `app/Models/Pac.php` + `app/Enums/PacStatus.php` (Draft/Active/Closed). audit_run_id nullable so PACs may be auto-generated OR manually authored. Auditable + soft-delete. |
 | M6.6 | `pac_actions` table — per-action assignment, due date, status, evidence | [x] | `database/migrations/2026_05_02_150001_create_pac_actions_table.php` + `app/Models/PacAction.php` + `app/Enums/PacActionStatus.php` (Pending/InProgress/Done/Cancelled). source_audit_response_id back-pointer (nullOnDelete) preserves traceability without lifecycle coupling. Auditable. |
-| M6.7 | Migrations + factories + seeders (incl. seeded HAS grid skeleton) | [ ] | |
-| M6.8 | All models BelongsToStructure + cross-tenant leak tests | [ ] | |
+| M6.7 | Migrations + factories + seeders (incl. seeded HAS grid skeleton) | [x] | Migrations from M6.1-M6.6 + factories for all 6 audit/PAC models + `database/seeders/AuditGridSeeder.php` (idempotent per-tenant HAS seed) + tests in `tests/Feature/Domain/Audits/AuditGridSeederTest.php` (3) |
+| M6.8 | All models BelongsToStructure + cross-tenant leak tests | [x] | 6 models all use `BelongsToStructure`; leak tests in `tests/Feature/Domain/Audits/AuditGridTenantIsolationTest.php` (4) + `AuditExecutionTenantIsolationTest.php` (5) + `PacTenantIsolationTest.php` (4) — covers AuditGrid, AuditGridItem, AuditRun, AuditRunResponse, Pac, PacAction. |
 | M6.9 | `AuditGridLibrary` service — load HAS / ISO 9001 / AFNOR NF X50-056 templates from JSON fixtures | [ ] | |
-| M6.10 | Seed JSON fixtures for the three reference grids (sourced from official documents) | [ ] | |
+| M6.10 | Seed JSON fixtures for the three reference grids (sourced from official documents) | [~] | HAS fixture done at `database/seeders/fixtures/has-grid.json` (10 items, official HAS recommendations for SAAD/SSIAD/SPASAD). ISO 9001 + AFNOR NF X50-056 fixtures pending. |
 | M6.11 | `AuditExecutionService` — start run, record response, finalise (lock + score) | [ ] | |
 | M6.12 | `AuditScoringService` pure service — auto-scoring per item + per section + global, unit-tested | [ ] | |
 | M6.13 | `PacGenerationService` — given finalised audit run, emit PAC with one action per non-conformity (auto, idempotent) | [ ] | |
