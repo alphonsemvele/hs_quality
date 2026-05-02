@@ -108,7 +108,7 @@ export default function DashboardLayout({
                         </div>
                         <div className="min-w-0">
                             <div className="text-sm font-semibold leading-tight text-white">HS Quality</div>
-                            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-brand-300">
+                            <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-300">
                                 Qualité & QVCT
                             </div>
                         </div>
@@ -119,7 +119,7 @@ export default function DashboardLayout({
                         {navSections.map((group, gi) => (
                             <div key={gi} className={gi > 0 ? 'pt-5' : ''}>
                                 {group.section && (
-                                    <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                                    <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-white/30">
                                         {group.section}
                                     </p>
                                 )}
@@ -177,7 +177,7 @@ export default function DashboardLayout({
                 {sidebarOpen && (
                     <div
                         onClick={() => setSidebarOpen(false)}
-                        className="fixed inset-0 z-30 bg-ink-900/50 lg:hidden"
+                        className="fixed inset-0 z-30 bg-ink-900/60 backdrop-blur-sm lg:hidden"
                         aria-hidden
                     />
                 )}
