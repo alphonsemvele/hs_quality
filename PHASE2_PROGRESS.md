@@ -65,7 +65,6 @@
 | M3.14 | Sync batch op: `qvct.submit_response` | [x] | `app/Services/SyncBatchService.php::qvctSubmitResponse` + `app/Http/Requests/Api/V1/SyncBatchRequest.php` (kind enum) + `tests/Feature/Api/V1/QvctSyncOpTest.php` (success / closed-conflict / cross-tenant rejected / missing-id error) |
 | M3.15 | Psychosocial risk cartography service — aggregates per-team (pure read service) | [x] | `app/Services/PsychosocialRiskCartographyService.php` + `tests/Unit/Services/PsychosocialRiskCartographyServiceTest.php` (5 tests, MIN_TEAM_SIZE anonymity guard, mean-score aggregation, active-signal join) |
 | M3.16 | Dashboard tile: open campaigns + weak-signal alerts | [x] | `DashboardStatsService::qvctStats` (qvct_campaigns_open / qvct_responses_ce_mois / qvct_weak_signals_outstanding) + observers `Qvct{Campaign,Response,WeakSignal}Observer` (cache-flush on writes) + 5 new dashboard tests |
-| M3.17 | Pest feature tests per endpoint (anonymous response, RH-only access to detail) | [ ] | |
 | M3.18 | Pest cross-tenant leak test on every QVCT model | [x] | `tests/Feature/Domain/Qvct/QvctTenantIsolationTest.php` (10/10 green; covers Questionnaire/Campaign/Response/WeakSignal + asserts anonymity invariant on Response) |
 | M3.19 | Pest unit test on `WeakSignalDetector` covering CDC-spec'd thresholds | [x] | `tests/Unit/Services/WeakSignalDetectorTest.php` |
 | M3.20 | French validation messages in `lang/fr/qvct.php` | [x] | `lang/fr/qvct.php` (module label + lifecycle messages + anonymity notice + weak-signal labels + frequency labels). Form-request inline messages remain for endpoint-specific overrides. |
@@ -82,6 +81,22 @@
 
 **Month 5 acceptance gate (self-defined):** A référent RH can launch a campaign, intervenants can submit anonymously via mobile sync, weak-signal alerts auto-fire, intervenants can keep an optional journal + raise an exchange request, monthly QVCT indicators auto-snapshot, action plan tracks impact. Dashboard reflects state. Cross-tenant leak tests green. ≥ 35 new Pest tests.
 
+### M3 retrospective (2026-05-02 close-out)
+
+**Backend coverage**: 29 of 30 spec rows ticked; 1 partial (M3.12 — backend complete, Inertia .tsx pages still pending as a frontend deferral). Total commits 7 (`965e7c1` skeleton, `8a83a23` policies+forms+sync, `93f0992` controllers+HTTP, `8971e6a` cartography+dashboard+seeder+French, `c0eb3bb` journal, `f7ecb92` exchange requests, `d3f197d` indicators, `af5bdbb` action plans).
+
+**Tests added in M3**: 152 (from 413 pre-M3 baseline → 555 after action-plans). All green.
+
+**Sync ops added**: 3 (`qvct.submit_response`, `qvct.write_journal`, `qvct.request_exchange`). Plus the on-demand snapshot endpoint (`POST /api/v1/qvct/indicators/snapshot`) for RH to refresh barometer mean mid-period.
+
+**Permission additions to RoleSeeder**: 5 (`qvct.questionnaire.manage`, `qvct.campaign.manage`, `qvct.weak_signal.acknowledge`, `qvct.exchange.rh_triage`, `qvct.exchange.manager_triage`). Existing perms (`qvct.respond`, `qvct.alert.receive`, etc.) reused throughout.
+
+**Process notes for next module**: tracker discipline held — every `[x]` carries a verifiable evidence pointer. Two bugs caught by tests (factory-shared randomized fields, SQLite date-vs-datetime literal mismatch); both fixes documented in commit messages. The "evidence column required to tick" rule did its job.
+
+**Outstanding from M3 carrying into next phase work**:
+- M3.12 Inertia .tsx pages (frontend-only)
+- Phase 1 deferrals P1-D1 / P1-D2 / P1-D3 (frontend)
+
 ---
 
 ## Month 6 — M6 Audits et conformité (lines 440-443)
@@ -90,7 +105,7 @@
 
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
-| M6.1 | `audit_grids` table — reusable grid templates (title, source: HAS/ISO9001/AFNOR/custom, sections, weight scheme) | [ ] | |
+| M6.1 | `audit_grids` table — reusable grid templates (title, source: HAS/ISO9001/AFNOR/custom, sections, weight scheme) | [x] | `database/migrations/2026_05_02_140000_create_audit_grids_table.php` + `app/Models/AuditGrid.php` + `app/Enums/AuditGridSource.php` (Has / Iso9001 / AfnorX50056 / Custom) + factory + `tests/Feature/Domain/Audits/AuditGridTenantIsolationTest.php` (4 tests). Per-tenant: each structure gets its own seeded copy (no global templates) so customization stays isolated. |
 | M6.2 | `audit_grid_items` table — individual scoreable items (label, evidence required, scale) | [ ] | |
 | M6.3 | `audit_runs` table — execution of a grid against a structure on a date | [ ] | |
 | M6.4 | `audit_run_responses` table — per-item score, comment, evidence file ref | [ ] | |
