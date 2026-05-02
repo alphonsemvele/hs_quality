@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\QvctMood;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\QvctCampaign;
+use App\Models\QvctJournalEntry;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -50,6 +52,7 @@ class SyncBatchService
         private readonly InterventionService $interventions,
         private readonly IncidentService $incidents,
         private readonly QvctService $qvct,
+        private readonly JournalEntryService $journal,
     ) {}
 
     /**
@@ -100,6 +103,7 @@ class SyncBatchService
                 'intervention.submit_report' => $this->interventionSubmitReport($op, $actor),
                 'incident.create' => $this->incidentCreate($op, $actor),
                 'qvct.submit_response' => $this->qvctSubmitResponse($op, $actor),
+                'qvct.write_journal' => $this->qvctWriteJournal($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
 
@@ -247,6 +251,40 @@ class SyncBatchService
         return [
             'campaign_id' => $campaign->id,
             'submitted_at' => $response->submitted_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctWriteJournal(array $op, User $actor): array
+    {
+        $this->authorize($actor, 'create', QvctJournalEntry::class);
+
+        $body = (string) ($op['payload']['body'] ?? '');
+        $moodValue = (string) ($op['payload']['mood'] ?? '');
+        if ($body === '' || $moodValue === '') {
+            throw new HttpException(422, 'A qvct.write_journal op requires non-empty body and mood.');
+        }
+
+        $mood = QvctMood::tryFrom($moodValue);
+        if ($mood === null) {
+            throw new HttpException(422, 'Invalid mood value.');
+        }
+
+        $entry = $this->journal->write(
+            $actor,
+            $body,
+            $mood,
+            (bool) ($op['payload']['shared_with_rh'] ?? false),
+        );
+
+        return [
+            'id' => $entry->id,
+            'mood' => $entry->mood->value,
+            'shared_with_rh' => $entry->shared_with_rh,
+            'created_at' => $entry->created_at?->toIso8601String(),
         ];
     }
 

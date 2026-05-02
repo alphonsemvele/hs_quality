@@ -69,16 +69,16 @@
 | M3.18 | Pest cross-tenant leak test on every QVCT model | [x] | `tests/Feature/Domain/Qvct/QvctTenantIsolationTest.php` (10/10 green; covers Questionnaire/Campaign/Response/WeakSignal + asserts anonymity invariant on Response) |
 | M3.19 | Pest unit test on `WeakSignalDetector` covering CDC-spec'd thresholds | [x] | `tests/Unit/Services/WeakSignalDetectorTest.php` |
 | M3.20 | French validation messages in `lang/fr/qvct.php` | [x] | `lang/fr/qvct.php` (module label + lifecycle messages + anonymity notice + weak-signal labels + frequency labels). Form-request inline messages remain for endpoint-specific overrides. |
-| M3.21 | Parametrable frequency on `qvct_questionnaires` (weekly/monthly/quarterly enum) | [ ] | |
-| M3.22 | `qvct_journal_entries` table — optional individualized emotional journal (private to user + référent RH) | [ ] | |
-| M3.23 | `JournalEntryService` — write, list-mine, list-as-RH (escalation visibility) | [ ] | |
+| M3.21 | Parametrable frequency on `qvct_questionnaires` (weekly/monthly/quarterly enum) | [x] | `app/Enums/QvctFrequency.php` (Weekly/Monthly/Quarterly + label() + periodDays()); migration column + model cast (commit `965e7c1`) |
+| M3.22 | `qvct_journal_entries` table — optional individualized emotional journal (private to user + référent RH) | [x] | `database/migrations/2026_05_02_100000_create_qvct_journal_entries_table.php` + `app/Models/QvctJournalEntry.php` (encrypted body, audit-excludes body, mood enum, mood_score for cheap aggregates, shared_with_rh consent flag, soft-delete) + `app/Enums/QvctMood.php` (5-point scale) |
+| M3.23 | `JournalEntryService` — write, list-mine, list-as-RH (escalation visibility) | [x] | `app/Services/JournalEntryService.php` (write/setSharing/listForUser/listSharedForRh — anonymity-by-design: write() takes actor, never spoofable). API surface in `app/Http/Controllers/Api/V1/QvctJournalController.php` + sync op `qvct.write_journal` in `SyncBatchService::qvctWriteJournal`. |
 | M3.24 | `qvct_exchange_requests` table — secure request to talk with manager / référent RH | [ ] | |
 | M3.25 | `ExchangeRequestService` — create, accept, schedule, close — notifies the addressee | [ ] | |
 | M3.26 | `qvct_indicators` table — periodic per-structure absenteeism / turnover / accidents / baromètre score | [ ] | |
 | M3.27 | `IndicatorIngestionService` — monthly snapshot job that aggregates current-period values | [ ] | |
 | M3.28 | `qvct_action_plans` + `qvct_action_plan_items` — action plan with impact measurement targets | [ ] | |
 | M3.29 | `ActionPlanService` — draft, publish, record-impact-measurement, close | [ ] | |
-| M3.30 | Pest tests covering journal privacy (intervenant cannot see another's; RH can; cross-tenant blocked) | [ ] | |
+| M3.30 | Pest tests covering journal privacy (intervenant cannot see another's; RH can; cross-tenant blocked) | [x] | `tests/Feature/Domain/Qvct/QvctJournalPrivacyTest.php` (12 tests: own + role × shared/unshared matrix + foreign-tenant + author-only edit/delete + cross-tenant scope + at-rest encryption verification) + `tests/Feature/Api/V1/QvctJournalApiTest.php` (9 tests: API write / mine / shared-with-rh queue / RBAC / sync op) |
 
 **Month 5 acceptance gate (self-defined):** A référent RH can launch a campaign, intervenants can submit anonymously via mobile sync, weak-signal alerts auto-fire, intervenants can keep an optional journal + raise an exchange request, monthly QVCT indicators auto-snapshot, action plan tracks impact. Dashboard reflects state. Cross-tenant leak tests green. ≥ 35 new Pest tests.
 

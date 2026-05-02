@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\BeneficiaryController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
+use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
 use App\Http\Controllers\Api\V1\SyncController;
 use Illuminate\Support\Facades\Route;
@@ -70,6 +71,13 @@ Route::prefix('v1')
         Route::get('qvct/weak-signals', [QvctWeakSignalController::class, 'index']);
         Route::post('qvct/weak-signals/{signal}/acknowledge', [QvctWeakSignalController::class, 'acknowledge'])
             ->middleware('idempotent');
+
+        // Journal — per-user, owner-only by default. RH-shared queue is a
+        // separate endpoint with explicit permission gate (qvct.alert.receive
+        // + qvct.weak_signal.acknowledge).
+        Route::post('qvct/journal', [QvctJournalController::class, 'store'])->middleware('idempotent');
+        Route::get('qvct/journal/mine', [QvctJournalController::class, 'mine']);
+        Route::get('qvct/journal/shared-with-rh', [QvctJournalController::class, 'sharedWithRh']);
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)

@@ -9,6 +9,7 @@ use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
 use App\Models\PlannedTask;
 use App\Models\QvctCampaign;
+use App\Models\QvctJournalEntry;
 use App\Models\QvctQuestionnaire;
 use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
@@ -26,6 +27,7 @@ use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
 use App\Policies\QvctCampaignPolicy;
+use App\Policies\QvctJournalEntryPolicy;
 use App\Policies\QvctQuestionnairePolicy;
 use App\Policies\QvctResponsePolicy;
 use App\Policies\QvctWeakSignalPolicy;
@@ -55,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         PlannedTask::class => PlannedTaskPolicy::class,
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
         QvctCampaign::class => QvctCampaignPolicy::class,
+        QvctJournalEntry::class => QvctJournalEntryPolicy::class,
         QvctResponse::class => QvctResponsePolicy::class,
         QvctWeakSignal::class => QvctWeakSignalPolicy::class,
         Structure::class => StructurePolicy::class,

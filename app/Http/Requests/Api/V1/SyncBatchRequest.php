@@ -41,6 +41,7 @@ class SyncBatchRequest extends BaseFormRequest
                 'intervention.submit_report',
                 'incident.create',
                 'qvct.submit_response',
+                'qvct.write_journal',
             ])],
             'operations.*.resource_id' => ['nullable', 'string'],
             'operations.*.client_timestamp' => ['nullable', 'date'],
