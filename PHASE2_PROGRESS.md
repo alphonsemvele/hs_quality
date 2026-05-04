@@ -212,8 +212,8 @@
 
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
-| M5.1 | `habilitations` table — user ↔ habilitation type (DEAS, AS, IDEL, etc.), valid_from, valid_until, evidence | [ ] | |
-| M5.2 | `certifications` table — user ↔ certification (BLS, gestes-d'urgence, etc.), expiry date, evidence | [ ] | |
+| M5.1 | `habilitations` table — user ↔ habilitation type (DEAS, AS, IDEL, etc.), valid_from, valid_until, evidence | [x] | `database/migrations/2026_05_04_133307_create_habilitations_table.php` + `app/Models/Habilitation.php` (BelongsToStructure + Auditable + soft-delete) + `database/factories/HabilitationFactory.php` (states `forStructure`, `forUser`, `ofType`). `evidence_path` nullable for S3 SSE-KMS storage; `valid_from`/`valid_until` nullable because most diplomas are lifetime. Cross-tenant test in `tests/Feature/Domain/Competencies/CompetenciesTenantIsolationTest.php`. |
+| M5.2 | `certifications` table — user ↔ certification (BLS, gestes-d'urgence, etc.), expiry date, evidence | [x] | `database/migrations/2026_05_04_133308_create_certifications_table.php` + `app/Models/Certification.php` (BelongsToStructure + Auditable + soft-delete + `daysUntilExpiry()` helper for M5.18 windowing). `last_alerted_at` + `last_alert_window` columns for the M5.9 expiry-alert idempotence (single fire per window per cert). Index on `(structure_id, expires_at)` for the daily expiry sweep. `database/factories/CertificationFactory.php` (state `expiresInDays(int)` for testing the alert windows directly). Cross-tenant test in same file. |
 | M5.3 | `training_plans` table — per-structure annual plan (year, theme, target audience) | [ ] | |
 | M5.4 | `training_sessions` table — scheduled sessions (date, trainer, capacity) | [ ] | |
 | M5.5 | `training_attendances` table — user × session, status (registered/attended/cancelled) | [ ] | |
