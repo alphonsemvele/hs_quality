@@ -87,6 +87,16 @@ class StructureController extends Controller
         ]);
     }
 
+    public function edit(Structure $structure): Response
+    {
+        $this->authorize('update', $structure);
+
+        return Inertia::render('admin/structures/edit', [
+            'structure' => $this->detail($structure),
+            'enums' => $this->enumOptions(),
+        ]);
+    }
+
     public function update(UpdateStructureRequest $request, Structure $structure): RedirectResponse
     {
         $structure->update($request->validated());

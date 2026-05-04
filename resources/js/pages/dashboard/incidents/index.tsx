@@ -7,6 +7,7 @@ import {
     IncidentStatusBadge,
     KpiCard,
     PageHeader,
+    Pagination,
 } from '@/components/ui';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
@@ -31,12 +32,14 @@ interface Incident {
 interface Props {
     incidents: Incident[];
     total: number;
+    pagination: { current_page: number; last_page: number; per_page: number };
     stats: { declare: number; en_analyse: number; plan_actions: number; clos: number; graves: number };
 }
 
 export default function Incidents({
     incidents = [],
     total = 0,
+    pagination = { current_page: 1, last_page: 1, per_page: 20 },
     stats = { declare: 0, en_analyse: 0, plan_actions: 0, clos: 0, graves: 0 },
 }: Partial<Props>) {
     return (
@@ -105,6 +108,13 @@ export default function Incidents({
                     <EmptyState title="Aucun incident déclaré" description="Les déclarations apparaîtront ici dès qu'elles seront enregistrées." />
                 </Card>
             )}
+
+            <Pagination
+                currentPage={pagination.current_page}
+                lastPage={pagination.last_page}
+                total={total}
+                perPage={pagination.per_page}
+            />
         </DashboardLayout>
     );
 }

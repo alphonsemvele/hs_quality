@@ -5,6 +5,7 @@ export { EmptyState } from './EmptyState';
 export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from './Input';
 export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
+export { Pagination } from './Pagination';
 export {
     CarePlanStatusBadge,
     IncidentGraviteBadge,
@@ -12,3 +13,4 @@ export {
     InterventionStatusBadge,
 } from './StatusBadge';
 export { TBody, THead, Table, Td, Th, Tr } from './Table';
+export { FlashToasts } from './Toast';

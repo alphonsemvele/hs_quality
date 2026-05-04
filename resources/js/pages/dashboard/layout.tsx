@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import ThemeToggle from '@/components/ThemeToggle';
+import { FlashToasts } from '@/components/ui';
 
 interface User {
     id: number;
@@ -93,6 +94,7 @@ export default function DashboardLayout({
     return (
         <>
             <Head title={`${title} — HS Quality`} />
+            <FlashToasts />
 
             <div className="flex min-h-dvh bg-ink-50 font-sans dark:bg-ink-900">
                 {/* Sidebar */}

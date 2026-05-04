@@ -5,6 +5,7 @@ import {
     EmptyState,
     InterventionStatusBadge,
     PageHeader,
+    Pagination,
     TBody,
     THead,
     Table,
@@ -34,14 +35,19 @@ interface Intervention {
 interface Props {
     interventions: Intervention[];
     total: number;
+    pagination: { current_page: number; last_page: number; per_page: number };
     stats: { planifiees: number; en_cours: number; realisees: number; annulees: number };
+    filters: { status: string | null };
 }
 
 export default function Interventions({
     interventions = [],
     total = 0,
+    pagination = { current_page: 1, last_page: 1, per_page: 20 },
     stats = { planifiees: 0, en_cours: 0, realisees: 0, annulees: 0 },
+    filters = { status: null },
 }: Partial<Props>) {
+    const activeFilter = filters.status;
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
             <PageHeader
@@ -57,11 +63,11 @@ export default function Interventions({
 
             {/* Filtres / stats */}
             <div className="mb-5 flex flex-wrap items-center gap-2">
-                <FilterChip label="Toutes" count={total} active />
-                <FilterChip label="En cours" count={stats.en_cours} />
-                <FilterChip label="Planifiées" count={stats.planifiees} />
-                <FilterChip label="Réalisées" count={stats.realisees} />
-                <FilterChip label="Annulées" count={stats.annulees} />
+                <FilterChip label="Toutes" count={total} active={!activeFilter} href="/interventions" />
+                <FilterChip label="En cours" count={stats.en_cours} active={activeFilter === 'en_cours'} href="/interventions?status=en_cours" />
+                <FilterChip label="Planifiées" count={stats.planifiees} active={activeFilter === 'planifiee'} href="/interventions?status=planifiee" />
+                <FilterChip label="Réalisées" count={stats.realisees} active={activeFilter === 'realisee'} href="/interventions?status=realisee" />
+                <FilterChip label="Annulées" count={stats.annulees} active={activeFilter === 'annulee'} href="/interventions?status=annulee" />
             </div>
 
             <Card>
@@ -134,15 +140,24 @@ export default function Interventions({
                         }
                     />
                 )}
+                <div className="px-4 pb-4">
+                    <Pagination
+                        currentPage={pagination.current_page}
+                        lastPage={pagination.last_page}
+                        total={total}
+                        perPage={pagination.per_page}
+                    />
+                </div>
             </Card>
         </DashboardLayout>
     );
 }
 
-function FilterChip({ label, count, active }: { label: string; count: number; active?: boolean }) {
+function FilterChip({ label, count, active, href }: { label: string; count: number; active?: boolean; href: string }) {
     return (
-        <button
-            type="button"
+        <Link
+            href={href}
+            preserveState
             className={
                 active
                     ? 'inline-flex items-center gap-1.5 rounded-lg bg-ink-900 px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-white dark:text-ink-900'
@@ -151,7 +166,7 @@ function FilterChip({ label, count, active }: { label: string; count: number; ac
         >
             {label}
             <span className={active ? 'text-white/70 dark:text-ink-900/60' : 'text-ink-400 dark:text-ink-500'}>({count})</span>
-        </button>
+        </Link>
     );
 }
 
