@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\Certification;
+use App\Models\User;
+use App\Notifications\CertificationExpiringNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Daily certification-expiry sweep. Spec: PHASE2_PROGRESS.md M5.9.
@@ -83,10 +88,37 @@ class CertificationExpiryAlertJob implements ShouldQueue
             'expires_at' => optional($cert->expires_at)->toDateString(),
         ]);
 
-        // TODO Phase 2 / M5 follow-up: dispatch a Notification (mail
-        // + in-app badge) to the user, the responsable formation,
-        // and the user's coordinateur. The log line above is the
-        // observable trace until that lands.
+        $recipients = $this->recipientsFor($cert);
+        if ($recipients->isNotEmpty()) {
+            Notification::send(
+                $recipients,
+                new CertificationExpiringNotification($cert, $window),
+            );
+        }
+    }
+
+    /**
+     * Build the recipient list: cert owner + structure-level responsables
+     * (rh, dirigeant, coordinateur). Spatie team scope must be set so the
+     * role lookup happens within the cert's structure.
+     */
+    private function recipientsFor(Certification $cert): Collection
+    {
+        app(PermissionRegistrar::class)->setPermissionsTeamId($cert->structure_id);
+
+        $responsables = User::query()
+            ->where('structure_id', $cert->structure_id)
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['rh', 'dirigeant', 'coordinateur']))
+            ->get();
+
+        $owner = $cert->user_id
+            ? User::query()->find($cert->user_id)
+            : null;
+
+        return $responsables
+            ->when($owner !== null, fn ($c) => $c->push($owner))
+            ->unique('id')
+            ->values();
     }
 
     /**
