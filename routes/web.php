@@ -177,7 +177,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/formations/{id}', [FormationController::class, 'update'])->name('formations.update');
 
     Route::get('/communication', [CommunicationController::class, 'index'])->name('communication.index');
-    Route::post('/communication/message', [CommunicationController::class, 'sendMessage'])->name('communication.send');
+    Route::post('/communication/groups/{group}/messages', [CommunicationController::class, 'sendMessage'])
+        ->name('communication.send');
+    Route::post('/communication/news', [CommunicationController::class, 'publishNews'])
+        ->name('communication.news.publish');
 
     // ── Platform admin (super_admin only) ─────────────────────────────────────
     // Tenants are managed here. NOT inside the `tenant` middleware group —

@@ -3,9 +3,13 @@
 use App\Http\Controllers\Api\V1\AuditRunController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
+use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
+use App\Http\Controllers\Api\V1\MessageController;
+use App\Http\Controllers\Api\V1\NewsFeedController;
 use App\Http\Controllers\Api\V1\PacController;
+use App\Http\Controllers\Api\V1\QaController;
 use App\Http\Controllers\Api\V1\QvctActionPlanController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
 use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
@@ -123,6 +127,41 @@ Route::prefix('v1')
         Route::get('pacs/{pac}', [PacController::class, 'show']);
         Route::post('pacs/{pac}/close', [PacController::class, 'close'])->middleware('idempotent');
         Route::put('pac-actions/{action}', [PacController::class, 'updateAction']);
+
+        // M4 — Communication. Messages live inside discussion groups; news,
+        // documents, and Q&A are structure-scoped. All write paths go through
+        // the dedicated services so the same business rules apply on web (M4.17)
+        // and mobile (M4.18). Reverb broadcasts (MessagePosted, NewsPostPublished)
+        // are dispatched from the services, not the controllers.
+        Route::get('communication/groups/{group}/messages', [MessageController::class, 'index']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('communication/groups/{group}/messages', [MessageController::class, 'store']);
+            Route::patch('communication/messages/{message}', [MessageController::class, 'update']);
+            Route::delete('communication/messages/{message}', [MessageController::class, 'destroy']);
+        });
+
+        Route::get('communication/news', [NewsFeedController::class, 'index']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('communication/news', [NewsFeedController::class, 'store']);
+            Route::post('communication/news/{post}/pin', [NewsFeedController::class, 'pin']);
+            Route::post('communication/news/{post}/unpin', [NewsFeedController::class, 'unpin']);
+            Route::post('communication/news/{post}/archive', [NewsFeedController::class, 'archive']);
+        });
+
+        Route::get('communication/documents', [DocumentController::class, 'index']);
+        Route::get('communication/documents/{document}', [DocumentController::class, 'show']);
+        Route::get('communication/documents/{document}/download', [DocumentController::class, 'download']);
+        Route::post('communication/documents', [DocumentController::class, 'store'])
+            ->middleware('idempotent');
+
+        Route::get('communication/qa/questions', [QaController::class, 'index']);
+        Route::get('communication/qa/questions/{question}', [QaController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('communication/qa/questions', [QaController::class, 'ask']);
+            Route::post('communication/qa/questions/{question}/answers', [QaController::class, 'answer']);
+            Route::patch('communication/qa/questions/{question}/accept-answer', [QaController::class, 'acceptAnswer']);
+            Route::post('communication/qa/answers/{answer}/vote', [QaController::class, 'vote']);
+        });
 
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)
