@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\V1\AuditRunController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
+use App\Http\Controllers\Api\V1\CertificationController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\HabilitationController;
 use App\Http\Controllers\Api\V1\IncidentController;
 use App\Http\Controllers\Api\V1\InterventionController;
 use App\Http\Controllers\Api\V1\MessageController;
@@ -17,6 +19,8 @@ use App\Http\Controllers\Api\V1\QvctIndicatorController;
 use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
 use App\Http\Controllers\Api\V1\SyncController;
+use App\Http\Controllers\Api\V1\TrainingAttendanceController;
+use App\Http\Controllers\Api\V1\TrainingPlanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -161,6 +165,39 @@ Route::prefix('v1')
             Route::post('communication/qa/questions/{question}/answers', [QaController::class, 'answer']);
             Route::patch('communication/qa/questions/{question}/accept-answer', [QaController::class, 'acceptAnswer']);
             Route::post('communication/qa/answers/{answer}/vote', [QaController::class, 'vote']);
+        });
+
+        // M5 — Compétences & formation. Habilitations (lifetime diplomas),
+        // certifications (renewable, expiry-alerted), and training plans
+        // with sessions/attendances. Tenant scope is enforced by
+        // BelongsToStructure on every model; policies enforce role gates.
+        Route::get('competencies/habilitations', [HabilitationController::class, 'index']);
+        Route::get('competencies/habilitations/{habilitation}', [HabilitationController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('competencies/habilitations', [HabilitationController::class, 'store']);
+            Route::delete('competencies/habilitations/{habilitation}', [HabilitationController::class, 'destroy']);
+        });
+
+        Route::get('competencies/certifications', [CertificationController::class, 'index']);
+        Route::get('competencies/certifications/{certification}', [CertificationController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('competencies/certifications', [CertificationController::class, 'store']);
+            Route::delete('competencies/certifications/{certification}', [CertificationController::class, 'destroy']);
+        });
+
+        Route::get('competencies/training-plans', [TrainingPlanController::class, 'index']);
+        Route::get('competencies/training-plans/{plan}', [TrainingPlanController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('competencies/training-plans', [TrainingPlanController::class, 'store']);
+            Route::post('competencies/training-plans/{plan}/publish', [TrainingPlanController::class, 'publish']);
+            Route::post('competencies/training-plans/{plan}/archive', [TrainingPlanController::class, 'archive']);
+            Route::post('competencies/training-plans/{plan}/sessions', [TrainingPlanController::class, 'addSession']);
+        });
+
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('competencies/training-sessions/{session}/register', [TrainingAttendanceController::class, 'register']);
+            Route::post('competencies/training-attendances/{attendance}/mark-attended', [TrainingAttendanceController::class, 'markAttended']);
+            Route::post('competencies/training-attendances/{attendance}/cancel', [TrainingAttendanceController::class, 'cancel']);
         });
 
         // Offline sync — flushes the mobile app's queued operations after a
