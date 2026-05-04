@@ -291,25 +291,35 @@ function UserMenu({
                         className="fixed inset-0 z-40 cursor-default"
                         onClick={onClose}
                     />
-                    <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl dark:border-ink-600 dark:bg-ink-800 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-                        <div className="flex items-center gap-3 border-b border-ink-100 bg-ink-50/60 px-4 py-3 dark:border-ink-700 dark:bg-ink-900/50">
+                    <div className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-xl dark:border-ink-700/80 dark:bg-ink-800 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                        {/* User identity header */}
+                        <div className="flex items-center gap-3 border-b border-ink-100 bg-ink-50/60 px-4 py-3.5 dark:border-ink-700/60 dark:bg-ink-900/50">
                             <Avatar name={user.name} size="md" />
                             <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold text-ink-900 dark:text-white">{user.name}</p>
                                 <p className="truncate text-xs text-ink-500 dark:text-ink-400">{user.email}</p>
                             </div>
                         </div>
+
+                        {/* Navigation items */}
                         <div className="p-1.5">
                             <Link
                                 href="/dashboard/profile"
                                 onClick={onClose}
-                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700"
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
                             >
                                 <UserIcon />
                                 Mon profil
                             </Link>
+                        </div>
+
+                        {/* Theme toggle section */}
+                        <div className="border-t border-ink-100 dark:border-ink-700/60">
                             <ThemeToggle />
-                            <div className="my-1.5 h-px bg-ink-100 dark:bg-ink-700" />
+                        </div>
+
+                        {/* Destructive action — separated */}
+                        <div className="border-t border-ink-100 p-1.5 dark:border-ink-700/60">
                             <button
                                 type="button"
                                 onClick={() => router.post('/logout')}
