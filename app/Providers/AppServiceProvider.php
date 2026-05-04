@@ -7,8 +7,10 @@ use App\Models\AuditRun;
 use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
+use App\Models\Certification;
 use App\Models\DiscussionGroup;
 use App\Models\Document;
+use App\Models\Habilitation;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
@@ -29,6 +31,9 @@ use App\Models\QvctQuestionnaire;
 use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
 use App\Models\Structure;
+use App\Models\TrainingAttendance;
+use App\Models\TrainingPlan;
+use App\Models\TrainingSession;
 use App\Models\User;
 use App\Observers\AuditRunObserver;
 use App\Observers\IncidentObserver;
@@ -43,8 +48,10 @@ use App\Policies\AuditRunPolicy;
 use App\Policies\AuditRunResponsePolicy;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
+use App\Policies\CertificationPolicy;
 use App\Policies\DiscussionGroupPolicy;
 use App\Policies\DocumentPolicy;
+use App\Policies\HabilitationPolicy;
 use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
@@ -65,6 +72,9 @@ use App\Policies\QvctQuestionnairePolicy;
 use App\Policies\QvctResponsePolicy;
 use App\Policies\QvctWeakSignalPolicy;
 use App\Policies\StructurePolicy;
+use App\Policies\TrainingAttendancePolicy;
+use App\Policies\TrainingPlanPolicy;
+use App\Policies\TrainingSessionPolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -87,8 +97,10 @@ class AppServiceProvider extends ServiceProvider
         AuditRunResponse::class => AuditRunResponsePolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
+        Certification::class => CertificationPolicy::class,
         DiscussionGroup::class => DiscussionGroupPolicy::class,
         Document::class => DocumentPolicy::class,
+        Habilitation::class => HabilitationPolicy::class,
         Incident::class => IncidentPolicy::class,
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
@@ -99,6 +111,9 @@ class AppServiceProvider extends ServiceProvider
         PlannedTask::class => PlannedTaskPolicy::class,
         QaAnswer::class => QaAnswerPolicy::class,
         QaQuestion::class => QaQuestionPolicy::class,
+        TrainingAttendance::class => TrainingAttendancePolicy::class,
+        TrainingPlan::class => TrainingPlanPolicy::class,
+        TrainingSession::class => TrainingSessionPolicy::class,
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
         QvctActionPlan::class => QvctActionPlanPolicy::class,
         QvctActionPlanItem::class => QvctActionPlanItemPolicy::class,

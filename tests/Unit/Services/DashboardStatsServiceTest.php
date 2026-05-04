@@ -7,6 +7,7 @@ use App\Enums\QvctCampaignStatus;
 use App\Models\AuditGrid;
 use App\Models\AuditRun;
 use App\Models\Beneficiary;
+use App\Models\Certification;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\Pac;
@@ -312,4 +313,36 @@ it('invalidates cache when an audit run is created', function () {
     AuditRun::factory()->forGrid($grid)->inProgress()->create();
 
     expect($this->service->stats($sid)['audit_runs_in_progress'])->toBe(1);
+});
+
+// ── M5.16 — certifications expiring within 30 days tile ─────────────────
+
+it('counts certifications expiring within 30 days but not yet expired', function () {
+    Certification::factory()->forUser($this->intervenant)->expiresInDays(15)->create();
+    Certification::factory()->forUser($this->intervenant)->expiresInDays(29)->create();
+    Certification::factory()->forUser($this->intervenant)->expiresInDays(45)->create();
+    Certification::factory()->forUser($this->intervenant)->expiresInDays(-5)->create();
+
+    Cache::flush();
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['certifications_expiring_30d'])->toBe(2);
+    expect($stats['certifications_expired'])->toBe(1);
+});
+
+it('does not leak certifications across structures in the dashboard tile', function () {
+    Certification::factory()->forUser($this->intervenant)->expiresInDays(10)->create();
+
+    $otherStructure = Structure::factory()->create();
+    $otherUser = User::factory()->create([
+        'structure_id' => $otherStructure->id,
+        'type' => 'intervenant',
+    ]);
+    Certification::factory()->forUser($otherUser)->expiresInDays(10)->create();
+    Certification::factory()->forUser($otherUser)->expiresInDays(10)->create();
+
+    Cache::flush();
+    $stats = $this->service->stats($this->structure->id);
+
+    expect($stats['certifications_expiring_30d'])->toBe(1);
 });

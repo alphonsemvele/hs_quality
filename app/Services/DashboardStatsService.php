@@ -8,6 +8,7 @@ use App\Enums\PacActionStatus;
 use App\Enums\PacStatus;
 use App\Enums\QvctCampaignStatus;
 use App\Models\AuditRun;
+use App\Models\Certification;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\Pac;
@@ -32,6 +33,7 @@ class DashboardStatsService
                     ...$this->incidentStats(),
                     ...$this->qvctStats(),
                     ...$this->auditStats(),
+                    ...$this->competenciesStats(),
                 ];
             });
     }
@@ -67,6 +69,32 @@ class DashboardStatsService
                 ])
                 ->whereNotNull('due_date')
                 ->whereDate('due_date', '<', $today)
+                ->count(),
+        ];
+    }
+
+    /**
+     * Phase 2 / M5 — dashboard tile (PHASE2_PROGRESS.md M5.16). RH /
+     * dirigeant care about: how many certifications expire within
+     * 30 days (the next reminder window), and how many are already
+     * expired but not yet renewed.
+     *
+     * Tenant-scoped via the `BelongsToStructure` global scope on
+     * `Certification` — the call site already binds `current_structure`
+     * before this method runs.
+     */
+    private function competenciesStats(): array
+    {
+        $today = Carbon::today()->toDateString();
+        $in30Days = Carbon::today()->addDays(30)->toDateString();
+
+        return [
+            'certifications_expiring_30d' => Certification::query()
+                ->whereDate('expires_at', '>=', $today)
+                ->whereDate('expires_at', '<=', $in30Days)
+                ->count(),
+            'certifications_expired' => Certification::query()
+                ->whereDate('expires_at', '<', $today)
                 ->count(),
         ];
     }
