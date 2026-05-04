@@ -167,12 +167,12 @@
 | M4.6 | `qa_questions` + `qa_answers` tables — forum Q&A | [x] | `database/migrations/2026_05_02_170002_create_qa_questions_table.php` + `..._170003_create_qa_answers_table.php` (back-reference FK on accepted_answer_id added in answers migration to avoid circular FK at create-table time) + `app/Models/Qa{Question,Answer}.php` + factories. Cross-tenant leak tests in `tests/Feature/Domain/Communication/NewsDocumentsQaTenantIsolationTest.php` (4 tests covering all 4 models). |
 | M4.7 | Migrations + factories + seeders | [ ] | |
 | M4.8 | All models BelongsToStructure + cross-tenant leak tests | [ ] | |
-| M4.9 | `MessageService` — send (with attachment routing), edit (within 5min), delete, mark read | [ ] | |
-| M4.10 | `NewsFeedService` — publish, pin, unpin, archive | [ ] | |
+| M4.9 | `MessageService` — send (with attachment routing), edit (within 5min), delete, mark read | [~] | `app/Services/MessageService.php` — `send` (DB::transaction + MessagePosted dispatch via `ShouldDispatchAfterCommit`), `edit` (author check + 300s window + 409 past window), `delete` (soft). `tests/Unit/Services/MessageServiceTest.php` — 8 tests: dispatch, attachments, edit happy path, non-author 403, past-window 409, boundary case, soft-delete. Mark-read deferred to M4.18 (mobile sync). |
+| M4.10 | `NewsFeedService` — publish, pin, unpin, archive | [x] | `app/Services/NewsFeedService.php` (publish dispatches `NewsPostPublished`, pin/unpin flip boolean, archive stamps `archived_at`). `tests/Unit/Services/NewsFeedServiceTest.php` — 5 tests covering all four ops + archived-filter contract. |
 | M4.11 | `DocumentLibraryService` — upload (S3 SSE-KMS, EXIF-strip for images), version, ACL check, signed URL | [ ] | |
 | M4.12 | `QaService` — ask, answer, accept-answer, vote | [ ] | |
-| M4.13 | Reverb event `MessagePosted` with `PrivateChannel('group.{id}')` | [ ] | |
-| M4.14 | Reverb event `NewsPostPublished` with `PrivateChannel('structure.{id}.news')` | [ ] | |
+| M4.13 | Reverb event `MessagePosted` with `PrivateChannel('group.{id}')` | [x] | `app/Events/MessagePosted.php` — `ShouldBroadcast` + `ShouldDispatchAfterCommit`, `broadcastOn` returns `PrivateChannel('group.'.$discussion_group_id)`, `broadcastWith` strips body (id/group_id/author_id/created_at only), alias `message.posted`. Dispatched from `MessageService::send`; covered by `MessageServiceTest::it creates a message and dispatches MessagePosted`. Channel authorizer in `routes/channels.php` deferred to M4.17 (web controller slice). |
+| M4.14 | Reverb event `NewsPostPublished` with `PrivateChannel('structure.{id}.news')` | [x] | `app/Events/NewsPostPublished.php` — `ShouldBroadcast`, `broadcastOn` returns `PrivateChannel('structure.'.$structure_id.'.news')`, payload includes `pinned` flag for client-side ordering, alias `news.published`. Dispatched from `NewsFeedService::publish`; covered by `NewsFeedServiceTest`. |
 | M4.15 | Form Requests: `SendMessageRequest`, `PublishNewsRequest`, `UploadDocumentRequest`, `AskQuestionRequest`, `AnswerQuestionRequest` | [ ] | |
 | M4.16 | Policies for every model | [ ] | |
 | M4.17 | Web controllers + Inertia pages (group chat, news feed, document library, forum) | [ ] | |
