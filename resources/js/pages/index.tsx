@@ -1,883 +1,1458 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect, useRef } from 'react';
+import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-type Module = { icon: string; code: string; title: string; tag: string; desc: string; kpi: string };
-type Profile = { abbr: string; title: string; items: string[]; accent: string };
-type RoadmapPhase = { phase: string; period: string; modules: string[]; kpi: string; active: boolean };
+// ════════════════════════════════════════════════════════════════════════════
+//  HOOKS & ANIMATION PRIMITIVES
+// ════════════════════════════════════════════════════════════════════════════
+
+function useInView(options?: IntersectionObserverInit): [RefObject<HTMLDivElement | null>, boolean] {
+    const ref = useRef<HTMLDivElement | null>(null);
+    const [inView, setInView] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+            { threshold: 0.15, ...options },
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+    return [ref, inView];
+}
+
+function useCountUp(target: number, duration = 1800): [RefObject<HTMLSpanElement | null>, string] {
+    const ref = useRef<HTMLSpanElement | null>(null);
+    const [value, setValue] = useState('0');
+    const started = useRef(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && !started.current) {
+                started.current = true;
+                const start = performance.now();
+                const step = (now: number) => {
+                    const t = Math.min((now - start) / duration, 1);
+                    const ease = 1 - Math.pow(1 - t, 3);
+                    const current = Math.round(ease * target);
+                    setValue(current.toLocaleString('fr-FR'));
+                    if (t < 1) requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+                obs.disconnect();
+            }
+        }, { threshold: 0.3 });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, [target, duration]);
+    return [ref, value];
+}
+
+function Reveal({ children, className = '', delay = 0, direction = 'up' }: {
+    children: ReactNode; className?: string; delay?: number;
+    direction?: 'up' | 'left' | 'right';
+}) {
+    const [ref, inView] = useInView();
+    const transforms: Record<string, string> = {
+        up: 'translateY(30px)',
+        left: 'translateX(40px)',
+        right: 'translateX(-40px)',
+    };
+    return (
+        <div ref={ref} className={className} style={{
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translate(0,0)' : transforms[direction],
+            transition: `opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
+        }}>
+            {children}
+        </div>
+    );
+}
+
+function AnimatedBar({ width, className = '' }: { width: number; className?: string }) {
+    const [ref, inView] = useInView();
+    return (
+        <div ref={ref} className="h-1.5 overflow-hidden rounded-full bg-ink-200">
+            <div className={`h-full rounded-full transition-all duration-1000 ease-out ${className}`}
+                style={{ width: inView ? `${width}%` : '0%' }} />
+        </div>
+    );
+}
+
+function FeatureCard({ icon, title, desc }: { icon: ReactNode; title: string; desc: string }) {
+    const cardRef = useRef<HTMLDivElement | null>(null);
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const el = cardRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        el.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        el.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    }, []);
+    return (
+        <div ref={cardRef} onMouseMove={handleMouseMove}
+            className="glow-hover card-hover group relative rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="relative z-10">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-ink-50 text-ink-600 transition-all duration-300 group-hover:bg-brand-50 group-hover:text-brand-600 group-hover:shadow-md group-hover:shadow-brand-100">
+                    {icon}
+                </div>
+                <h3 className="mt-4 text-[15px] font-semibold text-ink-900">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-500">{desc}</p>
+            </div>
+        </div>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  ICONS
+// ════════════════════════════════════════════════════════════════════════════
+
+function Arrow({ className = 'size-4' }: { className?: string }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+    );
+}
+
+function IconClipboard() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+    );
+}
+
+function IconShield() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+    );
+}
+
+function IconChart() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+    );
+}
+
+function IconHeart() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+    );
+}
+
+function IconAcademic() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+        </svg>
+    );
+}
+
+function IconPhone() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+    );
+}
+
+function IconCheck() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════════════════════════════
+
+type Faq = { q: string; a: string };
+
+const FEATURES = [
+    { icon: <IconClipboard />, title: 'Traçabilité terrain', desc: `Pointage géolocalisé, voice-to-text, signature électronique. Chaque intervention est documentée et consultable en temps réel par l'équipe de coordination.` },
+    { icon: <IconShield />, title: 'Gestion des incidents', desc: `Déclaration mobile en moins de 2 minutes, classification automatique par gravité, analyse 5-pourquoi, notification ARS si événement indésirable grave.` },
+    { icon: <IconChart />, title: 'Audits & conformité', desc: `Audits HAS, AFNOR NF X50-056, ISO 9001 sur tablette. Scoring automatique, plan d'amélioration continue généré depuis les écarts détectés.` },
+    { icon: <IconHeart />, title: 'Baromètre QVCT', desc: `Enquêtes régulières sur la qualité de vie au travail des intervenants. Cartographie des signaux faibles, prévention de l'épuisement professionnel.` },
+    { icon: <IconAcademic />, title: 'Formation continue', desc: `Gestion du plan de développement des compétences, suivi des habilitations, rappels automatiques des échéances réglementaires.` },
+    { icon: <IconPhone />, title: 'Application mobile', desc: `React Native offline-first pour les intervenants en zones blanches. Synchronisation dès retour réseau, interface pensée pour le terrain.` },
+];
+
+const FAQS: Faq[] = [
+    {
+        q: 'Que comprend exactement HS Quality ?',
+        a: `Une plateforme complète : suivi des interventions terrain (mobile + web), gestion des incidents et EI, audits qualité (HAS, AFNOR, ISO 9001, Caphandeo), baromètre QVCT, gestion des compétences et plans de soins. Tout est intégré et conforme HAS / RGPD / HDS.`,
+    },
+    {
+        q: `À quelle fréquence dois-je faire des audits qualité ?`,
+        a: `L'évaluation externe HAS doit avoir lieu tous les 5 ans. En interne, un point trimestriel est recommandé. HS Quality vous permet de programmer ces audits, de scorer en temps réel et de générer le PAC depuis les écarts détectés.`,
+    },
+    {
+        q: 'Combien de temps pour mettre en place HS Quality ?',
+        a: `Deux semaines en moyenne. Provisioning de votre tenant, import de vos bénéficiaires et intervenants, formation des coordinateurs (2h), puis déploiement progressif. Un référent qualité vous accompagne tout au long du pilote.`,
+    },
+    {
+        q: 'Mes données sont-elles bien sécurisées ?',
+        a: `Hébergement HDS en France (AWS Paris ou OVHcloud), chiffrement AES-256 au repos et TLS 1.3 en transit, MFA obligatoire pour les rôles privilégiés. Audit complet de chaque accès aux données de santé. Conformité RGPD et code de la santé publique.`,
+    },
+    {
+        q: `Puis-je essayer avant de m'engager ?`,
+        a: `Oui, l'essai pilote est gratuit pendant 3 mois, sans carte bancaire et avec un référent dédié. Si la solution ne correspond pas à vos besoins, vos données sont restituées ou supprimées sur simple demande.`,
+    },
+];
+
+const PRICING = [
+    {
+        name: 'Essentiel',
+        price: '149',
+        desc: 'Pour les petites structures qui démarrent leur démarche qualité.',
+        features: [
+            'Jusqu\'à 20 intervenants',
+            'Interventions & traçabilité',
+            'Gestion des incidents',
+            'Application mobile',
+            'Support par email',
+        ],
+        highlighted: false,
+    },
+    {
+        name: 'Professionnel',
+        price: '349',
+        desc: 'Pour les structures engagées dans une démarche qualité complète.',
+        features: [
+            'Jusqu\'à 80 intervenants',
+            'Tout Essentiel +',
+            'Audits HAS / AFNOR / ISO',
+            'Baromètre QVCT',
+            'Formation continue',
+            'API & connecteurs',
+            'Référent qualité dédié',
+        ],
+        highlighted: true,
+    },
+    {
+        name: 'Groupe',
+        price: 'Sur mesure',
+        desc: 'Pour les groupes multi-sites et les grandes associations.',
+        features: [
+            'Intervenants illimités',
+            'Tout Professionnel +',
+            'Multi-sites & consolidation',
+            'IA prédictive',
+            'SLA garanti 99,9%',
+            'Onboarding personnalisé',
+            'Accompagnement continu',
+        ],
+        highlighted: false,
+    },
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MAIN COMPONENT
+// ════════════════════════════════════════════════════════════════════════════
 
 export default function Welcome() {
-    const [navSolid, setNavSolid]       = useState(false);
-    const [mobileOpen, setMobileOpen]   = useState(false);
-    const [activeModule, setActiveModule] = useState<number | null>(null);
-    const [ticker, setTicker]           = useState(0);
-    const heroRef = useRef<HTMLElement>(null);
+    const [navSolid, setNavSolid] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
-    // Nav scroll
     useEffect(() => {
-        const fn = () => setNavSolid(window.scrollY > 40);
-        window.addEventListener('scroll', fn);
+        const fn = () => setNavSolid(window.scrollY > 32);
+        window.addEventListener('scroll', fn, { passive: true });
         return () => window.removeEventListener('scroll', fn);
     }, []);
 
-    // Ticker animation
-    useEffect(() => {
-        const id = setInterval(() => setTicker(t => (t + 1) % 4), 2800);
-        return () => clearInterval(id);
-    }, []);
-
-    // ─── Data ─────────────────────────────────────────────────────────────────
-    const ticker_stats = [
-        { value: '–15%', label: 'incidents déclarés dès An 1' },
-        { value: '>60%', label: 'plans d\'amélioration complétés' },
-        { value: '<5j',  label: 'délai traitement incident' },
-        { value: '99,9%', label: 'disponibilité garantie' },
-    ];
-
-    const modules: Module[] = [
-        {
-            icon: '◈', code: '01',
-            title: 'Traçabilité des interventions',
-            tag: 'Cœur opérationnel',
-            desc: 'Journal horodaté, pointage géolocalisé, voice-to-text, signature électronique. Chaque intervention est documentée, sécurisée et consultable en temps réel.',
-            kpi: '100% des interventions tracées',
-        },
-        {
-            icon: '◎', code: '02',
-            title: 'Gestion des incidents',
-            tag: 'Conformité HAS',
-            desc: 'Déclaration mobile en moins de 2 min, algorithme de gravité automatique, analyse des causes (5 pourquoi / Ishikawa), notification ARS/CD pour les événements graves.',
-            kpi: 'Délai traitement < 5 jours',
-        },
-        {
-            icon: '◉', code: '03',
-            title: 'Module QVCT',
-            tag: 'Prévention RPS',
-            desc: 'Baromètre anonyme hebdomadaire, détection automatique des signaux faibles, cartographie des risques par équipe, plan d\'actions QVCT avec suivi d\'impact.',
-            kpi: 'Turnover cible –30%',
-        },
-        {
-            icon: '◐', code: '04',
-            title: 'Communication interne',
-            tag: 'Anti-isolement',
-            desc: 'Messagerie sécurisée, groupes d\'équipe, bibliothèque de protocoles, forum de bonnes pratiques, visioconférence intégrée. L\'intervenant n\'est plus seul.',
-            kpi: '100% intervenants connectés',
-        },
-        {
-            icon: '◑', code: '05',
-            title: 'Compétences & Formation',
-            tag: 'RH opérationnel',
-            desc: 'Cartographie des habilitations, alertes d\'expiration, plan de formation individualisé, micro-learning, parcours onboarding, tableau de bord RH complet.',
-            kpi: 'Taux de formation >80%',
-        },
-        {
-            icon: '◒', code: '06',
-            title: 'Audits & Conformité',
-            tag: 'HAS · ISO · AFNOR',
-            desc: 'Grilles HAS, ISO 9001, AFNOR NF X50-056, Caphandeo. Audit mobile sur site, score automatique, PAC généré depuis les écarts, préparation guidée à l\'évaluation externe.',
-            kpi: 'Score conformité > 85%',
-        },
-        {
-            icon: '◓', code: '07',
-            title: 'Tableaux de bord & KPIs',
-            tag: 'Pilotage temps réel',
-            desc: 'Dashboard exécutif, suivi opérationnel coordinateurs, indicateurs qualité et QVCT, alertes sur seuils, exports PDF/Excel, rapport annuel qualité auto-généré.',
-            kpi: 'Visibilité 360° en <3 sec',
-        },
-        {
-            icon: '⬡', code: '08',
-            title: 'Portail bénéficiaires',
-            tag: 'Nouveau v2',
-            desc: 'Accès au plan d\'accompagnement, historique des interventions, questionnaire de satisfaction, signalement direct d\'insatisfaction, messagerie avec le coordinateur.',
-            kpi: 'NPS bénéficiaires >45',
-        },
-        {
-            icon: '⬢', code: '09',
-            title: 'IA & Analyse prédictive',
-            tag: 'Premium',
-            desc: 'Détection précoce des bénéficiaires à risque, prédiction burnout intervenants, suggestions d\'actions préventives, analyse sémantique des comptes-rendus.',
-            kpi: 'Prévention avant réaction',
-        },
-    ];
-
-    const profiles: Profile[] = [
-        {
-            abbr: 'INT', title: 'Intervenant à domicile',
-            items: ['Pointage mobile géolocalisé', 'Déclaration incidents < 2 min', 'Accès plan d\'accompagnement', 'Mode hors-ligne (zone blanche)'],
-            accent: '#F59E0B',
-        },
-        {
-            abbr: 'CDR', title: 'Coordinateur de secteur',
-            items: ['Dashboard temps réel', 'Gestion plannings équipe', 'Suivi QVCT intervenants', 'Alertes incidents graves'],
-            accent: '#3B82F6',
-        },
-        {
-            abbr: 'DIR', title: 'Dirigeant de structure',
-            items: ['KPIs synthétiques exécutifs', 'Rapport annuel qualité auto', 'Vision multi-sites', 'Pilotage conformité HAS'],
-            accent: '#8B5CF6',
-        },
-        {
-            abbr: 'RQU', title: 'Référent qualité',
-            items: ['Grilles d\'audit Caphandeo', 'Plans d\'amélioration continue', 'Reporting réglementaire', 'Préparation évaluation HAS'],
-            accent: '#10B981',
-        },
-        {
-            abbr: 'RH', title: 'Responsable formation',
-            items: ['Cartographie compétences', 'Plan de formation', 'Alertes habilitations', 'Tableau de bord RH'],
-            accent: '#EF4444',
-        },
-        {
-            abbr: 'BNF', title: 'Bénéficiaire & famille',
-            items: ['Plan d\'accompagnement', 'Historique interventions', 'Questionnaire satisfaction', 'Contact coordinateur'],
-            accent: '#06B6D4',
-        },
-    ];
-
-    const roadmap: RoadmapPhase[] = [
-        { phase: 'Phase 1', period: 'M1 → M4', modules: ['Traçabilité', 'Incidents', 'Dashboard basique', 'App mobile offline'], kpi: '10 structures · 200 intervenants', active: true },
-        { phase: 'Phase 2', period: 'M5 → M8', modules: ['QVCT complet', 'Audits HAS', 'Communication interne', 'Compétences basique'], kpi: '50 structures · 1 000 intervenants', active: false },
-        { phase: 'Phase 3', period: 'M9 → M14', modules: ['IA prédictive', 'Portail bénéficiaires', 'Analyse sémantique', 'Benchmark sectoriel'], kpi: '200 structures', active: false },
-        { phase: 'Phase 4', period: 'M15 → M24', modules: ['Expansion nationale', 'Connecteurs API', 'Licences CD/ARS', 'Partenariats institutionnels'], kpi: '500 structures', active: false },
-        { phase: 'Phase 5', period: 'M25 → M36', modules: ['Belgique · Suisse · Luxembourg', 'Europe du Sud', 'Versions localisées', 'Conformité RGPD par pays'], kpi: '1 000 structures', active: false },
-    ];
-
-    const structures = ['SAAD', 'SSIAD', 'SPASAD', 'ESAD', 'CCAS', 'Mandataires'];
-
     return (
         <>
-            <Head title="HS Quality — Pilotage Qualité & QVCT pour les services à domicile" />
+            <Head title="HS Quality — Pilotez la qualité de votre service à domicile" />
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+                html { scroll-behavior: smooth; }
 
-                * { box-sizing: border-box; }
+                @keyframes fadeIn { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+                @keyframes meshMove { 0%,100% { transform:translate(0,0) scale(1) } 50% { transform:translate(30px,-20px) scale(1.05) } }
+                @keyframes meshMove2 { 0%,100% { transform:translate(0,0) scale(1) } 50% { transform:translate(-20px,30px) scale(1.08) } }
+                @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+                @keyframes marquee { from { transform:translateX(0) } to { transform:translateX(-50%) } }
+                @keyframes float { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-8px) } }
+                @keyframes glowPulse { 0%,100% { box-shadow:0 0 20px 0 rgba(21,101,172,0.15) } 50% { box-shadow:0 0 48px 12px rgba(21,101,172,0.28) } }
+                @keyframes textGradientMove { 0% { background-position:0% 50% } 50% { background-position:100% 50% } 100% { background-position:0% 50% } }
 
-                :root {
-                    --navy:   #0B1628;
-                    --navy2:  #0F1E38;
-                    --navy3:  #162440;
-                    --gold:   #F59E0B;
-                    --gold2:  #FCD34D;
-                    --gold3:  #FBBF24;
-                    --cream:  #FEFCE8;
-                    --slate:  #94A3B8;
-                    --white:  #FFFFFF;
-                    --border: rgba(255,255,255,0.07);
-                    --border-light: #E2E8F0;
+                .fade-in { animation: fadeIn .8s cubic-bezier(.22,1,.36,1) both; }
+                .delay-1 { animation-delay: .1s; }
+                .delay-2 { animation-delay: .2s; }
+                .delay-3 { animation-delay: .35s; }
+                .delay-4 { animation-delay: .5s; }
+                .delay-5 { animation-delay: .65s; }
+
+                .gradient-text {
+                    background: linear-gradient(135deg, #5996cd 0%, #62ab80 50%, #5996cd 100%);
+                    background-size: 200% auto;
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    color: transparent;
+                    animation: textGradientMove 6s ease-in-out infinite;
+                }
+                .gradient-text-light {
+                    background: linear-gradient(135deg, #93bcdf 0%, #95c9a9 50%, #93bcdf 100%);
+                    background-size: 200% auto;
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    color: transparent;
+                    animation: textGradientMove 6s ease-in-out infinite;
                 }
 
-                body { font-family: 'DM Sans', sans-serif; background: #fff; color: var(--navy); }
-
-                .serif   { font-family: 'DM Serif Display', serif; }
-                .mono    { font-family: 'DM Mono', monospace; }
-
-                /* ─── Navbar ───── */
-                .nav-solid { background: rgba(11,22,40,0.97) !important; backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
-
-                /* ─── Animations ───── */
-                @keyframes fadeUp   { from { opacity:0; transform:translateY(28px) } to { opacity:1; transform:translateY(0) } }
-                @keyframes fadeIn   { from { opacity:0 } to { opacity:1 } }
-                @keyframes lineGrow { from { width:0 } to { width:100% } }
-                @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:.4} }
-                @keyframes tickSlide{ from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
-                @keyframes tickOut  { from{transform:translateY(0);opacity:1} to{transform:translateY(-100%);opacity:0} }
-                @keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-                @keyframes gridFade { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
-
-                .fade-up  { animation: fadeUp .7s ease both; }
-                .fade-in  { animation: fadeIn .6s ease both; }
-                .au-1     { animation-delay: .1s; }
-                .au-2     { animation-delay: .22s; }
-                .au-3     { animation-delay: .36s; }
-                .au-4     { animation-delay: .50s; }
-                .float    { animation: float 4s ease-in-out infinite; }
-
-                /* ─── Diagonal section separator ───── */
-                .diagonal-top::before {
-                    content: '';
-                    display: block;
-                    height: 64px;
-                    background: var(--navy);
-                    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 0);
-                    margin-bottom: -1px;
+                .card-hover {
+                    transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s, border-color .35s;
                 }
-
-                /* ─── Module card ───── */
-                .mod-card {
-                    position: relative;
-                    background: var(--white);
-                    border: 1px solid var(--border-light);
-                    border-radius: 16px;
-                    padding: 28px;
-                    transition: all .22s ease;
-                    overflow: hidden;
-                    cursor: default;
-                }
-                .mod-card::before {
-                    content: '';
-                    position: absolute;
-                    inset: 0;
-                    background: var(--navy);
-                    transform: translateY(100%);
-                    transition: transform .3s ease;
-                    z-index: 0;
-                }
-                .mod-card:hover::before { transform: translateY(0); }
-                .mod-card:hover { border-color: var(--gold); box-shadow: 0 20px 60px rgba(11,22,40,.15); }
-                .mod-card > * { position: relative; z-index: 1; }
-
-                .mod-icon {
-                    font-size: 28px;
-                    color: var(--gold);
-                    transition: color .22s;
-                    display: block;
-                    margin-bottom: 12px;
-                    line-height: 1;
-                }
-
-                .mod-code {
-                    font-family: 'DM Mono', monospace;
-                    font-size: 11px;
-                    font-weight: 500;
-                    color: #94A3B8;
-                    letter-spacing: .08em;
-                    transition: color .22s;
-                }
-                .mod-card:hover .mod-code { color: var(--gold); }
-
-                .mod-title {
-                    font-size: 15px;
-                    font-weight: 700;
-                    color: var(--navy);
-                    margin: 6px 0 4px;
-                    transition: color .22s;
-                }
-                .mod-card:hover .mod-title { color: var(--white); }
-
-                .mod-tag {
-                    display: inline-block;
-                    font-size: 11px;
-                    font-weight: 600;
-                    background: #F1F5F9;
-                    color: #475569;
-                    padding: 3px 8px;
-                    border-radius: 6px;
-                    transition: background .22s, color .22s;
-                }
-                .mod-card:hover .mod-tag { background: rgba(245,158,11,.15); color: var(--gold3); }
-
-                .mod-desc {
-                    font-size: 13px;
-                    color: #64748B;
-                    line-height: 1.65;
-                    margin-top: 12px;
-                    transition: color .22s;
-                }
-                .mod-card:hover .mod-desc { color: rgba(255,255,255,.7); }
-
-                .mod-kpi {
-                    margin-top: 16px;
-                    font-size: 12px;
-                    font-weight: 700;
-                    color: var(--gold);
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                .mod-kpi::before { content: '→'; }
-
-                /* ─── Profile card ───── */
-                .prof-card {
-                    border: 1px solid var(--border-light);
-                    border-radius: 16px;
-                    padding: 24px;
-                    background: white;
-                    transition: transform .2s, box-shadow .2s, border-color .2s;
-                }
-                .prof-card:hover {
+                .card-hover:hover {
                     transform: translateY(-3px);
-                    box-shadow: 0 12px 40px rgba(11,22,40,.1);
+                    box-shadow: 0 24px 48px -12px rgba(15,23,42,0.1);
+                    border-color: rgba(21,101,172,0.2);
                 }
 
-                /* ─── Ticker ───── */
-                .ticker-item { animation: tickSlide .4s ease both; }
-                .ticker-out  { animation: tickOut .4s ease both; }
-
-                /* ─── Scrollbar ───── */
-                ::-webkit-scrollbar { width: 6px; }
-                ::-webkit-scrollbar-track { background: #f1f5f9; }
-                ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
-
-                /* ─── Noise overlay ───── */
-                .noise {
-                    position: absolute; inset: 0; pointer-events: none; z-index: 1;
-                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-                    opacity: .06;
+                .glow-hover { position: relative; overflow: hidden; }
+                .glow-hover::before {
+                    content: '';
+                    position: absolute; inset: 0; opacity: 0;
+                    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(21,101,172,0.06), transparent 60%);
+                    transition: opacity 0.4s; pointer-events: none; z-index: 1;
                 }
+                .glow-hover:hover::before { opacity: 1; }
+
+                .btn-glow { position: relative; }
+                .btn-glow::after {
+                    content: ''; position: absolute; inset: -1px; border-radius: inherit;
+                    background: linear-gradient(135deg, rgba(21,101,172,0.4), rgba(63,150,112,0.4));
+                    opacity: 0; z-index: -1; filter: blur(14px); transition: opacity 0.4s;
+                }
+                .btn-glow:hover::after { opacity: 1; }
+
+                .dashboard-glow { animation: glowPulse 4s ease-in-out infinite; }
+
+                .marquee-track { animation: marquee 40s linear infinite; }
+                .marquee:hover .marquee-track { animation-play-state: paused; }
+
+                .mono { font-family: 'JetBrains Mono', monospace; }
+
+                .grain {
+                    position: absolute; inset: 0; pointer-events: none;
+                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+                    opacity: .04;
+                }
+
+                ::-webkit-scrollbar { width: 8px; }
+                ::-webkit-scrollbar-track { background: #FAFAFA; }
+                ::-webkit-scrollbar-thumb { background: #1565AC; border-radius: 4px; }
+                ::-webkit-scrollbar-thumb:hover { background: #0F4C81; }
             `}</style>
 
-            <div style={{ minHeight: '100vh', background: '#fff', color: 'var(--navy)', fontFamily: "'DM Sans', sans-serif" }}>
+            <div className="min-h-screen bg-white">
+                <a href="#main-content" className="skip-link">Aller au contenu principal</a>
+                <Nav solid={navSolid} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+                <HeroSection />
+                <LogoBar />
+                <FeaturesSection />
+                <HowItWorksSection />
+                <BentoGrid />
+                <StructureTypesSection />
+                <MetricsSection />
+                <TestimonialSection />
+                <PricingSection />
+                <FaqSection open={faqOpen} setOpen={setFaqOpen} />
+                <FinalCta />
+                <FooterSection />
+            </div>
+        </>
+    );
+}
 
-                {/* ══════════════════════════════════════════════════════════
-                    NAVBAR
-                ══════════════════════════════════════════════════════════ */}
-                <nav
-                    className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${navSolid ? 'nav-solid' : ''}`}
-                    style={{ padding: '0 0', background: navSolid ? undefined : 'transparent' }}
-                >
-                    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+// ════════════════════════════════════════════════════════════════════════════
+//  NAV
+// ════════════════════════════════════════════════════════════════════════════
 
-                        {/* Logo */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                width: 38, height: 38,
-                                background: 'linear-gradient(135deg, var(--gold) 0%, #D97706 100%)',
-                                borderRadius: 10,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontFamily: "'DM Serif Display', serif",
-                                fontWeight: 700, fontSize: 16, color: 'var(--navy)',
-                                letterSpacing: '-0.02em',
-                                flexShrink: 0,
-                            }}>Q</div>
-                            <div>
-                                <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.03em', color: navSolid ? 'white' : 'white', lineHeight: 1 }}>HS Quality</div>
-                                <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--gold)', lineHeight: 1, marginTop: 2 }}>Qualité & QVCT</div>
-                            </div>
-                        </div>
-
-                        {/* Desktop links */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 36 }} className="hidden lg:flex">
-                            {[['Modules', '#modules'], ['Utilisateurs', '#utilisateurs'], ['Feuille de route', '#roadmap'], ['Tarifs', '#tarifs']].map(([l, h]) => (
-                                <a key={l} href={h} style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,.65)', textDecoration: 'none', transition: 'color .2s' }}
-                                    onMouseEnter={e => (e.currentTarget.style.color = 'white')}
-                                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,.65)')}
-                                >{l}</a>
-                            ))}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }} className="hidden lg:flex">
-                            <a href="/login" style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.6)', textDecoration: 'none', padding: '8px 16px' }}>Connexion</a>
-                            <a href="/demo" style={{
-                                fontSize: 13, fontWeight: 700, textDecoration: 'none',
-                                background: 'var(--gold)', color: 'var(--navy)',
-                                padding: '10px 22px', borderRadius: 10,
-                                transition: 'background .2s, transform .15s',
-                                display: 'inline-block',
-                            }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--gold2)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--gold)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'; }}
-                            >Demander une démo →</a>
-                        </div>
-
-                        {/* Mobile burger */}
-                        <button onClick={() => setMobileOpen(!mobileOpen)} className="lg:hidden" style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 8, color: 'white' }}>
-                            <svg width={22} height={22} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                {mobileOpen
-                                    ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                    : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
-                            </svg>
-                        </button>
+function Nav({ solid, mobileOpen, setMobileOpen }: {
+    solid: boolean; mobileOpen: boolean; setMobileOpen: (v: boolean) => void;
+}) {
+    const links: [string, string][] = [
+        ['Fonctionnalités', '#features'],
+        ['Modules', '#modules'],
+        ['Tarifs', '#pricing'],
+        ['FAQ', '#faq'],
+    ];
+    return (
+        <nav className={
+            'fixed inset-x-0 top-0 z-50 transition-all duration-300 ' +
+            (solid ? 'border-b border-ink-200/60 bg-white/80 backdrop-blur-xl shadow-sm' : 'bg-transparent')
+        }>
+            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+                <Link href="/" className="flex items-center gap-2.5">
+                    <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-base font-semibold italic text-white">
+                        Q
                     </div>
-
-                    {mobileOpen && (
-                        <div style={{ background: 'var(--navy)', borderTop: '1px solid var(--border)', padding: '16px 32px 24px' }}>
-                            {[['Modules', '#modules'], ['Utilisateurs', '#utilisateurs'], ['Feuille de route', '#roadmap'], ['Tarifs', '#tarifs']].map(([l, h]) => (
-                                <a key={l} href={h} onClick={() => setMobileOpen(false)}
-                                    style={{ display: 'block', fontSize: 15, color: 'rgba(255,255,255,.75)', padding: '10px 0', textDecoration: 'none' }}>{l}</a>
-                            ))}
-                            <a href="/demo" style={{
-                                display: 'block', marginTop: 12, textAlign: 'center',
-                                background: 'var(--gold)', color: 'var(--navy)',
-                                padding: '12px', borderRadius: 10, fontWeight: 700, fontSize: 14, textDecoration: 'none',
-                            }}>Demander une démo</a>
-                        </div>
-                    )}
-                </nav>
-
-                {/* ══════════════════════════════════════════════════════════
-                    HERO
-                ══════════════════════════════════════════════════════════ */}
-                <section ref={heroRef} style={{ position: 'relative', background: 'var(--navy)', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <div className="noise" />
-
-                    {/* Grid pattern */}
-                    <div style={{
-                        position: 'absolute', inset: 0, opacity: .04, zIndex: 0,
-                        backgroundImage: 'linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)',
-                        backgroundSize: '72px 72px',
-                    }} />
-
-                    {/* Gold glow */}
-                    <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: 700, height: 700, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,.12) 0%, transparent 65%)', zIndex: 0 }} />
-                    <div style={{ position: 'absolute', bottom: 0, left: '-5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,.06) 0%, transparent 65%)', zIndex: 0 }} />
-
-                    {/* Main content */}
-                    <div style={{ position: 'relative', zIndex: 2, flex: 1, display: 'flex', alignItems: 'center', maxWidth: 1280, margin: '0 auto', width: '100%', padding: '120px 32px 80px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 72, alignItems: 'center', width: '100%' }}>
-
-                            {/* Left column */}
-                            <div>
-                                {/* Badge */}
-                                <div className="fade-up" style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                                    background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.25)',
-                                    color: 'var(--gold)', fontSize: 11, fontWeight: 700, letterSpacing: '.1em',
-                                    padding: '7px 14px', borderRadius: 100, marginBottom: 32,
-                                    textTransform: 'uppercase',
-                                }}>
-                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)', animation: 'pulse 2s infinite' }} />
-                                    SaaS · SAAD · SSIAD · SPASAD · Version 2.0
-                                </div>
-
-                                {/* Headline */}
-                                <h1 className="serif fade-up au-1" style={{ fontSize: 'clamp(44px, 5.5vw, 72px)', lineHeight: 1.04, color: 'white', marginBottom: 28, fontWeight: 400 }}>
-                                    La qualité<br />
-                                    <em style={{ color: 'var(--gold)' }}>mesurée.</em><br />
-                                    <span style={{ color: 'rgba(255,255,255,.35)', fontStyle: 'normal', fontSize: '.8em' }}>améliorée en continu.</span>
-                                </h1>
-
-                                <p className="fade-up au-2" style={{ fontSize: 17, color: 'rgba(255,255,255,.55)', lineHeight: 1.75, maxWidth: 520, fontWeight: 300, marginBottom: 44 }}>
-                                    HS Quality structure le pilotage de la qualité et de la QVCT pour les structures d'aide et de soins à domicile — du terrain à la direction, en temps réel.
-                                </p>
-
-                                {/* CTAs */}
-                                <div className="fade-up au-3" style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
-                                    <a href="#modules" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: 10,
-                                        background: 'var(--gold)', color: 'var(--navy)',
-                                        fontSize: 14, fontWeight: 700, padding: '14px 28px', borderRadius: 12,
-                                        textDecoration: 'none', transition: 'all .2s',
-                                    }}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#FCD34D'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--gold)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'; }}
-                                    >
-                                        Découvrir les 9 modules
-                                        <svg width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                    </a>
-                                    <a href="#demo" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: 10,
-                                        background: 'transparent', color: 'rgba(255,255,255,.8)',
-                                        fontSize: 14, fontWeight: 500, padding: '14px 28px', borderRadius: 12,
-                                        textDecoration: 'none', border: '1px solid rgba(255,255,255,.12)',
-                                        transition: 'all .2s',
-                                    }}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,.3)'; (e.currentTarget as HTMLAnchorElement).style.color = 'white'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,.12)'; (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,.8)'; }}
-                                    >
-                                        Essai gratuit 3 mois
-                                    </a>
-                                </div>
-
-                                {/* Structures */}
-                                <div className="fade-up au-4" style={{ marginTop: 52, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,.07)' }}>
-                                    <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 14 }}>Conçu pour</p>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                        {structures.map(s => (
-                                            <span key={s} style={{
-                                                fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)',
-                                                background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)',
-                                                padding: '5px 12px', borderRadius: 8,
-                                            }}>{s}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Right — Animated dashboard preview */}
-                            <div className="float" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-                                {/* KPI ticker card */}
-                                <div style={{
-                                    background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
-                                    borderRadius: 20, padding: '28px 32px',
-                                    backdropFilter: 'blur(12px)',
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--gold)' }}>Indicateurs clés — An 1</p>
-                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ADE80', animation: 'pulse 2s infinite' }} />
-                                    </div>
-                                    <div style={{ overflow: 'hidden', height: 64 }}>
-                                        <div key={ticker} className="ticker-item" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                            <div className="mono" style={{ fontSize: 44, fontWeight: 500, color: 'white', lineHeight: 1 }}>{ticker_stats[ticker].value}</div>
-                                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.45)' }}>{ticker_stats[ticker].label}</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Progress bars */}
-                                <div style={{
-                                    background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
-                                    borderRadius: 20, padding: '24px 28px',
-                                }}>
-                                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,.3)', marginBottom: 20 }}>Objectifs satisfaction</p>
-                                    {[
-                                        { label: 'NPS utilisateurs cible', pct: 73, color: 'var(--gold)' },
-                                        { label: 'Plans d\'amélioration complétés', pct: 60, color: '#60A5FA' },
-                                        { label: 'Réduction incidents', pct: 85, color: '#4ADE80' },
-                                    ].map(({ label, pct, color }) => (
-                                        <div key={label} style={{ marginBottom: 14 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                                                <span style={{ fontSize: 12, color: 'rgba(255,255,255,.5)' }}>{label}</span>
-                                                <span className="mono" style={{ fontSize: 12, color, fontWeight: 500 }}>{pct}%</span>
-                                            </div>
-                                            <div style={{ height: 4, background: 'rgba(255,255,255,.07)', borderRadius: 4, overflow: 'hidden' }}>
-                                                <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 4, transition: 'width 1.5s ease' }} />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Pill tags */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                    {['Offline-first', 'HDS certifié', 'Multi-tenant', 'TLS 1.3 + AES-256', 'RPO < 1h'].map(tag => (
-                                        <span key={tag} style={{
-                                            fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,.45)',
-                                            background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
-                                            padding: '6px 12px', borderRadius: 100,
-                                        }}>{tag}</span>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="leading-none">
+                        <div className={`text-[15px] font-semibold tracking-tight ${solid ? 'text-ink-900' : 'text-white'}`}>HS Quality</div>
+                        <div className={`mt-0.5 text-[10px] font-semibold uppercase tracking-widest ${solid ? 'text-brand-600' : 'text-brand-300'}`}>
+                            Qualité & QVCT
                         </div>
                     </div>
+                </Link>
 
-                    {/* Bottom strip — key numbers */}
-                    <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,.06)' }}>
-                        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-                            {[
-                                { v: '50', u: 'structures', sub: 'cible An 1' },
-                                { v: '1 000', u: 'intervenants', sub: 'actifs sur la plateforme' },
-                                { v: '180 K', u: 'euros ARR', sub: 'revenu récurrent An 1' },
-                                { v: '9', u: 'modules', sub: 'dont IA prédictive' },
-                            ].map(({ v, u, sub }, i) => (
-                                <div key={i} style={{ padding: '24px 20px', borderRight: i < 3 ? '1px solid rgba(255,255,255,.06)' : 'none' }}>
-                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                                        <span className="serif" style={{ fontSize: 32, color: 'white', fontWeight: 400 }}>{v}</span>
-                                        <span style={{ fontSize: 14, color: 'var(--gold)', fontWeight: 600 }}>{u}</span>
-                                    </div>
-                                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,.3)', marginTop: 2 }}>{sub}</div>
-                                </div>
-                            ))}
-                        </div>
+                <div className="hidden items-center gap-1 lg:flex">
+                    {links.map(([label, href]) => (
+                        <a key={href} href={href}
+                            className={`rounded-full px-4 py-1.5 text-[13px] font-medium transition-all ${
+                                solid ? 'text-ink-600 hover:bg-ink-50 hover:text-ink-900' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                            }`}>
+                            {label}
+                        </a>
+                    ))}
+                </div>
+
+                <div className="hidden items-center gap-2 lg:flex">
+                    <Link href="/login" className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        solid ? 'text-ink-600 hover:text-ink-900' : 'text-white/70 hover:text-white'
+                    }`}>
+                        Connexion
+                    </Link>
+                    <a href="#cta" className={`rounded-full px-5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg ${
+                        solid ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-white text-ink-900 hover:bg-ink-50'
+                    }`}>
+                        Démarrer gratuitement
+                    </a>
+                </div>
+
+                <button type="button" onClick={() => setMobileOpen(!mobileOpen)}
+                    className={`rounded-full p-2 lg:hidden ${solid ? 'text-ink-700 hover:bg-ink-50' : 'text-white hover:bg-white/10'}`}
+                    aria-label="Menu">
+                    <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        {mobileOpen
+                            ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
+                    </svg>
+                </button>
+            </div>
+
+            {/* Mobile overlay */}
+            <div
+                className={`fixed inset-0 z-40 bg-ink-900/60 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+                    mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+                }`}
+                onClick={() => setMobileOpen(false)}
+                aria-hidden="true"
+            />
+
+            {/* Mobile drawer */}
+            <div className={`fixed inset-y-0 right-0 z-50 w-[280px] transform transition-transform duration-300 ease-out lg:hidden ${
+                mobileOpen ? 'translate-x-0' : 'translate-x-full'
+            } ${solid ? 'bg-white' : 'bg-ink-900'}`}>
+                <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: solid ? 'rgb(241 245 249)' : 'rgba(255,255,255,0.1)' }}>
+                    <span className={`text-[15px] font-semibold ${solid ? 'text-ink-900' : 'text-white'}`}>Menu</span>
+                    <button type="button" onClick={() => setMobileOpen(false)}
+                        className={`rounded-full p-1.5 ${solid ? 'text-ink-500 hover:bg-ink-50' : 'text-white/70 hover:bg-white/10'}`}
+                        aria-label="Fermer le menu">
+                        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="px-5 py-4">
+                    {links.map(([label, href]) => (
+                        <a key={href} href={href} onClick={() => setMobileOpen(false)}
+                            className={`block rounded-lg px-3 py-3 text-[15px] font-medium transition-colors ${
+                                solid ? 'text-ink-700 hover:bg-ink-50' : 'text-white/85 hover:bg-white/10'
+                            }`}>
+                            {label}
+                        </a>
+                    ))}
+                    <div className="mt-5 flex flex-col gap-2.5">
+                        <Link href="/login" className={`rounded-full border px-4 py-3 text-center text-sm font-medium transition-colors ${
+                            solid ? 'border-ink-200 text-ink-700 hover:bg-ink-50' : 'border-white/15 text-white/85 hover:bg-white/10'
+                        }`}>
+                            Connexion
+                        </Link>
+                        <a href="#cta" onClick={() => setMobileOpen(false)}
+                            className="rounded-full bg-brand-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-700">
+                            Démarrer gratuitement
+                        </a>
                     </div>
-                </section>
+                </div>
+            </div>
+        </nav>
+    );
+}
 
-                {/* ══════════════════════════════════════════════════════════
-                    TRUST BAR
-                ══════════════════════════════════════════════════════════ */}
-                <div style={{ background: '#FAFAFA', borderBottom: '1px solid #F1F5F9', padding: '18px 32px' }}>
-                    <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#CBD5E1', whiteSpace: 'nowrap' }}>Référentiels intégrés</span>
-                        <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'center' }}>
-                            {['HAS Évaluation externe', 'AFNOR NF X50-056', 'ISO 9001', 'Caphandeo', 'RGPD', 'HDS France', 'Code du travail — RPS'].map(o => (
-                                <span key={o} style={{ fontSize: 13, fontWeight: 600, color: '#94A3B8' }}>{o}</span>
-                            ))}
+// ════════════════════════════════════════════════════════════════════════════
+//  HERO
+// ════════════════════════════════════════════════════════════════════════════
+
+const HERO_PHOTO = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&auto=format&fit=crop&q=80';
+
+function HeroSection() {
+    return (
+        <section id="main-content" className="relative min-h-screen overflow-hidden bg-ink-900 text-white">
+            {/* Background photo */}
+            <div className="absolute inset-0">
+                <img src={HERO_PHOTO} alt="" className="size-full object-cover" loading="eager" />
+                <div className="absolute inset-0" style={{
+                    background: 'linear-gradient(135deg, rgba(8,36,67,0.92) 0%, rgba(15,23,42,0.82) 40%, rgba(15,23,42,0.70) 100%)',
+                }} />
+            </div>
+            {/* Mesh gradient orbs — on top of photo for color accent */}
+            <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 size-[700px] rounded-full opacity-40"
+                style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.35), transparent 70%)', animation: 'meshMove 12s ease-in-out infinite' }} />
+            <div aria-hidden className="pointer-events-none absolute -left-32 bottom-[-20%] size-[600px] rounded-full opacity-30"
+                style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.25), transparent 70%)', animation: 'meshMove2 14s ease-in-out infinite' }} />
+            <div className="grain" aria-hidden />
+
+            <div className="relative mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-40 lg:pt-48">
+                {/* Badge */}
+                <div className="fade-in delay-1 flex justify-center">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[12px] font-medium text-white/85 backdrop-blur">
+                        <span className="size-1.5 rounded-full bg-sage-400" style={{ animation: 'pulse 2s infinite' }} />
+                        Plateforme conforme HAS · RGPD · HDS
+                    </span>
+                </div>
+
+                {/* Headline */}
+                <h1 className="fade-in delay-2 mx-auto mt-8 max-w-4xl text-center text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-7xl" style={{ lineHeight: 1.1 }}>
+                    La qualité du soin à domicile,{' '}
+                    <span className="gradient-text-light">enfin pilotée.</span>
+                </h1>
+
+                {/* Subtitle */}
+                <p className="fade-in delay-3 mx-auto mt-6 max-w-xl text-center text-base font-light leading-relaxed text-white/65 sm:text-lg">
+                    HS Quality structure le pilotage qualité et QVCT des services à domicile — interventions, incidents, audits, formations. Du terrain à la direction, en temps réel.
+                </p>
+
+                {/* CTAs */}
+                <div className="fade-in delay-4 mt-10 flex flex-wrap items-center justify-center gap-3">
+                    <a href="#cta"
+                        className="btn-glow inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl">
+                        Démarrer gratuitement
+                        <Arrow />
+                    </a>
+                    <a href="#modules"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition-all hover:border-white/35 hover:bg-white/10">
+                        Voir la démo
+                    </a>
+                </div>
+
+                {/* Social proof */}
+                <p className="fade-in delay-4 mt-8 text-center text-sm text-white/45">
+                    50+ structures · 94% traçabilité · &lt; 2 min par incident
+                </p>
+
+                {/* Dashboard preview */}
+                <div className="fade-in delay-5 mx-auto mt-14 max-w-4xl pb-20">
+                    <DashboardPreview />
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function DashboardPreview() {
+    return (
+        <div className="dashboard-glow relative">
+            <div className="overflow-hidden rounded-t-2xl border border-white/10 bg-ink-800 shadow-2xl">
+                {/* Window chrome */}
+                <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
+                    <div className="size-2.5 rounded-full bg-danger-500/60" />
+                    <div className="size-2.5 rounded-full bg-warning-500/60" />
+                    <div className="size-2.5 rounded-full bg-sage-500/60" />
+                    <span className="ml-3 text-[11px] text-white/40">app.hsquality.fr/dashboard</span>
+                </div>
+
+                {/* KPI grid */}
+                <div className="p-4 sm:p-6">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {[
+                            { label: 'Score qualité', value: '87', sub: '/100', accent: true },
+                            { label: 'Interventions', value: '1 248', sub: 'ce mois', accent: false },
+                            { label: 'Incidents ouverts', value: '3', sub: 'à traiter', accent: false },
+                            { label: 'Traçabilité', value: '94%', sub: '↑ +6%', accent: false },
+                        ].map((kpi) => (
+                            <div key={kpi.label} className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                                <p className="text-[11px] text-white/50">{kpi.label}</p>
+                                <div className="mt-1.5 flex items-baseline gap-1">
+                                    <span className={`mono text-2xl font-semibold ${kpi.accent ? 'text-sage-300' : 'text-white'}`}>{kpi.value}</span>
+                                    <span className="text-[11px] text-white/40">{kpi.sub}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Chart + incidents list */}
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                            <p className="text-[11px] text-white/50">Interventions / semaine</p>
+                            <div className="mt-3 flex items-end gap-1.5" style={{ height: 64 }}>
+                                {[40, 55, 35, 70, 60, 85, 75, 90, 65, 80, 72, 88].map((h, i) => (
+                                    <div key={i} className="flex-1 rounded-sm bg-gradient-to-t from-brand-700 to-brand-400"
+                                        style={{ height: `${h}%`, minHeight: 4 }} />
+                                ))}
+                            </div>
+                        </div>
+                        <div className="rounded-xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[11px] text-white/50">Incidents récents</p>
+                                <span className="rounded-full bg-danger-500/20 px-2 py-0.5 text-[10px] font-semibold text-danger-200">2 graves</span>
+                            </div>
+                            <div className="mt-3 space-y-2">
+                                {[
+                                    { who: 'Chute · Mme D.', tag: 'Grave', tone: 'danger' as const },
+                                    { who: 'Erreur médic. · M. P.', tag: 'En analyse', tone: 'warning' as const },
+                                    { who: 'Retard · Mme R.', tag: 'Clos', tone: 'mute' as const },
+                                ].map((row) => (
+                                    <div key={row.who} className="flex items-center justify-between text-[11px]">
+                                        <span className="text-white/70">{row.who}</span>
+                                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+                                            row.tone === 'danger' ? 'bg-danger-500/20 text-danger-200'
+                                                : row.tone === 'warning' ? 'bg-warning-500/20 text-warning-200'
+                                                    : 'bg-white/10 text-white/40'
+                                        }`}>{row.tag}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                {/* ══════════════════════════════════════════════════════════
-                    MODULES — 9 modules grid
-                ══════════════════════════════════════════════════════════ */}
-                <section id="modules" style={{ padding: '96px 32px', background: '#fff' }}>
-                    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-
-                        {/* Section header */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 64, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                <div style={{ width: 32, height: 2, background: 'var(--gold)' }} />
-                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--gold)' }}>Modules fonctionnels</span>
-                            </div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 24, alignItems: 'flex-end' }}>
-                                <h2 className="serif" style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.08, color: 'var(--navy)', fontWeight: 400 }}>
-                                    9 modules.<br /><em style={{ color: 'var(--gold)' }}>Une démarche complète.</em>
-                                </h2>
-                                <p style={{ fontSize: 16, color: '#64748B', maxWidth: 400, lineHeight: 1.7, fontWeight: 300 }}>
-                                    De la traçabilité terrain à l'intelligence artificielle prédictive — tout est pensé pour le secteur des services à domicile.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* 3-column grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
-                            {modules.map((m, i) => (
-                                <div
-                                    key={i}
-                                    className="mod-card"
-                                    onMouseEnter={() => setActiveModule(i)}
-                                    onMouseLeave={() => setActiveModule(null)}
-                                >
-                                    <span className="mod-icon">{m.icon}</span>
-                                    <span className="mod-code">{m.code}</span>
-                                    <h3 className="mod-title">{m.title}</h3>
-                                    <span className="mod-tag">{m.tag}</span>
-                                    <p className="mod-desc">{m.desc}</p>
-                                    <div className="mod-kpi">{m.kpi}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ══════════════════════════════════════════════════════════
-                    UTILISATEURS — 6 profiles
-                ══════════════════════════════════════════════════════════ */}
-                <section id="utilisateurs" style={{ padding: '96px 32px', background: 'var(--navy)' }}>
-                    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 64, alignItems: 'start', marginBottom: 64 }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                                    <div style={{ width: 32, height: 2, background: 'var(--gold)' }} />
-                                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--gold)' }}>Qui en bénéficie</span>
-                                </div>
-                                <h2 className="serif" style={{ fontSize: 'clamp(34px, 3.5vw, 52px)', lineHeight: 1.08, color: 'white', fontWeight: 400, marginBottom: 20 }}>
-                                    6 profils.<br /><em style={{ color: 'var(--gold)' }}>Un seul outil.</em>
-                                </h2>
-                                <p style={{ fontSize: 16, color: 'rgba(255,255,255,.45)', lineHeight: 1.75, fontWeight: 300, maxWidth: 400 }}>
-                                    Chaque acteur de la structure dispose d'un espace adapté à ses responsabilités, sur mobile ou sur web.
-                                </p>
-                            </div>
-                            {/* Highlighted stat */}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                {[
-                                    { n: '> 40', l: 'NPS utilisateurs cible', u: 'An 1' },
-                                    { n: '> 55', l: 'NPS utilisateurs cible', u: 'An 3' },
-                                    { n: '< 2s', l: 'Chargement app mobile', u: '4G' },
-                                    { n: '99.9%', l: 'Disponibilité garantie', u: 'SLA' },
-                                ].map(({ n, l, u }, i) => (
-                                    <div key={i} style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, padding: '20px 22px' }}>
-                                        <div className="serif" style={{ fontSize: 30, color: 'var(--gold)', fontWeight: 400 }}>{n}</div>
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', marginTop: 4, lineHeight: 1.4 }}>{l}</div>
-                                        <div className="mono" style={{ fontSize: 10, color: 'rgba(255,255,255,.2)', marginTop: 4 }}>{u}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Profile cards grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-                            {profiles.map((p, i) => (
-                                <div key={i} style={{
-                                    background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.07)',
-                                    borderRadius: 16, padding: '24px',
-                                    transition: 'background .2s, border-color .2s',
-                                }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,.08)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,.15)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,.04)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,.07)'; }}
-                                >
-                                    <div style={{
-                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                                        width: 44, height: 44, borderRadius: 12,
-                                        background: p.accent + '22', border: `1px solid ${p.accent}44`,
-                                        fontSize: 12, fontWeight: 800, color: p.accent,
-                                        fontFamily: "'DM Mono', monospace", letterSpacing: '.03em',
-                                        marginBottom: 16,
-                                    }}>{p.abbr}</div>
-                                    <h4 style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 14 }}>{p.title}</h4>
-                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
-                                        {p.items.map((item, j) => (
-                                            <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: 'rgba(255,255,255,.45)', lineHeight: 1.4 }}>
-                                                <span style={{ width: 5, height: 5, borderRadius: '50%', background: p.accent, marginTop: 5, flexShrink: 0 }} />
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ══════════════════════════════════════════════════════════
-                    ROADMAP
-                ══════════════════════════════════════════════════════════ */}
-                <section id="roadmap" style={{ padding: '96px 32px', background: '#FAFAFA' }}>
-                    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-
-                        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 16 }}>
-                                <div style={{ width: 32, height: 2, background: 'var(--gold)' }} />
-                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--gold)' }}>Feuille de route</span>
-                                <div style={{ width: 32, height: 2, background: 'var(--gold)' }} />
-                            </div>
-                            <h2 className="serif" style={{ fontSize: 'clamp(34px, 3.5vw, 52px)', color: 'var(--navy)', fontWeight: 400 }}>
-                                5 phases.<br /><em>Du MVP à la rentabilité.</em>
-                            </h2>
-                        </div>
-
-                        {/* Timeline */}
-                        <div style={{ position: 'relative' }}>
-                            <div style={{ position: 'absolute', top: 24, left: 0, right: 0, height: 2, background: '#E2E8F0', zIndex: 0 }} className="hidden lg:block" />
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-                                {roadmap.map((r, i) => (
-                                    <div key={i} style={{ position: 'relative' }}>
-                                        {/* Dot */}
-                                        <div className="hidden lg:flex" style={{ justifyContent: 'center', marginBottom: 0, position: 'relative' }}>
-                                            <div style={{
-                                                width: 16, height: 16, borderRadius: '50%',
-                                                background: r.active ? 'var(--gold)' : 'white',
-                                                border: r.active ? '3px solid var(--gold)' : '2px solid #CBD5E1',
-                                                position: 'relative', zIndex: 1,
-                                            }} />
-                                        </div>
-                                        {/* Card */}
-                                        <div style={{
-                                            marginTop: 20, padding: '20px',
-                                            background: r.active ? 'var(--navy)' : 'white',
-                                            border: `1px solid ${r.active ? 'var(--gold)' : '#E2E8F0'}`,
-                                            borderRadius: 16,
-                                            boxShadow: r.active ? '0 8px 32px rgba(245,158,11,.12)' : 'none',
-                                            transition: 'all .2s',
-                                        }}>
-                                            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: r.active ? 'var(--gold)' : '#94A3B8', marginBottom: 6 }}>{r.phase}</div>
-                                            <div className="mono" style={{ fontSize: 12, color: r.active ? 'rgba(255,255,255,.5)' : '#94A3B8', marginBottom: 12 }}>{r.period}</div>
-                                            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                                {r.modules.map((m, j) => (
-                                                    <li key={j} style={{ fontSize: 12, color: r.active ? 'rgba(255,255,255,.7)' : '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: r.active ? 'var(--gold)' : '#CBD5E1', flexShrink: 0 }} />
-                                                        {m}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                            <div style={{ fontSize: 11, fontWeight: 700, color: r.active ? 'var(--gold)' : '#94A3B8', borderTop: `1px solid ${r.active ? 'rgba(245,158,11,.2)' : '#F1F5F9'}`, paddingTop: 12 }}>{r.kpi}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ══════════════════════════════════════════════════════════
-                    PRICING — 3 tiers
-                ══════════════════════════════════════════════════════════ */}
-                
-
-                {/* ══════════════════════════════════════════════════════════
-                    CTA FINAL
-                ══════════════════════════════════════════════════════════ */}
-                <section id="demo" style={{ padding: '96px 32px', background: '#FAFAFA' }}>
-                    <div style={{ maxWidth: 960, margin: '0 auto' }}>
-                        <div style={{
-                            background: 'var(--navy)', borderRadius: 28,
-                            padding: 'clamp(48px, 6vw, 80px)',
-                            textAlign: 'center', position: 'relative', overflow: 'hidden',
-                        }}>
-                            <div className="noise" />
-                            <div style={{ position: 'absolute', top: '-30%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,.12) 0%, transparent 60%)', zIndex: 0 }} />
-                            <div style={{ position: 'relative', zIndex: 2 }}>
-                                <div style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 8,
-                                    background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.25)',
-                                    color: 'var(--gold)', fontSize: 11, fontWeight: 700, letterSpacing: '.1em',
-                                    padding: '7px 14px', borderRadius: 100, marginBottom: 32, textTransform: 'uppercase',
-                                }}>
-                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)' }} />
-                                    Essai pilote gratuit · 3 mois · Accompagnement inclus
-                                </div>
-                                <h2 className="serif" style={{ fontSize: 'clamp(36px, 4.5vw, 60px)', color: 'white', fontWeight: 400, lineHeight: 1.08, marginBottom: 20 }}>
-                                    Prêt à piloter<br /><em style={{ color: 'var(--gold)' }}>votre qualité ?</em>
-                                </h2>
-                                <p style={{ fontSize: 17, color: 'rgba(255,255,255,.45)', maxWidth: 480, margin: '0 auto 44px', lineHeight: 1.7, fontWeight: 300 }}>
-                                    Rejoignez les premières structures médico-sociales qui transforment leur démarche qualité avec HS Quality.
-                                </p>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 14 }}>
-                                    <a href="#" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: 10,
-                                        background: 'var(--gold)', color: 'var(--navy)',
-                                        fontSize: 15, fontWeight: 700, padding: '16px 36px', borderRadius: 14,
-                                        textDecoration: 'none', transition: 'all .2s',
-                                    }}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = '#FCD34D'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'var(--gold)'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)'; }}
-                                    >
-                                        Démarrer le pilote gratuit
-                                        <svg width={16} height={16} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                    </a>
-                                    <a href="#" style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: 8,
-                                        color: 'rgba(255,255,255,.6)', fontSize: 15, fontWeight: 500,
-                                        border: '1px solid rgba(255,255,255,.12)', padding: '16px 32px', borderRadius: 14,
-                                        textDecoration: 'none', transition: 'all .2s',
-                                    }}
-                                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'white'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,.3)'; }}
-                                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,.6)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,.12)'; }}
-                                    >
-                                        Parler à un expert
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* ══════════════════════════════════════════════════════════
-                    FOOTER
-                ══════════════════════════════════════════════════════════ */}
-                <footer style={{ background: 'white', borderTop: '1px solid #F1F5F9', padding: '64px 32px 32px' }}>
-                    <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, paddingBottom: 48, borderBottom: '1px solid #F1F5F9' }}>
-
-                            {/* Brand */}
-                            <div style={{ gridColumn: 'span 2' }} className="md:col-span-2">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                                    <div style={{
-                                        width: 36, height: 36, background: 'linear-gradient(135deg, var(--gold) 0%, #D97706 100%)',
-                                        borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontFamily: "'DM Serif Display', serif", fontWeight: 700, fontSize: 16, color: 'var(--navy)',
-                                    }}>Q</div>
-                                    <div>
-                                        <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--navy)', lineHeight: 1 }}>HS Quality</div>
-                                        <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--gold)', lineHeight: 1, marginTop: 3 }}>Qualité & QVCT · Services à domicile</div>
-                                    </div>
-                                </div>
-                                <p style={{ fontSize: 13, color: '#94A3B8', maxWidth: 280, lineHeight: 1.7, fontWeight: 300, marginBottom: 20 }}>
-                                    Le pilotage de la qualité et de la QVCT pour les structures médico-sociales d'aide et de soins à domicile.
-                                </p>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                    {['RGPD', 'HDS', 'HAS', 'ISO 9001', 'AFNOR NF X50-056'].map(b => (
-                                        <span key={b} style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8', border: '1px solid #E2E8F0', padding: '4px 10px', borderRadius: 6 }}>{b}</span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {[
-                                { h: 'Plateforme', links: ['9 modules fonctionnels', 'Module IA prédictive', 'Application mobile', 'API & connecteurs', 'Mode offline-first'] },
-                                { h: 'Conformité', links: ['Grilles HAS', 'AFNOR NF X50-056', 'ISO 9001', 'Caphandeo', 'Évaluation externe'] },
-                                { h: 'Ressources', links: ['Documentation', 'Conformité RGPD/HDS', 'Support technique', 'Formations', 'Contact commercial'] },
-                            ].map(col => (
-                                <div key={col.h}>
-                                    <h5 style={{ fontWeight: 700, fontSize: 13, color: 'var(--navy)', marginBottom: 16, letterSpacing: '.02em' }}>{col.h}</h5>
-                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                        {col.links.map(l => (
-                                            <li key={l}>
-                                                <a href="#" style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none', fontWeight: 300, transition: 'color .15s' }}
-                                                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
-                                                    onMouseLeave={e => (e.currentTarget.style.color = '#94A3B8')}
-                                                >{l}</a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 16, paddingTop: 24 }}>
-                            <p style={{ fontSize: 12, color: '#CBD5E1' }}>© 2024 HS Quality. Tous droits réservés. · CDC-QUALITE-DOM-2024-v2.0</p>
-                            <div style={{ display: 'flex', gap: 24 }}>
-                                {['Politique de confidentialité', 'CGU', 'Mentions légales', 'Accessibilité'].map(l => (
-                                    <a key={l} href="#" style={{ fontSize: 12, color: '#CBD5E1', textDecoration: 'none', transition: 'color .15s' }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = '#CBD5E1')}
-                                    >{l}</a>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-
             </div>
-        </>
+            {/* Fade to background */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900 to-transparent" />
+        </div>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  LOGO BAR (marquee)
+// ════════════════════════════════════════════════════════════════════════════
+
+function LogoBar() {
+    const items = [
+        'HAS · Évaluation externe',
+        'AFNOR NF X50-056',
+        'ISO 9001',
+        'Caphandeo',
+        'RGPD',
+        'HDS France',
+        'Code du travail (RPS)',
+        'CNIL',
+        'Code de la santé publique',
+    ];
+    return (
+        <div className="marquee relative overflow-hidden border-y border-ink-100 bg-ink-50/60 py-5">
+            <div className="marquee-track flex gap-12 whitespace-nowrap">
+                {[...items, ...items].map((it, i) => (
+                    <span key={i} className="flex shrink-0 items-center gap-3 text-xs font-medium uppercase tracking-widest text-ink-500">
+                        <span className="size-1 rounded-full bg-brand-500" />
+                        {it}
+                    </span>
+                ))}
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-ink-50 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-ink-50 to-transparent" />
+        </div>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FEATURES (6 cards, 3x2 grid)
+// ════════════════════════════════════════════════════════════════════════════
+
+function FeaturesSection() {
+    return (
+        <section id="features" className="bg-white px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Fonctionnalités
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Tout ce dont vous avez besoin,{' '}
+                        <span className="gradient-text">rien de superflu.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Six modules pensés pour le quotidien des structures médico-sociales, du terrain à la direction.
+                    </p>
+                </Reveal>
+
+                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {FEATURES.map((f, i) => (
+                        <Reveal key={f.title} delay={0.06 * i}>
+                            <FeatureCard icon={f.icon} title={f.title} desc={f.desc} />
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HOW IT WORKS (3 steps)
+// ════════════════════════════════════════════════════════════════════════════
+
+const STEPS = [
+    {
+        step: '01',
+        title: 'Provisioning en 48h',
+        desc: 'Création de votre espace sécurisé HDS, import de vos bénéficiaires et intervenants. Configuration des rôles et permissions adaptée à votre organigramme.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+            </svg>
+        ),
+    },
+    {
+        step: '02',
+        title: 'Formation & déploiement',
+        desc: 'Formation des coordinateurs (2h), prise en main par les intervenants via l\'app mobile. Un référent qualité dédié vous accompagne pendant tout le pilote.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+        ),
+    },
+    {
+        step: '03',
+        title: 'Pilotage en continu',
+        desc: 'Vos indicateurs qualité se remplissent automatiquement. Audits, incidents, QVCT, formations — tout converge vers un tableau de bord actionnable.',
+        icon: (
+            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+        ),
+    },
+];
+
+function HowItWorksSection() {
+    return (
+        <section className="relative overflow-hidden bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
+                        Mise en place
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Opérationnel en{' '}
+                        <span className="gradient-text">2 semaines.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Un processus d'intégration pensé pour ne pas perturber votre activité quotidienne.
+                    </p>
+                </Reveal>
+
+                <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {STEPS.map((s, i) => (
+                        <Reveal key={s.step} delay={0.1 * i}>
+                            <div className="group relative flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-7 transition-all duration-300 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-50">
+                                {/* Step number + connector line */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 transition-colors duration-300 group-hover:bg-brand-600 group-hover:text-white">
+                                        {s.icon}
+                                    </div>
+                                    <span className="mono text-[11px] font-semibold uppercase tracking-widest text-ink-300">
+                                        Étape {s.step}
+                                    </span>
+                                </div>
+
+                                {/* Content */}
+                                <h3 className="mt-5 text-lg font-semibold text-ink-900">{s.title}</h3>
+                                <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-500">{s.desc}</p>
+
+                                {/* Connector arrow (hidden on last card) */}
+                                {i < STEPS.length - 1 && (
+                                    <div className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:block">
+                                        <div className="flex size-6 items-center justify-center rounded-full bg-white shadow ring-1 ring-ink-100">
+                                            <svg className="size-3 text-ink-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 4l8 8-8 8" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  BENTO GRID
+// ════════════════════════════════════════════════════════════════════════════
+
+function BentoGrid() {
+    return (
+        <section id="modules" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-sage-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-sage-700">
+                        Modules
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Une vue sur chaque dimension{' '}
+                        <span className="gradient-text">qualité.</span>
+                    </h2>
+                </Reveal>
+
+                {/* Top row: 2+1 */}
+                <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <Reveal delay={0} className="lg:col-span-2">
+                        <BentoInterventions />
+                    </Reveal>
+                    <Reveal delay={0.08}>
+                        <BentoIncidents />
+                    </Reveal>
+                </div>
+
+                {/* Bottom row: 1+2 */}
+                <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    <Reveal delay={0.14}>
+                        <BentoAudits />
+                    </Reveal>
+                    <Reveal delay={0.2} className="lg:col-span-2">
+                        <BentoQvct />
+                    </Reveal>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function BentoInterventions() {
+    const interventions = [
+        { time: '08:30', name: 'Mme Dupont', type: 'Aide à la toilette', status: 'Terminée' },
+        { time: '09:15', name: 'M. Bernard', type: 'Préparation repas', status: 'En cours' },
+        { time: '10:00', name: 'Mme Léon', type: 'Accompagnement', status: 'Planifiée' },
+        { time: '11:30', name: 'M. Petit', type: 'Aide au ménage', status: 'Planifiée' },
+    ];
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-base font-semibold text-ink-900">Interventions du jour</h3>
+                    <p className="mt-1 text-sm text-ink-500">Suivi en temps réel</p>
+                </div>
+                <span className="mono rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-700">12 / 14</span>
+            </div>
+            <div className="mt-5 space-y-2.5">
+                {interventions.map((item) => (
+                    <div key={item.time + item.name} className="flex items-center gap-3 rounded-xl bg-ink-50/80 px-4 py-2.5">
+                        <span className="mono w-12 text-xs text-ink-400">{item.time}</span>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-ink-900">{item.name}</p>
+                            <p className="text-xs text-ink-500">{item.type}</p>
+                        </div>
+                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                            item.status === 'Terminée' ? 'bg-sage-50 text-sage-700'
+                                : item.status === 'En cours' ? 'bg-brand-50 text-brand-700'
+                                    : 'bg-ink-100 text-ink-500'
+                        }`}>{item.status}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BentoIncidents() {
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <h3 className="text-base font-semibold text-ink-900">Incidents</h3>
+            <p className="mt-1 text-sm text-ink-500">Ce mois-ci</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-danger-50 p-3 text-center">
+                    <span className="mono text-2xl font-semibold text-danger-600">2</span>
+                    <p className="mt-0.5 text-[11px] text-danger-600">Graves</p>
+                </div>
+                <div className="rounded-xl bg-warning-50 p-3 text-center">
+                    <span className="mono text-2xl font-semibold text-warning-600">5</span>
+                    <p className="mt-0.5 text-[11px] text-warning-600">En analyse</p>
+                </div>
+            </div>
+            <div className="mt-4 rounded-xl bg-sage-50 px-4 py-3">
+                <div className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-sage-500" style={{ animation: 'pulse 2s infinite' }} />
+                    <span className="text-xs font-medium text-sage-700">100% notifiés ARS &lt; 24h</span>
+                </div>
+            </div>
+            <div className="mt-3 space-y-1.5">
+                {[
+                    { label: 'Déclarés ce mois', val: '12' },
+                    { label: 'Délai moyen résolution', val: '3,2 j' },
+                ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-xs">
+                        <span className="text-ink-500">{row.label}</span>
+                        <span className="mono font-semibold text-ink-900">{row.val}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BentoAudits() {
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-ink-900">Audit HAS · 2026</h3>
+                <span className="rounded-full bg-sage-50 px-2.5 py-0.5 text-[11px] font-semibold text-sage-700">Finalisé</span>
+            </div>
+            <div className="mt-5 flex items-baseline gap-1">
+                <span className="mono text-4xl font-semibold tracking-tight text-ink-900">87</span>
+                <span className="text-sm text-ink-400">/100</span>
+            </div>
+            <div className="mt-5 space-y-3">
+                {[
+                    { label: 'Bientraitance', pct: 92 },
+                    { label: 'Coordination', pct: 84 },
+                    { label: 'Traçabilité', pct: 88 },
+                    { label: 'Droits & éthique', pct: 79 },
+                ].map((item) => (
+                    <div key={item.label}>
+                        <div className="flex justify-between text-[11px]">
+                            <span className="text-ink-600">{item.label}</span>
+                            <span className="mono font-medium text-ink-900">{item.pct}%</span>
+                        </div>
+                        <div className="mt-1">
+                            <AnimatedBar width={item.pct} className="bg-gradient-to-r from-sage-500 to-brand-400" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function BentoQvct() {
+    const dimensions = ['Sens du travail', 'Charge', 'Autonomie', 'Relations', 'Reconnaissance'];
+    return (
+        <div className="h-full overflow-hidden rounded-2xl border border-ink-100 bg-white p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-base font-semibold text-ink-900">Baromètre QVCT</h3>
+                    <p className="mt-1 text-sm text-ink-500">Dernier trimestre</p>
+                </div>
+                <span className="mono rounded-lg bg-sage-50 px-3 py-1.5 text-sm font-semibold text-sage-700">7.2 / 10</span>
+            </div>
+            <div className="mt-5 grid grid-cols-1 items-center gap-6 sm:grid-cols-2">
+                {/* Radar chart SVG */}
+                <div className="flex justify-center">
+                    <svg viewBox="0 0 200 200" className="size-48" aria-hidden>
+                        {/* Grid */}
+                        <g stroke="currentColor" className="text-ink-200" fill="none">
+                            <polygon points="100,30 165,65 145,140 55,140 35,65" />
+                            <polygon points="100,50 148,75 133,125 67,125 52,75" />
+                            <polygon points="100,70 130,85 120,110 80,110 70,85" />
+                        </g>
+                        {/* Data */}
+                        <polygon
+                            points="100,38 158,70 138,132 62,125 45,68"
+                            fill="rgba(63,150,112,.25)"
+                            stroke="rgb(63,150,112)"
+                            strokeWidth="2"
+                        />
+                        {/* Labels */}
+                        <g fill="currentColor" className="text-ink-500" fontSize="8" fontFamily="Poppins">
+                            <text x="100" y="22" textAnchor="middle">Sens</text>
+                            <text x="175" y="68" textAnchor="start">Charge</text>
+                            <text x="152" y="148" textAnchor="start">Autonomie</text>
+                            <text x="48" y="148" textAnchor="end">Relations</text>
+                            <text x="25" y="68" textAnchor="end">Reconn.</text>
+                        </g>
+                        {/* Dots */}
+                        <g fill="rgb(63,150,112)">
+                            <circle cx="100" cy="38" r="3" />
+                            <circle cx="158" cy="70" r="3" />
+                            <circle cx="138" cy="132" r="3" />
+                            <circle cx="62" cy="125" r="3" />
+                            <circle cx="45" cy="68" r="3" />
+                        </g>
+                    </svg>
+                </div>
+                {/* Tags */}
+                <div className="space-y-2">
+                    {dimensions.map((dim, i) => {
+                        const scores = [8.1, 6.4, 7.8, 7.5, 6.8];
+                        return (
+                            <div key={dim} className="flex items-center justify-between rounded-lg bg-ink-50/80 px-3 py-2">
+                                <span className="text-sm text-ink-700">{dim}</span>
+                                <span className={`mono text-sm font-semibold ${scores[i] >= 7.5 ? 'text-sage-600' : scores[i] >= 6.5 ? 'text-warning-600' : 'text-danger-600'}`}>
+                                    {scores[i]}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  STRUCTURE TYPES (Enterprise Gateway — "Solutions par type")
+// ════════════════════════════════════════════════════════════════════════════
+
+const STRUCTURE_TYPES = [
+    {
+        name: 'SAAD',
+        full: 'Service d\'Aide à Domicile',
+        desc: 'Traçabilité des interventions d\'aide (toilette, repas, ménage), gestion des incidents terrain, suivi qualité prestataire et mandataire.',
+        color: 'brand' as const,
+        modules: ['Interventions', 'Incidents', 'QVCT', 'Audits'],
+    },
+    {
+        name: 'SSIAD',
+        full: 'Service de Soins Infirmiers à Domicile',
+        desc: 'Coordination des soins infirmiers, suivi des plans de soins, traçabilité des actes, notification ARS des événements indésirables graves.',
+        color: 'sage' as const,
+        modules: ['Plans de soins', 'Incidents EIG', 'Formations', 'Conformité HAS'],
+    },
+    {
+        name: 'ESAD / SPASAD',
+        full: 'Service Polyvalent d\'Aide et de Soins',
+        desc: 'Pilotage unifié aide + soins, tableau de bord consolidé, audits croisés, indicateurs qualité multi-prestations.',
+        color: 'brand' as const,
+        modules: ['Dashboard unifié', 'Audits croisés', 'QVCT', 'API'],
+    },
+    {
+        name: 'CCAS / Associations',
+        full: 'Centres Communaux & Associations',
+        desc: 'Multi-sites, consolidation groupe, benchmark inter-structures, reporting automatique pour les tutelles et financeurs.',
+        color: 'sage' as const,
+        modules: ['Multi-sites', 'Consolidation', 'Reporting', 'Benchmark'],
+    },
+];
+
+function StructureTypesSection() {
+    const colorClasses = {
+        brand: {
+            badge: 'bg-brand-50 text-brand-700 ring-1 ring-brand-100',
+            icon: 'bg-brand-50 text-brand-600',
+            tag: 'bg-brand-50 text-brand-600',
+        },
+        sage: {
+            badge: 'bg-sage-50 text-sage-700 ring-1 ring-sage-100',
+            icon: 'bg-sage-50 text-sage-600',
+            tag: 'bg-sage-50 text-sage-600',
+        },
+    };
+
+    return (
+        <section className="bg-white px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Adapté à votre structure
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Une solution pour chaque{' '}
+                        <span className="gradient-text">type de service.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
+                        Que vous soyez SAAD, SSIAD, ESAD ou CCAS, HS Quality s'adapte à vos obligations réglementaires et vos processus métier.
+                    </p>
+                </Reveal>
+
+                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    {STRUCTURE_TYPES.map((st, i) => {
+                        const colors = colorClasses[st.color];
+                        return (
+                            <Reveal key={st.name} delay={0.08 * i}>
+                                <div className="card-hover group flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-6 sm:p-7">
+                                    <div className="flex items-center gap-3">
+                                        <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${colors.badge}`}>
+                                            {st.name}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1.5 text-xs font-medium text-ink-400">{st.full}</p>
+                                    <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-600">{st.desc}</p>
+                                    <div className="mt-5 flex flex-wrap gap-1.5">
+                                        {st.modules.map((m) => (
+                                            <span key={m} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${colors.tag}`}>
+                                                {m}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </Reveal>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  METRICS (count-up)
+// ════════════════════════════════════════════════════════════════════════════
+
+function MetricsSection() {
+    const [refYears, valYears] = useCountUp(10);
+    const [refStructures, valStructures] = useCountUp(50);
+    const [refTrace, valTrace] = useCountUp(94);
+
+    return (
+        <section className="bg-white px-5 py-20 sm:px-8 sm:py-28">
+            <div className="mx-auto max-w-5xl">
+                <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+                    <Reveal className="text-center">
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refYears}>{valYears}</span>+
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">années d'expertise</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.08}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refStructures}>{valStructures}</span>+
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">structures accompagnées</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.16}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            <span ref={refTrace}>{valTrace}</span>%
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">traçabilité terrain</p>
+                    </Reveal>
+                    <Reveal className="text-center" delay={0.24}>
+                        <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
+                            &lt; 2 min
+                        </div>
+                        <p className="mt-2 text-sm text-ink-500">par incident déclaré</p>
+                    </Reveal>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  TESTIMONIAL
+// ════════════════════════════════════════════════════════════════════════════
+
+const TESTIMONIALS = [
+    {
+        quote: 'Nos coordinatrices déclarent les incidents en moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.',
+        initials: 'MF',
+        name: 'Marie-France Essomba',
+        role: 'Directrice qualité · SAAD Horizon',
+        metric: '+23%',
+        metricLabel: 'conformité HAS',
+    },
+    {
+        quote: 'Le baromètre QVCT nous a permis de détecter un risque de turn-over chez nos aides-soignantes avant qu\'il ne devienne critique. On a pu agir à temps.',
+        initials: 'AT',
+        name: 'Alain Tchoupo',
+        role: 'DRH · SSIAD Solidarité',
+        metric: '-40%',
+        metricLabel: 'turn-over An 1',
+    },
+    {
+        quote: 'Avant HS Quality, nos audits HAS prenaient 3 semaines de préparation. Aujourd\'hui, le scoring est automatique et le PAC se génère depuis les écarts.',
+        initials: 'CN',
+        name: 'Claire Nguema',
+        role: 'Référente qualité · ESAD Lumière',
+        metric: '÷3',
+        metricLabel: 'temps de préparation',
+    },
+];
+
+function TestimonialSection() {
+    return (
+        <section className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Témoignages
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Ils pilotent leur qualité{' '}
+                        <span className="gradient-text">avec HS Quality.</span>
+                    </h2>
+                </Reveal>
+
+                <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+                    {TESTIMONIALS.map((t, i) => (
+                        <Reveal key={t.name} delay={0.08 * i}>
+                            <div className="card-hover flex h-full flex-col rounded-2xl border border-ink-100 bg-white p-6 sm:p-7">
+                                {/* Quote icon */}
+                                <svg className="size-8 text-brand-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C9.591 11.69 11 13.166 11 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311C19.591 11.69 21 13.166 21 15c0 1.933-1.567 3.5-3.5 3.5-1.218 0-2.36-.558-2.917-1.179z" />
+                                </svg>
+
+                                {/* Quote text */}
+                                <blockquote className="mt-4 flex-1 text-[15px] font-medium leading-relaxed text-ink-700" style={{ lineHeight: 1.55 }}>
+                                    "{t.quote}"
+                                </blockquote>
+
+                                {/* Metric badge */}
+                                <div className="mt-5 inline-flex self-start rounded-lg bg-sage-50 px-3 py-1.5">
+                                    <span className="mono text-sm font-bold text-sage-700">{t.metric}</span>
+                                    <span className="ml-1.5 text-xs text-sage-600">{t.metricLabel}</span>
+                                </div>
+
+                                {/* Author */}
+                                <div className="mt-5 flex items-center gap-3 border-t border-ink-100 pt-5">
+                                    <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-xs font-semibold text-white">
+                                        {t.initials}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-ink-900">{t.name}</p>
+                                        <p className="text-xs text-ink-500">{t.role}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PRICING
+// ════════════════════════════════════════════════════════════════════════════
+
+function PricingSection() {
+    return (
+        <section id="pricing" className="bg-white px-5 py-24 sm:px-8 sm:py-32">
+            <div className="mx-auto max-w-7xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700">
+                        Tarifs
+                    </span>
+                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Un plan adapté à{' '}
+                        <span className="gradient-text">votre structure.</span>
+                    </h2>
+                    <p className="mx-auto mt-4 max-w-lg text-base font-light text-ink-600">
+                        Essai pilote gratuit 3 mois. Sans engagement, sans carte bancaire.
+                    </p>
+                </Reveal>
+
+                <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
+                    {PRICING.map((plan, i) => (
+                        <Reveal key={plan.name} delay={0.08 * i}>
+                            <div className={`card-hover relative flex h-full flex-col rounded-2xl border p-6 sm:p-8 ${
+                                plan.highlighted
+                                    ? 'border-brand-200 bg-brand-50/30 ring-1 ring-brand-200'
+                                    : 'border-ink-100 bg-white'
+                            }`}>
+                                {plan.highlighted && (
+                                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-1 text-[11px] font-semibold text-white">
+                                        Recommandé
+                                    </span>
+                                )}
+                                <h3 className="text-lg font-semibold text-ink-900">{plan.name}</h3>
+                                <div className="mt-3 flex items-baseline gap-1">
+                                    {plan.price === 'Sur mesure' ? (
+                                        <span className="text-2xl font-bold text-ink-900">Sur mesure</span>
+                                    ) : (
+                                        <>
+                                            <span className="mono text-4xl font-bold text-ink-900">{plan.price}</span>
+                                            <span className="text-sm text-ink-500">€ / mois</span>
+                                        </>
+                                    )}
+                                </div>
+                                <p className="mt-3 text-sm text-ink-500">{plan.desc}</p>
+                                <ul className="mt-6 flex-1 space-y-2.5">
+                                    {plan.features.map((f) => (
+                                        <li key={f} className="flex items-start gap-2">
+                                            <span className={`mt-0.5 ${plan.highlighted ? 'text-brand-600' : 'text-sage-600'}`}>
+                                                <IconCheck />
+                                            </span>
+                                            <span className="text-sm text-ink-700">{f}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <a href="#cta" className={`mt-8 block rounded-full py-3 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 ${
+                                    plan.highlighted
+                                        ? 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg'
+                                        : 'bg-ink-900 text-white hover:bg-ink-800 hover:shadow-lg'
+                                }`}>
+                                    {plan.price === 'Sur mesure' ? 'Nous contacter' : 'Démarrer gratuitement'}
+                                </a>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FAQ
+// ════════════════════════════════════════════════════════════════════════════
+
+function FaqSection({ open, setOpen }: { open: number | null; setOpen: (v: number | null) => void }) {
+    return (
+        <section id="faq" className="bg-ink-50/40 px-5 py-24 sm:px-8 sm:py-28">
+            <div className="mx-auto max-w-3xl">
+                <Reveal className="text-center">
+                    <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-brand-700 ring-1 ring-brand-100">
+                        Questions fréquentes
+                    </span>
+                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
+                        Tout ce que vous voulez{' '}
+                        <span className="gradient-text">savoir.</span>
+                    </h2>
+                </Reveal>
+
+                <div className="mt-12 space-y-3">
+                    {FAQS.map((f, i) => {
+                        const isOpen = open === i;
+                        return (
+                            <div key={f.q} className={`overflow-hidden rounded-2xl bg-white ring-1 transition-all ${
+                                isOpen
+                                    ? 'shadow-[0_8px_32px_rgba(15,23,42,.06)] ring-brand-200'
+                                    : 'ring-ink-100 hover:ring-ink-200'
+                            }`}>
+                                <button type="button" onClick={() => setOpen(isOpen ? null : i)}
+                                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                                    aria-expanded={isOpen}>
+                                    <span className="text-base font-semibold text-ink-900">{f.q}</span>
+                                    <span className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-all ${
+                                        isOpen ? 'rotate-45 bg-brand-600 text-white' : 'bg-ink-50 text-ink-600'
+                                    }`}>
+                                        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+                                        </svg>
+                                    </span>
+                                </button>
+                                <div className="grid transition-all duration-300 ease-out"
+                                    style={{ gridTemplateRows: isOpen ? '1fr' : '0fr', opacity: isOpen ? 1 : 0 }}>
+                                    <div className="overflow-hidden">
+                                        <p className="px-6 pb-6 text-sm font-light leading-relaxed text-ink-600">{f.a}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FINAL CTA
+// ════════════════════════════════════════════════════════════════════════════
+
+function FinalCta() {
+    return (
+        <section id="cta" className="bg-white px-5 py-20 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-5xl">
+                <div className="relative overflow-hidden rounded-[32px] p-10 sm:p-16"
+                    style={{ background: 'linear-gradient(135deg, #082443 0%, #0B385E 50%, #0F4C81 100%)' }}>
+                    <div className="grain" aria-hidden />
+                    {/* Mesh orbs */}
+                    <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 size-[640px] -translate-x-1/2 rounded-full"
+                        style={{ background: 'radial-gradient(closest-side, rgba(21,101,172,.40), transparent 70%)', animation: 'meshMove 12s ease-in-out infinite' }} />
+                    <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-32 size-[420px] rounded-full"
+                        style={{ background: 'radial-gradient(closest-side, rgba(63,150,112,.28), transparent 70%)', animation: 'meshMove2 14s ease-in-out infinite' }} />
+
+                    <div className="relative text-center text-white">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-medium text-white/85 backdrop-blur">
+                            <span className="size-1.5 rounded-full bg-sage-300" style={{ animation: 'pulse 2s infinite' }} />
+                            Pilote gratuit · 3 mois · accompagnement inclus
+                        </span>
+                        <h2 className="mx-auto mt-6 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl" style={{ lineHeight: 1.15 }}>
+                            Prêt à structurer votre{' '}
+                            <span className="gradient-text-light">démarche qualité</span> ?
+                        </h2>
+                        <p className="mx-auto mt-5 max-w-md text-base font-light leading-relaxed text-white/65">
+                            Échangeons sur vos enjeux et ouvrons un environnement pilote pour vos coordinateurs.
+                        </p>
+                        <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+                            <a href="mailto:contact@hsquality.fr"
+                                className="btn-glow inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl">
+                                Demander une démo
+                                <Arrow />
+                            </a>
+                            <Link href="/login"
+                                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-3.5 text-sm font-medium text-white/85 transition-colors hover:border-white/40 hover:text-white">
+                                Déjà client ? Se connecter
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  FOOTER
+// ════════════════════════════════════════════════════════════════════════════
+
+function FooterSection() {
+    const cols = [
+        { h: 'Plateforme', links: ['Modules', 'Mobile offline', 'API & connecteurs', 'IA prédictive'] },
+        { h: 'Conformité', links: ['HAS', 'AFNOR NF X50-056', 'ISO 9001', 'Caphandeo'] },
+        { h: 'Ressources', links: ['Documentation', 'Support', 'Formations', 'Contact'] },
+    ];
+    return (
+        <footer className="border-t border-ink-100 bg-white px-5 py-14 sm:px-8">
+            <div className="mx-auto max-w-7xl">
+                <div className="grid grid-cols-2 gap-8 border-b border-ink-100 pb-10 lg:grid-cols-5">
+                    <div className="col-span-2">
+                        <Link href="/" className="flex items-center gap-2.5">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-semibold italic text-white">
+                                Q
+                            </div>
+                            <span className="text-lg font-semibold tracking-tight text-ink-900">HS Quality</span>
+                        </Link>
+                        <p className="mt-4 max-w-xs text-sm font-light leading-relaxed text-ink-600">
+                            Pilotage qualité et QVCT pour les structures médico-sociales d'aide et de soins à domicile.
+                        </p>
+                        <div className="mt-5 flex flex-wrap gap-1.5">
+                            {['RGPD', 'HDS', 'HAS', 'ISO 9001', 'AFNOR'].map((b) => (
+                                <span key={b} className="rounded-md border border-ink-200 px-2 py-0.5 text-[11px] font-semibold text-ink-500">
+                                    {b}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {cols.map((col) => (
+                        <div key={col.h}>
+                            <h5 className="text-[13px] font-semibold text-ink-900">{col.h}</h5>
+                            <ul className="mt-4 space-y-2.5">
+                                {col.links.map((l) => (
+                                    <li key={l}>
+                                        <a href="#" className="text-sm text-ink-500 transition-colors hover:text-brand-600">{l}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-6 text-xs text-ink-400">
+                    <p>&copy; {new Date().getFullYear()} HS Quality &middot; CDC-QUALITE-DOM-2024-v2.0</p>
+                    <div className="flex gap-5">
+                        {['Confidentialité', 'CGU', 'Mentions légales', 'Accessibilité'].map((l) => (
+                            <a key={l} href="#" className="transition-colors hover:text-ink-700">{l}</a>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </footer>
     );
 }

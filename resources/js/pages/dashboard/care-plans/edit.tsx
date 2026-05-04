@@ -1,13 +1,8 @@
-import { Link, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { Button, Card, CardBody, CardFooter, CardHeader, FormField, Input, PageHeader, Textarea } from '@/components/ui';
+import { Form, Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
-interface Beneficiary {
-    id: string;
-    full_name: string;
-}
-
-interface CarePlan {
+interface Plan {
     id: string;
     title: string;
     objectives: string | null;
@@ -15,69 +10,95 @@ interface CarePlan {
     end_date: string | null;
 }
 
-interface Props {
-    plan: { data: CarePlan };
-    beneficiary: { data: Beneficiary };
+interface Beneficiary {
+    id: string;
+    full_name: string;
 }
 
-export default function CarePlanEdit({ plan: { data: plan }, beneficiary: { data: b } }: Props) {
-    const { data, setData, put, processing, errors } = useForm({
-        title: plan.title,
-        objectives: plan.objectives ?? '',
-        start_date: plan.start_date ?? '',
-        end_date: plan.end_date ?? '',
-    });
+function unwrap<T>(value: { data: T } | T): T {
+    if (value && typeof value === 'object' && 'data' in (value as object)) {
+        return (value as { data: T }).data;
+    }
+    return value as T;
+}
 
-    const submit = (e: FormEvent) => {
-        e.preventDefault();
-        put(`/care-plans/${plan.id}`);
-    };
+interface Props {
+    plan: { data: Plan } | Plan;
+    beneficiary: { data: Beneficiary } | Beneficiary;
+}
 
-    const inputStyle: React.CSSProperties = {
-        width: '100%', padding: '8px 12px', borderRadius: 8,
-        border: '1px solid #E2E8F0', fontSize: 13, outline: 'none',
-    };
-    const labelStyle: React.CSSProperties = {
-        fontSize: 12, color: '#64748B', marginBottom: 4, display: 'block', fontWeight: 600,
-    };
+export default function CarePlanEdit({ plan, beneficiary }: Props) {
+    const p = unwrap<Plan>(plan);
+    const b = unwrap<Beneficiary>(beneficiary);
 
     return (
-        <DashboardLayout title={`Modifier — ${plan.title}`} subtitle={b.full_name}>
-            <Link href={`/care-plans/${plan.id}`} style={{ fontSize: 12, color: '#64748B', textDecoration: 'none', display: 'inline-block', marginBottom: 14 }}>← Annuler</Link>
+        <DashboardLayout title={`Modifier ${p.title}`} subtitle="">
+            <PageHeader
+                title="Modifier le plan"
+                subtitle={`Bénéficiaire : ${b.full_name}`}
+                breadcrumb={[
+                    { label: 'Tableau de bord', href: '/dashboard' },
+                    { label: 'Bénéficiaires', href: '/beneficiaries' },
+                    { label: b.full_name, href: `/beneficiaries/${b.id}` },
+                    { label: p.title, href: `/care-plans/${p.id}` },
+                    { label: 'Modifier' },
+                ]}
+            />
 
-            <form onSubmit={submit}>
-                <div style={{ background: 'white', borderRadius: 14, padding: 20, marginBottom: 14 }}>
-                    <div style={{ marginBottom: 14 }}>
-                        <label style={labelStyle}>Titre du plan *</label>
-                        <input style={inputStyle} value={data.title} onChange={e => setData('title', e.target.value)} />
-                        {errors.title && <div style={{ color: '#DC2626', fontSize: 11, marginTop: 4 }}>{errors.title}</div>}
-                    </div>
-
-                    <div style={{ marginBottom: 14 }}>
-                        <label style={labelStyle}>Objectifs</label>
-                        <textarea rows={6} style={{ ...inputStyle, resize: 'vertical' }} value={data.objectives} onChange={e => setData('objectives', e.target.value)} />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-                        <div>
-                            <label style={labelStyle}>Date de début *</label>
-                            <input type="date" style={inputStyle} value={data.start_date} onChange={e => setData('start_date', e.target.value)} />
-                        </div>
-                        <div>
-                            <label style={labelStyle}>Date de fin (optionnel)</label>
-                            <input type="date" style={inputStyle} value={data.end_date} onChange={e => setData('end_date', e.target.value)} />
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" disabled={processing} style={{
-                    background: 'var(--gold)', color: 'var(--navy)', fontSize: 13, fontWeight: 700,
-                    padding: '12px 28px', borderRadius: 10, border: 'none', cursor: processing ? 'wait' : 'pointer',
-                    opacity: processing ? 0.6 : 1,
-                }}>
-                    {processing ? 'Enregistrement…' : 'Enregistrer'}
-                </button>
-            </form>
+            <Form action={`/care-plans/${p.id}`} method="put">
+                {({ errors, processing }) => (
+                    <Card className="mx-auto max-w-3xl">
+                        <CardHeader title="Informations" />
+                        <CardBody className="space-y-4">
+                            <FormField label="Titre" htmlFor="title" required error={errors.title}>
+                                <Input id="title" name="title" required maxLength={200} defaultValue={p.title} invalid={!!errors.title} />
+                            </FormField>
+                            <FormField label="Objectifs" htmlFor="objectives" error={errors.objectives} help="Champ chiffré">
+                                <Textarea
+                                    id="objectives"
+                                    name="objectives"
+                                    rows={6}
+                                    maxLength={10000}
+                                    defaultValue={p.objectives ?? ''}
+                                    invalid={!!errors.objectives}
+                                />
+                            </FormField>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <FormField label="Date de début" htmlFor="start_date" required error={errors.start_date}>
+                                    <Input
+                                        id="start_date"
+                                        name="start_date"
+                                        type="date"
+                                        required
+                                        defaultValue={p.start_date ?? ''}
+                                        invalid={!!errors.start_date}
+                                    />
+                                </FormField>
+                                <FormField label="Date de fin" htmlFor="end_date" error={errors.end_date}>
+                                    <Input
+                                        id="end_date"
+                                        name="end_date"
+                                        type="date"
+                                        defaultValue={p.end_date ?? ''}
+                                        invalid={!!errors.end_date}
+                                    />
+                                </FormField>
+                            </div>
+                        </CardBody>
+                        <CardFooter>
+                            <Link
+                                href={`/care-plans/${p.id}`}
+                                className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100"
+                            >
+                                Annuler
+                            </Link>
+                            <Button type="submit" loading={processing}>
+                                Enregistrer
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                )}
+            </Form>
         </DashboardLayout>
     );
 }

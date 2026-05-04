@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
 
     Route::middleware(['tenant'])->group(function () {
 

@@ -1,6 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+        <script>
+            (function() {
+                try {
+                    var stored = localStorage.getItem('appearance');
+                    var mode = (stored === 'light' || stored === 'dark')
+                        ? stored
+                        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                    if (mode === 'dark') {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch (e) {}
+            })();
+        </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -11,7 +24,8 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <link rel="preconnect" href="https://images.unsplash.com">
+        <link href="https://fonts.bunny.net/css?family=poppins:300,400,500,600,700,800,300i,400i,500i,600i,700i|jetbrains-mono:400,500" rel="stylesheet" />
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

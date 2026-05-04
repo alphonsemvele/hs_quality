@@ -196,3 +196,51 @@ it('coordinator can soft-delete an incident', function () {
     expect(Incident::count())->toBe(0)
         ->and(Incident::withTrashed()->count())->toBe(1);
 });
+
+// ── INDEX (Inertia page contract) ──────────────────────────────────────────────
+
+it('index page returns incidents in the shape the React component expects', function () {
+    $coord = actingAsRole('coordinateur');
+    $declarant = User::factory()->create([
+        'structure_id' => $coord->structure_id,
+        'first_name' => 'Sophie',
+        'last_name' => 'Bernard',
+        'type' => 'intervenant',
+    ]);
+
+    Incident::factory()
+        ->forStructure($coord->structure)
+        ->state([
+            'declared_by' => $declarant->id,
+            'categorie' => CategorieIncident::Chute->value,
+            'gravite' => 'grave',
+            'statut' => StatutIncident::Declare->value,
+            'notifie_ars_at' => now(),
+        ])
+        ->create();
+
+    $response = $this->get('/incidents');
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard/incidents/index')
+        ->has('incidents', 1)
+        ->has('incidents.0', fn ($item) => $item
+            ->where('initials', 'SB')
+            ->where('declarant', 'Sophie Bernard')
+            ->where('categorie', 'Chute')
+            ->where('gravite', 'grave')
+            ->where('statut', 'declare')
+            ->where('notifie_autorites', true)
+            ->etc()
+        )
+        ->where('total', 1)
+        ->has('stats', fn ($stats) => $stats
+            ->where('declare', 1)
+            ->where('en_analyse', 0)
+            ->where('plan_actions', 0)
+            ->where('clos', 0)
+            ->where('graves', 1)
+        )
+    );
+});

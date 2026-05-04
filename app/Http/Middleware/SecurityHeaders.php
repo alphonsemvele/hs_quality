@@ -56,21 +56,34 @@ class SecurityHeaders
         $reverbScheme = config('reverb.servers.reverb.options.tls', false) === false ? 'ws' : 'wss';
         $reverbOrigin = "{$reverbScheme}://{$reverbHost}:{$reverbPort}";
 
+        $isProd = app()->environment('production', 'staging');
+
+        // Vite dev server origins — only added in non-prod. Vite picks the
+        // first available port from 5173; we whitelist 5173 + 5174 on both
+        // `localhost` and `127.0.0.1`. IPv6 literals (`[::1]`) are NOT valid
+        // CSP source expressions per spec, so vite.config.ts pins
+        // `server.host: 'localhost'` to keep emitted URLs IPv4-shaped.
+        $viteHttp = 'http://localhost:5173 http://127.0.0.1:5173 http://localhost:5174 http://127.0.0.1:5174';
+        $viteWs = 'ws://localhost:5173 ws://127.0.0.1:5173 ws://localhost:5174 ws://127.0.0.1:5174';
+
         // Wave 1 / M4 — the dynamic-script CSP keyword defeats most XSS
         // protection CSP would otherwise give. React 19's production build
         // does not require it; only the dev runtime (vite/HMR with React
-        // Refresh) does. Gate it behind non-production environments.
-        $scriptSrc = app()->environment('production', 'staging')
+        // Refresh) does. `unsafe-inline` is also dev-only — needed by the
+        // React Refresh preamble inline script emitted by @viteReactRefresh.
+        $scriptSrc = $isProd
             ? "script-src 'self'"
-            : "script-src 'self' 'unsafe-eval'";
+            : "script-src 'self' 'unsafe-eval' 'unsafe-inline' {$viteHttp}";
+
+        $connectExtras = $isProd ? '' : " {$viteHttp} {$viteWs}";
 
         $parts = [
             "default-src 'self'",
             $scriptSrc,
-            "style-src 'self' 'unsafe-inline'",   // Tailwind + Inertia inline styles; pin when feasible
-            "img-src 'self' data: blob:",
-            "font-src 'self' data:",
-            "connect-src 'self' {$appUrl} {$reverbOrigin}",
+            "style-src 'self' 'unsafe-inline' https://fonts.bunny.net",
+            "img-src 'self' data: blob: https://images.unsplash.com",
+            "font-src 'self' data: https://fonts.bunny.net",
+            "connect-src 'self' {$appUrl} {$reverbOrigin}{$connectExtras}",
             "frame-ancestors 'none'",
             "form-action 'self'",
             "base-uri 'self'",

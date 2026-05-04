@@ -34,11 +34,15 @@ class DashboardController extends Controller
         $alertes_qvct = [];
         $audits_recents = [];
 
+        $user = request()->user();
+
         return Inertia::render('dashboard/index', [
             'stats' => $stats,
             'incidents_recents' => $incidents_recents,
             'alertes_qvct' => $alertes_qvct,
             'audits_recents' => $audits_recents,
+            'user_first_name' => $user->first_name ?? '',
+            'structure_name' => $user->structure?->nom ?? '',
         ]);
     }
 }

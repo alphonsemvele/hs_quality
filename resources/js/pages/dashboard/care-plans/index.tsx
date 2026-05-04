@@ -1,3 +1,4 @@
+import { Button, Card, CardBody, CarePlanStatusBadge, EmptyState, PageHeader } from '@/components/ui';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -6,77 +7,98 @@ interface Beneficiary {
     full_name: string;
 }
 
-interface CarePlan {
+interface Plan {
     id: string;
     title: string;
-    status: string;
+    status: 'draft' | 'active' | 'archived';
     status_label: string;
     is_active: boolean;
-    is_archived: boolean;
     start_date: string | null;
     end_date: string | null;
-    tasks_count: number;
+    tasks_count?: number;
+}
+
+function unwrap<T>(value: { data: T } | T): T {
+    if (value && typeof value === 'object' && 'data' in (value as object)) {
+        return (value as { data: T }).data;
+    }
+    return value as T;
 }
 
 interface Props {
-    beneficiary: { data: Beneficiary };
-    plans: { data: CarePlan[] };
+    beneficiary: { data: Beneficiary } | Beneficiary;
+    plans: { data: Plan[] };
 }
 
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-    draft: { bg: '#E2E8F0', color: '#475569' },
-    active: { bg: '#DCFCE7', color: '#15803D' },
-    archived: { bg: '#FEF3C7', color: '#92400E' },
-};
+export default function CarePlansIndex({ beneficiary, plans }: Props) {
+    const b = unwrap<Beneficiary>(beneficiary);
+    const list = plans?.data ?? [];
 
-export default function CarePlansIndex({ beneficiary: { data: b }, plans: { data } }: Props) {
     return (
-        <DashboardLayout
-            title={`Plans d'accompagnement — ${b.full_name}`}
-            subtitle="Historique et plan actif"
-        >
-            <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'center' }}>
-                <Link href={`/beneficiaries/${b.id}`} style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>
-                    ← Retour au bénéficiaire
-                </Link>
-                <span style={{ flex: 1 }} />
-                <Link href={`/beneficiaries/${b.id}/care-plans/create`} style={{
-                    background: 'var(--gold)', color: 'var(--navy)',
-                    fontSize: 13, fontWeight: 700, padding: '9px 18px', borderRadius: 10, textDecoration: 'none',
-                }}>+ Nouveau plan</Link>
-            </div>
+        <DashboardLayout title={`Plans · ${b.full_name}`} subtitle="">
+            <PageHeader
+                title="Plans d'accompagnement"
+                subtitle={`${b.full_name} · ${list.length} plan(s)`}
+                breadcrumb={[
+                    { label: 'Tableau de bord', href: '/dashboard' },
+                    { label: 'Bénéficiaires', href: '/beneficiaries' },
+                    { label: b.full_name, href: `/beneficiaries/${b.id}` },
+                    { label: "Plans d'accompagnement" },
+                ]}
+                actions={
+                    <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
+                        <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
+                    </Link>
+                }
+            />
 
-            {data.length === 0 ? (
-                <div style={{ background: 'white', borderRadius: 14, padding: '40px 20px', textAlign: 'center', color: '#64748B' }}>
-                    Aucun plan d'accompagnement pour le moment.
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gap: 10 }}>
-                    {data.map(plan => {
-                        const s = STATUS_STYLES[plan.status] ?? STATUS_STYLES.draft;
-                        return (
-                            <Link key={plan.id} href={`/care-plans/${plan.id}`} style={{
-                                background: 'white', borderRadius: 12, padding: '14px 18px',
-                                textDecoration: 'none', color: 'inherit',
-                                display: 'flex', alignItems: 'center', gap: 14,
-                            }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--navy)' }}>{plan.title}</div>
-                                    <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>
-                                        Du {plan.start_date ?? '?'} {plan.end_date ? `au ${plan.end_date}` : '— en cours'}
-                                        {' · '}
-                                        {plan.tasks_count} tâche{plan.tasks_count > 1 ? 's' : ''}
+            {list.length > 0 ? (
+                <ul className="space-y-3">
+                    {list.map((plan) => (
+                        <Link key={plan.id} href={`/care-plans/${plan.id}`}>
+                            <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                                <CardBody>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="text-base font-semibold text-ink-900 dark:text-white">{plan.title}</h3>
+                                                <CarePlanStatusBadge statut={plan.status} />
+                                                {plan.tasks_count !== undefined && (
+                                                    <span className="text-xs text-ink-500 dark:text-ink-400">{plan.tasks_count} tâche(s)</span>
+                                                )}
+                                            </div>
+                                            <p className="mt-1 font-mono text-xs text-ink-500 dark:text-ink-400">
+                                                {plan.start_date ?? '?'} → {plan.end_date ?? 'sans terme'}
+                                            </p>
+                                        </div>
+                                        <span className="self-center text-sm font-medium text-brand-600 dark:text-brand-400">Voir →</span>
                                     </div>
-                                </div>
-                                <span style={{
-                                    background: s.bg, color: s.color,
-                                    fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 6,
-                                }}>{plan.status_label}</span>
+                                </CardBody>
+                            </Card>
+                        </Link>
+                    ))}
+                </ul>
+            ) : (
+                <Card>
+                    <EmptyState
+                        title="Aucun plan d'accompagnement"
+                        description={`Créez le premier plan pour ${b.full_name}.`}
+                        action={
+                            <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
+                                <Button>Nouveau plan</Button>
                             </Link>
-                        );
-                    })}
-                </div>
+                        }
+                    />
+                </Card>
             )}
         </DashboardLayout>
+    );
+}
+
+function PlusIcon() {
+    return (
+        <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
     );
 }
