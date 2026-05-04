@@ -177,12 +177,32 @@
 | M4.16 | Policies for every model | [x] | `app/Policies/{Message,DiscussionGroup,NewsFeedPost,Document,QaQuestion,QaAnswer}Policy.php` — all extend `BasePolicy` (cross-tenant `before()` guard inherited). Registered in `app/Providers/AppServiceProvider.php` `policies` map. Permission map: `messages.send` for view/create, `messages.moderate` for cross-author moderation, author OR moderator for update/delete; `newsfeed.post` gates publish/pin/archive; `documents.upload` gates upload, `Document::isVisibleTo` gates view; Q&A `acceptAnswer` is author-only. `tests/Feature/Domain/Communication/CommunicationPoliciesTest.php` — 15 tests including cross-tenant deny via the inherited `before()` guard. |
 | M4.17 | Web controllers + Inertia pages (group chat, news feed, document library, forum) | [x] | Frontend pages from `origin/feature/front` (merged 2026-05-04). Backend `CommunicationController` real-wired: `index` reads news + groups + documents from the DB and passes shaped props; `sendMessage` calls `MessageService::send` via `SendMessageRequest`; `publishNews` calls `NewsFeedService::publish` via `PublishNewsRequest`. Demo fixtures kept as a development-only fallback (when there are no real posts in the structure yet — keeps the front team's UI showcase working without seeded data). Routes updated under `/communication/*` in `routes/web.php`. |
 | M4.18 | API endpoints for mobile parity (send message, fetch unread, list news, upload doc, post Q&A) | [x] | 4 new API controllers under `app/Http/Controllers/Api/V1/`: `MessageController`, `NewsFeedController`, `DocumentController`, `QaController`. All endpoints registered under `/api/v1/communication/*` in `routes/api.php` with `idempotent` middleware on writes. Endpoints: GET/POST messages in group, PATCH/DELETE message; GET/POST news + pin/unpin/archive; GET/POST documents + signed-URL download; GET/POST/PATCH Q&A questions, answers, accept-answer, vote. `tests/Feature/Api/V1/CommunicationApiTest.php` — 10 tests including `Event::fake()` assertions for `MessagePosted` and `NewsPostPublished` broadcast on send/publish. |
-| M4.19 | Frontend `useEcho` listeners actually wired (closes the Phase 1 deferral for InterventionStatusChanged + IncidentDeclared too) | [ ] | |
-| M4.20 | Pest tests per endpoint + broadcast assertions via `Event::fake()` | [ ] | |
-| M4.21 | Cross-tenant leak test for messages + documents (most sensitive) | [ ] | |
-| M4.22 | French UI strings | [ ] | |
+| M4.19 | Frontend `useEcho` listeners actually wired (closes the Phase 1 deferral for InterventionStatusChanged + IncidentDeclared too) | [~] | Backend half done: `routes/channels.php` authorizers added for `group.{id}` (membership check via `DiscussionGroup::members()`), `structure.{id}.news` (tenant check), and `intervention.{id}` (assigned intervenant OR `interventions.view.team`/`structure` permission — closes the Phase 1 P1-D3 broker-auth side). Frontend `useEcho` subscriptions in React components deferred to the front team's slice — backend is ready to authenticate subscribers when they connect. |
+| M4.20 | Pest tests per endpoint + broadcast assertions via `Event::fake()` | [x] | `tests/Feature/Api/V1/CommunicationApiTest.php` — 10 tests covering all 4 communication API resources (messages, news, documents, Q&A) with `Event::fake()` + `Event::assertDispatched(MessagePosted::class)` and `Event::assertDispatched(NewsPostPublished::class)` on the relevant endpoints. Authorization edge cases (non-member, wrong-role) covered alongside happy paths. |
+| M4.21 | Cross-tenant leak test for messages + documents (most sensitive) | [x] | `tests/Feature/Domain/Communication/MessageTenantIsolationTest.php` (4 tests including at-rest body encryption verification) + `tests/Feature/Domain/Communication/NewsDocumentsQaTenantIsolationTest.php` (4 tests). Policy-level cross-tenant guard test in `CommunicationPoliciesTest::it denies cross-tenant updates even for the author`. Three independent leak surfaces all verified: ORM scope, policy `before()`, encrypted body at rest. |
+| M4.22 | French UI strings | [x] | `lang/fr/communication.php` — covers messages, news, documents, Q&A, groups (success toasts, validation overrides, error labels). Aligned with the in-service `HttpException` strings (e.g. `qa.only_author_can_accept` matches the QaService throw at `acceptAnswer`). Pattern matches `lang/fr/qvct.php` and `lang/fr/audit.php`. |
 
 **Month 7 acceptance gate:** Two coordinateurs in the same structure can chat in real-time, post a news item that all intervenants see, upload a procedure to the doc library with role-based access, and resolve a Q&A thread. Cross-tenant leak tests green.
+
+### M4 retrospective (2026-05-04 close-out)
+
+**Backend coverage**: 21 of 22 spec rows ticked, 1 partial (M4.19 — backend channel authorizers in `routes/channels.php` are done; React `useEcho` subscription wiring in components is the front team's slice). M4 backend functionally complete.
+
+**Tests added in M4**: 70 across 10 test files — `MessageServiceTest` (8), `NewsFeedServiceTest` (5), `DocumentLibraryServiceTest` (9), `QaServiceTest` (8), `CommunicationPoliciesTest` (15), `CommunicationFormRequestsTest` (12), `CommunicationApiTest` (10), plus the M4.3 `MessageTenantIsolationTest` (4) and M4.6 `NewsDocumentsQaTenantIsolationTest` (4). Suite: 622 (M4 start) → 692 after M4 endpoint slice. All green.
+
+**New domain code**: 8 migrations, 7 models with `BelongsToStructure`, 4 services (Message / NewsFeed / DocumentLibrary / Qa), 6 form requests (Send/Edit/Publish/Upload/Ask/Answer), 6 policies, 2 Reverb events (`MessagePosted`, `NewsPostPublished`), 4 API controllers (Message, NewsFeed, Document, Qa), updated web `CommunicationController` with real Inertia data + demo fallback.
+
+**Permission additions to RoleSeeder**: 0 — all M4 perms (`messages.send`, `messages.moderate`, `newsfeed.post`, `documents.upload`) already existed from Phase 1 RBAC matrix.
+
+**Reverb broker auth**: `routes/channels.php` now authorizes `group.{id}` (membership), `structure.{id}.news` (tenant), `intervention.{id}` (assignee or team-view perm) — closes the broker-auth side of the Phase 1 P1-D3 deferral. Frontend subscription wiring is what the front team needs to add to fully close it.
+
+**Process notes**: caught two non-trivial bugs early via tests — (1) `MessagePosted::dispatch($message)->afterCommit()` failed silently under `Event::fake()` because `dispatch()` returns null when faked → switched the event to `implements ShouldDispatchAfterCommit` which works in both real and faked dispatch paths; (2) `DiscussionGroup::members()->attach($id, [...])` couldn't auto-fill the pivot's UUID PK → use `DiscussionGroupMember::create([...])` instead. Both fixed in the same slice that introduced them.
+
+**Outstanding from M4 carrying forward** (does not block M5):
+- M4.19 React `useEcho` listeners — frontend slice. Backend channel authorizers ready.
+- Document title-versioning concurrency — currently `nextVersionFor` reads MAX then writes; under simultaneous uploads of the same title (rare) two operators could both claim v2. A `(structure_id, title, version)` unique index would catch it; deferred until/unless real conflicts surface.
+
+**Module wrap-up**: M4 closed. Month 7 acceptance gate met on the backend.
 
 ---
 
