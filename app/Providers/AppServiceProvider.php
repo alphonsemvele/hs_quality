@@ -7,12 +7,18 @@ use App\Models\AuditRun;
 use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
+use App\Models\DiscussionGroup;
+use App\Models\Document;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
+use App\Models\Message;
+use App\Models\NewsFeedPost;
 use App\Models\Pac;
 use App\Models\PacAction;
 use App\Models\PlannedTask;
+use App\Models\QaAnswer;
+use App\Models\QaQuestion;
 use App\Models\QvctActionPlan;
 use App\Models\QvctActionPlanItem;
 use App\Models\QvctCampaign;
@@ -37,12 +43,18 @@ use App\Policies\AuditRunPolicy;
 use App\Policies\AuditRunResponsePolicy;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
+use App\Policies\DiscussionGroupPolicy;
+use App\Policies\DocumentPolicy;
 use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
+use App\Policies\MessagePolicy;
+use App\Policies\NewsFeedPostPolicy;
 use App\Policies\PacActionPolicy;
 use App\Policies\PacPolicy;
 use App\Policies\PlannedTaskPolicy;
+use App\Policies\QaAnswerPolicy;
+use App\Policies\QaQuestionPolicy;
 use App\Policies\QvctActionPlanItemPolicy;
 use App\Policies\QvctActionPlanPolicy;
 use App\Policies\QvctCampaignPolicy;
@@ -75,12 +87,18 @@ class AppServiceProvider extends ServiceProvider
         AuditRunResponse::class => AuditRunResponsePolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
+        DiscussionGroup::class => DiscussionGroupPolicy::class,
+        Document::class => DocumentPolicy::class,
         Incident::class => IncidentPolicy::class,
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
+        Message::class => MessagePolicy::class,
+        NewsFeedPost::class => NewsFeedPostPolicy::class,
         Pac::class => PacPolicy::class,
         PacAction::class => PacActionPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
+        QaAnswer::class => QaAnswerPolicy::class,
+        QaQuestion::class => QaQuestionPolicy::class,
         QvctQuestionnaire::class => QvctQuestionnairePolicy::class,
         QvctActionPlan::class => QvctActionPlanPolicy::class,
         QvctActionPlanItem::class => QvctActionPlanItemPolicy::class,
