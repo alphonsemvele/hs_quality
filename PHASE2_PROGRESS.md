@@ -235,6 +235,25 @@
 
 **Month 8 acceptance gate:** A responsable formation can map every intervenant's habilitations, schedule training sessions, see who's expiring within 30 days; intervenants can see their own from mobile. Cross-tenant leak tests green.
 
+### M5 retrospective (2026-05-04 close-out)
+
+**Backend coverage**: 19 of 20 spec rows ticked, 1 partial (M5.14 — backend services + API endpoints are wired; Inertia pages are the front team's slice, matching the M4.19 deferral pattern). M5 backend functionally complete.
+
+**Tests added in M5**: 75 across 7 test files — `CompetenciesTenantIsolationTest` (5), `HabilitationServiceTest` (4), `CertificationExpiryAlertJobTest` (20 incl. boundary dataset), `TrainingPlanServiceTest` (11), `CompetenciesPoliciesTest` (11), `CompetenciesFormRequestsTest` (8), `CompetenciesApiTest` (15), plus 1 added to `DashboardStatsServiceTest` for the M5.16 tile. Suite: 692 (M4 close) → 769 after M5 close. All green.
+
+**New domain code**: 5 migrations (habilitations, certifications, training_plans, training_sessions, training_attendances + qa_answer_votes from M4), 5 models with `BelongsToStructure` + Auditable, 2 enums (TrainingPlanStatus, TrainingAttendanceStatus), 2 services (HabilitationService, TrainingPlanService), 1 queued job (CertificationExpiryAlertJob with idempotent windowing), 1 artisan command (CertificationExpirySweepCommand), 5 policies, 6 form requests, 4 API controllers, 1 dashboard tile, 1 cron entry.
+
+**Permission additions to RoleSeeder**: 0 — all M5 perms (`certifications.view.own/.team/.structure`, `certifications.record`, `trainings.plan`, `trainings.record`) already existed from Phase 1 RBAC matrix.
+
+**The non-trivial invariant**: certification expiry alerting. The tests caught two issues early: (1) `travel()` is not a global helper outside the test case context — needed `$this->travel()`; (2) `TrainingAttendanceFactory::forSession` evaluated `User::factory()->create()->id` once instead of per-row, tripping the unique (session, user) constraint on `count(N)` — fixed by switching to a closure-state. Both surfaced through tests, not production. The pure helpers (`windowFor` + `shouldAdvance`) factored out of the persistence layer let the windowing invariant be tested directly via a Pest dataset of 10 boundary inputs (day 91 → null, 90 → T-90, 30 → T-30, 0 → T-7, -1 → expired, etc.) without seeding any rows.
+
+**Outstanding from M5 carrying forward** (does not block commercial readiness):
+- M5.14 Inertia pages — frontend slice. API + service surface ready.
+- Notification fan-out (mail/SMS) on `CertificationExpiryAlertJob` — currently logs to Laravel Log; the windowing + dedup logic is locked, only the channel needs wiring.
+- HabilitationService doesn't currently expose a `renew` route — covered by re-issuing rather than mutating in place; if pilot tenants want renewal-as-update, surface it then.
+
+**Module wrap-up**: M5 closed. Month 8 acceptance gate met on the backend.
+
 ---
 
 ## Commercial readiness (lines 453-455)
