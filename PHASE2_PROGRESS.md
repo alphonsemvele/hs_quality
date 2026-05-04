@@ -219,17 +219,17 @@
 | M5.5 | `training_attendances` table — user × session, status (registered/attended/cancelled) | [ ] | |
 | M5.6 | Migrations + factories + seeders | [ ] | |
 | M5.7 | Models BelongsToStructure + cross-tenant leak tests | [ ] | |
-| M5.8 | `HabilitationService` — record, renew, expire (cron-driven) | [ ] | |
-| M5.9 | `CertificationExpiryAlertJob` — queued daily, fires alerts at T-90, T-30, T-7 days, on expiry | [ ] | |
+| M5.8 | `HabilitationService` — record, renew, expire (cron-driven) | [x] | `app/Services/HabilitationService.php` — `record` (inherits structure from user), `renew` (refuses on soft-deleted), `expire` (soft-delete; recoverable via `withTrashed()->restore()`). `tests/Unit/Services/HabilitationServiceTest.php` — 4 tests covering happy paths + 409 on renew of trashed. |
+| M5.9 | `CertificationExpiryAlertJob` — queued daily, fires alerts at T-90, T-30, T-7 days, on expiry | [x] | `app/Jobs/CertificationExpiryAlertJob.php` — `ShouldQueue`, iterates all certs via `chunkById(500)`. Pure helpers `windowFor(int)` and `shouldAdvance(?string, string)` factor the windowing invariant out of DB land for direct unit testing. Idempotent: each cert advances forward through the ladder T-90 → T-30 → T-7 → expired at most once per window via the `last_alert_window` column updated atomically with `last_alerted_at`. Also refuses backward transitions (clock-skew defense). Notification fan-out is logged for now (TODO marker for the Phase 2 mail/SMS slice). |
 | M5.10 | `TrainingPlanService` — draft, publish, register attendance | [ ] | |
-| M5.11 | Cron in routes/console.php for certification expiry sweep | [ ] | |
+| M5.11 | Cron in routes/console.php for certification expiry sweep | [x] | `routes/console.php` — `Schedule::command('certifications:expiry-sweep')->dailyAt('03:00')->timezone('Europe/Paris')` with `withoutOverlapping`/`onOneServer`. Backed by `app/Console/Commands/CertificationExpirySweepCommand.php` which dispatches the job synchronously (job is itself queued via `ShouldQueue` for the actual work; the command is the cron entry point). 03:00 keeps the daily fan-out off the morning planning window for coordinateurs. |
 | M5.12 | Form Requests for every write endpoint | [ ] | |
 | M5.13 | Policies (intervenant sees own; responsable formation sees structure) | [ ] | |
 | M5.14 | Web controllers + Inertia pages (habilitation matrix, training plan calendar) | [ ] | |
 | M5.15 | API endpoints (mobile: my habilitations, my training schedule) | [ ] | |
 | M5.16 | Dashboard tile: certifications expiring within 30 days | [ ] | |
 | M5.17 | Pest feature tests per endpoint | [ ] | |
-| M5.18 | Pest unit test on the expiry alert windowing logic | [ ] | |
+| M5.18 | Pest unit test on the expiry alert windowing logic | [x] | `tests/Unit/Services/CertificationExpiryAlertJobTest.php` — 20 assertions across boundary inputs (day 91 / 90 / 30 / 7 / 0 / -1), idempotence (`shouldAdvance` returns false for same window), backward-transition refusal (clock skew), end-to-end DB integration (cert with `last_alert_window=null` becomes `T-90` then advances to `T-30` after `$this->travel(31)->days()`). Pure helpers tested via Pest dataset; integration tests verify the persistence side. |
 | M5.19 | Cross-tenant leak test on every model | [ ] | |
 | M5.20 | French UI strings | [ ] | |
 

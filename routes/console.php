@@ -37,3 +37,16 @@ Schedule::command('qvct:indicators:snapshot')
     ->onOneServer()
     ->runInBackground()
     ->name('qvct.indicators.snapshot');
+
+// Phase 2 / M5 — daily certification expiry sweep. Idempotent: each
+// cert advances forward through the windowing ladder (T-90 → T-30 →
+// T-7 → expired) at most once per window, so re-running on the same
+// day fires no extra alerts. 03:00 Europe/Paris keeps the job out of
+// the morning planning window for coordinateurs.
+Schedule::command('certifications:expiry-sweep')
+    ->dailyAt('03:00')
+    ->timezone('Europe/Paris')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->runInBackground()
+    ->name('certifications.expiry-sweep');
