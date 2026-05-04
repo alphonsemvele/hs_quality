@@ -2,9 +2,9 @@ import { cn } from '@/lib/utils';
 import { forwardRef, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
 
 const baseField =
-    'w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors hover:border-ink-300 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400';
+    'w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors hover:border-ink-300 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-100 dark:placeholder:text-ink-500 dark:hover:border-ink-500 dark:focus:border-brand-400 dark:focus:ring-brand-400/20 dark:disabled:bg-ink-900 dark:disabled:text-ink-500';
 
-const errorField = 'border-danger-300 hover:border-danger-400 focus:border-danger-500 focus:ring-danger-500/20';
+const errorField = 'border-danger-300 hover:border-danger-400 focus:border-danger-500 focus:ring-danger-500/20 dark:border-danger-500/60 dark:hover:border-danger-400/70 dark:focus:border-danger-400 dark:focus:ring-danger-400/20';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     invalid?: boolean;
@@ -18,7 +18,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     if (leadingIcon) {
         return (
             <div className={cn('relative', className)}>
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-400">{leadingIcon}</span>
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-400 dark:text-ink-500">{leadingIcon}</span>
                 <input
                     ref={ref}
                     className={cn(baseField, 'h-10 pl-10 pr-3', invalid && errorField)}
@@ -73,7 +73,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 
 export function Label({ children, htmlFor, required }: { children: React.ReactNode; htmlFor?: string; required?: boolean }) {
     return (
-        <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-600">
+        <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-600 dark:text-ink-400">
             {children}
             {required && <span className="ml-1 text-danger-500">*</span>}
         </label>
@@ -83,7 +83,7 @@ export function Label({ children, htmlFor, required }: { children: React.ReactNo
 export function FieldError({ message }: { message?: string }) {
     if (!message) return null;
     return (
-        <p className="mt-1.5 flex items-center gap-1 text-xs text-danger-600">
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-danger-600 dark:text-danger-400">
             <svg className="size-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                 <path
                     fillRule="evenodd"
@@ -97,7 +97,7 @@ export function FieldError({ message }: { message?: string }) {
 }
 
 export function FieldHelp({ children }: { children: React.ReactNode }) {
-    return <p className="mt-1.5 text-xs text-ink-500">{children}</p>;
+    return <p className="mt-1.5 text-xs text-ink-500 dark:text-ink-400">{children}</p>;
 }
 
 export function FormField({

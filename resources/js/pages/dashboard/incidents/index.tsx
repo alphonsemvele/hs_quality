@@ -62,19 +62,19 @@ export default function Incidents({
                 <KpiCard label="Graves / critiques" value={stats.graves} tone="danger" />
             </div>
 
-            <h2 className="mb-3 text-sm font-semibold text-ink-900">{total} incident(s)</h2>
+            <h2 className="mb-3 text-sm font-semibold text-ink-900 dark:text-white">{total} incident(s)</h2>
 
             {incidents.length > 0 ? (
                 <ul className="space-y-3">
                     {incidents.map((inc) => (
                         <Card key={inc.id} className="hover:shadow-md">
                             <div className="flex items-start gap-4 p-5">
-                                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-semibold text-brand-700">
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
                                     {inc.initials || '?'}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-sm font-semibold text-ink-900">{inc.categorie}</span>
+                                        <span className="text-sm font-semibold text-ink-900 dark:text-white">{inc.categorie}</span>
                                         <IncidentGraviteBadge gravite={inc.gravite} />
                                         <IncidentStatusBadge statut={inc.statut} />
                                         {inc.notifie_autorites && (
@@ -83,8 +83,8 @@ export default function Incidents({
                                             </Badge>
                                         )}
                                     </div>
-                                    <p className="mt-1 line-clamp-2 text-sm text-ink-600">{inc.description}</p>
-                                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-ink-500">
+                                    <p className="mt-1 line-clamp-2 text-sm text-ink-600 dark:text-ink-400">{inc.description}</p>
+                                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-ink-500 dark:text-ink-400">
                                         <span>Par {inc.declarant}</span>
                                         <span>{inc.structure}</span>
                                         <span className="font-mono">{inc.date_heure}</span>
@@ -92,7 +92,7 @@ export default function Incidents({
                                 </div>
                                 <Link
                                     href={`/incidents/${inc.id}`}
-                                    className="shrink-0 self-center text-sm font-medium text-brand-600 hover:text-brand-700"
+                                    className="shrink-0 self-center text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                                 >
                                     Traiter →
                                 </Link>

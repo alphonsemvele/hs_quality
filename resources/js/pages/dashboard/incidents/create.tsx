@@ -72,11 +72,11 @@ export default function CreateIncident({ options }: Props) {
                                     <Input id="lieu" name="lieu" placeholder="Domicile du bénéficiaire, salle de bain…" maxLength={255} />
                                 </FormField>
 
-                                <fieldset className="rounded-xl border border-warning-200 bg-warning-50 p-4">
-                                    <legend className="px-2 text-xs font-semibold uppercase tracking-wider text-warning-700">
+                                <fieldset className="rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-700/50 dark:bg-warning-900/20">
+                                    <legend className="px-2 text-xs font-semibold uppercase tracking-wider text-warning-700 dark:text-warning-300">
                                         Conséquences
                                     </legend>
-                                    <p className="mb-3 text-xs text-warning-700">
+                                    <p className="mb-3 text-xs text-warning-700 dark:text-warning-300">
                                         Cocher au moins une de ces cases déclenche une classification grave ou critique automatique.
                                     </p>
                                     <div className="space-y-2">
@@ -130,7 +130,7 @@ export default function CreateIncident({ options }: Props) {
                             <CardFooter>
                                 <Link
                                     href="/incidents"
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-700"
                                 >
                                     Annuler
                                 </Link>
@@ -153,9 +153,9 @@ function Checkbox({ name, label }: { name: string; label: string }) {
                 type="checkbox"
                 name={name}
                 value="1"
-                className="size-4 rounded border-ink-300 text-brand-600 focus:ring-2 focus:ring-brand-500/20"
+                className="size-4 rounded border-ink-300 text-brand-600 focus:ring-2 focus:ring-brand-500/20 dark:border-ink-600 dark:bg-ink-800"
             />
-            <span className="text-sm text-ink-700">{label}</span>
+            <span className="text-sm text-ink-700 dark:text-ink-300">{label}</span>
         </label>
     );
 }

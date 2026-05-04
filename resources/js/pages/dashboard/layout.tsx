@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface User {
     id: number;
@@ -191,7 +192,7 @@ export default function DashboardLayout({
                                 type="button"
                                 onClick={() => setSidebarOpen(true)}
                                 aria-label="Ouvrir le menu"
-                                className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 lg:hidden"
+                                className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 lg:hidden dark:text-ink-400 dark:hover:bg-ink-700"
                             >
                                 <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -307,6 +308,7 @@ function UserMenu({
                                 <UserIcon />
                                 Mon profil
                             </Link>
+                            <ThemeToggle />
                             <div className="my-1.5 h-px bg-ink-100 dark:bg-ink-700" />
                             <button
                                 type="button"

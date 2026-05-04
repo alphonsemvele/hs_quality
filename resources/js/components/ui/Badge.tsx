@@ -12,12 +12,12 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const TONE: Record<Tone, { bg: string; text: string; ring: string; dot: string }> = {
-    neutral: { bg: 'bg-ink-100', text: 'text-ink-700', ring: 'ring-ink-200', dot: 'bg-ink-400' },
-    brand: { bg: 'bg-brand-50', text: 'text-brand-700', ring: 'ring-brand-100', dot: 'bg-brand-500' },
-    sage: { bg: 'bg-sage-50', text: 'text-sage-700', ring: 'ring-sage-200', dot: 'bg-sage-500' },
-    warning: { bg: 'bg-warning-50', text: 'text-warning-700', ring: 'ring-warning-200', dot: 'bg-warning-500' },
-    danger: { bg: 'bg-danger-50', text: 'text-danger-700', ring: 'ring-danger-200', dot: 'bg-danger-500' },
-    info: { bg: 'bg-brand-50', text: 'text-brand-700', ring: 'ring-brand-100', dot: 'bg-brand-500' },
+    neutral: { bg: 'bg-ink-100 dark:bg-ink-700', text: 'text-ink-700 dark:text-ink-300', ring: 'ring-ink-200 dark:ring-ink-600', dot: 'bg-ink-400 dark:bg-ink-500' },
+    brand: { bg: 'bg-brand-50 dark:bg-brand-900/30', text: 'text-brand-700 dark:text-brand-300', ring: 'ring-brand-100 dark:ring-brand-800/50', dot: 'bg-brand-500 dark:bg-brand-400' },
+    sage: { bg: 'bg-sage-50 dark:bg-sage-900/30', text: 'text-sage-700 dark:text-sage-300', ring: 'ring-sage-200 dark:ring-sage-800/50', dot: 'bg-sage-500 dark:bg-sage-400' },
+    warning: { bg: 'bg-warning-50 dark:bg-warning-900/30', text: 'text-warning-700 dark:text-warning-300', ring: 'ring-warning-200 dark:ring-warning-700/50', dot: 'bg-warning-500 dark:bg-warning-400' },
+    danger: { bg: 'bg-danger-50 dark:bg-danger-900/30', text: 'text-danger-700 dark:text-danger-300', ring: 'ring-danger-200 dark:ring-danger-700/50', dot: 'bg-danger-500 dark:bg-danger-400' },
+    info: { bg: 'bg-brand-50 dark:bg-brand-900/30', text: 'text-brand-700 dark:text-brand-300', ring: 'ring-brand-100 dark:ring-brand-800/50', dot: 'bg-brand-500 dark:bg-brand-400' },
 };
 
 const SIZE: Record<Size, string> = {

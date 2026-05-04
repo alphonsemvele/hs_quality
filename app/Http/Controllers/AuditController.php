@@ -4,29 +4,64 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
  * Phase 2 Module M6 — HAS / AFNOR / ISO 9001 audit grids and conformity scoring.
  *
- * Currently a placeholder. Previously returned hardcoded sample data
- * including named individuals — that constituted an RGPD breach for any
- * authenticated user (Wave 1 / C1 in the security sweep). Until the
- * domain ships in Phase 2 Month 6, this controller renders a "coming soon"
- * page so the sidebar entry remains discoverable without leaking data.
+ * Frontend pages are shipped; backend domain (models, services, policies)
+ * is not yet implemented. Controllers pass empty/default data so the UI
+ * renders with proper empty states and is ready to wire up.
  */
 class AuditController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('dashboard/coming-soon', [
-            'feature' => 'M6 Audits & Conformité',
-            'feature_label' => 'Audits & Conformité',
-            'description' => 'Préparation aux évaluations HAS, audits AFNOR NF X50-056 et ISO 9001, '
-                .'grilles personnalisables, scoring automatique et génération du PAC à partir des écarts.',
-            'eta' => 'Phase 2 — Mois 6 (T3 2026)',
-            'tier_required' => 'pro',
+        return Inertia::render('dashboard/audits/index', [
+            'audits' => [],
+            'stats' => [
+                'total' => 0,
+                'en_cours' => 0,
+                'termines' => 0,
+                'score_moyen' => null,
+            ],
         ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('dashboard/audits/create', [
+            'referentiels' => [
+                ['value' => 'has', 'label' => 'HAS — Évaluation externe'],
+                ['value' => 'afnor', 'label' => 'AFNOR NF X50-056'],
+                ['value' => 'iso9001', 'label' => 'ISO 9001:2015'],
+                ['value' => 'interne', 'label' => 'Audit interne personnalisé'],
+            ],
+        ]);
+    }
+
+    public function store(): RedirectResponse
+    {
+        // Phase 2 stub — will call AuditService::create()
+        return back()->with('info', 'Module Audits en cours de développement.');
+    }
+
+    public function show(string $id): Response
+    {
+        return Inertia::render('dashboard/audits/show', [
+            'audit' => null,
+        ]);
+    }
+
+    public function update(string $id): RedirectResponse
+    {
+        return back()->with('info', 'Module Audits en cours de développement.');
+    }
+
+    public function finaliser(string $id): RedirectResponse
+    {
+        return back()->with('info', 'Module Audits en cours de développement.');
     }
 }

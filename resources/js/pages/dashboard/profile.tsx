@@ -46,8 +46,8 @@ export default function Profile() {
                                 {initials}
                             </div>
                             <div className="min-w-0">
-                                <h2 className="truncate font-serif text-xl font-medium text-ink-900">{user?.name ?? '—'}</h2>
-                                <p className="truncate font-mono text-sm text-ink-500">{user?.email ?? '—'}</p>
+                                <h2 className="truncate font-serif text-xl font-medium text-ink-900 dark:text-white">{user?.name ?? '—'}</h2>
+                                <p className="truncate font-mono text-sm text-ink-500 dark:text-ink-400">{user?.email ?? '—'}</p>
                                 {user?.role && (
                                     <Badge tone="brand" size="sm" className="mt-2">
                                         {user.role}
@@ -56,7 +56,7 @@ export default function Profile() {
                             </div>
                         </div>
 
-                        <p className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 text-sm text-ink-600">
+                        <p className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 text-sm text-ink-600 dark:border-ink-700/60 dark:bg-ink-900/40 dark:text-ink-400">
                             Pour modifier votre nom, votre email ou votre rôle, contactez l'administrateur de votre structure.
                             La gestion des comptes est centralisée pour préserver l'intégrité des audits.
                         </p>
@@ -104,7 +104,7 @@ export default function Profile() {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-3">
-            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
             <dd>{value}</dd>
         </div>
     );

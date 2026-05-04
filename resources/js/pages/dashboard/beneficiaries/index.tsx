@@ -53,10 +53,10 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                                 <Tr key={b.id}>
                                     <Td>
                                         <div className="flex items-center gap-3">
-                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sage-50 text-xs font-semibold text-sage-700">
+                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sage-50 text-xs font-semibold text-sage-700 dark:bg-sage-900/30 dark:text-sage-300">
                                                 {b.initials || '?'}
                                             </div>
-                                            <span className="font-medium text-ink-900">{b.full_name}</span>
+                                            <span className="font-medium text-ink-900 dark:text-white">{b.full_name}</span>
                                             {b.is_erased && (
                                                 <Badge tone="warning" size="xs">
                                                     Anonymisé
@@ -65,7 +65,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                                         </div>
                                     </Td>
                                     <Td className="font-mono">{b.age ?? '—'}</Td>
-                                    <Td>{b.gir ? <GirBadge gir={b.gir} /> : <span className="text-ink-400">—</span>}</Td>
+                                    <Td>{b.gir ? <GirBadge gir={b.gir} /> : <span className="text-ink-400 dark:text-ink-500">—</span>}</Td>
                                     <Td>{b.city ?? '—'}</Td>
                                     <Td>
                                         <Badge tone={b.status === 'active' ? 'sage' : 'neutral'} size="sm" dot={b.status === 'active'}>
@@ -75,7 +75,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                                     <Td className="text-right">
                                         <Link
                                             href={`/beneficiaries/${b.id}`}
-                                            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                                         >
                                             Détail →
                                         </Link>

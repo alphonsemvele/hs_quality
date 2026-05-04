@@ -61,17 +61,17 @@ export default function CarePlansIndex({ beneficiary, plans }: Props) {
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="text-base font-semibold text-ink-900">{plan.title}</h3>
+                                                <h3 className="text-base font-semibold text-ink-900 dark:text-white">{plan.title}</h3>
                                                 <CarePlanStatusBadge statut={plan.status} />
                                                 {plan.tasks_count !== undefined && (
-                                                    <span className="text-xs text-ink-500">{plan.tasks_count} tâche(s)</span>
+                                                    <span className="text-xs text-ink-500 dark:text-ink-400">{plan.tasks_count} tâche(s)</span>
                                                 )}
                                             </div>
-                                            <p className="mt-1 font-mono text-xs text-ink-500">
+                                            <p className="mt-1 font-mono text-xs text-ink-500 dark:text-ink-400">
                                                 {plan.start_date ?? '?'} → {plan.end_date ?? 'sans terme'}
                                             </p>
                                         </div>
-                                        <span className="self-center text-sm font-medium text-brand-600">Voir →</span>
+                                        <span className="self-center text-sm font-medium text-brand-600 dark:text-brand-400">Voir →</span>
                                     </div>
                                 </CardBody>
                             </Card>

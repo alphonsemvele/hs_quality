@@ -60,9 +60,19 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
     const isInProgress = intervention.statut === 'en_cours';
 
     const checkIn = () => router.post(`/interventions/${intervention.id}/checkin`);
+    const checkOut = () => {
+        if (confirm('Clôturer cette intervention ?')) {
+            router.post(`/interventions/${intervention.id}/checkout`);
+        }
+    };
     const cancel = () => {
         if (confirm("Confirmer l'annulation de cette intervention ?")) {
             router.post(`/interventions/${intervention.id}/cancel`);
+        }
+    };
+    const deletePhoto = (photoId: number) => {
+        if (confirm('Supprimer cette photo ?')) {
+            router.delete(`/interventions/${intervention.id}/photos/${photoId}`);
         }
     };
 
@@ -91,9 +101,12 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                             </>
                         )}
                         {isInProgress && (
-                            <Badge tone="warning" dot>
-                                En cours sur le terrain
-                            </Badge>
+                            <>
+                                <Badge tone="warning" dot>
+                                    En cours sur le terrain
+                                </Badge>
+                                <Button onClick={checkOut}>Clôturer (check-out)</Button>
+                            </>
                         )}
                     </>
                 }
@@ -120,9 +133,9 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                         </div>
 
                         {intervention.cancellation_reason && (
-                            <div className="mt-6 rounded-xl border border-danger-200 bg-danger-50 p-4">
-                                <p className="text-xs font-semibold uppercase tracking-wider text-danger-700">Motif d'annulation</p>
-                                <p className="mt-1 text-sm text-danger-700">{intervention.cancellation_reason}</p>
+                            <div className="mt-6 rounded-xl border border-danger-200 bg-danger-50 p-4 dark:border-danger-700/50 dark:bg-danger-900/20">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-danger-700 dark:text-danger-300">Motif d'annulation</p>
+                                <p className="mt-1 text-sm text-danger-700 dark:text-danger-300">{intervention.cancellation_reason}</p>
                             </div>
                         )}
                     </CardBody>
@@ -132,9 +145,9 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                     <CardHeader title="Compte-rendu" />
                     <CardBody>
                         {intervention.report_text ? (
-                            <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700">{intervention.report_text}</p>
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-ink-300">{intervention.report_text}</p>
                         ) : (
-                            <p className="text-sm italic text-ink-500">Aucun compte-rendu encore renseigné.</p>
+                            <p className="text-sm italic text-ink-500 dark:text-ink-400">Aucun compte-rendu encore renseigné.</p>
                         )}
                     </CardBody>
                 </Card>
@@ -143,19 +156,19 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                     <CardHeader title="Tâches réalisées" subtitle={`${intervention.completed_tasks.length} tâche(s)`} />
                     <CardBody>
                         {intervention.completed_tasks.length > 0 ? (
-                            <ul className="divide-y divide-ink-100">
+                            <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
                                 {intervention.completed_tasks.map((t) => (
                                     <li key={t.id} className="flex items-start gap-3 py-3">
-                                        <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-sage-50 text-sage-600">
+                                        <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-sage-50 text-sage-600 dark:bg-sage-900/30 dark:text-sage-400">
                                             <svg className="size-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                             </svg>
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-medium text-ink-900">{t.planned_task_description ?? 'Tâche'}</p>
-                                            {t.notes && <p className="mt-0.5 text-xs text-ink-500">{t.notes}</p>}
+                                            <p className="text-sm font-medium text-ink-900 dark:text-white">{t.planned_task_description ?? 'Tâche'}</p>
+                                            {t.notes && <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">{t.notes}</p>}
                                             {t.completed_at && (
-                                                <p className="mt-0.5 font-mono text-[11px] text-ink-400">{t.completed_at}</p>
+                                                <p className="mt-0.5 font-mono text-[11px] text-ink-400 dark:text-ink-500">{t.completed_at}</p>
                                             )}
                                         </div>
                                     </li>
@@ -173,33 +186,52 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                         subtitle={`${intervention.photos.length} photo(s) · ${intervention.signatures.length} signature(s)`}
                     />
                     <CardBody>
-                        {intervention.photos.length === 0 && intervention.signatures.length === 0 ? (
-                            <p className="text-sm italic text-ink-500">Aucun média ni signature.</p>
+                        {/* Photo upload form */}
+                        {isInProgress && (
+                            <form
+                                action={`/interventions/${intervention.id}/photos`}
+                                method="post"
+                                encType="multipart/form-data"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.currentTarget);
+                                    router.post(`/interventions/${intervention.id}/photos`, Object.fromEntries(formData));
+                                }}
+                                className="mb-4 flex items-center gap-3 rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4 dark:border-ink-600 dark:bg-ink-800/50"
+                            >
+                                <input type="file" name="photo" accept="image/*" required className="flex-1 text-sm text-ink-600 dark:text-ink-400 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-brand-700 dark:file:bg-brand-900/30 dark:file:text-brand-300" />
+                                <Button type="submit" size="sm" variant="secondary">Envoyer</Button>
+                            </form>
+                        )}
+
+                        {intervention.photos.length === 0 && intervention.signatures.length === 0 && !isInProgress ? (
+                            <p className="text-sm italic text-ink-500 dark:text-ink-400">Aucun média ni signature.</p>
                         ) : (
                             <div className="space-y-3">
                                 {intervention.photos.map((p) => (
-                                    <div key={p.id} className="flex items-center gap-3 rounded-lg border border-ink-100 p-3">
-                                        <div className="flex size-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                                    <div key={p.id} className="flex items-center gap-3 rounded-lg border border-ink-100 p-3 dark:border-ink-700/60">
+                                        <div className="flex size-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
                                             <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 7l3-3h12l3 3M21 7v13a1 1 0 01-1 1H4a1 1 0 01-1-1V7m9 4a3 3 0 100 6 3 3 0 000-6z" />
                                             </svg>
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-ink-900">{p.original_name ?? `Photo #${p.id}`}</p>
-                                            {p.taken_at && <p className="font-mono text-[11px] text-ink-400">{p.taken_at}</p>}
+                                            <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{p.original_name ?? `Photo #${p.id}`}</p>
+                                            {p.taken_at && <p className="font-mono text-[11px] text-ink-400 dark:text-ink-500">{p.taken_at}</p>}
                                         </div>
+                                        <button type="button" onClick={() => deletePhoto(p.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">Supprimer</button>
                                     </div>
                                 ))}
                                 {intervention.signatures.map((s) => (
-                                    <div key={s.id} className="flex items-center gap-3 rounded-lg border border-ink-100 p-3">
-                                        <div className="flex size-9 items-center justify-center rounded-lg bg-sage-50 text-sage-600">
+                                    <div key={s.id} className="flex items-center gap-3 rounded-lg border border-ink-100 p-3 dark:border-ink-700/60">
+                                        <div className="flex size-9 items-center justify-center rounded-lg bg-sage-50 text-sage-600 dark:bg-sage-900/30 dark:text-sage-400">
                                             <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M14 7h7v7" />
                                             </svg>
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-medium text-ink-900">Signature {s.signer_type}</p>
-                                            {s.signed_at && <p className="font-mono text-[11px] text-ink-400">{s.signed_at}</p>}
+                                            <p className="truncate text-sm font-medium text-ink-900 dark:text-white">Signature {s.signer_type}</p>
+                                            {s.signed_at && <p className="font-mono text-[11px] text-ink-400 dark:text-ink-500">{s.signed_at}</p>}
                                         </div>
                                     </div>
                                 ))}
@@ -215,9 +247,9 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
 function Field({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
         <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</p>
-            <p className="mt-1 text-sm font-medium text-ink-900">{value}</p>
-            {sub && <p className="mt-0.5 font-mono text-xs text-ink-500">{sub}</p>}
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</p>
+            <p className="mt-1 text-sm font-medium text-ink-900 dark:text-white">{value}</p>
+            {sub && <p className="mt-0.5 font-mono text-xs text-ink-500 dark:text-ink-400">{sub}</p>}
         </div>
     );
 }

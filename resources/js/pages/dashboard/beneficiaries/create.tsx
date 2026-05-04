@@ -107,7 +107,7 @@ export default function BeneficiaryCreate() {
                             <CardFooter>
                                 <Link
                                     href="/beneficiaries"
-                                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100"
+                                    className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-700"
                                 >
                                     Annuler
                                 </Link>

@@ -55,13 +55,13 @@ export default function ShowUser({ user }: { user: UserDetail }) {
             />
 
             {invitationUrl && (
-                <div className="mb-5 rounded-2xl border border-brand-200 bg-brand-50 p-4">
-                    <p className="text-sm font-semibold text-brand-700">Lien d'invitation généré</p>
-                    <p className="mt-1 text-xs text-brand-700">
+                <div className="mb-5 rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
+                    <p className="text-sm font-semibold text-brand-700 dark:text-brand-300">Lien d'invitation généré</p>
+                    <p className="mt-1 text-xs text-brand-700 dark:text-brand-300">
                         Communiquez ce lien à l'utilisateur. Il expirera après usage.
                     </p>
                     <div className="mt-2 flex items-center gap-2">
-                        <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs text-ink-700">
+                        <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs text-ink-700 dark:bg-ink-800 dark:text-ink-300">
                             {invitationUrl}
                         </code>
                         <Button
@@ -154,7 +154,7 @@ export default function ShowUser({ user }: { user: UserDetail }) {
             </div>
 
             <div className="mt-5">
-                <Link href="/users" className="text-sm text-ink-500 hover:text-brand-600">
+                <Link href="/users" className="text-sm text-ink-500 hover:text-brand-600 dark:text-ink-400 dark:hover:text-brand-400">
                     ← Retour à la liste
                 </Link>
             </div>
@@ -165,8 +165,8 @@ export default function ShowUser({ user }: { user: UserDetail }) {
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
     return (
         <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
-            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900' : 'mt-1 text-sm font-medium text-ink-900'}>{value}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
+            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900 dark:text-white' : 'mt-1 text-sm font-medium text-ink-900 dark:text-white'}>{value}</dd>
         </div>
     );
 }
@@ -174,7 +174,7 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-3">
-            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
             <dd>{value}</dd>
         </div>
     );

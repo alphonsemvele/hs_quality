@@ -83,14 +83,14 @@ export default function Interventions({
                                 <Tr key={i.id}>
                                     <Td>
                                         <div className="flex items-center gap-3">
-                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700">
+                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
                                                 {i.initials}
                                             </div>
-                                            <span className="font-medium text-ink-900">{i.intervenant}</span>
+                                            <span className="font-medium text-ink-900 dark:text-white">{i.intervenant}</span>
                                         </div>
                                     </Td>
                                     <Td>{i.beneficiaire}</Td>
-                                    <Td className="font-mono text-xs text-ink-600">{i.date_heure_debut}</Td>
+                                    <Td className="font-mono text-xs text-ink-600 dark:text-ink-400">{i.date_heure_debut}</Td>
                                     <Td className="font-mono text-xs">
                                         {i.duree_minutes ? `${i.duree_minutes} min` : '—'}
                                     </Td>
@@ -100,9 +100,9 @@ export default function Interventions({
                                     <Td>
                                         <div className="flex items-center gap-1.5">
                                             {i.compte_rendu ? (
-                                                <span className="text-sage-600">✓</span>
+                                                <span className="text-sage-600 dark:text-sage-400">✓</span>
                                             ) : (
-                                                <span className="text-ink-300">—</span>
+                                                <span className="text-ink-300 dark:text-ink-600">—</span>
                                             )}
                                             {i.sync_offline && (
                                                 <Badge tone="warning" size="xs">
@@ -114,7 +114,7 @@ export default function Interventions({
                                     <Td className="text-right">
                                         <Link
                                             href={`/interventions/${i.id}`}
-                                            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                                         >
                                             Voir →
                                         </Link>
@@ -145,12 +145,12 @@ function FilterChip({ label, count, active }: { label: string; count: number; ac
             type="button"
             className={
                 active
-                    ? 'inline-flex items-center gap-1.5 rounded-lg bg-ink-900 px-3.5 py-1.5 text-xs font-semibold text-white'
-                    : 'inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-600 hover:border-ink-300'
+                    ? 'inline-flex items-center gap-1.5 rounded-lg bg-ink-900 px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-white dark:text-ink-900'
+                    : 'inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-600 hover:border-ink-300 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-300 dark:hover:border-ink-500'
             }
         >
             {label}
-            <span className={active ? 'text-white/70' : 'text-ink-400'}>({count})</span>
+            <span className={active ? 'text-white/70 dark:text-ink-900/60' : 'text-ink-400 dark:text-ink-500'}>({count})</span>
         </button>
     );
 }

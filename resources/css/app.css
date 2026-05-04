@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -76,6 +78,11 @@
         font-family: var(--font-sans);
         color: var(--color-ink-900);
         background: var(--color-ink-50);
+    }
+
+    .dark body {
+        color: var(--color-ink-100);
+        background: var(--color-ink-900);
     }
 
     .tabular {

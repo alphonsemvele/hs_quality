@@ -4,42 +4,40 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
  * Phase 2 Module M3 — QVCT (Qualité de Vie et Conditions de Travail).
  *
- * Currently a placeholder. Previously returned hardcoded sample data
- * including named individuals with mental-health distress flags — that
- * constituted an RGPD Art 9 special-category data breach for any
- * authenticated user (Wave 1 / C1 in the security sweep).
+ * Frontend pages are shipped; backend domain not yet implemented.
  */
 class QvctController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('dashboard/coming-soon', [
-            'feature' => 'M3 Baromètre QVCT',
-            'feature_label' => 'Baromètre QVCT',
-            'description' => 'Baromètres QVCT anonymes, détection des signaux faibles, '
-                .'cartographie des risques psychosociaux par équipe et alertes individualisées '
-                .'au référent RH.',
-            'eta' => 'Phase 2 — Mois 5 (T2 2026)',
-            'tier_required' => 'pro',
+        return Inertia::render('dashboard/qvct/index', [
+            'campagnes' => [],
+            'stats' => [
+                'score_moyen' => null,
+                'taux_participation' => null,
+                'alertes_actives' => 0,
+                'derniere_campagne' => null,
+            ],
         ]);
     }
 
-    /**
-     * Stub kept so existing routes don't 404; will be redesigned when M3 ships.
-     */
     public function questionnaire(): Response
     {
-        return $this->index();
+        return Inertia::render('dashboard/qvct/questionnaire', [
+            'questions' => [],
+            'campagne' => null,
+        ]);
     }
 
-    public function store(): Response
+    public function store(): RedirectResponse
     {
-        return $this->index();
+        return back()->with('info', 'Module QVCT en cours de développement.');
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,31 +12,30 @@ use Inertia\Response;
  * Phase 2 Module M5 — Compétences & Formation (habilitations, certifications,
  * plans de formation).
  *
- * Currently a placeholder. Previously returned hardcoded sample data
- * including named individuals and certification statuses (Wave 1 / C1).
+ * Frontend pages are shipped; backend domain not yet implemented.
  */
 class FormationController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('dashboard/coming-soon', [
-            'feature' => 'M5 Formations',
-            'feature_label' => 'Formations',
-            'description' => 'Suivi des habilitations et certifications, alertes d\'expiration, '
-                .'plan de formation annuel, micro-learning e-learning et tableau de bord '
-                .'compétences par équipe.',
-            'eta' => 'Phase 2 — Mois 8 (T4 2026)',
-            'tier_required' => 'pro',
+        return Inertia::render('dashboard/formations/index', [
+            'formations' => [],
+            'stats' => [
+                'total' => 0,
+                'a_jour' => 0,
+                'expirant_bientot' => 0,
+                'expirees' => 0,
+            ],
         ]);
     }
 
-    public function store(): Response
+    public function store(): RedirectResponse
     {
-        return $this->index();
+        return back()->with('info', 'Module Formations en cours de développement.');
     }
 
-    public function update(): Response
+    public function update(string $id): RedirectResponse
     {
-        return $this->index();
+        return back()->with('info', 'Module Formations en cours de développement.');
     }
 }

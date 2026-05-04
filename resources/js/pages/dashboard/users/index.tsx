@@ -62,7 +62,7 @@ export default function UsersIndex({ users }: Props) {
                                         <div className="flex items-center gap-3">
                                             <Avatar name={u.name} />
                                             <div>
-                                                <p className="font-medium text-ink-900">{u.name}</p>
+                                                <p className="font-medium text-ink-900 dark:text-white">{u.name}</p>
                                                 {u.pending_invite && (
                                                     <Badge tone="warning" size="xs" className="mt-0.5">
                                                         Invitation en attente
@@ -76,7 +76,7 @@ export default function UsersIndex({ users }: Props) {
                                             {u.type_label || u.type}
                                         </Badge>
                                     </Td>
-                                    <Td className="font-mono text-xs text-ink-500">{u.email}</Td>
+                                    <Td className="font-mono text-xs text-ink-500 dark:text-ink-400">{u.email}</Td>
                                     <Td>
                                         {u.status === 'active' ? (
                                             <Badge tone="sage" size="sm" dot>
@@ -106,7 +106,7 @@ export default function UsersIndex({ users }: Props) {
                                     <Td className="text-right">
                                         <Link
                                             href={`/users/${u.id}`}
-                                            className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
                                         >
                                             Détail →
                                         </Link>

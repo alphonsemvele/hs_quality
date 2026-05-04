@@ -165,19 +165,19 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                     />
                     <CardBody>
                         {showAttach && eligible_intervenants.length > 0 && (
-                            <div className="mb-5 rounded-xl border border-brand-200 bg-brand-50 p-4">
+                            <div className="mb-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
                                 <Form action={`/beneficiaries/${b.id}/assignments`} method="post" resetOnSuccess>
                                     {({ processing }) => (
                                         <div className="flex flex-wrap items-end gap-3">
                                             <div className="min-w-64 flex-1">
-                                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-700">
+                                                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">
                                                     Intervenant à affecter
                                                 </label>
                                                 <select
                                                     name="user_id"
                                                     required
                                                     defaultValue=""
-                                                    className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-ink-900"
+                                                    className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-ink-900 dark:border-brand-700/50 dark:bg-ink-800 dark:text-ink-100"
                                                 >
                                                     <option value="" disabled>
                                                         Sélectionner
@@ -199,10 +199,10 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                         )}
 
                         {assignmentsList.length > 0 ? (
-                            <ul className="divide-y divide-ink-100">
+                            <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
                                 {assignmentsList.map((a) => (
                                     <li key={a.id} className="flex items-center gap-3 py-3">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700">
+                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
                                             {a.intervenant?.full_name
                                                 ? a.intervenant.full_name
                                                       .split(' ')
@@ -213,10 +213,10 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                                                 : '?'}
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-medium text-ink-900">
+                                            <p className="text-sm font-medium text-ink-900 dark:text-white">
                                                 {a.intervenant?.full_name ?? 'Intervenant'}
                                             </p>
-                                            <p className="font-mono text-xs text-ink-500">{a.intervenant?.email}</p>
+                                            <p className="font-mono text-xs text-ink-500 dark:text-ink-400">{a.intervenant?.email}</p>
                                         </div>
                                         {a.is_active ? (
                                             <Badge tone="sage" size="sm" dot>
@@ -251,8 +251,8 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
     return (
         <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
-            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900' : 'mt-1 text-sm font-medium text-ink-900'}>{value}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
+            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900 dark:text-white' : 'mt-1 text-sm font-medium text-ink-900 dark:text-white'}>{value}</dd>
         </div>
     );
 }
@@ -260,8 +260,8 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-3">
-            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
-            <dd className="text-sm font-medium text-ink-900">{value}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
+            <dd className="text-sm font-medium text-ink-900 dark:text-white">{value}</dd>
         </div>
     );
 }

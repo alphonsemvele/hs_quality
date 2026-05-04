@@ -34,8 +34,8 @@ export default function ComingSoon({ feature, feature_label, description, eta, t
                     </div>
 
                     <div className="max-w-2xl">
-                        <h2 className="font-serif text-2xl font-medium text-ink-900 sm:text-3xl">{feature ?? label}</h2>
-                        {description && <p className="mt-3 text-sm leading-relaxed text-ink-600">{description}</p>}
+                        <h2 className="font-serif text-2xl font-medium text-ink-900 sm:text-3xl dark:text-white">{feature ?? label}</h2>
+                        {description && <p className="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-400">{description}</p>}
                     </div>
 
                     <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
@@ -59,9 +59,9 @@ export default function ComingSoon({ feature, feature_label, description, eta, t
 
 function InfoTile({ label, value }: { label: string; value: string }) {
     return (
-        <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</p>
-            <p className="mt-1.5 text-sm font-medium text-ink-900">{value}</p>
+        <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 dark:border-ink-700/60 dark:bg-ink-900/40">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</p>
+            <p className="mt-1.5 text-sm font-medium text-ink-900 dark:text-white">{value}</p>
         </div>
     );
 }
