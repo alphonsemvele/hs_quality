@@ -8,15 +8,18 @@ use App\Enums\StructureType;
 use App\Enums\UserType;
 use App\Models\Structure;
 use App\Models\User;
+use App\Notifications\StructureWelcomeNotification;
 use App\Services\StructureService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\PermissionRegistrar;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
+    Notification::fake();
     $this->seed(RoleSeeder::class);
 });
 
@@ -82,6 +85,18 @@ it('rolls back if Dirigeant creation fails (atomic)', function (): void {
     ))->toThrow(QueryException::class);
 
     expect(Structure::where('code', 'WILL-ROLLBACK')->exists())->toBeFalse();
+});
+
+it('dispatches a welcome notification to the dirigeant after provisioning', function (): void {
+    $result = app(StructureService::class)->provision(
+        structureData: ['code' => 'WELCOME-TEST', 'name' => 'SAAD Bienvenue', 'type' => StructureType::SAAD],
+        dirigeantData: ['first_name' => 'Paul', 'last_name' => 'Moreau', 'email' => 'p.moreau@test.fr'],
+    );
+
+    Notification::assertSentTo(
+        $result['dirigeant'],
+        StructureWelcomeNotification::class,
+    );
 });
 
 it('suspends and reactivates a structure', function (): void {
