@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\Billing\SyncSubscriptionToStructure;
 use App\Models\AuditGrid;
 use App\Models\AuditRun;
 use App\Models\AuditRunResponse;
@@ -82,10 +83,12 @@ use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Cashier\Cashier;
+use Laravel\Cashier\Events\WebhookReceived;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -139,6 +142,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiters();
         $this->registerPolicies();
         $this->registerObservers();
+        $this->registerListeners();
         $this->configureScramble();
         $this->configureCashier();
     }
@@ -182,6 +186,11 @@ class AppServiceProvider extends ServiceProvider
         foreach ($this->policies as $model => $policy) {
             Gate::policy($model, $policy);
         }
+    }
+
+    private function registerListeners(): void
+    {
+        Event::listen(WebhookReceived::class, SyncSubscriptionToStructure::class);
     }
 
     private function registerObservers(): void
