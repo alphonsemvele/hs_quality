@@ -24,7 +24,9 @@ declare(strict_types=1);
 | own Stripe customer/product/price, so the test account stays clean.
 */
 
+use App\Enums\StructureTier;
 use App\Models\Structure;
+use App\Services\BillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Stripe\StripeClient;
 
@@ -84,4 +86,48 @@ it('a second call returns the same Stripe customer (idempotent)', function (): v
     test()->createdCustomerIds = [$first->id];
 
     expect($first->id)->toBe($second->id);
+});
+
+it('subscribes a structure to Pro with a trial, mirrors the tier', function (): void {
+    // Create a Stripe product + price on the fly so this test does not
+    // depend on BILLING_PRICE_PRO env being set in the test account.
+    // CI installations using their own price IDs can skip this single
+    // test by setting BILLING_SKIP_INTEGRATION_PRICE=1.
+    if (! empty(getenv('BILLING_SKIP_INTEGRATION_PRICE'))) {
+        test()->markTestSkipped('BILLING_SKIP_INTEGRATION_PRICE set');
+    }
+
+    $product = test()->stripe->products->create([
+        'name' => 'QualitéDomicile Pro (test)',
+    ]);
+    $price = test()->stripe->prices->create([
+        'product' => $product->id,
+        'currency' => 'eur',
+        'unit_amount' => 1500, // 15 EUR/seat/month
+        'recurring' => ['interval' => 'month'],
+    ]);
+
+    config([
+        'billing.trial_days' => 14,
+        'billing.prices.pro' => $price->id,
+    ]);
+
+    $structure = Structure::factory()->create([
+        'name' => 'Subscribe Test '.uniqid(),
+        'billing_email' => 'billing+sub'.uniqid().'@qualitedomicile.test',
+        'tier' => 'essential',
+    ]);
+
+    $subscription = app(BillingService::class)->subscribe(
+        $structure,
+        StructureTier::Pro,
+        'pm_card_visa', // Stripe testmode token
+    );
+
+    test()->createdCustomerIds = [$structure->fresh()->stripe_id];
+
+    expect($subscription->stripe_status)->toBe('trialing');
+    expect($subscription->stripe_price)->toBe($price->id);
+    expect($subscription->trial_ends_at)->not->toBeNull();
+    expect($structure->fresh()->tier->value)->toBe('pro');
 });

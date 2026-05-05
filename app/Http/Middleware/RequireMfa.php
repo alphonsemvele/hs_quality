@@ -77,7 +77,7 @@ class RequireMfa
             ], 423);
         }
 
-        return Inertia::render('auth/mfa-required', [
+        return Inertia::render('Auth/mfa-required', [
             'role' => $user->type instanceof \BackedEnum ? $user->type->value : (string) $user->type,
         ])->toResponse($request)->setStatusCode(423);
     }

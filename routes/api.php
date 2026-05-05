@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
 use App\Http\Controllers\Api\V1\QvctIndicatorController;
 use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
+use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TrainingAttendanceController;
 use App\Http\Controllers\Api\V1\TrainingPlanController;
@@ -198,6 +199,16 @@ Route::prefix('v1')
             Route::post('competencies/training-sessions/{session}/register', [TrainingAttendanceController::class, 'register']);
             Route::post('competencies/training-attendances/{attendance}/mark-attended', [TrainingAttendanceController::class, 'markAttended']);
             Route::post('competencies/training-attendances/{attendance}/cancel', [TrainingAttendanceController::class, 'cancel']);
+        });
+
+        // Phase 2 / Commercial readiness — subscription endpoints. Tenant
+        // is resolved from the auth context (TenantResolver), not the URL,
+        // so a structure cannot subscribe another structure. Idempotent
+        // middleware on POST so a duplicate click never creates two
+        // Stripe subscriptions.
+        Route::get('billing/subscription', [SubscriptionController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('billing/subscribe', [SubscriptionController::class, 'subscribe']);
         });
 
         // Offline sync — flushes the mobile app's queued operations after a
