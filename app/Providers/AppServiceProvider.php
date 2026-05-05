@@ -85,6 +85,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -139,6 +140,21 @@ class AppServiceProvider extends ServiceProvider
         $this->registerPolicies();
         $this->registerObservers();
         $this->configureScramble();
+        $this->configureCashier();
+    }
+
+    /**
+     * Cashier is configured to use Structure as the billable customer
+     * model — subscriptions belong to the tenant (per-seat pricing),
+     * not to the individual user. The customer-columns + subscriptions
+     * migrations target the `structures` table accordingly.
+     *
+     * Spec: PHASE2_PROGRESS.md C1.
+     */
+    private function configureCashier(): void
+    {
+        Cashier::useCustomerModel(Structure::class);
+        Cashier::calculateTaxes(); // Stripe Tax handles French TVA automatically
     }
 
     /**

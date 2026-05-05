@@ -260,7 +260,7 @@
 
 | # | Spec item | Status | Evidence |
 |---|---|---|---|
-| C1 | Stripe / Laravel Cashier integration — Pro tier subscription | [ ] | |
+| C1 | Stripe / Laravel Cashier integration — Pro tier subscription | [~] | `laravel/cashier ^16.5` installed. `Structure` is now `Billable` with `stripeName()` + `stripeEmail()` accessors; per-tenant subscription model preferred over per-user (per-seat pricing belongs to the structure). Cashier customer columns + subscriptions table migrations targeted at `structures` (not the default `users`); `subscriptions.structure_id` is a UUID FK. `config/billing.php` exposes `trial_days` (default 30, `BILLING_TRIAL_DAYS` env), `default_tier` (essential), and Stripe price IDs per tier. `Cashier::useCustomerModel(Structure::class)` + `Cashier::calculateTaxes()` (French TVA via Stripe Tax) wired in `AppServiceProvider::configureCashier()`. 8 unit tests in `tests/Unit/Billing/StructureBillableTest.php` covering trait wiring + config reads + Cashier columns. 2 real-Stripe-testmode integration tests in `tests/Feature/Billing/StructureSubscriptionIntegrationTest.php` — skipped automatically unless `STRIPE_SECRET=sk_test_xxx` is in env (CI requirement). Subscribe-via-controller + Form Request slice deferred to next pass within Slice 1. |
 | C2 | Billing webhooks idempotent (Stripe retry-safe) | [ ] | |
 | C3 | Pricing model: per-intervenant seat, with QVCT/Audits/Communication/Compétences toggleable | [ ] | |
 | C4 | Onboarding automation — wizard for new structures (provision tenant + seed users + welcome email) | [ ] | |

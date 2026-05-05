@@ -9,11 +9,15 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 
 class Structure extends Model
 {
+    use Billable;
     use HasFactory;
     use HasUuids;
+    use Notifiable;
     use SoftDeletes;
 
     protected $fillable = [
@@ -22,6 +26,7 @@ class Structure extends Model
         'type',
         'address',
         'siret',
+        'billing_email',
         'tier',
         'status',
     ];
@@ -32,6 +37,7 @@ class Structure extends Model
             'type' => StructureType::class,
             'tier' => StructureTier::class,
             'status' => StructureStatus::class,
+            'trial_ends_at' => 'datetime',
         ];
     }
 
@@ -49,5 +55,20 @@ class Structure extends Model
             'beneficiary_portal', 'ai_predictive' => $this->tier === StructureTier::Premium,
             default => true,
         };
+    }
+
+    /**
+     * Cashier customer accessors — Stripe customer name = structure
+     * name; contact email = billing_email (a stable inbox like
+     * facturation@... that's not tied to any individual user account).
+     */
+    public function stripeName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function stripeEmail(): ?string
+    {
+        return $this->billing_email;
     }
 }
