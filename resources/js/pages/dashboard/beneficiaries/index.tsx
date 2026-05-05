@@ -1,4 +1,4 @@
-import { Badge, Button, Card, EmptyState, PageHeader, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -95,6 +95,14 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                         }
                     />
                 )}
+                <div className="px-4 pb-4">
+                    <Pagination
+                        currentPage={meta?.current_page ?? 1}
+                        lastPage={meta?.last_page ?? 1}
+                        total={meta?.total ?? list.length}
+                        perPage={20}
+                    />
+                </div>
             </Card>
         </DashboardLayout>
     );

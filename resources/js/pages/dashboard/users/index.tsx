@@ -1,4 +1,4 @@
-import { Badge, Button, Card, EmptyState, PageHeader, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -126,6 +126,14 @@ export default function UsersIndex({ users }: Props) {
                         }
                     />
                 )}
+                <div className="px-4 pb-4">
+                    <Pagination
+                        currentPage={users?.current_page ?? 1}
+                        lastPage={users?.last_page ?? 1}
+                        total={users?.total ?? list.length}
+                        perPage={25}
+                    />
+                </div>
             </Card>
         </DashboardLayout>
     );

@@ -54,6 +54,9 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
                 ]}
                 actions={
                     <>
+                        <Link href={`/admin/structures/${structure.id}/edit`}>
+                            <Button variant="secondary">Modifier</Button>
+                        </Link>
                         <Button variant={isActive ? 'secondary' : 'primary'} onClick={toggleStatus}>
                             {isActive ? 'Suspendre' : 'Réactiver'}
                         </Button>
@@ -147,8 +150,8 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
     return (
         <div>
-            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
-            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900' : 'mt-1 text-sm font-medium text-ink-900'}>{value}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
+            <dd className={mono ? 'mt-1 font-mono text-sm text-ink-900 dark:text-white' : 'mt-1 text-sm font-medium text-ink-900 dark:text-white'}>{value}</dd>
         </div>
     );
 }
@@ -156,7 +159,7 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-3">
-            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
+            <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
             <dd>{value}</dd>
         </div>
     );

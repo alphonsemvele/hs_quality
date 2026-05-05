@@ -89,6 +89,11 @@ class IncidentController extends Controller
         return Inertia::render('dashboard/incidents/index', [
             'incidents' => $paginator->items(),
             'total' => $paginator->total(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+            ],
             'stats' => $stats,
         ]);
     }

@@ -195,6 +195,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
             Route::post('/', [AdminStructureController::class, 'store'])->name('store');
             Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
+            Route::get('/{structure}/edit', [AdminStructureController::class, 'edit'])->name('edit');
             Route::put('/{structure}', [AdminStructureController::class, 'update'])->name('update');
             Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');
             Route::post('/{structure}/suspend', [AdminStructureController::class, 'suspend'])->name('suspend');

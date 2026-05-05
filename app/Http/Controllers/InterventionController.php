@@ -53,6 +53,18 @@ class InterventionController extends Controller
             $query->where('intervenant_id', $user->id);
         }
 
+        // Optional status filter via query string.
+        $statusFilter = request()->input('status');
+        $statusEnumMap = [
+            'planifiee' => InterventionStatus::Planned->value,
+            'en_cours' => InterventionStatus::InProgress->value,
+            'realisee' => InterventionStatus::Completed->value,
+            'annulee' => InterventionStatus::Cancelled->value,
+        ];
+        if ($statusFilter && isset($statusEnumMap[$statusFilter])) {
+            $query->where('status', $statusEnumMap[$statusFilter]);
+        }
+
         $statutMap = [
             InterventionStatus::Planned->value => 'planifiee',
             InterventionStatus::InProgress->value => 'en_cours',
@@ -95,7 +107,15 @@ class InterventionController extends Controller
         return Inertia::render('dashboard/interventions/index', [
             'interventions' => $paginator->items(),
             'total' => $paginator->total(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+            ],
             'stats' => $stats,
+            'filters' => [
+                'status' => $statusFilter,
+            ],
         ]);
     }
 
