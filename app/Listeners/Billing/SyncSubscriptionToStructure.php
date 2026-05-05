@@ -6,6 +6,7 @@ namespace App\Listeners\Billing;
 
 use App\Enums\StructureTier;
 use App\Models\Structure;
+use App\Services\CrmService;
 use Laravel\Cashier\Events\WebhookReceived;
 
 /**
@@ -19,6 +20,8 @@ use Laravel\Cashier\Events\WebhookReceived;
  */
 class SyncSubscriptionToStructure
 {
+    public function __construct(private readonly CrmService $crm) {}
+
     public function handle(WebhookReceived $event): void
     {
         $type = $event->payload['type'] ?? '';
@@ -48,6 +51,8 @@ class SyncSubscriptionToStructure
         Structure::query()
             ->where('id', $structure->id)
             ->update(['tier' => $tier->value]);
+
+        $this->crm->recordUpgrade($structure->fresh(), $tier);
     }
 
     private function onDeleted(array $subscription): void
@@ -60,6 +65,8 @@ class SyncSubscriptionToStructure
         Structure::query()
             ->where('id', $structure->id)
             ->update(['tier' => StructureTier::Essential->value]);
+
+        $this->crm->recordCancellation($structure);
     }
 
     private function structureForCustomer(?string $stripeCustomerId): ?Structure

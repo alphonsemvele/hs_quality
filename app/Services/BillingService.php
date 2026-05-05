@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\StructureTier;
+use App\Enums\UserType;
 use App\Models\Structure;
+use App\Models\User;
+use App\Notifications\SubscriptionCancelledNotification;
 use Laravel\Cashier\Subscription;
 use Laravel\Cashier\SubscriptionBuilder;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -70,6 +73,37 @@ class BillingService
         }
 
         return $price;
+    }
+
+    /**
+     * Cancel the structure's active subscription at period end (graceful).
+     * Dispatches a 30-day data retention notice to the dirigeant (GDPR /
+     * données de santé compliance obligation). Returns the cancelled
+     * Cashier Subscription so the controller can serialise the ends_at date.
+     *
+     * Throws 422 if there is no active subscription to cancel.
+     */
+    public function cancel(Structure $structure): Subscription
+    {
+        $subscription = $structure->subscription(self::SUBSCRIPTION_TYPE);
+
+        if ($subscription === null || $subscription->canceled()) {
+            throw new HttpException(422, 'No active subscription to cancel.');
+        }
+
+        $subscription->cancel();
+
+        $dirigeant = User::query()
+            ->where('structure_id', $structure->id)
+            ->where('type', UserType::Dirigeant->value)
+            ->first();
+
+        if ($dirigeant !== null) {
+            $endsAt = $subscription->fresh()->ends_at ?? now()->addDays(30);
+            $dirigeant->notify(new SubscriptionCancelledNotification($structure, $endsAt));
+        }
+
+        return $subscription->fresh();
     }
 
     /**

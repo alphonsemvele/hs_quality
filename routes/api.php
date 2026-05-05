@@ -209,6 +209,7 @@ Route::prefix('v1')
         Route::get('billing/subscription', [SubscriptionController::class, 'show']);
         Route::middleware('idempotent')->group(function (): void {
             Route::post('billing/subscribe', [SubscriptionController::class, 'subscribe']);
+            Route::post('billing/cancel', [SubscriptionController::class, 'cancel']);
         });
 
         // Offline sync — flushes the mobile app's queued operations after a

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\StructureTier;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Billing\CancelSubscriptionRequest;
 use App\Http\Requests\Billing\SubscribeStructureRequest;
 use App\Services\BillingService;
 use Illuminate\Http\JsonResponse;
@@ -48,6 +49,18 @@ class SubscriptionController extends Controller
                 'tier' => $structure->fresh()->tier->value,
             ],
         ], 201);
+    }
+
+    public function cancel(CancelSubscriptionRequest $request): JsonResponse
+    {
+        $structure = currentStructure();
+
+        $subscription = $this->billing->cancel($structure);
+
+        return response()->json([
+            'cancelled' => true,
+            'ends_at' => $subscription->ends_at?->toIso8601String(),
+        ]);
     }
 
     public function show(): JsonResponse

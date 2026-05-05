@@ -131,3 +131,37 @@ it('subscribes a structure to Pro with a trial, mirrors the tier', function (): 
     expect($subscription->trial_ends_at)->not->toBeNull();
     expect($structure->fresh()->tier->value)->toBe('pro');
 });
+
+it('cancel() ends the subscription gracefully and sets ends_at (C7)', function (): void {
+    if (! empty(getenv('BILLING_SKIP_INTEGRATION_PRICE'))) {
+        test()->markTestSkipped('BILLING_SKIP_INTEGRATION_PRICE set');
+    }
+
+    $product = test()->stripe->products->create(['name' => 'QD Pro cancel test']);
+    $price = test()->stripe->prices->create([
+        'product' => $product->id,
+        'currency' => 'eur',
+        'unit_amount' => 1500,
+        'recurring' => ['interval' => 'month'],
+    ]);
+
+    config([
+        'billing.trial_days' => 14,
+        'billing.prices.pro' => $price->id,
+    ]);
+
+    $structure = Structure::factory()->create([
+        'name' => 'Cancel Test '.uniqid(),
+        'billing_email' => 'billing+cancel'.uniqid().'@qualitedomicile.test',
+        'tier' => 'essential',
+    ]);
+
+    app(BillingService::class)->subscribe($structure, StructureTier::Pro, 'pm_card_visa');
+    test()->createdCustomerIds = [$structure->fresh()->stripe_id];
+
+    $cancelled = app(BillingService::class)->cancel($structure);
+
+    expect($cancelled->ends_at)->not->toBeNull();
+    expect($cancelled->onGracePeriod())->toBeTrue();
+    expect($cancelled->canceled())->toBeTrue();
+});
