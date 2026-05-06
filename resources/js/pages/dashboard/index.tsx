@@ -7,6 +7,7 @@ import {
     IncidentStatusBadge,
     KpiCard,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from './layout';
 
@@ -92,6 +93,28 @@ export default function Dashboard({
         (i) => i.gravite === 'grave' || i.gravite === 'critique',
     );
 
+    const canDeclareIncident = useCan('incidents.create');
+    const canViewIncidents = useCan('incidents.view');
+    const canViewInterventions = useCan('interventions.view');
+    const canCreateIntervention = useCan('interventions.create');
+    const canManageUsers = useCan('users.manage');
+    const canViewQvct = useCan('qvct.view');
+    const canManageAudits = useCan('audits.manage');
+
+    const quickActions: Array<{
+        href: string;
+        icon: React.ReactNode;
+        label: string;
+        tone: 'brand' | 'sage' | 'warning' | 'danger';
+        visible: boolean;
+    }> = [
+        { href: '/interventions/create', icon: <ClipboardIcon />, label: 'Planifier une intervention', tone: 'brand', visible: canCreateIntervention },
+        { href: '/audits/create', icon: <BadgeIcon />, label: 'Lancer un audit', tone: 'sage', visible: canManageAudits },
+        { href: '/qvct/questionnaire', icon: <HeartIcon />, label: 'Questionnaire QVCT', tone: 'warning', visible: canViewQvct },
+    ];
+    const visibleQuickActions = quickActions.filter((a) => a.visible);
+    const showQuickActionsCard = canDeclareIncident || visibleQuickActions.length > 0;
+
     return (
         <DashboardLayout title="Tableau de bord" subtitle="Pilotage qualité & QVCT">
             {/* ──── Welcome header ──── */}
@@ -111,17 +134,19 @@ export default function Dashboard({
                         )}
                     </p>
                 </div>
-                <Link
-                    href="/incidents/create"
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-danger-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.98] md:hidden"
-                >
-                    <PlusIcon />
-                    Déclarer un incident
-                </Link>
+                {canDeclareIncident && (
+                    <Link
+                        href="/incidents/create"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-danger-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.98] md:hidden"
+                    >
+                        <PlusIcon />
+                        Déclarer un incident
+                    </Link>
+                )}
             </div>
 
             {/* ──── Critical alert banner ──── */}
-            {incidentsGraves.length > 0 && (
+            {incidentsGraves.length > 0 && canViewIncidents && (
                 <div
                     className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-danger-200 bg-gradient-to-r from-danger-50 to-danger-50/60 p-4 dark:border-danger-700/50 dark:from-danger-900/30 dark:to-danger-900/10"
                     role="alert"
@@ -152,43 +177,53 @@ export default function Dashboard({
             )}
 
             {/* ──── KPIs – Hero row (counts) ──── */}
-            <SectionLabel>Activité du mois</SectionLabel>
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <HeroKpi
-                    label="Interventions"
-                    value={s.interventions_ce_mois > 0 ? s.interventions_ce_mois.toLocaleString('fr-FR') : '0'}
-                    badge={`${s.interventions_en_cours || 0} en cours`}
-                    icon={<ClipboardIcon />}
-                    tone="brand"
-                    href="/interventions"
-                />
-                <HeroKpi
-                    label="Incidents déclarés"
-                    value={s.incidents_declares ?? 0}
-                    badge={
-                        s.incidents_en_cours > 0
-                            ? `${s.incidents_en_cours} non clôturé${s.incidents_en_cours > 1 ? 's' : ''}`
-                            : 'Tous clôturés'
-                    }
-                    badgeTone={s.incidents_en_cours > 0 ? 'danger' : 'sage'}
-                    icon={<AlertIcon />}
-                    tone="danger"
-                    href="/incidents"
-                />
-                <HeroKpi
-                    label="Intervenants actifs"
-                    value={s.intervenants_actifs ?? 0}
-                    badge={
-                        s.formations_expirant_bientot > 0
-                            ? `${s.formations_expirant_bientot} formation${s.formations_expirant_bientot > 1 ? 's' : ''} expire${s.formations_expirant_bientot > 1 ? 'nt' : ''}`
-                            : 'Formations à jour'
-                    }
-                    badgeTone={s.formations_expirant_bientot > 0 ? 'warning' : 'sage'}
-                    icon={<UsersIcon />}
-                    tone="neutral"
-                    href="/users"
-                />
-            </div>
+            {(canViewInterventions || canViewIncidents || canManageUsers) && (
+                <>
+                    <SectionLabel>Activité du mois</SectionLabel>
+                    <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        {canViewInterventions && (
+                            <HeroKpi
+                                label="Interventions"
+                                value={s.interventions_ce_mois > 0 ? s.interventions_ce_mois.toLocaleString('fr-FR') : '0'}
+                                badge={`${s.interventions_en_cours || 0} en cours`}
+                                icon={<ClipboardIcon />}
+                                tone="brand"
+                                href="/interventions"
+                            />
+                        )}
+                        {canViewIncidents && (
+                            <HeroKpi
+                                label="Incidents déclarés"
+                                value={s.incidents_declares ?? 0}
+                                badge={
+                                    s.incidents_en_cours > 0
+                                        ? `${s.incidents_en_cours} non clôturé${s.incidents_en_cours > 1 ? 's' : ''}`
+                                        : 'Tous clôturés'
+                                }
+                                badgeTone={s.incidents_en_cours > 0 ? 'danger' : 'sage'}
+                                icon={<AlertIcon />}
+                                tone="danger"
+                                href="/incidents"
+                            />
+                        )}
+                        {canManageUsers && (
+                            <HeroKpi
+                                label="Intervenants actifs"
+                                value={s.intervenants_actifs ?? 0}
+                                badge={
+                                    s.formations_expirant_bientot > 0
+                                        ? `${s.formations_expirant_bientot} formation${s.formations_expirant_bientot > 1 ? 's' : ''} expire${s.formations_expirant_bientot > 1 ? 'nt' : ''}`
+                                        : 'Formations à jour'
+                                }
+                                badgeTone={s.formations_expirant_bientot > 0 ? 'warning' : 'sage'}
+                                icon={<UsersIcon />}
+                                tone="neutral"
+                                href="/users"
+                            />
+                        )}
+                    </div>
+                </>
+            )}
 
             {/* ──── KPIs – Metric row (percentages & scores) ──── */}
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -221,6 +256,7 @@ export default function Dashboard({
             {/* ──── Body: incidents + right column ──── */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Recent incidents — 2/3 width */}
+                {canViewIncidents && (
                 <Card className="lg:col-span-2">
                     <CardHeader
                         title="Incidents récents"
@@ -277,21 +313,25 @@ export default function Dashboard({
                                 <p className="mt-1 max-w-xs text-xs text-ink-500 dark:text-ink-400">
                                     Bonne nouvelle ! Les incidents récents apparaîtront ici dès qu'ils seront déclarés.
                                 </p>
-                                <Link
-                                    href="/incidents/create"
-                                    className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-700 transition-colors hover:bg-ink-50 dark:border-ink-600 dark:bg-ink-700 dark:text-ink-200 dark:hover:bg-ink-600"
-                                >
-                                    <PlusIcon />
-                                    Déclarer un incident
-                                </Link>
+                                {canDeclareIncident && (
+                                    <Link
+                                        href="/incidents/create"
+                                        className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3 py-1.5 text-xs font-medium text-ink-700 transition-colors hover:bg-ink-50 dark:border-ink-600 dark:bg-ink-700 dark:text-ink-200 dark:hover:bg-ink-600"
+                                    >
+                                        <PlusIcon />
+                                        Déclarer un incident
+                                    </Link>
+                                )}
                             </div>
                         </CardBody>
                     )}
                 </Card>
+                )}
 
                 {/* Right column */}
                 <div className="flex flex-col gap-6">
                     {/* QVCT Alerts */}
+                    {canViewQvct && (
                     <Card>
                         <CardHeader
                             title="Alertes QVCT"
@@ -344,54 +384,51 @@ export default function Dashboard({
                             </CardBody>
                         )}
                     </Card>
+                    )}
 
                     {/* Quick actions */}
+                    {showQuickActionsCard && (
                     <Card>
                         <CardHeader title="Actions rapides" subtitle="Raccourcis fréquents" />
                         <div className="p-3">
                             {/* Primary CTA */}
-                            <Link
-                                href="/incidents/create"
-                                className="group flex cursor-pointer items-center gap-3 rounded-xl bg-danger-50 px-4 py-3 transition-all duration-150 hover:bg-danger-100 active:scale-[0.98] dark:bg-danger-900/20 dark:hover:bg-danger-900/30"
-                            >
-                                <span className="flex size-10 items-center justify-center rounded-xl bg-danger-500 text-white shadow-sm transition-transform duration-150 group-hover:scale-105">
-                                    <AlertIcon />
-                                </span>
-                                <div className="flex-1">
-                                    <span className="text-sm font-semibold text-danger-700 dark:text-danger-200">
-                                        Déclarer un incident
+                            {canDeclareIncident && (
+                                <Link
+                                    href="/incidents/create"
+                                    className="group flex cursor-pointer items-center gap-3 rounded-xl bg-danger-50 px-4 py-3 transition-all duration-150 hover:bg-danger-100 active:scale-[0.98] dark:bg-danger-900/20 dark:hover:bg-danger-900/30"
+                                >
+                                    <span className="flex size-10 items-center justify-center rounded-xl bg-danger-500 text-white shadow-sm transition-transform duration-150 group-hover:scale-105">
+                                        <AlertIcon />
                                     </span>
-                                    <p className="text-xs text-danger-600/70 dark:text-danger-300/60">
-                                        Événement indésirable ou grave
-                                    </p>
-                                </div>
-                                <ChevronRightIcon className="text-danger-400 transition-transform duration-150 group-hover:translate-x-0.5 dark:text-danger-500" />
-                            </Link>
+                                    <div className="flex-1">
+                                        <span className="text-sm font-semibold text-danger-700 dark:text-danger-200">
+                                            Déclarer un incident
+                                        </span>
+                                        <p className="text-xs text-danger-600/70 dark:text-danger-300/60">
+                                            Événement indésirable ou grave
+                                        </p>
+                                    </div>
+                                    <ChevronRightIcon className="text-danger-400 transition-transform duration-150 group-hover:translate-x-0.5 dark:text-danger-500" />
+                                </Link>
+                            )}
 
-                            {/* Separator */}
-                            <div className="my-2 h-px bg-ink-100 dark:bg-ink-700/60" />
+                            {canDeclareIncident && visibleQuickActions.length > 0 && (
+                                <div className="my-2 h-px bg-ink-100 dark:bg-ink-700/60" />
+                            )}
 
-                            {/* Secondary actions */}
-                            <QuickAction
-                                href="/interventions/create"
-                                icon={<ClipboardIcon />}
-                                label="Planifier une intervention"
-                                tone="brand"
-                            />
-                            <QuickAction
-                                href="/audits/create"
-                                icon={<BadgeIcon />}
-                                label="Lancer un audit"
-                                tone="sage"
-                            />
-                            <QuickAction
-                                href="/qvct/questionnaire"
-                                icon={<HeartIcon />}
-                                label="Questionnaire QVCT"
-                                tone="warning"
-                            />
+                            {/* Secondary actions — filtered by ability */}
+                            {visibleQuickActions.map((a) => (
+                                <QuickAction
+                                    key={a.href}
+                                    href={a.href}
+                                    icon={a.icon}
+                                    label={a.label}
+                                    tone={a.tone}
+                                />
+                            ))}
                         </div>
                     </Card>
+                    )}
                 </div>
             </div>
         </DashboardLayout>

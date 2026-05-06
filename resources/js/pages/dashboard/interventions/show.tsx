@@ -8,6 +8,7 @@ import {
     InterventionStatusBadge,
     PageHeader,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link, router } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -58,6 +59,7 @@ interface Intervention {
 export default function ShowIntervention({ intervention }: { intervention: Intervention }) {
     const isPlanned = intervention.statut === 'planifiee';
     const isInProgress = intervention.statut === 'en_cours';
+    const canAct = useCan('interventions.update');
 
     const checkIn = () => router.post(`/interventions/${intervention.id}/checkin`);
     const checkOut = () => {
@@ -89,7 +91,7 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                 actions={
                     <>
                         <InterventionStatusBadge statut={intervention.statut} />
-                        {isPlanned && (
+                        {isPlanned && canAct && (
                             <>
                                 <Button variant="secondary" onClick={cancel}>
                                     Annuler
@@ -101,12 +103,12 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                             </>
                         )}
                         {isInProgress && (
-                            <>
-                                <Badge tone="warning" dot>
-                                    En cours sur le terrain
-                                </Badge>
-                                <Button onClick={checkOut}>Clôturer (check-out)</Button>
-                            </>
+                            <Badge tone="warning" dot>
+                                En cours sur le terrain
+                            </Badge>
+                        )}
+                        {isInProgress && canAct && (
+                            <Button onClick={checkOut}>Clôturer (check-out)</Button>
                         )}
                     </>
                 }
@@ -187,7 +189,7 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                     />
                     <CardBody>
                         {/* Photo upload form */}
-                        {isInProgress && (
+                        {isInProgress && canAct && (
                             <form
                                 action={`/interventions/${intervention.id}/photos`}
                                 method="post"
@@ -219,7 +221,9 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                                             <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{p.original_name ?? `Photo #${p.id}`}</p>
                                             {p.taken_at && <p className="font-mono text-[11px] text-ink-400 dark:text-ink-500">{p.taken_at}</p>}
                                         </div>
-                                        <button type="button" onClick={() => deletePhoto(p.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">Supprimer</button>
+                                        {canAct && (
+                                            <button type="button" onClick={() => deletePhoto(p.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">Supprimer</button>
+                                        )}
                                     </div>
                                 ))}
                                 {intervention.signatures.map((s) => (

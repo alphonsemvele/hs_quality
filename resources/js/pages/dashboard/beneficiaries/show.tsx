@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -58,6 +59,7 @@ function unwrap<T>(value: { data: T } | T): T {
 export default function BeneficiaryShow({ beneficiary, assignments, eligible_intervenants, can_assign }: Props) {
     const b = unwrap<Beneficiary>(beneficiary);
     const assignmentsList = unwrap<Assignment[]>(assignments) ?? [];
+    const canUpdate = useCan('beneficiaries.update');
 
     const [showAttach, setShowAttach] = useState(false);
 
@@ -94,9 +96,11 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                         <Link href={`/beneficiaries/${b.id}/care-plans`}>
                             <Button variant="secondary">Plans</Button>
                         </Link>
-                        <Link href={`/beneficiaries/${b.id}/edit`}>
-                            <Button>Modifier</Button>
-                        </Link>
+                        {canUpdate && (
+                            <Link href={`/beneficiaries/${b.id}/edit`}>
+                                <Button>Modifier</Button>
+                            </Link>
+                        )}
                     </>
                 }
             />

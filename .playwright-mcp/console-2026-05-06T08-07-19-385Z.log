@@ -1,0 +1,4 @@
+[     142ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://localhost:8000/_boost/browser-logs @ http://localhost:8000/audits/019dfc2d-25b4-73c9-a1d8-a4508ba81f53/edit:41
+[     166ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8000/audits/019dfc2d-25b4-73c9-a1d8-a4508ba81f53/edit:100
+[    5145ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://localhost:8000/_boost/browser-logs @ http://localhost:8000/audits/019dfc2d-25b4-73c9-a1d8-a4508ba81f53/edit:41
+[    5400ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:8000/audits/019dfc2d-25b4-73c9-a1d8-a4508ba81f53/edit:100

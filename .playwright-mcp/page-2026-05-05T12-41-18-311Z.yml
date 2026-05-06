@@ -1,0 +1,177 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: QVCT & RH
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Baromètre QVCT" [ref=e46] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e48]
+              - generic [ref=e50]: Baromètre QVCT
+          - listitem [ref=e51]:
+            - link "Communication" [ref=e52] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e54]
+              - generic [ref=e56]: Communication
+    - generic [ref=e58]:
+      - generic [ref=e59]: CD
+      - generic [ref=e60]:
+        - paragraph [ref=e61]: Coordinateur Demo
+        - paragraph [ref=e62]: utilisateur
+  - generic [ref=e63]:
+    - banner [ref=e64]:
+      - generic [ref=e66]:
+        - heading "Tableau de bord" [level=1] [ref=e67]
+        - paragraph [ref=e68]: Pilotage qualité & QVCT
+      - generic [ref=e69]:
+        - link "Déclarer un incident" [ref=e70] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e71]
+          - text: Déclarer un incident
+        - button "CD Coordinateur Demo" [ref=e74] [cursor=pointer]:
+          - generic [ref=e75]: CD
+          - generic [ref=e76]: Coordinateur Demo
+          - img [ref=e77]
+    - main [ref=e79]:
+      - generic [ref=e81]:
+        - heading "Bon après-midi, Coordinateur" [level=1] [ref=e82]
+        - paragraph [ref=e83]:
+          - generic [ref=e84]: mardi 5 mai 2026
+      - paragraph [ref=e85]: Activité du mois
+      - generic [ref=e86]:
+        - link "0 en cours Interventions 4 ce mois Voir le détail" [ref=e87] [cursor=pointer]:
+          - /url: /interventions
+          - generic [ref=e88]:
+            - img [ref=e90]
+            - generic [ref=e92]: 0 en cours
+          - paragraph [ref=e93]: Interventions
+          - generic [ref=e94]:
+            - paragraph [ref=e95]: "4"
+            - generic [ref=e96]: ce mois
+          - generic [ref=e97]:
+            - text: Voir le détail
+            - img [ref=e98]
+        - link "Tous clôturés Incidents déclarés 0 ce mois Voir le détail" [ref=e100] [cursor=pointer]:
+          - /url: /incidents
+          - generic [ref=e101]:
+            - img [ref=e103]
+            - generic [ref=e105]: Tous clôturés
+          - paragraph [ref=e106]: Incidents déclarés
+          - generic [ref=e107]:
+            - paragraph [ref=e108]: "0"
+            - generic [ref=e109]: ce mois
+          - generic [ref=e110]:
+            - text: Voir le détail
+            - img [ref=e111]
+        - link "Formations à jour Intervenants actifs 0 ce mois Voir le détail" [ref=e113] [cursor=pointer]:
+          - /url: /users
+          - generic [ref=e114]:
+            - img [ref=e116]
+            - generic [ref=e120]: Formations à jour
+          - paragraph [ref=e121]: Intervenants actifs
+          - generic [ref=e122]:
+            - paragraph [ref=e123]: "0"
+            - generic [ref=e124]: ce mois
+          - generic [ref=e125]:
+            - text: Voir le détail
+            - img [ref=e126]
+      - generic [ref=e128]:
+        - generic [ref=e129]:
+          - img [ref=e132]
+          - paragraph [ref=e135]: Conformité
+          - paragraph [ref=e136]: —
+          - paragraph [ref=e138]: "Cible : 85 %"
+        - generic [ref=e139]:
+          - img [ref=e142]
+          - paragraph [ref=e145]: Plan d'actions correctives
+          - paragraph [ref=e146]: —
+          - paragraph [ref=e148]: "Cible : > 60 %"
+        - generic [ref=e149]:
+          - img [ref=e152]
+          - paragraph [ref=e154]: Score QVCT moyen
+          - paragraph [ref=e155]: —
+          - paragraph [ref=e157]: 0 alertes actives
+      - generic [ref=e158]:
+        - generic [ref=e159]:
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - heading "Incidents récents" [level=3] [ref=e162]
+              - paragraph [ref=e163]: 0 déclarations
+            - link "Voir tout →" [ref=e165] [cursor=pointer]:
+              - /url: /incidents
+          - generic [ref=e167]:
+            - img [ref=e169]
+            - paragraph [ref=e171]: Aucun incident déclaré
+            - paragraph [ref=e172]: Bonne nouvelle ! Les incidents récents apparaîtront ici dès qu'ils seront déclarés.
+            - link "Déclarer un incident" [ref=e173] [cursor=pointer]:
+              - /url: /incidents/create
+              - img [ref=e174]
+              - text: Déclarer un incident
+        - generic [ref=e176]:
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - heading "Alertes QVCT" [level=3] [ref=e180]
+                - paragraph [ref=e181]: 0 signalaux
+              - link "Gérer →" [ref=e183] [cursor=pointer]:
+                - /url: /qvct
+            - generic [ref=e185]:
+              - img [ref=e187]
+              - paragraph [ref=e189]: Aucune alerte QVCT active
+          - generic [ref=e190]:
+            - generic [ref=e192]:
+              - heading "Actions rapides" [level=3] [ref=e193]
+              - paragraph [ref=e194]: Raccourcis fréquents
+            - generic [ref=e195]:
+              - link "Déclarer un incident Événement indésirable ou grave" [ref=e196] [cursor=pointer]:
+                - /url: /incidents/create
+                - img [ref=e198]
+                - generic [ref=e200]:
+                  - text: Déclarer un incident
+                  - paragraph [ref=e201]: Événement indésirable ou grave
+                - img [ref=e202]
+              - link "Planifier une intervention" [ref=e205] [cursor=pointer]:
+                - /url: /interventions/create
+                - img [ref=e207]
+                - generic [ref=e209]: Planifier une intervention
+                - img [ref=e210]
+              - link "Lancer un audit" [ref=e212] [cursor=pointer]:
+                - /url: /audits/create
+                - img [ref=e214]
+                - generic [ref=e217]: Lancer un audit
+                - img [ref=e218]
+              - link "Questionnaire QVCT" [ref=e220] [cursor=pointer]:
+                - /url: /qvct/questionnaire
+                - img [ref=e222]
+                - generic [ref=e224]: Questionnaire QVCT
+                - img [ref=e225]

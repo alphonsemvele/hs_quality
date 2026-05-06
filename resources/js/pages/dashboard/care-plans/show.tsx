@@ -8,6 +8,7 @@ import {
     EmptyState,
     PageHeader,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { FormField, Input, Textarea } from '@/components/ui';
 import { useState } from 'react';
@@ -56,6 +57,7 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
     const p = unwrap<Plan>(plan);
     const b = unwrap<Beneficiary>(beneficiary);
     const tasks = unwrap<PlannedTask[]>(p.tasks ?? []) ?? [];
+    const canManage = useCan('beneficiaries.update');
 
     const [showArchive, setShowArchive] = useState(false);
     const [showAddTask, setShowAddTask] = useState(false);
@@ -92,18 +94,20 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                 actions={
                     <>
                         <CarePlanStatusBadge statut={p.status} />
-                        {p.status === 'draft' && (
+                        {p.status === 'draft' && canManage && (
                             <Button variant="secondary" onClick={activate}>
                                 Activer
                             </Button>
                         )}
-                        {!p.is_archived && (
+                        {!p.is_archived && canManage && (
                             <Button variant="secondary" onClick={() => setShowArchive(!showArchive)}>
                                 {showArchive ? 'Annuler' : 'Archiver'}
                             </Button>
                         )}
-                        <Button variant="secondary" onClick={copyPlan}>Dupliquer</Button>
-                        {!p.is_archived && (
+                        {canManage && (
+                            <Button variant="secondary" onClick={copyPlan}>Dupliquer</Button>
+                        )}
+                        {!p.is_archived && canManage && (
                             <Link href={`/care-plans/${p.id}/edit`}>
                                 <Button>Modifier</Button>
                             </Link>
@@ -178,15 +182,15 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                         title="Tâches planifiées"
                         subtitle={`${tasks.length} tâche(s)`}
                         action={
-                            !p.is_archived && (
+                            !p.is_archived && canManage ? (
                                 <Button variant="secondary" size="sm" onClick={() => setShowAddTask(!showAddTask)}>
                                     {showAddTask ? 'Annuler' : '+ Ajouter une tâche'}
                                 </Button>
-                            )
+                            ) : undefined
                         }
                     />
                     <CardBody>
-                        {showAddTask && (
+                        {showAddTask && canManage && (
                             <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
                                 <Form action={`/care-plans/${p.id}/tasks`} method="post" onSuccess={() => setShowAddTask(false)} resetOnSuccess>
                                     {({ errors, processing }) => (
@@ -254,7 +258,7 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                                             </div>
                                             {t.description && <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{t.description}</p>}
                                         </div>
-                                        {!p.is_archived && (
+                                        {!p.is_archived && canManage && (
                                             <button type="button" onClick={() => deleteTask(t.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">
                                                 Supprimer
                                             </button>

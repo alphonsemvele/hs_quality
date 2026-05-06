@@ -2,10 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AuditStatus;
 use App\Enums\CarePlanStatus;
 use App\Enums\CategorieIncident;
+use App\Enums\EcartGravite;
 use App\Enums\GraviteIncident;
+use App\Enums\PacSource;
+use App\Enums\PlanAmeliorationStatus;
+use App\Enums\Referentiel;
+use App\Enums\StructureStatus;
+use App\Enums\StructureTier;
+use App\Enums\StructureType;
 use App\Enums\UserType;
+use App\Models\ActionAmelioration;
+use App\Models\AuditEcart;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
 use App\Models\Incident;
@@ -13,7 +23,9 @@ use App\Models\IncidentActionCorrective;
 use App\Models\IncidentSuivi;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
+use App\Models\PlanAmelioration;
 use App\Models\PlannedTask;
+use App\Models\QualityAudit;
 use App\Models\Structure;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -36,6 +48,20 @@ class DevSeeder extends Seeder
     {
         // RoleSeeder must run first so permissions exist.
         $this->call(RoleSeeder::class);
+
+        // ── Platform admin (no tenant — accesses /admin/* surface) ───────────
+        // Idempotent. Lives outside any tenant — TenantResolver lets through
+        // is_platform_admin=true without binding a structure context.
+        User::firstWhere('email', 'admin@platform.fr')
+            ?? User::factory()->create([
+                'first_name' => 'Platform',
+                'last_name' => 'Admin',
+                'email' => 'admin@platform.fr',
+                'password' => Hash::make('password'),
+                'structure_id' => null,
+                'is_platform_admin' => true,
+                'type' => null,
+            ]);
 
         $structure = Structure::firstWhere('code', 'DEMO')
             ?? Structure::factory()->create([
@@ -108,9 +134,12 @@ class DevSeeder extends Seeder
             $rh->assignRole('rh');
         }
 
-        // Skip if already seeded (idempotent).
+        // Skip if already seeded (idempotent). Secondary structures are
+        // still seeded below — they're idempotent on their own and the
+        // platform admin dashboard needs them present.
         if (Beneficiary::where('structure_id', $structure->id)->count() >= 5) {
-            $this->command->info('  Demo data already exists — skipping.');
+            $this->command->info('  Demo data already exists — skipping main structure.');
+            $this->seedSecondaryStructures();
             $this->printAccounts($accounts);
 
             return;
@@ -343,8 +372,307 @@ class DevSeeder extends Seeder
             ->state(['categorie' => CategorieIncident::Autre->value])
             ->create();
 
-        $this->command->info('  ✓ 8 beneficiaries, 28+ interventions, 5 care plans, 8+ incidents seeded');
+        // ── Quality Audits + PAC (Module 6) ──────────────────────────────────
+        $dirigeant = $users['dirigeant'];
+
+        // Audit terminé HAS — score 78 avec 3 écarts
+        $auditTermine = QualityAudit::factory()
+            ->forStructure($structure)
+            ->createdBy($qualite)
+            ->termine(78)
+            ->state([
+                'titre' => 'Audit HAS — Évaluation externe annuelle',
+                'referentiel' => Referentiel::Has->value,
+                'description' => "Évaluation externe annuelle couvrant les 5 domaines du référentiel HAS :\n- Droits des usagers\n- Personnalisation de l'accompagnement\n- Organisation interne\n- Prévention des risques\n- Amélioration continue",
+                'date_audit' => now()->subMonths(2)->format('Y-m-d'),
+                'auditeur' => 'Dr. Lefèvre (cabinet AQS)',
+            ])
+            ->create();
+        AuditEcart::factory()->forAudit($auditTermine)->majeur()->create([
+            'critere' => 'Traçabilité des transmissions',
+            'constat' => 'Transmissions orales non systématiquement tracées dans le cahier numérique.',
+            'action_corrective' => 'Mise en place du cahier numérique obligatoire',
+        ]);
+        AuditEcart::factory()->forAudit($auditTermine)->create([
+            'critere' => 'Plan de formation',
+            'constat' => 'Absence de plan de formation formalisé pour 2026.',
+            'gravite' => EcartGravite::Mineur->value,
+        ]);
+        AuditEcart::factory()->forAudit($auditTermine)->majeur()->create([
+            'critere' => 'Protocole médicamenteux',
+            'constat' => 'Protocole non mis à jour depuis 14 mois.',
+        ]);
+
+        // Audit en cours — interne sur la prévention des chutes
+        $auditEnCours = QualityAudit::factory()
+            ->forStructure($structure)
+            ->createdBy($qualite)
+            ->enCours()
+            ->state([
+                'titre' => 'Audit interne — Prévention des chutes',
+                'referentiel' => Referentiel::Interne->value,
+                'description' => "Audit ciblé sur les pratiques de prévention des chutes à domicile suite à la série d'incidents Q1.",
+                'date_audit' => now()->subDays(3)->format('Y-m-d'),
+                'auditeur' => $qualite->fullName(),
+            ])
+            ->create();
+        AuditEcart::factory()->forAudit($auditEnCours)->critique()->create([
+            'critere' => 'Évaluation domicile',
+            'constat' => 'Aucune check-list d\'évaluation des risques de chute dans 4 dossiers sur 8.',
+        ]);
+
+        // Audit planifié — pré-audit ISO 9001
+        QualityAudit::factory()
+            ->forStructure($structure)
+            ->createdBy($dirigeant)
+            ->state([
+                'titre' => 'Audit ISO 9001 — Pré-audit de certification',
+                'referentiel' => Referentiel::Iso9001->value,
+                'description' => 'Pré-audit en vue de la certification ISO 9001:2015 prévue pour le second semestre.',
+                'date_audit' => now()->addMonths(2)->format('Y-m-d'),
+                'statut' => AuditStatus::Planifie->value,
+            ])
+            ->create();
+
+        // PAC issu de l'audit terminé — en cours, 2 actions sur 3 réalisées
+        $pacAudit = PlanAmelioration::factory()
+            ->forStructure($structure)
+            ->createdBy($qualite)
+            ->fromAudit($auditTermine->id)
+            ->enCours()
+            ->state([
+                'titre' => 'Mise à jour du protocole médicamenteux',
+                'constat' => 'Protocole non mis à jour depuis 14 mois — risque sur la traçabilité de l\'administration.',
+                'responsable' => 'Claire Bernard',
+                'echeance' => now()->addWeeks(3)->format('Y-m-d'),
+            ])
+            ->create();
+        ActionAmelioration::factory()->forPlan($pacAudit)->realisee()->create([
+            'description' => 'Audit du protocole existant — diagnostic des écarts.',
+            'responsable' => 'Claire Bernard',
+        ]);
+        ActionAmelioration::factory()->forPlan($pacAudit)->realisee()->create([
+            'description' => 'Rédaction du protocole v2 (revue par le médecin coordonnateur).',
+            'responsable' => 'Claire Bernard',
+        ]);
+        ActionAmelioration::factory()->forPlan($pacAudit)->enCours()->create([
+            'description' => 'Formation des intervenants au nouveau protocole — session terrain.',
+            'responsable' => 'Anne Petit',
+            'echeance' => now()->addWeeks(2)->format('Y-m-d'),
+        ]);
+
+        // PAC ouvert depuis un incident QVCT
+        PlanAmelioration::factory()
+            ->forStructure($structure)
+            ->createdBy($dirigeant)
+            ->state([
+                'titre' => 'Plan QVCT — réduction du turnover',
+                'source' => PacSource::Qvct->value,
+                'constat' => 'Score QVCT moyen 5.4/10 sur le secteur Sud, signaux de surcharge identifiés.',
+                'responsable' => 'Anne Petit',
+                'echeance' => now()->addMonths(2)->format('Y-m-d'),
+                'statut' => PlanAmeliorationStatus::Ouvert->value,
+            ])
+            ->create();
+
+        // PAC terminé — exemple d'historique
+        $pacTermine = PlanAmelioration::factory()
+            ->forStructure($structure)
+            ->createdBy($qualite)
+            ->termine()
+            ->state([
+                'titre' => 'Sécurisation des transmissions — déploiement cahier numérique',
+                'source' => PacSource::Audit->value,
+                'source_id' => $auditTermine->id,
+                'constat' => 'Transmissions non tracées — écart majeur HAS.',
+                'responsable' => 'Thomas Dupont',
+                'echeance' => now()->subWeeks(2)->format('Y-m-d'),
+            ])
+            ->create();
+        ActionAmelioration::factory()->forPlan($pacTermine)->realisee()->create([
+            'description' => 'Déploiement de l\'application mobile sur tous les téléphones intervenants.',
+        ]);
+        ActionAmelioration::factory()->forPlan($pacTermine)->realisee()->create([
+            'description' => 'Formation des intervenants à l\'usage du cahier numérique.',
+        ]);
+
+        $this->command->info('  ✓ 8 beneficiaries, 28+ interventions, 5 care plans, 8+ incidents, 3 audits, 3 PAC seeded');
+
+        $this->seedSecondaryStructures();
+
         $this->printAccounts($accounts);
+    }
+
+    /**
+     * Provision 3 additional structures so the platform admin dashboard
+     * has cross-tenant data to display (varied types, tiers, statuses,
+     * one suspended, one with critical incidents).
+     *
+     * Idempotent — keyed off the structure code.
+     */
+    private function seedSecondaryStructures(): void
+    {
+        $blueprints = [
+            [
+                'code' => 'SOLEIL',
+                'name' => 'Soleil de Provence',
+                'type' => StructureType::SAAD,
+                'tier' => StructureTier::Pro,
+                'status' => StructureStatus::Active,
+                'dirigeant_email' => 'dirigeant.soleil@demo.fr',
+                'dirigeant_first' => 'Hélène',
+                'dirigeant_last' => 'Roux',
+                'intervenants' => 6,
+                'beneficiaries' => 12,
+                'critical_incident' => true,
+            ],
+            [
+                'code' => 'NORDSANTE',
+                'name' => 'Nord Santé Soins',
+                'type' => StructureType::SSIAD,
+                'tier' => StructureTier::Premium,
+                'status' => StructureStatus::Active,
+                'dirigeant_email' => 'dirigeant.nord@demo.fr',
+                'dirigeant_first' => 'Bertrand',
+                'dirigeant_last' => 'Lefèvre',
+                'intervenants' => 4,
+                'beneficiaries' => 9,
+                'critical_incident' => false,
+            ],
+            [
+                'code' => 'MAINSDOR',
+                'name' => "Mains d'Or — CCAS",
+                'type' => StructureType::CCAS,
+                'tier' => StructureTier::Essential,
+                'status' => StructureStatus::Suspended,
+                'dirigeant_email' => 'dirigeant.mainsdor@demo.fr',
+                'dirigeant_first' => 'Patricia',
+                'dirigeant_last' => 'Garnier',
+                'intervenants' => 2,
+                'beneficiaries' => 4,
+                'critical_incident' => false,
+            ],
+        ];
+
+        foreach ($blueprints as $blueprint) {
+            $this->seedSecondaryStructure($blueprint);
+        }
+
+        $this->command->info('  ✓ 3 secondary structures seeded for the platform admin dashboard');
+    }
+
+    /**
+     * @param  array{
+     *     code: string,
+     *     name: string,
+     *     type: StructureType,
+     *     tier: StructureTier,
+     *     status: StructureStatus,
+     *     dirigeant_email: string,
+     *     dirigeant_first: string,
+     *     dirigeant_last: string,
+     *     intervenants: int,
+     *     beneficiaries: int,
+     *     critical_incident: bool
+     * }  $blueprint
+     */
+    private function seedSecondaryStructure(array $blueprint): void
+    {
+        $structure = Structure::firstWhere('code', $blueprint['code'])
+            ?? Structure::factory()->create([
+                'code' => $blueprint['code'],
+                'name' => $blueprint['name'],
+                'type' => $blueprint['type']->value,
+                'tier' => $blueprint['tier']->value,
+                'status' => $blueprint['status']->value,
+            ]);
+
+        // Bind tenant context so BelongsToStructure auto-fills structure_id and
+        // role assignments target the correct team scope.
+        app()->instance('current_structure', $structure);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($structure->getKey());
+
+        $dirigeant = User::firstWhere('email', $blueprint['dirigeant_email'])
+            ?? User::factory()
+                ->forStructure($structure)
+                ->state([
+                    'first_name' => $blueprint['dirigeant_first'],
+                    'last_name' => $blueprint['dirigeant_last'],
+                    'email' => $blueprint['dirigeant_email'],
+                    'password' => Hash::make('password'),
+                    'type' => UserType::Dirigeant->value,
+                ])
+                ->create();
+        if (! $dirigeant->hasRole('dirigeant')) {
+            $dirigeant->assignRole('dirigeant');
+        }
+
+        // Skip volume seeding if already done for this structure.
+        if (Beneficiary::query()->where('structure_id', $structure->id)->count() > 0) {
+            return;
+        }
+
+        $intervenants = User::factory()
+            ->forStructure($structure)
+            ->count($blueprint['intervenants'])
+            ->state(['type' => UserType::Intervenant->value])
+            ->create();
+        $intervenants->each(fn (User $u) => $u->assignRole('intervenant'));
+
+        $beneficiaries = Beneficiary::factory()
+            ->forStructure($structure)
+            ->count($blueprint['beneficiaries'])
+            ->create();
+
+        $beneficiaries->each(function (Beneficiary $beneficiary, int $i) use ($intervenants, $structure) {
+            $intervenant = $intervenants[$i % max(1, $intervenants->count())] ?? $intervenants->first();
+
+            if ($intervenant !== null) {
+                IntervenantAssignment::factory()
+                    ->between($intervenant, $beneficiary)
+                    ->create();
+
+                Intervention::factory()
+                    ->count(2)
+                    ->completed()
+                    ->forBeneficiary($beneficiary)
+                    ->forIntervenant($intervenant)
+                    ->state(['structure_id' => $structure->id])
+                    ->create();
+
+                Intervention::factory()
+                    ->planned()
+                    ->forBeneficiary($beneficiary)
+                    ->forIntervenant($intervenant)
+                    ->state(['structure_id' => $structure->id])
+                    ->create();
+            }
+        });
+
+        if ($blueprint['critical_incident'] && $intervenants->isNotEmpty()) {
+            Incident::factory()
+                ->forStructure($structure)
+                ->declaredBy($intervenants->first())
+                ->grave()
+                ->state([
+                    'categorie' => CategorieIncident::Chute->value,
+                    'description' => 'Chute avec hospitalisation. Dossier ouvert, ARS notifiée.',
+                    'lieu' => 'Domicile bénéficiaire',
+                    'avec_blessure_physique' => true,
+                    'avec_hospitalisation' => true,
+                ])
+                ->create();
+        }
+
+        // Few minor incidents so the per-tenant table is not all zeroes.
+        if ($intervenants->isNotEmpty()) {
+            Incident::factory()
+                ->count(2)
+                ->forStructure($structure)
+                ->declaredBy($intervenants->first())
+                ->state(['categorie' => CategorieIncident::Autre->value])
+                ->create();
+        }
     }
 
     /** @param  array<int, array{email: string}>  $accounts */
@@ -352,11 +680,18 @@ class DevSeeder extends Seeder
     {
         $this->command->info('');
         $this->command->info('  Demo accounts (password: "password"):');
+        $this->command->info('  ── Plateforme ──');
+        $this->command->info('    admin@platform.fr           (super_admin — /admin)');
+        $this->command->info('  ── Structure DEMO ──');
         foreach ($accounts as $a) {
             $this->command->info("    {$a['email']}");
         }
         $this->command->info('    intervenant2@demo.fr');
         $this->command->info('    rh@demo.fr');
+        $this->command->info('  ── Structures secondaires (dashboard plateforme) ──');
+        $this->command->info('    dirigeant.soleil@demo.fr     (Soleil de Provence — SAAD Pro, actif)');
+        $this->command->info('    dirigeant.nord@demo.fr       (Nord Santé Soins — SSIAD Premium, actif)');
+        $this->command->info('    dirigeant.mainsdor@demo.fr   (Mains d\'Or — CCAS, suspendu)');
         $this->command->info('');
     }
 }

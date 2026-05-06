@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useAbilities, type Ability } from '@/lib/can';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
@@ -23,6 +24,7 @@ interface NavLink {
     icon: ReactNode;
     danger?: boolean;
     badgeCount?: number;
+    requires?: Ability;
 }
 
 interface NavSection {
@@ -41,6 +43,7 @@ export default function DashboardLayout({
 }) {
     const { url, props } = usePage<PageProps>();
     const auth = props.auth;
+    const abilities = useAbilities();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -51,45 +54,68 @@ export default function DashboardLayout({
         return current === clean || current.startsWith(clean + '/');
     };
 
-    const navSections: NavSection[] = [
-        {
-            section: null,
-            links: [{ href: '/dashboard', label: 'Tableau de bord', icon: <HomeIcon /> }],
-        },
-        {
-            section: 'Terrain',
-            links: [
-                { href: '/interventions', label: 'Interventions', icon: <ClipboardIcon /> },
-                { href: '/incidents', label: 'Incidents & EI', icon: <AlertIcon />, danger: true },
-                { href: '/beneficiaries', label: 'Bénéficiaires', icon: <UserHeartIcon /> },
-            ],
-        },
-        {
-            section: 'Qualité',
-            links: [
-                { href: '/audits', label: 'Audits & conformité', icon: <BadgeIcon /> },
-                { href: '/plans-amelioration', label: "Plans d'amélioration", icon: <CheckListIcon /> },
-                { href: '/indicateurs', label: 'Indicateurs', icon: <ChartIcon /> },
-            ],
-        },
-        {
-            section: 'QVCT & RH',
-            links: [
-                { href: '/qvct', label: 'Baromètre QVCT', icon: <HeartIcon /> },
-                { href: '/formations', label: 'Formations', icon: <AcademicIcon /> },
-                { href: '/communication', label: 'Communication', icon: <ChatIcon /> },
-            ],
-        },
-        {
-            section: 'Administration',
-            links: [
-                { href: '/users', label: 'Utilisateurs', icon: <UsersIcon /> },
-                ...(auth?.user?.is_platform_admin
-                    ? [{ href: '/admin/structures', label: 'Structures (admin)', icon: <BuildingIcon /> }]
-                    : []),
-            ],
-        },
-    ];
+    // Platform admins see a dedicated cross-tenant nav. Tenant-scoped users
+    // see the operational nav. The two surfaces never overlap.
+    const isPlatformAdmin = auth?.user?.is_platform_admin === true;
+
+    const rawSections: NavSection[] = isPlatformAdmin
+        ? [
+              {
+                  section: null,
+                  links: [{ href: '/admin', label: 'Console plateforme', icon: <HomeIcon /> }],
+              },
+              {
+                  section: 'Plateforme',
+                  links: [
+                      { href: '/admin/structures', label: 'Structures', icon: <BuildingIcon /> },
+                  ],
+              },
+          ]
+        : [
+              {
+                  section: null,
+                  links: [{ href: '/dashboard', label: 'Tableau de bord', icon: <HomeIcon /> }],
+              },
+              {
+                  section: 'Terrain',
+                  links: [
+                      { href: '/interventions', label: 'Interventions', icon: <ClipboardIcon />, requires: 'interventions.view' },
+                      { href: '/incidents', label: 'Incidents & EI', icon: <AlertIcon />, danger: true, requires: 'incidents.view' },
+                      { href: '/beneficiaries', label: 'Bénéficiaires', icon: <UserHeartIcon />, requires: 'beneficiaries.view' },
+                  ],
+              },
+              {
+                  section: 'Qualité',
+                  links: [
+                      { href: '/audits', label: 'Audits & conformité', icon: <BadgeIcon />, requires: 'audits.view' },
+                      { href: '/plans-amelioration', label: "Plans d'amélioration", icon: <CheckListIcon />, requires: 'plans_amelioration.view' },
+                      { href: '/indicateurs', label: 'Indicateurs', icon: <ChartIcon />, requires: 'indicateurs.view' },
+                  ],
+              },
+              {
+                  section: 'QVCT & RH',
+                  links: [
+                      { href: '/qvct', label: 'Baromètre QVCT', icon: <HeartIcon />, requires: 'qvct.view' },
+                      { href: '/formations', label: 'Formations', icon: <AcademicIcon />, requires: 'formations.view' },
+                      { href: '/communication', label: 'Communication', icon: <ChatIcon />, requires: 'communication.view' },
+                  ],
+              },
+              {
+                  section: 'Administration',
+                  links: [
+                      { href: '/users', label: 'Utilisateurs', icon: <UsersIcon />, requires: 'users.manage' },
+                  ],
+              },
+          ];
+
+    const navSections: NavSection[] = rawSections
+        .map((group) => ({
+            ...group,
+            links: group.links.filter((link) => !link.requires || abilities[link.requires] === true),
+        }))
+        .filter((group) => group.links.length > 0);
+
+    const canDeclareIncident = abilities['incidents.create'] === true;
 
     return (
         <>
@@ -207,15 +233,17 @@ export default function DashboardLayout({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Link
-                                href="/incidents/create"
-                                className="hidden cursor-pointer items-center gap-1.5 rounded-lg bg-danger-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.97] md:inline-flex"
-                            >
-                                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
-                                </svg>
-                                Déclarer un incident
-                            </Link>
+                            {canDeclareIncident && (
+                                <Link
+                                    href="/incidents/create"
+                                    className="hidden cursor-pointer items-center gap-1.5 rounded-lg bg-danger-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.97] md:inline-flex"
+                                >
+                                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+                                    </svg>
+                                    Déclarer un incident
+                                </Link>
+                            )}
 
                             {auth?.user && (
                                 <UserMenu

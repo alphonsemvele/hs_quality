@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardBody, EmptyState, KpiCard, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -35,6 +36,7 @@ const STATUT_TONE: Record<string, 'brand' | 'warning' | 'sage' | 'neutral' | 'da
 };
 
 export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours: 0, termines: 0, score_moyen: null } }: Partial<Props>) {
+    const canManage = useCan('audits.manage');
     return (
         <DashboardLayout title="Audits & Conformité" subtitle="Évaluations HAS, AFNOR, ISO 9001">
             <PageHeader
@@ -42,9 +44,11 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                 subtitle="Grilles d'évaluation, scoring et plans d'actions correctifs"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Audits' }]}
                 actions={
-                    <Link href="/audits/create">
-                        <Button leadingIcon={<PlusIcon />}>Nouvel audit</Button>
-                    </Link>
+                    canManage ? (
+                        <Link href="/audits/create">
+                            <Button leadingIcon={<PlusIcon />}>Nouvel audit</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -104,9 +108,11 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                         title="Aucun audit planifié"
                         description="Lancez votre premier audit de conformité — HAS, AFNOR NF X50-056 ou ISO 9001."
                         action={
-                            <Link href="/audits/create">
-                                <Button>Planifier un audit</Button>
-                            </Link>
+                            canManage ? (
+                                <Link href="/audits/create">
+                                    <Button>Planifier un audit</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 </Card>

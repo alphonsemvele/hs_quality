@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\InertiaUserResource;
+use App\Support\UserAbilities;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -50,6 +51,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user()
                     ? (new InertiaUserResource($request->user()))->toArray($request)
                     : null,
+                // Coarse, page-level UI abilities. The React layer reads
+                // this via `useCan()` to hide pages and action buttons
+                // for personas that have no business clicking them. The
+                // backend still enforces authorization via Policies.
+                'abilities' => UserAbilities::for($request->user()),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

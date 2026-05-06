@@ -1,0 +1,326 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: QVCT & RH
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Communication" [ref=e46] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e48]
+              - generic [ref=e50]: Communication
+    - generic [ref=e52]:
+      - generic [ref=e53]: ID
+      - generic [ref=e54]:
+        - paragraph [ref=e55]: Intervenant Demo
+        - paragraph [ref=e56]: utilisateur
+  - generic [ref=e57]:
+    - banner [ref=e58]:
+      - generic [ref=e60]:
+        - heading "Interventions" [level=1] [ref=e61]
+        - paragraph [ref=e62]: Suivi des interventions à domicile
+      - generic [ref=e63]:
+        - link "Déclarer un incident" [ref=e64] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e65]
+          - text: Déclarer un incident
+        - button "ID Intervenant Demo" [ref=e68] [cursor=pointer]:
+          - generic [ref=e69]: ID
+          - generic [ref=e70]: Intervenant Demo
+          - img [ref=e71]
+    - main [ref=e73]:
+      - generic [ref=e75]:
+        - navigation "Fil d'ariane" [ref=e76]:
+          - link "Tableau de bord" [ref=e78] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e79]:
+            - img [ref=e80]
+            - generic [ref=e82]: Interventions
+        - heading "Interventions" [level=1] [ref=e83]
+        - paragraph [ref=e84]: 15 intervention(s) au total
+      - generic [ref=e85]:
+        - link "Toutes (15)" [ref=e86] [cursor=pointer]:
+          - /url: /interventions
+          - text: Toutes
+          - generic [ref=e87]: (15)
+        - link "En cours (0)" [ref=e88] [cursor=pointer]:
+          - /url: /interventions?status=en_cours
+          - text: En cours
+          - generic [ref=e89]: (0)
+        - link "Planifiées (15)" [ref=e90] [cursor=pointer]:
+          - /url: /interventions?status=planifiee
+          - text: Planifiées
+          - generic [ref=e91]: (15)
+        - link "Réalisées (0)" [ref=e92] [cursor=pointer]:
+          - /url: /interventions?status=realisee
+          - text: Réalisées
+          - generic [ref=e93]: (0)
+        - link "Annulées (0)" [ref=e94] [cursor=pointer]:
+          - /url: /interventions?status=annulee
+          - text: Annulées
+          - generic [ref=e95]: (0)
+      - table [ref=e98]:
+        - rowgroup [ref=e99]:
+          - row "Intervenant Bénéficiaire Date & heure Durée Statut CR" [ref=e100]:
+            - columnheader "Intervenant" [ref=e101]
+            - columnheader "Bénéficiaire" [ref=e102]
+            - columnheader "Date & heure" [ref=e103]
+            - columnheader "Durée" [ref=e104]
+            - columnheader "Statut" [ref=e105]
+            - columnheader "CR" [ref=e106]
+            - columnheader [ref=e107]
+        - rowgroup [ref=e108]:
+          - row "ID Intervenant Demo Benjamin LEBLANC 05/05/2026 06:42 — Planifiée — Voir →" [ref=e109]:
+            - cell "ID Intervenant Demo" [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]: ID
+                - generic [ref=e113]: Intervenant Demo
+            - cell "Benjamin LEBLANC" [ref=e114]
+            - cell "05/05/2026 06:42" [ref=e115]
+            - cell "—" [ref=e116]
+            - cell "Planifiée" [ref=e117]:
+              - generic [ref=e118]: Planifiée
+            - cell "—" [ref=e120]:
+              - generic [ref=e122]: —
+            - cell "Voir →" [ref=e123]:
+              - link "Voir →" [ref=e124] [cursor=pointer]:
+                - /url: /interventions/019dd525-193d-7173-8cdb-a2c6c9657b6f
+          - row "ID Intervenant Demo Michel JOLY 03/05/2026 18:40 — Planifiée — Voir →" [ref=e125]:
+            - cell "ID Intervenant Demo" [ref=e126]:
+              - generic [ref=e127]:
+                - generic [ref=e128]: ID
+                - generic [ref=e129]: Intervenant Demo
+            - cell "Michel JOLY" [ref=e130]
+            - cell "03/05/2026 18:40" [ref=e131]
+            - cell "—" [ref=e132]
+            - cell "Planifiée" [ref=e133]:
+              - generic [ref=e134]: Planifiée
+            - cell "—" [ref=e136]:
+              - generic [ref=e138]: —
+            - cell "Voir →" [ref=e139]:
+              - link "Voir →" [ref=e140] [cursor=pointer]:
+                - /url: /interventions/019dd525-1958-739e-bf44-01ae68787821
+          - row "ID Intervenant Demo Benjamin LEBLANC 02/05/2026 17:33 — Planifiée — Voir →" [ref=e141]:
+            - cell "ID Intervenant Demo" [ref=e142]:
+              - generic [ref=e143]:
+                - generic [ref=e144]: ID
+                - generic [ref=e145]: Intervenant Demo
+            - cell "Benjamin LEBLANC" [ref=e146]
+            - cell "02/05/2026 17:33" [ref=e147]
+            - cell "—" [ref=e148]
+            - cell "Planifiée" [ref=e149]:
+              - generic [ref=e150]: Planifiée
+            - cell "—" [ref=e152]:
+              - generic [ref=e154]: —
+            - cell "Voir →" [ref=e155]:
+              - link "Voir →" [ref=e156] [cursor=pointer]:
+                - /url: /interventions/019dd525-1948-70c5-9bf4-4c052e539d74
+          - row "ID Intervenant Demo Rémy DELAUNAY 02/05/2026 20:11 — Planifiée — Voir →" [ref=e157]:
+            - cell "ID Intervenant Demo" [ref=e158]:
+              - generic [ref=e159]:
+                - generic [ref=e160]: ID
+                - generic [ref=e161]: Intervenant Demo
+            - cell "Rémy DELAUNAY" [ref=e162]
+            - cell "02/05/2026 20:11" [ref=e163]
+            - cell "—" [ref=e164]
+            - cell "Planifiée" [ref=e165]:
+              - generic [ref=e166]: Planifiée
+            - cell "—" [ref=e168]:
+              - generic [ref=e170]: —
+            - cell "Voir →" [ref=e171]:
+              - link "Voir →" [ref=e172] [cursor=pointer]:
+                - /url: /interventions/019dd525-194c-73c8-b924-8442a26f50b0
+          - row "ID Intervenant Demo Rémy DELAUNAY 30/04/2026 00:42 — Planifiée — Voir →" [ref=e173]:
+            - cell "ID Intervenant Demo" [ref=e174]:
+              - generic [ref=e175]:
+                - generic [ref=e176]: ID
+                - generic [ref=e177]: Intervenant Demo
+            - cell "Rémy DELAUNAY" [ref=e178]
+            - cell "30/04/2026 00:42" [ref=e179]
+            - cell "—" [ref=e180]
+            - cell "Planifiée" [ref=e181]:
+              - generic [ref=e182]: Planifiée
+            - cell "—" [ref=e184]:
+              - generic [ref=e186]: —
+            - cell "Voir →" [ref=e187]:
+              - link "Voir →" [ref=e188] [cursor=pointer]:
+                - /url: /interventions/019dd525-194f-72ca-a8e6-bba0282ba0a9
+          - row "ID Intervenant Demo Lucy GARCIA 30/04/2026 01:29 — Planifiée — Voir →" [ref=e189]:
+            - cell "ID Intervenant Demo" [ref=e190]:
+              - generic [ref=e191]:
+                - generic [ref=e192]: ID
+                - generic [ref=e193]: Intervenant Demo
+            - cell "Lucy GARCIA" [ref=e194]
+            - cell "30/04/2026 01:29" [ref=e195]
+            - cell "—" [ref=e196]
+            - cell "Planifiée" [ref=e197]:
+              - generic [ref=e198]: Planifiée
+            - cell "—" [ref=e200]:
+              - generic [ref=e202]: —
+            - cell "Voir →" [ref=e203]:
+              - link "Voir →" [ref=e204] [cursor=pointer]:
+                - /url: /interventions/019dd525-1953-7158-a95f-641134781667
+          - row "ID Intervenant Demo Bernard LE GOFF 30/04/2026 14:02 — Planifiée — Voir →" [ref=e205]:
+            - cell "ID Intervenant Demo" [ref=e206]:
+              - generic [ref=e207]:
+                - generic [ref=e208]: ID
+                - generic [ref=e209]: Intervenant Demo
+            - cell "Bernard LE GOFF" [ref=e210]
+            - cell "30/04/2026 14:02" [ref=e211]
+            - cell "—" [ref=e212]
+            - cell "Planifiée" [ref=e213]:
+              - generic [ref=e214]: Planifiée
+            - cell "—" [ref=e216]:
+              - generic [ref=e218]: —
+            - cell "Voir →" [ref=e219]:
+              - link "Voir →" [ref=e220] [cursor=pointer]:
+                - /url: /interventions/019dd525-1956-7290-8829-5efbc88d180e
+          - row "ID Intervenant Demo Benjamin LEBLANC 30/04/2026 17:55 — Planifiée — Voir →" [ref=e221]:
+            - cell "ID Intervenant Demo" [ref=e222]:
+              - generic [ref=e223]:
+                - generic [ref=e224]: ID
+                - generic [ref=e225]: Intervenant Demo
+            - cell "Benjamin LEBLANC" [ref=e226]
+            - cell "30/04/2026 17:55" [ref=e227]
+            - cell "—" [ref=e228]
+            - cell "Planifiée" [ref=e229]:
+              - generic [ref=e230]: Planifiée
+            - cell "—" [ref=e232]:
+              - generic [ref=e234]: —
+            - cell "Voir →" [ref=e235]:
+              - link "Voir →" [ref=e236] [cursor=pointer]:
+                - /url: /interventions/019dd525-194a-71c2-8dca-eb8c32344466
+          - row "ID Intervenant Demo Michel JOLY 30/04/2026 20:07 — Planifiée — Voir →" [ref=e237]:
+            - cell "ID Intervenant Demo" [ref=e238]:
+              - generic [ref=e239]:
+                - generic [ref=e240]: ID
+                - generic [ref=e241]: Intervenant Demo
+            - cell "Michel JOLY" [ref=e242]
+            - cell "30/04/2026 20:07" [ref=e243]
+            - cell "—" [ref=e244]
+            - cell "Planifiée" [ref=e245]:
+              - generic [ref=e246]: Planifiée
+            - cell "—" [ref=e248]:
+              - generic [ref=e250]: —
+            - cell "Voir →" [ref=e251]:
+              - link "Voir →" [ref=e252] [cursor=pointer]:
+                - /url: /interventions/019dd525-195a-7144-99ea-1b3d173c34cf
+          - row "ID Intervenant Demo Bernard LE GOFF 28/04/2026 02:49 — Planifiée — Voir →" [ref=e253]:
+            - cell "ID Intervenant Demo" [ref=e254]:
+              - generic [ref=e255]:
+                - generic [ref=e256]: ID
+                - generic [ref=e257]: Intervenant Demo
+            - cell "Bernard LE GOFF" [ref=e258]
+            - cell "28/04/2026 02:49" [ref=e259]
+            - cell "—" [ref=e260]
+            - cell "Planifiée" [ref=e261]:
+              - generic [ref=e262]: Planifiée
+            - cell "—" [ref=e264]:
+              - generic [ref=e266]: —
+            - cell "Voir →" [ref=e267]:
+              - link "Voir →" [ref=e268] [cursor=pointer]:
+                - /url: /interventions/019dd525-1955-70cd-ad19-08d2ac3fe253
+          - row "ID Intervenant Demo Lucy GARCIA 27/04/2026 10:52 — Planifiée — Voir →" [ref=e269]:
+            - cell "ID Intervenant Demo" [ref=e270]:
+              - generic [ref=e271]:
+                - generic [ref=e272]: ID
+                - generic [ref=e273]: Intervenant Demo
+            - cell "Lucy GARCIA" [ref=e274]
+            - cell "27/04/2026 10:52" [ref=e275]
+            - cell "—" [ref=e276]
+            - cell "Planifiée" [ref=e277]:
+              - generic [ref=e278]: Planifiée
+            - cell "—" [ref=e280]:
+              - generic [ref=e282]: —
+            - cell "Voir →" [ref=e283]:
+              - link "Voir →" [ref=e284] [cursor=pointer]:
+                - /url: /interventions/019dd525-1951-7318-bff9-38e587b66e36
+          - row "ID Intervenant Demo Bernard LE GOFF 27/04/2026 14:41 — Planifiée — Voir →" [ref=e285]:
+            - cell "ID Intervenant Demo" [ref=e286]:
+              - generic [ref=e287]:
+                - generic [ref=e288]: ID
+                - generic [ref=e289]: Intervenant Demo
+            - cell "Bernard LE GOFF" [ref=e290]
+            - cell "27/04/2026 14:41" [ref=e291]
+            - cell "—" [ref=e292]
+            - cell "Planifiée" [ref=e293]:
+              - generic [ref=e294]: Planifiée
+            - cell "—" [ref=e296]:
+              - generic [ref=e298]: —
+            - cell "Voir →" [ref=e299]:
+              - link "Voir →" [ref=e300] [cursor=pointer]:
+                - /url: /interventions/019dd525-1957-72c0-a1a5-ea48a7878039
+          - row "ID Intervenant Demo Michel JOLY 25/04/2026 11:41 — Planifiée — Voir →" [ref=e301]:
+            - cell "ID Intervenant Demo" [ref=e302]:
+              - generic [ref=e303]:
+                - generic [ref=e304]: ID
+                - generic [ref=e305]: Intervenant Demo
+            - cell "Michel JOLY" [ref=e306]
+            - cell "25/04/2026 11:41" [ref=e307]
+            - cell "—" [ref=e308]
+            - cell "Planifiée" [ref=e309]:
+              - generic [ref=e310]: Planifiée
+            - cell "—" [ref=e312]:
+              - generic [ref=e314]: —
+            - cell "Voir →" [ref=e315]:
+              - link "Voir →" [ref=e316] [cursor=pointer]:
+                - /url: /interventions/019dd525-1959-7214-a362-2007633d1c40
+          - row "ID Intervenant Demo Lucy GARCIA 24/04/2026 02:05 — Planifiée — Voir →" [ref=e317]:
+            - cell "ID Intervenant Demo" [ref=e318]:
+              - generic [ref=e319]:
+                - generic [ref=e320]: ID
+                - generic [ref=e321]: Intervenant Demo
+            - cell "Lucy GARCIA" [ref=e322]
+            - cell "24/04/2026 02:05" [ref=e323]
+            - cell "—" [ref=e324]
+            - cell "Planifiée" [ref=e325]:
+              - generic [ref=e326]: Planifiée
+            - cell "—" [ref=e328]:
+              - generic [ref=e330]: —
+            - cell "Voir →" [ref=e331]:
+              - link "Voir →" [ref=e332] [cursor=pointer]:
+                - /url: /interventions/019dd525-1950-7146-91ee-ed088b5297aa
+          - row "ID Intervenant Demo Rémy DELAUNAY 22/04/2026 12:46 — Planifiée — Voir →" [ref=e333]:
+            - cell "ID Intervenant Demo" [ref=e334]:
+              - generic [ref=e335]:
+                - generic [ref=e336]: ID
+                - generic [ref=e337]: Intervenant Demo
+            - cell "Rémy DELAUNAY" [ref=e338]
+            - cell "22/04/2026 12:46" [ref=e339]
+            - cell "—" [ref=e340]
+            - cell "Planifiée" [ref=e341]:
+              - generic [ref=e342]: Planifiée
+            - cell "—" [ref=e344]:
+              - generic [ref=e346]: —
+            - cell "Voir →" [ref=e347]:
+              - link "Voir →" [ref=e348] [cursor=pointer]:
+                - /url: /interventions/019dd525-194d-729a-93da-ae4bec653455

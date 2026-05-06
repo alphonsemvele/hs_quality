@@ -9,6 +9,7 @@ import {
     PageHeader,
     Pagination,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -42,6 +43,7 @@ export default function Incidents({
     pagination = { current_page: 1, last_page: 1, per_page: 20 },
     stats = { declare: 0, en_analyse: 0, plan_actions: 0, clos: 0, graves: 0 },
 }: Partial<Props>) {
+    const canDeclare = useCan('incidents.create');
     return (
         <DashboardLayout title="Incidents & événements indésirables" subtitle="Déclaration, analyse et suivi">
             <PageHeader
@@ -49,11 +51,13 @@ export default function Incidents({
                 subtitle="Toute déclaration est auditée et conservée 10 ans (CDC §6)"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Incidents' }]}
                 actions={
-                    <Link href="/incidents/create">
-                        <Button variant="danger" leadingIcon={<PlusIcon />}>
-                            Déclarer un incident
-                        </Button>
-                    </Link>
+                    canDeclare ? (
+                        <Link href="/incidents/create">
+                            <Button variant="danger" leadingIcon={<PlusIcon />}>
+                                Déclarer un incident
+                            </Button>
+                        </Link>
+                    ) : null
                 }
             />
 

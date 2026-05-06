@@ -4,116 +4,221 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionStatus;
+use App\Enums\PacSource;
+use App\Http\Requests\Pac\CancelPlanRequest;
+use App\Http\Requests\Pac\ClosePlanRequest;
+use App\Http\Requests\Pac\StoreActionRequest;
+use App\Http\Requests\Pac\StorePlanAmeliorationRequest;
+use App\Http\Requests\Pac\UpdateActionRequest;
+use App\Http\Requests\Pac\UpdatePlanAmeliorationRequest;
+use App\Models\ActionAmelioration;
+use App\Models\PlanAmelioration;
+use App\Services\PlanAmeliorationService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Phase 2 Module M6 — Plans d'Amélioration Continue (PAC).
+ * Module 6 — Plans d'Amélioration Continue (PAC).
+ *
+ * Tracks corrective action plans triggered by audits, incidents, QVCT
+ * alerts, or beneficiary complaints — with per-action status and
+ * progression %.
  */
 class PlanAmeliorationController extends Controller
 {
+    public function __construct(private readonly PlanAmeliorationService $plans) {}
+
     public function index(): Response
     {
-        $demo = config('app.env') === 'local';
+        $this->authorize('viewAny', PlanAmelioration::class);
+
+        $plans = PlanAmelioration::query()
+            ->with(['actions' => fn ($q) => $q->where('statut', '!=', ActionStatus::Annulee->value)])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (PlanAmelioration $p) {
+                $relevantActions = $p->actions;
+                $total = $relevantActions->count();
+                $done = $relevantActions->where('statut', ActionStatus::Realisee)->count();
+
+                return [
+                    'id' => $p->id,
+                    'titre' => $p->titre,
+                    'source' => $p->source->value,
+                    'source_label' => $p->source->label(),
+                    'statut' => $p->statut->value,
+                    'statut_label' => $p->statut->label(),
+                    'echeance' => $p->echeance?->format('Y-m-d'),
+                    'responsable' => $p->responsable,
+                    'nb_actions' => $total,
+                    'nb_actions_realisees' => $done,
+                    'progression' => $total === 0 ? 0 : (int) round(($done / $total) * 100),
+                ];
+            })->all();
+
+        $structureId = currentStructure()?->getKey();
 
         return Inertia::render('dashboard/plans-amelioration/index', [
-            'plans' => $demo ? $this->demoPlans() : [],
-            'stats' => $demo
-                ? ['total' => 3, 'en_cours' => 2, 'termines' => 1, 'taux_completion' => 58]
+            'plans' => $plans,
+            'stats' => $structureId
+                ? $this->plans->statsForStructure($structureId)
                 : ['total' => 0, 'en_cours' => 0, 'termines' => 0, 'taux_completion' => null],
         ]);
     }
 
     public function create(): Response
     {
+        $this->authorize('create', PlanAmelioration::class);
+
         return Inertia::render('dashboard/plans-amelioration/create', [
-            'sources' => [
-                ['value' => 'audit', 'label' => 'Écart d\'audit'],
-                ['value' => 'incident', 'label' => 'Incident / EI'],
-                ['value' => 'qvct', 'label' => 'Alerte QVCT'],
-                ['value' => 'reclamation', 'label' => 'Réclamation usager'],
-                ['value' => 'autre', 'label' => 'Autre'],
-            ],
+            'sources' => array_map(
+                fn (PacSource $s) => ['value' => $s->value, 'label' => $s->label()],
+                PacSource::cases(),
+            ),
         ]);
     }
 
-    public function store(): RedirectResponse
+    public function store(StorePlanAmeliorationRequest $request): RedirectResponse
     {
-        return back()->with('info', 'Module Plans d\'amélioration en cours de développement.');
+        $plan = $this->plans->create($request->validated(), $request->user());
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', "Plan d'amélioration créé.");
     }
 
-    public function show(string $id): Response
+    public function show(PlanAmelioration $plan): Response
     {
-        $plan = collect($this->demoPlans())->firstWhere('id', $id);
+        $this->authorize('view', $plan);
+
+        $plan->load('actions');
 
         return Inertia::render('dashboard/plans-amelioration/show', [
-            'plan' => $plan,
+            'plan' => [
+                'id' => $plan->id,
+                'titre' => $plan->titre,
+                'source' => $plan->source->value,
+                'source_label' => $plan->source->label(),
+                'source_id' => $plan->source_id,
+                'constat' => $plan->constat,
+                'statut' => $plan->statut->value,
+                'statut_label' => $plan->statut->label(),
+                'responsable' => $plan->responsable,
+                'echeance' => $plan->echeance?->format('Y-m-d'),
+                'progression' => $plan->progression(),
+                'is_terminal' => $plan->isTerminal(),
+                'closed_at' => $plan->closed_at?->format('Y-m-d H:i'),
+                'cancelled_at' => $plan->cancelled_at?->format('Y-m-d H:i'),
+                'cancellation_reason' => $plan->cancellation_reason,
+                'created_at' => $plan->created_at?->format('Y-m-d H:i'),
+                'actions' => $plan->actions->map(fn (ActionAmelioration $a) => [
+                    'id' => $a->id,
+                    'description' => $a->description,
+                    'responsable' => $a->responsable,
+                    'echeance' => $a->echeance?->format('Y-m-d'),
+                    'statut' => $a->statut->value,
+                    'statut_label' => $a->statut->label(),
+                    'realise_at' => $a->realise_at?->format('Y-m-d H:i'),
+                ])->all(),
+            ],
+            'can' => [
+                'update' => request()->user()?->can('update', $plan) ?? false,
+                'close' => request()->user()?->can('close', $plan) ?? false,
+                'cancel' => request()->user()?->can('cancel', $plan) ?? false,
+            ],
         ]);
     }
 
-    public function update(string $id): RedirectResponse
+    public function edit(PlanAmelioration $plan): Response
     {
-        return back()->with('info', 'Module Plans d\'amélioration en cours de développement.');
+        $this->authorize('update', $plan);
+
+        return Inertia::render('dashboard/plans-amelioration/edit', [
+            'plan' => [
+                'id' => $plan->id,
+                'titre' => $plan->titre,
+                'source' => $plan->source->value,
+                'source_label' => $plan->source->label(),
+                'constat' => $plan->constat,
+                'responsable' => $plan->responsable,
+                'echeance' => $plan->echeance?->format('Y-m-d'),
+            ],
+        ]);
     }
 
-    /** @return list<array<string, mixed>> */
-    private function demoPlans(): array
+    public function update(UpdatePlanAmeliorationRequest $request, PlanAmelioration $plan): RedirectResponse
     {
-        return [
-            [
-                'id' => 'pac-001',
-                'titre' => 'PAC — Traçabilité des transmissions',
-                'source' => 'audit',
-                'source_label' => 'Écart d\'audit',
-                'constat' => "Constat lors de l'audit HAS 2026 : les transmissions orales entre intervenants ne sont pas systématiquement tracées dans le cahier numérique, ce qui crée des ruptures dans la continuité de l'accompagnement.",
-                'statut' => 'en_cours',
-                'statut_label' => 'En cours',
-                'responsable' => 'Claire Bernard',
-                'echeance' => '2026-06-30',
-                'progression' => 66,
-                'actions' => [
-                    ['id' => 1, 'description' => 'Rédiger la procédure de transmission numérique obligatoire', 'responsable' => 'Claire Bernard', 'echeance' => '2026-04-15', 'statut' => 'done', 'realise_at' => '2026-04-12'],
-                    ['id' => 2, 'description' => 'Former les 12 intervenants à l\'outil de transmission', 'responsable' => 'Thomas Dupont', 'echeance' => '2026-05-15', 'statut' => 'done', 'realise_at' => '2026-05-10'],
-                    ['id' => 3, 'description' => 'Audit de conformité à 1 mois post-déploiement', 'responsable' => 'Claire Bernard', 'echeance' => '2026-06-30', 'statut' => 'en_cours', 'realise_at' => null],
-                ],
-            ],
-            [
-                'id' => 'pac-002',
-                'titre' => 'PAC — Prévention des chutes à domicile',
-                'source' => 'incident',
-                'source_label' => 'Incident / EI',
-                'constat' => 'Série de 3 incidents de chute en Q1 2026 impliquant des bénéficiaires GIR 2-3. Analyse racine : absence de check-list systématique d\'évaluation des risques domicile.',
-                'statut' => 'en_cours',
-                'statut_label' => 'En cours',
-                'responsable' => 'Thomas Dupont',
-                'echeance' => '2026-07-31',
-                'progression' => 40,
-                'actions' => [
-                    ['id' => 4, 'description' => 'Créer la check-list d\'évaluation des risques domicile', 'responsable' => 'Claire Bernard', 'echeance' => '2026-04-30', 'statut' => 'done', 'realise_at' => '2026-04-28'],
-                    ['id' => 5, 'description' => 'Réévaluer les 8 domiciles des bénéficiaires GIR 1-3', 'responsable' => 'Marie Leclerc', 'echeance' => '2026-06-15', 'statut' => 'en_cours', 'realise_at' => null],
-                    ['id' => 6, 'description' => 'Installer les équipements de prévention identifiés', 'responsable' => 'Thomas Dupont', 'echeance' => '2026-07-15', 'statut' => 'planifiee', 'realise_at' => null],
-                    ['id' => 7, 'description' => 'Former les intervenants aux gestes de prévention', 'responsable' => 'Anne Petit', 'echeance' => '2026-07-31', 'statut' => 'planifiee', 'realise_at' => null],
-                    ['id' => 8, 'description' => 'Mesurer l\'efficacité à 3 mois (taux d\'incidents chute)', 'responsable' => 'Claire Bernard', 'echeance' => '2026-10-31', 'statut' => 'planifiee', 'realise_at' => null],
-                ],
-            ],
-            [
-                'id' => 'pac-003',
-                'titre' => 'PAC — Protocole médicamenteux',
-                'source' => 'audit',
-                'source_label' => 'Écart d\'audit',
-                'constat' => 'Protocole de gestion médicamenteuse non mis à jour depuis 14 mois (audit HAS 2026, écart majeur).',
-                'statut' => 'termine',
-                'statut_label' => 'Terminé',
-                'responsable' => 'Claire Bernard',
-                'echeance' => '2026-04-30',
-                'progression' => 100,
-                'actions' => [
-                    ['id' => 9, 'description' => 'Réviser le protocole avec le médecin coordonnateur', 'responsable' => 'Claire Bernard', 'echeance' => '2026-03-31', 'statut' => 'done', 'realise_at' => '2026-03-28'],
-                    ['id' => 10, 'description' => 'Diffuser le protocole révisé et recueillir les accusés de réception', 'responsable' => 'Thomas Dupont', 'echeance' => '2026-04-15', 'statut' => 'done', 'realise_at' => '2026-04-14'],
-                    ['id' => 11, 'description' => 'Contrôle terrain de la bonne application', 'responsable' => 'Claire Bernard', 'echeance' => '2026-04-30', 'statut' => 'done', 'realise_at' => '2026-04-29'],
-                ],
-            ],
-        ];
+        $this->plans->update($plan, $request->validated());
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Plan mis à jour.');
+    }
+
+    public function storeAction(StoreActionRequest $request, PlanAmelioration $plan): RedirectResponse
+    {
+        $this->plans->addAction($plan, $request->validated());
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Action ajoutée.');
+    }
+
+    public function updateAction(
+        UpdateActionRequest $request,
+        PlanAmelioration $plan,
+        ActionAmelioration $action,
+    ): RedirectResponse {
+        abort_if($action->plan_amelioration_id !== $plan->id, 404);
+
+        $this->plans->updateAction($action, $request->validated());
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Action mise à jour.');
+    }
+
+    public function markActionDone(PlanAmelioration $plan, ActionAmelioration $action): RedirectResponse
+    {
+        $this->authorize('update', $plan);
+        abort_if($action->plan_amelioration_id !== $plan->id, 404);
+
+        $this->plans->markActionDone($action);
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Action marquée comme réalisée.');
+    }
+
+    public function destroyAction(PlanAmelioration $plan, ActionAmelioration $action): RedirectResponse
+    {
+        $this->authorize('update', $plan);
+        abort_if($action->plan_amelioration_id !== $plan->id, 404);
+
+        $this->plans->deleteAction($action);
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Action supprimée.');
+    }
+
+    public function close(ClosePlanRequest $request, PlanAmelioration $plan): RedirectResponse
+    {
+        $this->plans->close($plan, $request->input('reason'));
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Plan clôturé.');
+    }
+
+    public function cancel(CancelPlanRequest $request, PlanAmelioration $plan): RedirectResponse
+    {
+        $this->plans->cancel($plan, $request->input('reason'));
+
+        return redirect()
+            ->route('pac.show', $plan)
+            ->with('success', 'Plan annulé.');
     }
 }

@@ -1,0 +1,108 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: QVCT & RH
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Baromètre QVCT" [ref=e24] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e26]
+              - generic [ref=e28]: Baromètre QVCT
+          - listitem [ref=e29]:
+            - link "Formations" [ref=e30] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e32]
+              - generic [ref=e35]: Formations
+          - listitem [ref=e36]:
+            - link "Communication" [ref=e37] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e39]
+              - generic [ref=e41]: Communication
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Administration
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Utilisateurs" [ref=e46] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e48]
+              - generic [ref=e52]: Utilisateurs
+    - generic [ref=e54]:
+      - generic [ref=e55]: AP
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: Anne Petit
+        - paragraph [ref=e58]: utilisateur
+  - generic [ref=e59]:
+    - banner [ref=e60]:
+      - generic [ref=e62]:
+        - heading "Tableau de bord" [level=1] [ref=e63]
+        - paragraph [ref=e64]: Pilotage qualité & QVCT
+      - button "AP Anne Petit" [ref=e67] [cursor=pointer]:
+        - generic [ref=e68]: AP
+        - generic [ref=e69]: Anne Petit
+        - img [ref=e70]
+    - main [ref=e72]:
+      - generic [ref=e74]:
+        - heading "Bon après-midi, Anne" [level=1] [ref=e75]
+        - paragraph [ref=e76]:
+          - generic [ref=e77]: mardi 5 mai 2026
+      - paragraph [ref=e78]: Activité du mois
+      - link "Formations à jour Intervenants actifs 0 ce mois Voir le détail" [ref=e80] [cursor=pointer]:
+        - /url: /users
+        - generic [ref=e81]:
+          - img [ref=e83]
+          - generic [ref=e87]: Formations à jour
+        - paragraph [ref=e88]: Intervenants actifs
+        - generic [ref=e89]:
+          - paragraph [ref=e90]: "0"
+          - generic [ref=e91]: ce mois
+        - generic [ref=e92]:
+          - text: Voir le détail
+          - img [ref=e93]
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - img [ref=e99]
+          - paragraph [ref=e102]: Conformité
+          - paragraph [ref=e103]: —
+          - paragraph [ref=e105]: "Cible : 85 %"
+        - generic [ref=e106]:
+          - img [ref=e109]
+          - paragraph [ref=e112]: Plan d'actions correctives
+          - paragraph [ref=e113]: —
+          - paragraph [ref=e115]: "Cible : > 60 %"
+        - generic [ref=e116]:
+          - img [ref=e119]
+          - paragraph [ref=e121]: Score QVCT moyen
+          - paragraph [ref=e122]: —
+          - paragraph [ref=e124]: 0 alertes actives
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - heading "Alertes QVCT" [level=3] [ref=e130]
+              - paragraph [ref=e131]: 0 signalaux
+            - link "Gérer →" [ref=e133] [cursor=pointer]:
+              - /url: /qvct
+          - generic [ref=e135]:
+            - img [ref=e137]
+            - paragraph [ref=e139]: Aucune alerte QVCT active
+        - generic [ref=e140]:
+          - generic [ref=e142]:
+            - heading "Actions rapides" [level=3] [ref=e143]
+            - paragraph [ref=e144]: Raccourcis fréquents
+          - link "Questionnaire QVCT" [ref=e146] [cursor=pointer]:
+            - /url: /qvct/questionnaire
+            - img [ref=e148]
+            - generic [ref=e150]: Questionnaire QVCT
+            - img [ref=e151]

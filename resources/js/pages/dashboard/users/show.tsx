@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardBody, CardHeader, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link, router, usePage } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -26,6 +27,7 @@ interface PageFlash {
 export default function ShowUser({ user }: { user: UserDetail }) {
     const { props } = usePage<{ flash?: PageFlash }>();
     const invitationUrl = props.flash?.invitation_url;
+    const canManage = useCan('users.manage');
 
     const isActive = user.status === 'active';
 
@@ -48,9 +50,11 @@ export default function ShowUser({ user }: { user: UserDetail }) {
                     { label: user.name },
                 ]}
                 actions={
-                    <Button variant={isActive ? 'secondary' : 'primary'} onClick={toggleStatus}>
-                        {isActive ? 'Désactiver' : 'Réactiver'}
-                    </Button>
+                    canManage ? (
+                        <Button variant={isActive ? 'secondary' : 'primary'} onClick={toggleStatus}>
+                            {isActive ? 'Désactiver' : 'Réactiver'}
+                        </Button>
+                    ) : null
                 }
             />
 

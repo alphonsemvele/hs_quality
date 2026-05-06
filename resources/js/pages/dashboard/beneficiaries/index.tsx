@@ -1,4 +1,5 @@
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -21,6 +22,7 @@ interface Props {
 
 export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
     const list = beneficiaries?.data ?? [];
+    const canCreate = useCan('beneficiaries.create');
 
     return (
         <DashboardLayout title="Bénéficiaires" subtitle="Personnes accompagnées par votre structure">
@@ -29,9 +31,11 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                 subtitle={`${meta?.total ?? list.length} bénéficiaire(s) — page ${meta?.current_page ?? 1} sur ${meta?.last_page ?? 1}`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Bénéficiaires' }]}
                 actions={
-                    <Link href="/beneficiaries/create">
-                        <Button leadingIcon={<PlusIcon />}>Nouveau bénéficiaire</Button>
-                    </Link>
+                    canCreate ? (
+                        <Link href="/beneficiaries/create">
+                            <Button leadingIcon={<PlusIcon />}>Nouveau bénéficiaire</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -89,9 +93,11 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                         title="Aucun bénéficiaire"
                         description="Créez votre premier bénéficiaire pour démarrer le suivi."
                         action={
-                            <Link href="/beneficiaries/create">
-                                <Button>Nouveau bénéficiaire</Button>
-                            </Link>
+                            canCreate ? (
+                                <Link href="/beneficiaries/create">
+                                    <Button>Nouveau bénéficiaire</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 )}

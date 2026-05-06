@@ -1,0 +1,185 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: QVCT & RH
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Baromètre QVCT" [ref=e24] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e26]
+              - generic [ref=e28]: Baromètre QVCT
+          - listitem [ref=e29]:
+            - link "Formations" [ref=e30] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e32]
+              - generic [ref=e35]: Formations
+          - listitem [ref=e36]:
+            - link "Communication" [ref=e37] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e39]
+              - generic [ref=e41]: Communication
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Administration
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Utilisateurs" [ref=e46] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e48]
+              - generic [ref=e52]: Utilisateurs
+    - generic [ref=e54]:
+      - generic [ref=e55]: AP
+      - generic [ref=e56]:
+        - paragraph [ref=e57]: Anne Petit
+        - paragraph [ref=e58]: utilisateur
+  - generic [ref=e59]:
+    - banner [ref=e60]:
+      - generic [ref=e62]:
+        - heading "Utilisateurs" [level=1] [ref=e63]
+        - paragraph [ref=e64]: Gestion des membres de votre structure
+      - button "AP Anne Petit" [ref=e67] [cursor=pointer]:
+        - generic [ref=e68]: AP
+        - generic [ref=e69]: Anne Petit
+        - img [ref=e70]
+    - main [ref=e72]:
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - navigation "Fil d'ariane" [ref=e75]:
+            - link "Tableau de bord" [ref=e77] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e78]:
+              - img [ref=e79]
+              - generic [ref=e81]: Utilisateurs
+          - heading "Utilisateurs" [level=1] [ref=e82]
+          - paragraph [ref=e83]: 7 membres dans votre structure
+        - link "Inviter un utilisateur" [ref=e85] [cursor=pointer]:
+          - /url: /users/create
+          - button "Inviter un utilisateur" [ref=e86]:
+            - img [ref=e87]
+            - text: Inviter un utilisateur
+      - table [ref=e91]:
+        - rowgroup [ref=e92]:
+          - row "Nom Rôle Email Statut 2FA" [ref=e93]:
+            - columnheader "Nom" [ref=e94]
+            - columnheader "Rôle" [ref=e95]
+            - columnheader "Email" [ref=e96]
+            - columnheader "Statut" [ref=e97]
+            - columnheader "2FA" [ref=e98]
+            - columnheader [ref=e99]
+        - rowgroup [ref=e100]:
+          - row "CD Coordinateur Demo Coordinateur / Responsable de secteur coordinateur@demo.fr Actif Non enrôlée Détail →" [ref=e101]:
+            - cell "CD Coordinateur Demo" [ref=e102]:
+              - generic [ref=e103]:
+                - generic [ref=e104]: CD
+                - paragraph [ref=e106]: Coordinateur Demo
+            - cell "Coordinateur / Responsable de secteur" [ref=e107]:
+              - generic [ref=e108]: Coordinateur / Responsable de secteur
+            - cell "coordinateur@demo.fr" [ref=e109]
+            - cell "Actif" [ref=e110]:
+              - generic [ref=e111]: Actif
+            - cell "Non enrôlée" [ref=e113]:
+              - generic [ref=e114]: Non enrôlée
+            - cell "Détail →" [ref=e115]:
+              - link "Détail →" [ref=e116] [cursor=pointer]:
+                - /url: /users/3
+          - row "DD Dirigeant Demo Dirigeant de structure dirigeant@demo.fr Actif Non enrôlée Détail →" [ref=e117]:
+            - cell "DD Dirigeant Demo" [ref=e118]:
+              - generic [ref=e119]:
+                - generic [ref=e120]: DD
+                - paragraph [ref=e122]: Dirigeant Demo
+            - cell "Dirigeant de structure" [ref=e123]:
+              - generic [ref=e124]: Dirigeant de structure
+            - cell "dirigeant@demo.fr" [ref=e125]
+            - cell "Actif" [ref=e126]:
+              - generic [ref=e127]: Actif
+            - cell "Non enrôlée" [ref=e129]:
+              - generic [ref=e130]: Non enrôlée
+            - cell "Détail →" [ref=e131]:
+              - link "Détail →" [ref=e132] [cursor=pointer]:
+                - /url: /users/2
+          - row "ID Intervenant Demo Intervenant à domicile intervenant@demo.fr Actif Optionnelle Détail →" [ref=e133]:
+            - cell "ID Intervenant Demo" [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]: ID
+                - paragraph [ref=e138]: Intervenant Demo
+            - cell "Intervenant à domicile" [ref=e139]:
+              - generic [ref=e140]: Intervenant à domicile
+            - cell "intervenant@demo.fr" [ref=e141]
+            - cell "Actif" [ref=e142]:
+              - generic [ref=e143]: Actif
+            - cell "Optionnelle" [ref=e145]:
+              - generic [ref=e146]: Optionnelle
+            - cell "Détail →" [ref=e147]:
+              - link "Détail →" [ref=e148] [cursor=pointer]:
+                - /url: /users/5
+          - row "RD Referent_qualite Demo Référent qualité qualite@demo.fr Actif Non enrôlée Détail →" [ref=e149]:
+            - cell "RD Referent_qualite Demo" [ref=e150]:
+              - generic [ref=e151]:
+                - generic [ref=e152]: RD
+                - paragraph [ref=e154]: Referent_qualite Demo
+            - cell "Référent qualité" [ref=e155]:
+              - generic [ref=e156]: Référent qualité
+            - cell "qualite@demo.fr" [ref=e157]
+            - cell "Actif" [ref=e158]:
+              - generic [ref=e159]: Actif
+            - cell "Non enrôlée" [ref=e161]:
+              - generic [ref=e162]: Non enrôlée
+            - cell "Détail →" [ref=e163]:
+              - link "Détail →" [ref=e164] [cursor=pointer]:
+                - /url: /users/4
+          - row "LM Luc Moreau Intervenant à domicile intervenant2@demo.fr Actif Optionnelle Détail →" [ref=e165]:
+            - cell "LM Luc Moreau" [ref=e166]:
+              - generic [ref=e167]:
+                - generic [ref=e168]: LM
+                - paragraph [ref=e170]: Luc Moreau
+            - cell "Intervenant à domicile" [ref=e171]:
+              - generic [ref=e172]: Intervenant à domicile
+            - cell "intervenant2@demo.fr" [ref=e173]
+            - cell "Actif" [ref=e174]:
+              - generic [ref=e175]: Actif
+            - cell "Optionnelle" [ref=e177]:
+              - generic [ref=e178]: Optionnelle
+            - cell "Détail →" [ref=e179]:
+              - link "Détail →" [ref=e180] [cursor=pointer]:
+                - /url: /users/6
+          - row "AP Anne Petit Responsable RH / formation rh@demo.fr Actif Non enrôlée Détail →" [ref=e181]:
+            - cell "AP Anne Petit" [ref=e182]:
+              - generic [ref=e183]:
+                - generic [ref=e184]: AP
+                - paragraph [ref=e186]: Anne Petit
+            - cell "Responsable RH / formation" [ref=e187]:
+              - generic [ref=e188]: Responsable RH / formation
+            - cell "rh@demo.fr" [ref=e189]
+            - cell "Actif" [ref=e190]:
+              - generic [ref=e191]: Actif
+            - cell "Non enrôlée" [ref=e193]:
+              - generic [ref=e194]: Non enrôlée
+            - cell "Détail →" [ref=e195]:
+              - link "Détail →" [ref=e196] [cursor=pointer]:
+                - /url: /users/7
+          - row "TU Test User Intervenant à domicile test@example.com Actif Optionnelle Détail →" [ref=e197]:
+            - cell "TU Test User" [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: TU
+                - paragraph [ref=e202]: Test User
+            - cell "Intervenant à domicile" [ref=e203]:
+              - generic [ref=e204]: Intervenant à domicile
+            - cell "test@example.com" [ref=e205]
+            - cell "Actif" [ref=e206]:
+              - generic [ref=e207]: Actif
+            - cell "Optionnelle" [ref=e209]:
+              - generic [ref=e210]: Optionnelle
+            - cell "Détail →" [ref=e211]:
+              - link "Détail →" [ref=e212] [cursor=pointer]:
+                - /url: /users/1

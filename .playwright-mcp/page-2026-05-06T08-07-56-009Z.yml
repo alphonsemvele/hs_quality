@@ -1,0 +1,152 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Communication" [ref=e75] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e77]
+              - generic [ref=e79]: Communication
+    - generic [ref=e81]:
+      - generic [ref=e82]: CB
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Claire Bernard
+        - paragraph [ref=e85]: utilisateur
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - heading "Mise à jour du protocole médicamenteux" [level=1] [ref=e90]
+      - button "CB Claire Bernard" [ref=e93] [cursor=pointer]:
+        - generic [ref=e94]: CB
+        - generic [ref=e95]: Claire Bernard
+        - img [ref=e96]
+    - main [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - navigation "Fil d'ariane" [ref=e101]:
+            - link "Tableau de bord" [ref=e103] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e104]:
+              - img [ref=e105]
+              - link "Plans d'amélioration" [ref=e107] [cursor=pointer]:
+                - /url: /plans-amelioration
+            - generic [ref=e108]:
+              - img [ref=e109]
+              - generic [ref=e111]: Mise à jour du protocole médicamenteux
+          - heading "Mise à jour du protocole médicamenteux" [level=1] [ref=e112]
+          - paragraph [ref=e113]: "Audit · Échéance : 2026-05-27"
+        - generic [ref=e114]:
+          - generic [ref=e115]: En cours
+          - link "Modifier" [ref=e117] [cursor=pointer]:
+            - /url: /plans-amelioration/019dfc2d-25bc-7240-b783-c6245394b5a6/edit
+            - button "Modifier" [ref=e118]
+          - button "Clôturer" [ref=e119]
+          - button "Annuler plan" [ref=e120]
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - heading "Constat / Écart" [level=3] [ref=e125]
+          - generic [ref=e126]:
+            - paragraph [ref=e127]: Protocole non mis à jour depuis 14 mois — risque sur la traçabilité de l'administration.
+            - generic [ref=e128]:
+              - paragraph [ref=e129]: Progression globale
+              - paragraph [ref=e132]: 67 %
+        - generic [ref=e133]:
+          - heading "Synthèse" [level=3] [ref=e136]
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - term [ref=e140]: Source
+              - definition [ref=e141]: Audit
+            - generic [ref=e142]:
+              - term [ref=e143]: Responsable
+              - definition [ref=e144]: Claire Bernard
+            - generic [ref=e145]:
+              - term [ref=e146]: Échéance
+              - definition [ref=e147]: 2026-05-27
+            - generic [ref=e148]:
+              - term [ref=e149]: Actions
+              - definition [ref=e150]: "3"
+        - generic [ref=e151]:
+          - generic [ref=e152]:
+            - generic [ref=e153]:
+              - heading "Actions correctives" [level=3] [ref=e154]
+              - paragraph [ref=e155]: 3 action(s)
+            - button "+ Nouvelle action" [ref=e157]
+          - list [ref=e159]:
+            - listitem [ref=e160]:
+              - generic [ref=e161]:
+                - generic [ref=e162]:
+                  - paragraph [ref=e163]: Formation des intervenants au nouveau protocole — session terrain.
+                  - paragraph [ref=e164]: "Resp. : Anne Petit · Échéance : 2026-05-20"
+                - generic [ref=e165]:
+                  - generic [ref=e166]: En cours
+                  - button "✓ Marquer réalisée" [ref=e167]
+                  - button "Supprimer" [ref=e168]
+            - listitem [ref=e169]:
+              - generic [ref=e170]:
+                - generic [ref=e171]:
+                  - paragraph [ref=e172]: Audit du protocole existant — diagnostic des écarts.
+                  - paragraph [ref=e173]: "Resp. : Claire Bernard · Échéance : 2026-06-28 · Réalisée le 2026-05-06 07:25"
+                - generic [ref=e174]:
+                  - generic [ref=e175]: Réalisée
+                  - button "Supprimer" [ref=e176]
+            - listitem [ref=e177]:
+              - generic [ref=e178]:
+                - generic [ref=e179]:
+                  - paragraph [ref=e180]: Rédaction du protocole v2 (revue par le médecin coordonnateur).
+                  - paragraph [ref=e181]: "Resp. : Claire Bernard · Échéance : 2026-05-19 · Réalisée le 2026-05-06 07:25"
+                - generic [ref=e182]:
+                  - generic [ref=e183]: Réalisée
+                  - button "Supprimer" [ref=e184]

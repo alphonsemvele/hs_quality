@@ -4,143 +4,192 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\EcartGravite;
+use App\Enums\Referentiel;
+use App\Http\Requests\Audits\CancelAuditRequest;
+use App\Http\Requests\Audits\StoreAuditRequest;
+use App\Http\Requests\Audits\StoreEcartRequest;
+use App\Http\Requests\Audits\UpdateAuditRequest;
+use App\Models\AuditEcart;
+use App\Models\QualityAudit;
+use App\Services\QualityAuditService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Phase 2 Module M6 — HAS / AFNOR / ISO 9001 audit grids and conformity scoring.
- *
- * Frontend pages are shipped; backend domain (models, services, policies)
- * is not yet implemented. Controllers pass demo data in local environment
- * and empty data in production.
+ * Module 6 — HAS / AFNOR / ISO 9001 audit grids and conformity scoring.
  */
 class AuditController extends Controller
 {
+    public function __construct(private readonly QualityAuditService $audits) {}
+
     public function index(): Response
     {
-        $demo = $this->isDemoMode();
+        $this->authorize('viewAny', QualityAudit::class);
+
+        $audits = QualityAudit::query()
+            ->withCount('ecarts as nb_ecarts')
+            ->orderByDesc('date_audit')
+            ->get()
+            ->map(fn (QualityAudit $a) => [
+                'id' => $a->id,
+                'titre' => $a->titre,
+                'referentiel' => $a->referentiel->value,
+                'referentiel_label' => $a->referentiel->label(),
+                'date_audit' => $a->date_audit?->format('Y-m-d'),
+                'statut' => $a->statut->value,
+                'statut_label' => $a->statut->label(),
+                'score' => $a->score,
+                'auditeur' => $a->auditeur,
+                'nb_ecarts' => (int) $a->nb_ecarts,
+            ])->all();
+
+        $structureId = $this->currentStructureId();
 
         return Inertia::render('dashboard/audits/index', [
-            'audits' => $demo ? $this->demoAudits() : [],
-            'stats' => $demo
-                ? ['total' => 4, 'en_cours' => 1, 'termines' => 2, 'score_moyen' => 78]
+            'audits' => $audits,
+            'stats' => $structureId
+                ? $this->audits->statsForStructure($structureId)
                 : ['total' => 0, 'en_cours' => 0, 'termines' => 0, 'score_moyen' => null],
         ]);
     }
 
     public function create(): Response
     {
+        $this->authorize('create', QualityAudit::class);
+
         return Inertia::render('dashboard/audits/create', [
-            'referentiels' => [
-                ['value' => 'has', 'label' => 'HAS — Évaluation externe'],
-                ['value' => 'afnor', 'label' => 'AFNOR NF X50-056'],
-                ['value' => 'iso9001', 'label' => 'ISO 9001:2015'],
-                ['value' => 'interne', 'label' => 'Audit interne personnalisé'],
-            ],
+            'referentiels' => array_map(
+                fn (Referentiel $r) => ['value' => $r->value, 'label' => $r->label()],
+                Referentiel::cases(),
+            ),
         ]);
     }
 
-    public function store(): RedirectResponse
+    public function store(StoreAuditRequest $request): RedirectResponse
     {
-        return back()->with('info', 'Module Audits en cours de développement.');
+        $audit = $this->audits->create($request->validated(), $request->user());
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Audit créé.');
     }
 
-    public function show(string $id): Response
+    public function show(QualityAudit $audit): Response
     {
-        $demo = $this->isDemoMode();
-        $audit = $demo ? collect($this->demoAudits())->firstWhere('id', $id) : null;
+        $this->authorize('view', $audit);
+
+        $audit->load('ecarts');
 
         return Inertia::render('dashboard/audits/show', [
-            'audit' => $audit,
+            'audit' => [
+                'id' => $audit->id,
+                'titre' => $audit->titre,
+                'referentiel' => $audit->referentiel->value,
+                'referentiel_label' => $audit->referentiel->label(),
+                'description' => $audit->description,
+                'date_audit' => $audit->date_audit?->format('Y-m-d'),
+                'statut' => $audit->statut->value,
+                'statut_label' => $audit->statut->label(),
+                'score' => $audit->score,
+                'auditeur' => $audit->auditeur,
+                'finalized_at' => $audit->finalized_at?->format('Y-m-d H:i'),
+                'cancelled_at' => $audit->cancelled_at?->format('Y-m-d H:i'),
+                'cancellation_reason' => $audit->cancellation_reason,
+                'is_terminal' => $audit->isTerminal(),
+                'ecarts' => $audit->ecarts->map(fn (AuditEcart $e) => [
+                    'id' => $e->id,
+                    'critere' => $e->critere,
+                    'constat' => $e->constat,
+                    'gravite' => $e->gravite->value,
+                    'gravite_label' => $e->gravite->label(),
+                    'action_corrective' => $e->action_corrective,
+                ])->all(),
+                'created_at' => $audit->created_at?->format('Y-m-d H:i'),
+            ],
+            'gravites' => array_map(
+                fn (EcartGravite $g) => ['value' => $g->value, 'label' => $g->label()],
+                EcartGravite::cases(),
+            ),
+            'can' => [
+                'execute' => request()->user()?->can('execute', $audit) ?? false,
+                'finalize' => request()->user()?->can('finalize', $audit) ?? false,
+                'cancel' => request()->user()?->can('cancel', $audit) ?? false,
+                'update' => request()->user()?->can('update', $audit) ?? false,
+            ],
         ]);
     }
 
-    public function update(string $id): RedirectResponse
+    public function edit(QualityAudit $audit): Response
     {
-        return back()->with('info', 'Module Audits en cours de développement.');
+        $this->authorize('update', $audit);
+
+        return Inertia::render('dashboard/audits/edit', [
+            'audit' => [
+                'id' => $audit->id,
+                'titre' => $audit->titre,
+                'referentiel' => $audit->referentiel->value,
+                'description' => $audit->description,
+                'date_audit' => $audit->date_audit?->format('Y-m-d'),
+                'auditeur' => $audit->auditeur,
+            ],
+            'referentiels' => array_map(
+                fn (Referentiel $r) => ['value' => $r->value, 'label' => $r->label()],
+                Referentiel::cases(),
+            ),
+        ]);
     }
 
-    public function finaliser(string $id): RedirectResponse
+    public function update(UpdateAuditRequest $request, QualityAudit $audit): RedirectResponse
     {
-        return back()->with('info', 'Module Audits en cours de développement.');
+        $this->audits->update($audit, $request->validated());
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Audit mis à jour.');
     }
 
-    private function isDemoMode(): bool
+    public function storeEcart(StoreEcartRequest $request, QualityAudit $audit): RedirectResponse
     {
-        return config('app.env') === 'local';
+        $this->audits->addEcart($audit, $request->validated(), $request->user());
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Écart ajouté.');
     }
 
-    /** @return list<array<string, mixed>> */
-    private function demoAudits(): array
+    public function destroyEcart(QualityAudit $audit, AuditEcart $ecart): RedirectResponse
     {
-        return [
-            [
-                'id' => 'audit-001',
-                'titre' => 'Audit HAS — Évaluation externe annuelle',
-                'referentiel' => 'has',
-                'referentiel_label' => 'HAS — Évaluation externe',
-                'date_audit' => '2026-03-15',
-                'statut' => 'termine',
-                'statut_label' => 'Terminé',
-                'score' => 82,
-                'auditeur' => 'Dr. Lefèvre (cabinet AQS)',
-                'nb_ecarts' => 3,
-                'description' => "Évaluation externe annuelle couvrant les 5 domaines du référentiel HAS :\n- Droits des usagers\n- Personnalisation de l'accompagnement\n- Organisation interne\n- Prévention des risques\n- Amélioration continue",
-                'ecarts' => [
-                    ['id' => 1, 'critere' => 'Traçabilité des transmissions', 'constat' => 'Transmissions orales non systématiquement tracées dans le cahier numérique', 'gravite' => 'majeur', 'action_corrective' => 'Mise en place du cahier de transmission numérique obligatoire'],
-                    ['id' => 2, 'critere' => 'Plan de formation', 'constat' => 'Absence de plan de formation formalisé pour 2026', 'gravite' => 'mineur', 'action_corrective' => 'Élaboration du plan avant fin Q2'],
-                    ['id' => 3, 'critere' => 'Protocole médicamenteux', 'constat' => 'Protocole non mis à jour depuis 14 mois', 'gravite' => 'majeur', 'action_corrective' => null],
-                ],
-            ],
-            [
-                'id' => 'audit-002',
-                'titre' => 'Audit interne — Prévention des chutes',
-                'referentiel' => 'interne',
-                'referentiel_label' => 'Audit interne personnalisé',
-                'date_audit' => '2026-04-02',
-                'statut' => 'en_cours',
-                'statut_label' => 'En cours',
-                'score' => null,
-                'auditeur' => 'Claire Bernard (Réf. Qualité)',
-                'nb_ecarts' => 0,
-                'description' => 'Audit ciblé sur les pratiques de prévention des chutes à domicile suite à la série d\'incidents déclarés en Q1.',
-                'ecarts' => [],
-            ],
-            [
-                'id' => 'audit-003',
-                'titre' => 'Audit AFNOR NF X50-056 — Certification',
-                'referentiel' => 'afnor',
-                'referentiel_label' => 'AFNOR NF X50-056',
-                'date_audit' => '2026-01-20',
-                'statut' => 'termine',
-                'statut_label' => 'Terminé',
-                'score' => 74,
-                'auditeur' => 'M. Garnier (AFNOR Certification)',
-                'nb_ecarts' => 5,
-                'description' => null,
-                'ecarts' => [
-                    ['id' => 4, 'critere' => 'Gestion documentaire', 'constat' => 'Documents qualité non versionnés', 'gravite' => 'mineur', 'action_corrective' => 'GED mise en place'],
-                    ['id' => 5, 'critere' => 'Évaluation à domicile', 'constat' => 'Grille d\'évaluation incomplète', 'gravite' => 'majeur', 'action_corrective' => null],
-                    ['id' => 6, 'critere' => 'Suivi des réclamations', 'constat' => 'Délai moyen de réponse > 15 jours', 'gravite' => 'majeur', 'action_corrective' => 'Objectif ramené à 7 jours ouvrés'],
-                    ['id' => 7, 'critere' => 'Formation continue', 'constat' => '2 intervenants sans habilitation à jour', 'gravite' => 'critique', 'action_corrective' => 'Sessions de rattrapage planifiées'],
-                    ['id' => 8, 'critere' => 'Protocole urgence', 'constat' => 'Numéros d\'urgence non affichés dans 3 domiciles', 'gravite' => 'mineur', 'action_corrective' => 'Affichage systématique lors de la prochaine visite'],
-                ],
-            ],
-            [
-                'id' => 'audit-004',
-                'titre' => 'Audit ISO 9001 — Pré-audit de certification',
-                'referentiel' => 'iso9001',
-                'referentiel_label' => 'ISO 9001:2015',
-                'date_audit' => '2026-06-10',
-                'statut' => 'planifie',
-                'statut_label' => 'Planifié',
-                'score' => null,
-                'auditeur' => null,
-                'nb_ecarts' => 0,
-                'description' => 'Pré-audit en vue de la certification ISO 9001:2015 prévue pour le second semestre.',
-                'ecarts' => [],
-            ],
-        ];
+        $this->authorize('execute', $audit);
+        $this->audits->deleteEcart($audit, $ecart);
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Écart supprimé.');
+    }
+
+    public function finaliser(QualityAudit $audit): RedirectResponse
+    {
+        $this->authorize('finalize', $audit);
+        $this->audits->finalize($audit);
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Audit finalisé.');
+    }
+
+    public function cancel(CancelAuditRequest $request, QualityAudit $audit): RedirectResponse
+    {
+        $this->audits->cancel($audit, $request->input('reason'));
+
+        return redirect()
+            ->route('audits.show', $audit)
+            ->with('success', 'Audit annulé.');
+    }
+
+    private function currentStructureId(): ?string
+    {
+        return currentStructure()?->getKey();
     }
 }

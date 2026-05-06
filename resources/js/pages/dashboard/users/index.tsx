@@ -1,4 +1,5 @@
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -28,6 +29,7 @@ interface Props {
 
 export default function UsersIndex({ users }: Props) {
     const list = users?.data ?? [];
+    const canManage = useCan('users.manage');
 
     return (
         <DashboardLayout title="Utilisateurs" subtitle="Gestion des membres de votre structure">
@@ -36,9 +38,11 @@ export default function UsersIndex({ users }: Props) {
                 subtitle={`${users?.total ?? list.length} membres dans votre structure`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Utilisateurs' }]}
                 actions={
-                    <Link href="/users/create">
-                        <Button leadingIcon={<PlusIcon />}>Inviter un utilisateur</Button>
-                    </Link>
+                    canManage ? (
+                        <Link href="/users/create">
+                            <Button leadingIcon={<PlusIcon />}>Inviter un utilisateur</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -120,9 +124,11 @@ export default function UsersIndex({ users }: Props) {
                         title="Aucun utilisateur"
                         description="Invitez les premiers membres de votre équipe (coordinateurs, intervenants, référent qualité)."
                         action={
-                            <Link href="/users/create">
-                                <Button>Inviter un utilisateur</Button>
-                            </Link>
+                            canManage ? (
+                                <Link href="/users/create">
+                                    <Button>Inviter un utilisateur</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 )}

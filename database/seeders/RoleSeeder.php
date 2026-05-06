@@ -175,6 +175,8 @@ class RoleSeeder extends Seeder
 
         'dirigeant' => [
             'interventions.view.structure',
+            'interventions.update.team',
+            'interventions.delete',
             'beneficiaries.view.structure',
             'beneficiaries.create',
             'beneficiaries.update',
@@ -183,6 +185,7 @@ class RoleSeeder extends Seeder
             'care_plans.update',
             'care_plans.archive',
             'care_plans.delete',
+            'incidents.declare',
             'incidents.view.structure',
             'incidents.analyze',
             'incidents.close',
@@ -264,6 +267,11 @@ class RoleSeeder extends Seeder
             'ai.burnout_risk.view.team_aggregate',
             'audit_logs.view.own',
             'rgpd.erasure.request',
+            // RH manages staff lifecycle (invitation, deactivation,
+            // role assignment) for all in-tenant users so HR can onboard
+            // and offboard intervenants/coordinateurs without going
+            // through the dirigeant. Aligned with the validated UI matrix.
+            'users.manage.structure',
         ],
 
         'beneficiaire_portal' => [

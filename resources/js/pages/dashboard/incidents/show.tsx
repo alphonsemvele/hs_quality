@@ -9,6 +9,7 @@ import {
     IncidentStatusBadge,
     PageHeader,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -54,6 +55,7 @@ interface Incident {
 export default function ShowIncident({ incident }: { incident: Incident }) {
     const [showAnalysisForm, setShowAnalysisForm] = useState(false);
     const [showActionForm, setShowActionForm] = useState(false);
+    const canAnalyze = useCan('incidents.analyze');
 
     const startAnalyse = () => router.post(`/incidents/${incident.id}/assign`, { assigned_to: incident.declarant.id });
     const closeIncident = () => {
@@ -78,7 +80,7 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     <>
                         <IncidentGraviteBadge gravite={incident.gravite} />
                         <IncidentStatusBadge statut={incident.statut} />
-                        {!isClosed && (
+                        {!isClosed && canAnalyze && (
                             <>
                                 {incident.statut === 'declare' && (
                                     <Button variant="secondary" onClick={startAnalyse}>
@@ -143,15 +145,15 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                         title="Actions correctives"
                         subtitle={`${incident.actions_correctives.length} action(s)`}
                         action={
-                            !isClosed && (
+                            !isClosed && canAnalyze ? (
                                 <Button variant="secondary" size="sm" onClick={() => setShowActionForm(!showActionForm)}>
                                     {showActionForm ? 'Annuler' : '+ Nouvelle action'}
                                 </Button>
-                            )
+                            ) : undefined
                         }
                     />
                     <CardBody>
-                        {showActionForm && (
+                        {showActionForm && canAnalyze && (
                             <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
                                 <Form action={`/incidents/${incident.id}/actions`} method="post" onSuccess={() => setShowActionForm(false)} resetOnSuccess>
                                     {({ processing }) => (
@@ -242,15 +244,16 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                         subtitle="Cause racine identifiée"
                         action={
                             !isClosed &&
-                            !incident.analyse_causes && (
+                            canAnalyze &&
+                            !incident.analyse_causes ? (
                                 <Button variant="secondary" size="sm" onClick={() => setShowAnalysisForm(!showAnalysisForm)}>
                                     {showAnalysisForm ? 'Annuler' : '+ Démarrer'}
                                 </Button>
-                            )
+                            ) : undefined
                         }
                     />
                     <CardBody>
-                        {showAnalysisForm && !incident.analyse_causes && (
+                        {showAnalysisForm && canAnalyze && !incident.analyse_causes && (
                             <div className="mb-4 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
                                 <Form action={`/incidents/${incident.id}/analyse`} method="post" onSuccess={() => setShowAnalysisForm(false)}>
                                     {({ processing }) => (

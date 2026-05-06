@@ -1,0 +1,167 @@
+- generic [ref=e105]:
+  - complementary [ref=e106]:
+    - generic [ref=e107]:
+      - generic [ref=e108]: Q
+      - generic [ref=e109]:
+        - generic [ref=e110]: HS Quality
+        - generic [ref=e111]: Qualité & QVCT
+    - navigation [ref=e112]:
+      - list [ref=e114]:
+        - listitem [ref=e115]:
+          - link "Tableau de bord" [ref=e116] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e118]
+            - generic [ref=e121]: Tableau de bord
+      - generic [ref=e122]:
+        - paragraph [ref=e123]: QVCT & RH
+        - list [ref=e124]:
+          - listitem [ref=e125]:
+            - link "Baromètre QVCT" [ref=e126] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e128]
+              - generic [ref=e130]: Baromètre QVCT
+          - listitem [ref=e131]:
+            - link "Formations" [ref=e132] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e134]
+              - generic [ref=e137]: Formations
+          - listitem [ref=e138]:
+            - link "Communication" [ref=e139] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e141]
+              - generic [ref=e143]: Communication
+      - generic [ref=e144]:
+        - paragraph [ref=e145]: Administration
+        - list [ref=e146]:
+          - listitem [ref=e147]:
+            - link "Utilisateurs" [ref=e148] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e150]
+              - generic [ref=e154]: Utilisateurs
+    - generic [ref=e156]:
+      - generic [ref=e157]: AP
+      - generic [ref=e158]:
+        - paragraph [ref=e159]: Anne Petit
+        - paragraph [ref=e160]: utilisateur
+  - generic [ref=e161]:
+    - banner [ref=e162]:
+      - generic [ref=e164]:
+        - heading "Tableau de bord" [level=1] [ref=e165]
+        - paragraph [ref=e166]: Pilotage qualité & QVCT
+      - button "AP Anne Petit" [ref=e169] [cursor=pointer]:
+        - generic [ref=e170]: AP
+        - generic [ref=e171]: Anne Petit
+        - img [ref=e172]
+    - main [ref=e174]:
+      - generic [ref=e176]:
+        - heading "Bon après-midi, Anne" [level=1] [ref=e177]
+        - paragraph [ref=e178]:
+          - generic [ref=e179]: mardi 5 mai 2026
+      - paragraph [ref=e180]: Activité du mois
+      - generic [ref=e181]:
+        - link "0 en cours Interventions 4 ce mois Voir le détail" [ref=e182] [cursor=pointer]:
+          - /url: /interventions
+          - generic [ref=e183]:
+            - img [ref=e185]
+            - generic [ref=e187]: 0 en cours
+          - paragraph [ref=e188]: Interventions
+          - generic [ref=e189]:
+            - paragraph [ref=e190]: "4"
+            - generic [ref=e191]: ce mois
+          - generic [ref=e192]:
+            - text: Voir le détail
+            - img [ref=e193]
+        - link "Tous clôturés Incidents déclarés 0 ce mois Voir le détail" [ref=e195] [cursor=pointer]:
+          - /url: /incidents
+          - generic [ref=e196]:
+            - img [ref=e198]
+            - generic [ref=e200]: Tous clôturés
+          - paragraph [ref=e201]: Incidents déclarés
+          - generic [ref=e202]:
+            - paragraph [ref=e203]: "0"
+            - generic [ref=e204]: ce mois
+          - generic [ref=e205]:
+            - text: Voir le détail
+            - img [ref=e206]
+        - link "Formations à jour Intervenants actifs 0 ce mois Voir le détail" [ref=e208] [cursor=pointer]:
+          - /url: /users
+          - generic [ref=e209]:
+            - img [ref=e211]
+            - generic [ref=e215]: Formations à jour
+          - paragraph [ref=e216]: Intervenants actifs
+          - generic [ref=e217]:
+            - paragraph [ref=e218]: "0"
+            - generic [ref=e219]: ce mois
+          - generic [ref=e220]:
+            - text: Voir le détail
+            - img [ref=e221]
+      - generic [ref=e223]:
+        - generic [ref=e224]:
+          - img [ref=e227]
+          - paragraph [ref=e230]: Conformité
+          - paragraph [ref=e231]: —
+          - paragraph [ref=e233]: "Cible : 85 %"
+        - generic [ref=e234]:
+          - img [ref=e237]
+          - paragraph [ref=e240]: Plan d'actions correctives
+          - paragraph [ref=e241]: —
+          - paragraph [ref=e243]: "Cible : > 60 %"
+        - generic [ref=e244]:
+          - img [ref=e247]
+          - paragraph [ref=e249]: Score QVCT moyen
+          - paragraph [ref=e250]: —
+          - paragraph [ref=e252]: 0 alertes actives
+      - generic [ref=e253]:
+        - generic [ref=e254]:
+          - generic [ref=e255]:
+            - generic [ref=e256]:
+              - heading "Incidents récents" [level=3] [ref=e257]
+              - paragraph [ref=e258]: 0 déclarations
+            - link "Voir tout →" [ref=e260] [cursor=pointer]:
+              - /url: /incidents
+          - generic [ref=e262]:
+            - img [ref=e264]
+            - paragraph [ref=e266]: Aucun incident déclaré
+            - paragraph [ref=e267]: Bonne nouvelle ! Les incidents récents apparaîtront ici dès qu'ils seront déclarés.
+            - link "Déclarer un incident" [ref=e268] [cursor=pointer]:
+              - /url: /incidents/create
+              - img [ref=e269]
+              - text: Déclarer un incident
+        - generic [ref=e271]:
+          - generic [ref=e272]:
+            - generic [ref=e273]:
+              - generic [ref=e274]:
+                - heading "Alertes QVCT" [level=3] [ref=e275]
+                - paragraph [ref=e276]: 0 signalaux
+              - link "Gérer →" [ref=e278] [cursor=pointer]:
+                - /url: /qvct
+            - generic [ref=e280]:
+              - img [ref=e282]
+              - paragraph [ref=e284]: Aucune alerte QVCT active
+          - generic [ref=e285]:
+            - generic [ref=e287]:
+              - heading "Actions rapides" [level=3] [ref=e288]
+              - paragraph [ref=e289]: Raccourcis fréquents
+            - generic [ref=e290]:
+              - link "Déclarer un incident Événement indésirable ou grave" [ref=e291] [cursor=pointer]:
+                - /url: /incidents/create
+                - img [ref=e293]
+                - generic [ref=e295]:
+                  - text: Déclarer un incident
+                  - paragraph [ref=e296]: Événement indésirable ou grave
+                - img [ref=e297]
+              - link "Planifier une intervention" [ref=e300] [cursor=pointer]:
+                - /url: /interventions/create
+                - img [ref=e302]
+                - generic [ref=e304]: Planifier une intervention
+                - img [ref=e305]
+              - link "Lancer un audit" [ref=e307] [cursor=pointer]:
+                - /url: /audits/create
+                - img [ref=e309]
+                - generic [ref=e312]: Lancer un audit
+                - img [ref=e313]
+              - link "Questionnaire QVCT" [ref=e315] [cursor=pointer]:
+                - /url: /qvct/questionnaire
+                - img [ref=e317]
+                - generic [ref=e319]: Questionnaire QVCT
+                - img [ref=e320]

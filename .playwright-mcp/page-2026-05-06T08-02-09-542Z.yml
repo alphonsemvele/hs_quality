@@ -1,0 +1,142 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Communication" [ref=e75] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e77]
+              - generic [ref=e79]: Communication
+    - generic [ref=e81]:
+      - generic [ref=e82]: CB
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Claire Bernard
+        - paragraph [ref=e85]: utilisateur
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - heading "Audit HAS — Évaluation externe annuelle" [level=1] [ref=e90]
+      - button "CB Claire Bernard" [ref=e93] [cursor=pointer]:
+        - generic [ref=e94]: CB
+        - generic [ref=e95]: Claire Bernard
+        - img [ref=e96]
+    - main [ref=e98]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - navigation "Fil d'ariane" [ref=e101]:
+            - link "Tableau de bord" [ref=e103] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e104]:
+              - img [ref=e105]
+              - link "Audits" [ref=e107] [cursor=pointer]:
+                - /url: /audits
+            - generic [ref=e108]:
+              - img [ref=e109]
+              - generic [ref=e111]: Audit HAS — Évaluation externe annuelle
+          - heading "Audit HAS — Évaluation externe annuelle" [level=1] [ref=e112]
+          - paragraph [ref=e113]: HAS · 2026-03-06
+        - generic [ref=e114]:
+          - generic [ref=e115]: Terminé
+          - generic [ref=e117]: 78%
+      - generic [ref=e118]:
+        - generic [ref=e119]:
+          - heading "Description" [level=3] [ref=e122]
+          - paragraph [ref=e124]: "Évaluation externe annuelle couvrant les 5 domaines du référentiel HAS : - Droits des usagers - Personnalisation de l'accompagnement - Organisation interne - Prévention des risques - Amélioration continue"
+        - generic [ref=e125]:
+          - heading "Synthèse" [level=3] [ref=e128]
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - term [ref=e132]: Référentiel
+              - definition [ref=e133]: HAS
+            - generic [ref=e134]:
+              - term [ref=e135]: Date
+              - definition [ref=e136]: 2026-03-06
+            - generic [ref=e137]:
+              - term [ref=e138]: Auditeur
+              - definition [ref=e139]: Dr. Lefèvre (cabinet AQS)
+            - generic [ref=e140]:
+              - term [ref=e141]: Score
+              - definition [ref=e142]: 78 %
+            - generic [ref=e143]:
+              - term [ref=e144]: Écarts
+              - definition [ref=e145]: "3"
+            - generic [ref=e146]:
+              - term [ref=e147]: Finalisé
+              - definition [ref=e148]: 2026-05-06 07:25
+        - generic [ref=e149]:
+          - generic [ref=e151]:
+            - heading "Écarts identifiés" [level=3] [ref=e152]
+            - paragraph [ref=e153]: 3 écart(s)
+          - list [ref=e155]:
+            - listitem [ref=e156]:
+              - generic [ref=e157]:
+                - generic [ref=e158]:
+                  - paragraph [ref=e159]: Traçabilité des transmissions
+                  - paragraph [ref=e160]: Transmissions orales non systématiquement tracées dans le cahier numérique.
+                  - paragraph [ref=e161]: → Mise en place du cahier numérique obligatoire
+                - generic [ref=e162]: Majeur
+            - listitem [ref=e164]:
+              - generic [ref=e165]:
+                - generic [ref=e166]:
+                  - paragraph [ref=e167]: Protocole médicamenteux
+                  - paragraph [ref=e168]: Protocole non mis à jour depuis 14 mois.
+                - generic [ref=e169]: Majeur
+            - listitem [ref=e171]:
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - paragraph [ref=e174]: Plan de formation
+                  - paragraph [ref=e175]: Absence de plan de formation formalisé pour 2026.
+                - generic [ref=e176]: Mineur

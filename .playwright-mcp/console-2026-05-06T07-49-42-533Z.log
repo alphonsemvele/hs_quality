@@ -1,0 +1,9 @@
+[     163ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/audits/019dfc2d-25a6-71c6-9427-fb00f4a41c23:0
+[   82534ms] [ERROR] Failed to load resource: the server responded with a status of 409 (Conflict) @ http://localhost:8000/dashboard:0
+[   82623ms] [ERROR] Failed to load resource: the server responded with a status of 409 (Conflict) @ http://localhost:8000/audits:0
+[   82707ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/audits/019dfc2d-25a6-71c6-9427-fb00f4a41c23:0
+[  151378ms] [ERROR] Failed to load resource: the server responded with a status of 409 (Conflict) @ http://localhost:8000/interventions:0
+[  151443ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/audits/019dfc2d-25a6-71c6-9427-fb00f4a41c23:0
+[  184402ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/interventions/019dfc2d-24f0-7165-a36c-4ce2dae7bf76:0
+[  184440ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/beneficiaries/019dfc2d-24c9-72a2-bdb3-365d281e0c2d:0
+[  213912ms] [ERROR] Failed to load resource: the server responded with a status of 409 (Conflict) @ http://localhost:8000/dashboard:0

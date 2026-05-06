@@ -1,0 +1,156 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]: Method Not Allowed
+    - button "Copy as Markdown" [ref=e11] [cursor=pointer]:
+      - img [ref=e12]
+      - generic [ref=e15]: Copy as Markdown
+  - generic [ref=e18]:
+    - generic [ref=e19]:
+      - heading "Symfony\\Component\\HttpKernel\\Exception\\MethodNotAllowedHttpException" [level=1] [ref=e20]
+      - generic [ref=e22]: vendor/laravel/framework/src/Illuminate/Routing/AbstractRouteCollection.php:130
+      - paragraph [ref=e23]: "The GET method is not supported for route logout. Supported methods: POST."
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: LARAVEL
+          - generic [ref=e28]: 12.56.0
+        - generic [ref=e29]:
+          - generic [ref=e30]: PHP
+          - generic [ref=e31]: 8.4.8
+      - generic [ref=e32]:
+        - img [ref=e33]
+        - text: UNHANDLED
+      - generic [ref=e36]: CODE 0
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - img [ref=e40]
+        - text: "405"
+      - generic [ref=e43]:
+        - img [ref=e44]
+        - text: GET
+      - generic [ref=e47]: http://localhost:8000/logout
+      - button [ref=e48] [cursor=pointer]:
+        - img [ref=e49]
+  - generic [ref=e53]:
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - img [ref=e57]
+        - heading "Exception trace" [level=3] [ref=e60]
+      - generic [ref=e61]:
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e64]
+          - generic [ref=e68]: 9 vendor frames
+          - button [ref=e69]:
+            - img [ref=e70]
+        - generic [ref=e74]:
+          - generic [ref=e75] [cursor=pointer]:
+            - generic [ref=e78]:
+              - code [ref=e82]:
+                - generic [ref=e83]: "Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(object(Illuminate\\Http\\Request))"
+              - generic [ref=e85]: app/Http/Middleware/SecurityHeaders.php:23
+            - button [ref=e87]:
+              - img [ref=e88]
+          - code [ref=e96]:
+            - generic [ref=e97]: 18 */
+            - generic [ref=e98]: 19class SecurityHeaders
+            - generic [ref=e99]: "20{"
+            - generic [ref=e100]: "21 public function handle(Request $request, Closure $next): Response"
+            - generic [ref=e101]: "22 {"
+            - generic [ref=e102]: 23 $response = $next($request);
+            - generic [ref=e103]: "24"
+            - generic [ref=e104]: 25 $response->headers->set('X-Content-Type-Options', 'nosniff');
+            - generic [ref=e105]: 26 $response->headers->set('X-Frame-Options', 'DENY');
+            - generic [ref=e106]: 27 $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+            - generic [ref=e107]: 28 $response->headers->set('Permissions-Policy', 'camera=(), microphone=(self), geolocation=(self), payment=()');
+            - generic [ref=e108]: "29"
+            - generic [ref=e109]: 30 // HSTS — only in production to avoid locking developers into HTTPS on localhost.
+            - generic [ref=e110]: "31 if (app()->environment('production', 'staging')) {"
+            - generic [ref=e111]: 32 $response->headers->set(
+            - generic [ref=e112]: 33 'Strict-Transport-Security',
+            - generic [ref=e113]: 34 'max-age=31536000; includeSubDomains; preload',
+            - generic [ref=e114]: "35"
+        - generic [ref=e116] [cursor=pointer]:
+          - img [ref=e117]
+          - generic [ref=e121]: 23 vendor frames
+          - button [ref=e122]:
+            - img [ref=e123]
+        - generic [ref=e128] [cursor=pointer]:
+          - generic [ref=e131]:
+            - code [ref=e135]:
+              - generic [ref=e136]: Illuminate\Foundation\Application->handleRequest(object(Illuminate\Http\Request))
+            - generic [ref=e138]: public/index.php:20
+          - button [ref=e140]:
+            - img [ref=e141]
+        - generic [ref=e146] [cursor=pointer]:
+          - img [ref=e147]
+          - generic [ref=e151]: 1 vendor frame
+          - button [ref=e152]:
+            - img [ref=e153]
+    - generic [ref=e157]:
+      - generic [ref=e159]:
+        - img [ref=e161]
+        - heading "Queries" [level=3] [ref=e163]
+      - generic [ref=e165]: // No queries executed
+  - generic [ref=e167]:
+    - generic [ref=e168]:
+      - heading "Headers" [level=2] [ref=e169]
+      - generic [ref=e170]:
+        - generic [ref=e171]:
+          - generic [ref=e172]: host
+          - generic [ref=e174]: localhost:8000
+        - generic [ref=e175]:
+          - generic [ref=e176]: connection
+          - generic [ref=e178]: keep-alive
+        - generic [ref=e179]:
+          - generic [ref=e180]: sec-ch-ua
+          - generic [ref=e182]: "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\""
+        - generic [ref=e183]:
+          - generic [ref=e184]: sec-ch-ua-mobile
+          - generic [ref=e186]: "?0"
+        - generic [ref=e187]:
+          - generic [ref=e188]: sec-ch-ua-platform
+          - generic [ref=e190]: "\"macOS\""
+        - generic [ref=e191]:
+          - generic [ref=e192]: upgrade-insecure-requests
+          - generic [ref=e194]: "1"
+        - generic [ref=e195]:
+          - generic [ref=e196]: user-agent
+          - generic [ref=e198]: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36
+        - generic [ref=e199]:
+          - generic [ref=e200]: accept
+          - generic [ref=e202]: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+        - generic [ref=e203]:
+          - generic [ref=e204]: sec-fetch-site
+          - generic [ref=e206]: none
+        - generic [ref=e207]:
+          - generic [ref=e208]: sec-fetch-mode
+          - generic [ref=e210]: navigate
+        - generic [ref=e211]:
+          - generic [ref=e212]: sec-fetch-user
+          - generic [ref=e214]: "?1"
+        - generic [ref=e215]:
+          - generic [ref=e216]: sec-fetch-dest
+          - generic [ref=e218]: document
+        - generic [ref=e219]:
+          - generic [ref=e220]: accept-encoding
+          - generic [ref=e222]: gzip, deflate, br, zstd
+        - generic [ref=e223]:
+          - generic [ref=e224]: accept-language
+          - generic [ref=e226]: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7
+        - generic [ref=e227]:
+          - generic [ref=e228]: cookie
+          - generic [ref=e230]: XSRF-TOKEN=eyJpdiI6Ik5CelRTbTl5ZmowUDVTK0d3aUFPTkE9PSIsInZhbHVlIjoiNDRValBKV0lrbC9WdWdkUUN0UlFWT1dCYk1HaG1vdGhtOHV6RlhYRkcvOGZFWUp4NmF4Q0xDUDhZbzBqNm01eHFCUXdpNHlXdzMwYmZxdDlPc1dYdU52cXpJN1BMd3BWRUprNWRPdnVLdlBRMGVrRGZ6MlZIbVMwZVlqMXZsbFkiLCJtYWMiOiI4MzIyM2NmYWFjZDEzNjUzNWIwMmQ1NWJjNzM3OTNlNjI4N2VjMGVmZDUwMWMwMjcwMTc4NGI5NTdlNTU0MDcwIiwidGFnIjoiIn0%3D; qualitedomicile-session=eyJpdiI6IkU1Nm1telB1QmF1b0hIT3JQbDBzWXc9PSIsInZhbHVlIjoibGtXdFBCTGhEMHpHN3BxZDhwZGs1anVvb1k0cVNER2dhYnErQ3o3cjl4eHN0RUNKZHk0YVVKRFdPR0xnSHdYdWZNcytrQythME9WSlFiRE1BUHJ2RldnMFQ2d0N1RWNRWDVNMmJLYVBrTXlmdlNnWTZMQzlVem1BV3VLdnhWUnciLCJtYWMiOiIxMjI0Zjk2Y2ZlZTAwOWRkMmRiYTk1NmFhNzM2Y2U4OGUwMWQ4YzNjZWVmYjlkMmIzYWIwMDQwYTNkMTMxOTliIiwidGFnIjoiIn0%3D
+    - generic [ref=e231]:
+      - heading "Body" [level=2] [ref=e232]
+      - generic [ref=e233]: // No request body
+    - generic [ref=e234]:
+      - heading "Routing" [level=2] [ref=e235]
+      - generic [ref=e237]: // No routing context
+    - generic [ref=e238]:
+      - heading "Routing parameters" [level=2] [ref=e239]
+      - generic [ref=e240]: // No routing parameters
+  - generic [ref=e243]:
+    - img [ref=e245]
+    - img [ref=e3283]

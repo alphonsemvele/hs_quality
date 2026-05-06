@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DashboardStatsService;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -10,9 +11,18 @@ class DashboardController extends Controller
 {
     public function __construct(private readonly DashboardStatsService $statsService) {}
 
-    public function index(): Response
+    public function index(): Response|RedirectResponse
     {
-        $structureId = (int) request()->user()->structure_id;
+        $user = request()->user();
+
+        // Platform operators have no tenant — send them to /admin where the
+        // cross-tenant KPI surface lives. The /dashboard tenant view would be
+        // empty for them (StructureScope returns 1=0 with no tenant context).
+        if ($user->is_platform_admin === true) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        $structureId = (int) $user->structure_id;
 
         $stats = $this->statsService->stats($structureId);
 
@@ -33,8 +43,6 @@ class DashboardController extends Controller
         // QVCT alerts and audit data remain placeholders until M5/M6 domains are built.
         $alertes_qvct = [];
         $audits_recents = [];
-
-        $user = request()->user();
 
         return Inertia::render('dashboard/index', [
             'stats' => $stats,

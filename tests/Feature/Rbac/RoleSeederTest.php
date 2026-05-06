@@ -9,7 +9,6 @@ use Spatie\Permission\PermissionRegistrar;
  * Verifies the RoleSeeder builds the 6 personas × permissions matrix per
  * references/rbac/matrix.md and references/rbac/seeding-patterns.md.
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });
@@ -73,6 +72,13 @@ it('gives a dirigeant executive + admin permissions including erasure', function
             'rgpd.erasure.execute',
             'users.manage.structure',
             'structure.configure',
+            // Dirigeant must be able to fully operate the structure: plan
+            // and delete interventions, declare incidents. Without these
+            // the UI shows the buttons (per the Inertia abilities matrix)
+            // but every click 403s.
+            'interventions.update.team',
+            'interventions.delete',
+            'incidents.declare',
         )
         ->not->toContain('cross_tenant_benchmark.read');
 });

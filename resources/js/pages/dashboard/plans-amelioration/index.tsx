@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardBody, EmptyState, KpiCard, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -36,6 +37,7 @@ const STATUT_TONE: Record<string, 'brand' | 'warning' | 'sage' | 'neutral' | 'da
 };
 
 export default function PlansAmeliorationIndex({ plans = [], stats = { total: 0, en_cours: 0, termines: 0, taux_completion: null } }: Partial<Props>) {
+    const canManage = useCan('plans_amelioration.manage');
     return (
         <DashboardLayout title="Plans d'amélioration" subtitle="PAC — Suivi des actions correctives">
             <PageHeader
@@ -43,9 +45,11 @@ export default function PlansAmeliorationIndex({ plans = [], stats = { total: 0,
                 subtitle="Actions correctives issues des audits, incidents et alertes QVCT"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: "Plans d'amélioration" }]}
                 actions={
-                    <Link href="/plans-amelioration/create">
-                        <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
-                    </Link>
+                    canManage ? (
+                        <Link href="/plans-amelioration/create">
+                            <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -100,9 +104,11 @@ export default function PlansAmeliorationIndex({ plans = [], stats = { total: 0,
                         title="Aucun plan d'amélioration"
                         description="Les plans d'amélioration sont générés automatiquement depuis les écarts d'audit et les incidents."
                         action={
-                            <Link href="/plans-amelioration/create">
-                                <Button>Créer un plan</Button>
-                            </Link>
+                            canManage ? (
+                                <Link href="/plans-amelioration/create">
+                                    <Button>Créer un plan</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 </Card>

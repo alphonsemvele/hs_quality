@@ -1,4 +1,5 @@
 import { Button, Card, CardBody, CarePlanStatusBadge, EmptyState, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -33,6 +34,7 @@ interface Props {
 export default function CarePlansIndex({ beneficiary, plans }: Props) {
     const b = unwrap<Beneficiary>(beneficiary);
     const list = plans?.data ?? [];
+    const canManage = useCan('beneficiaries.update');
 
     return (
         <DashboardLayout title={`Plans · ${b.full_name}`} subtitle="">
@@ -46,9 +48,11 @@ export default function CarePlansIndex({ beneficiary, plans }: Props) {
                     { label: "Plans d'accompagnement" },
                 ]}
                 actions={
-                    <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
-                        <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
-                    </Link>
+                    canManage ? (
+                        <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
+                            <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -84,9 +88,11 @@ export default function CarePlansIndex({ beneficiary, plans }: Props) {
                         title="Aucun plan d'accompagnement"
                         description={`Créez le premier plan pour ${b.full_name}.`}
                         action={
-                            <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
-                                <Button>Nouveau plan</Button>
-                            </Link>
+                            canManage ? (
+                                <Link href={`/beneficiaries/${b.id}/care-plans/create`}>
+                                    <Button>Nouveau plan</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 </Card>

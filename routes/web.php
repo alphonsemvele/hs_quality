@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
@@ -131,20 +132,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
     });
 
-    // ── Qualité ───────────────────────────────────────────────────────────────
+    // ── Qualité (M6 — Audits + Plans d'Amélioration Continue) ─────────────────
+    Route::middleware(['tenant'])->group(function () {
+        Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
+        Route::get('/audits/create', [AuditController::class, 'create'])->name('audits.create');
+        Route::post('/audits', [AuditController::class, 'store'])->name('audits.store');
+        Route::get('/audits/{audit}', [AuditController::class, 'show'])->name('audits.show');
+        Route::get('/audits/{audit}/edit', [AuditController::class, 'edit'])->name('audits.edit');
+        Route::put('/audits/{audit}', [AuditController::class, 'update'])->name('audits.update');
+        Route::post('/audits/{audit}/finaliser', [AuditController::class, 'finaliser'])->name('audits.finaliser');
+        Route::post('/audits/{audit}/cancel', [AuditController::class, 'cancel'])->name('audits.cancel');
+        Route::post('/audits/{audit}/ecarts', [AuditController::class, 'storeEcart'])->name('audits.ecarts.store');
+        Route::delete('/audits/{audit}/ecarts/{ecart}', [AuditController::class, 'destroyEcart'])->name('audits.ecarts.destroy');
 
-    Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
-    Route::get('/audits/create', [AuditController::class, 'create'])->name('audits.create');
-    Route::post('/audits', [AuditController::class, 'store'])->name('audits.store');
-    Route::get('/audits/{id}', [AuditController::class, 'show'])->name('audits.show');
-    Route::put('/audits/{id}', [AuditController::class, 'update'])->name('audits.update');
-    Route::put('/audits/{id}/finaliser', [AuditController::class, 'finaliser'])->name('audits.finaliser');
-
-    Route::get('/plans-amelioration', [PlanAmeliorationController::class, 'index'])->name('pac.index');
-    Route::get('/plans-amelioration/create', [PlanAmeliorationController::class, 'create'])->name('pac.create');
-    Route::post('/plans-amelioration', [PlanAmeliorationController::class, 'store'])->name('pac.store');
-    Route::get('/plans-amelioration/{id}', [PlanAmeliorationController::class, 'show'])->name('pac.show');
-    Route::put('/plans-amelioration/{id}', [PlanAmeliorationController::class, 'update'])->name('pac.update');
+        Route::get('/plans-amelioration', [PlanAmeliorationController::class, 'index'])->name('pac.index');
+        Route::get('/plans-amelioration/create', [PlanAmeliorationController::class, 'create'])->name('pac.create');
+        Route::post('/plans-amelioration', [PlanAmeliorationController::class, 'store'])->name('pac.store');
+        Route::get('/plans-amelioration/{plan}', [PlanAmeliorationController::class, 'show'])->name('pac.show');
+        Route::get('/plans-amelioration/{plan}/edit', [PlanAmeliorationController::class, 'edit'])->name('pac.edit');
+        Route::put('/plans-amelioration/{plan}', [PlanAmeliorationController::class, 'update'])->name('pac.update');
+        Route::post('/plans-amelioration/{plan}/close', [PlanAmeliorationController::class, 'close'])->name('pac.close');
+        Route::post('/plans-amelioration/{plan}/cancel', [PlanAmeliorationController::class, 'cancel'])->name('pac.cancel');
+        Route::post('/plans-amelioration/{plan}/actions', [PlanAmeliorationController::class, 'storeAction'])->name('pac.actions.store');
+        Route::put('/plans-amelioration/{plan}/actions/{action}', [PlanAmeliorationController::class, 'updateAction'])->name('pac.actions.update');
+        Route::post('/plans-amelioration/{plan}/actions/{action}/done', [PlanAmeliorationController::class, 'markActionDone'])->name('pac.actions.done');
+        Route::delete('/plans-amelioration/{plan}/actions/{action}', [PlanAmeliorationController::class, 'destroyAction'])->name('pac.actions.destroy');
+    });
 
     Route::get('/indicateurs', [IndicateurController::class, 'index'])->name('indicateurs.index');
 
@@ -165,6 +178,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // these endpoints operate on the structure rows themselves and do not
     // belong to any tenant. EnsureSuperAdmin returns 404 (not 403) on
     // failure so the surface is invisible to tenant-scoped users.
+    // ── Platform admin dashboard (super_admin only) ──────────────────────────
+    // Cross-tenant KPI surface for platform operators. Tenant-scoped users
+    // 404 here (EnsureSuperAdmin) — the page does not exist for them.
+    Route::middleware(['super_admin'])
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function (): void {
+            Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        });
+
     Route::middleware(['super_admin'])
         ->prefix('admin/structures')
         ->name('admin.structures.')

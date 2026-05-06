@@ -1,0 +1,199 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Communication" [ref=e75] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e77]
+              - generic [ref=e79]: Communication
+    - generic [ref=e81]:
+      - generic [ref=e82]: RD
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Referent_qualite Demo
+        - paragraph [ref=e85]: utilisateur
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - generic [ref=e89]:
+        - heading "Bénéficiaires" [level=1] [ref=e90]
+        - paragraph [ref=e91]: Personnes accompagnées par votre structure
+      - generic [ref=e92]:
+        - link "Déclarer un incident" [ref=e93] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e94]
+          - text: Déclarer un incident
+        - generic [ref=e96]:
+          - button "RD Referent_qualite Demo" [active] [ref=e97] [cursor=pointer]:
+            - generic [ref=e98]: RD
+            - generic [ref=e99]: Referent_qualite Demo
+            - img [ref=e100]
+          - button "Fermer le menu" [ref=e197]
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - generic [ref=e200]: RD
+              - generic [ref=e201]:
+                - paragraph [ref=e202]: Referent_qualite Demo
+                - paragraph
+            - link "Mon profil" [ref=e204] [cursor=pointer]:
+              - /url: /dashboard/profile
+              - img [ref=e205]
+              - text: Mon profil
+            - radiogroup "Thème d'affichage" [ref=e209]:
+              - paragraph [ref=e210]: Apparence
+              - generic [ref=e211]:
+                - radio "Thème Clair" [ref=e212] [cursor=pointer]:
+                  - img [ref=e214]
+                  - generic [ref=e217]: Clair
+                - radio "Thème Auto" [checked] [ref=e218] [cursor=pointer]:
+                  - img [ref=e220]
+                  - generic [ref=e222]: Auto
+                - radio "Thème Sombre" [ref=e223] [cursor=pointer]:
+                  - img [ref=e225]
+                  - generic [ref=e227]: Sombre
+            - button "Se déconnecter" [ref=e229] [cursor=pointer]:
+              - img [ref=e230]
+              - text: Se déconnecter
+    - main [ref=e102]:
+      - generic [ref=e104]:
+        - navigation "Fil d'ariane" [ref=e105]:
+          - link "Tableau de bord" [ref=e107] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e108]:
+            - img [ref=e109]
+            - generic [ref=e111]: Bénéficiaires
+        - heading "Bénéficiaires" [level=1] [ref=e112]
+        - paragraph [ref=e113]: 5 bénéficiaire(s) — page 1 sur 1
+      - table [ref=e116]:
+        - rowgroup [ref=e117]:
+          - row "Bénéficiaire Âge GIR Ville Statut" [ref=e118]:
+            - columnheader "Bénéficiaire" [ref=e119]
+            - columnheader "Âge" [ref=e120]
+            - columnheader "GIR" [ref=e121]
+            - columnheader "Ville" [ref=e122]
+            - columnheader "Statut" [ref=e123]
+            - columnheader [ref=e124]
+        - rowgroup [ref=e125]:
+          - row "RD Rémy DELAUNAY 81 GIR 4 Aubert Actif Détail →" [ref=e126]:
+            - cell "RD Rémy DELAUNAY" [ref=e127]:
+              - generic [ref=e128]:
+                - generic [ref=e129]: RD
+                - generic [ref=e130]: Rémy DELAUNAY
+            - cell "81" [ref=e131]
+            - cell "GIR 4" [ref=e132]:
+              - generic [ref=e133]: GIR 4
+            - cell "Aubert" [ref=e134]
+            - cell "Actif" [ref=e135]:
+              - generic [ref=e136]: Actif
+            - cell "Détail →" [ref=e138]:
+              - link "Détail →" [ref=e139] [cursor=pointer]:
+                - /url: /beneficiaries/019dd525-1937-719f-b985-0ddb8d6b805c
+          - row "LG Lucy GARCIA 91 GIR 6 Bonnet-sur-Masse Actif Détail →" [ref=e140]:
+            - cell "LG Lucy GARCIA" [ref=e141]:
+              - generic [ref=e142]:
+                - generic [ref=e143]: LG
+                - generic [ref=e144]: Lucy GARCIA
+            - cell "91" [ref=e145]
+            - cell "GIR 6" [ref=e146]:
+              - generic [ref=e147]: GIR 6
+            - cell "Bonnet-sur-Masse" [ref=e148]
+            - cell "Actif" [ref=e149]:
+              - generic [ref=e150]: Actif
+            - cell "Détail →" [ref=e152]:
+              - link "Détail →" [ref=e153] [cursor=pointer]:
+                - /url: /beneficiaries/019dd525-1938-725a-9ae0-50f56da15e03
+          - row "MJ Michel JOLY 63 GIR 6 Gonzalez-sur-Mer Actif Détail →" [ref=e154]:
+            - cell "MJ Michel JOLY" [ref=e155]:
+              - generic [ref=e156]:
+                - generic [ref=e157]: MJ
+                - generic [ref=e158]: Michel JOLY
+            - cell "63" [ref=e159]
+            - cell "GIR 6" [ref=e160]:
+              - generic [ref=e161]: GIR 6
+            - cell "Gonzalez-sur-Mer" [ref=e162]
+            - cell "Actif" [ref=e163]:
+              - generic [ref=e164]: Actif
+            - cell "Détail →" [ref=e166]:
+              - link "Détail →" [ref=e167] [cursor=pointer]:
+                - /url: /beneficiaries/019dd525-193a-722f-acff-02a36dc2e3b0
+          - row "BL Bernard LE GOFF 70 GIR 1 Garcia Actif Détail →" [ref=e168]:
+            - cell "BL Bernard LE GOFF" [ref=e169]:
+              - generic [ref=e170]:
+                - generic [ref=e171]: BL
+                - generic [ref=e172]: Bernard LE GOFF
+            - cell "70" [ref=e173]
+            - cell "GIR 1" [ref=e174]:
+              - generic [ref=e175]: GIR 1
+            - cell "Garcia" [ref=e176]
+            - cell "Actif" [ref=e177]:
+              - generic [ref=e178]: Actif
+            - cell "Détail →" [ref=e180]:
+              - link "Détail →" [ref=e181] [cursor=pointer]:
+                - /url: /beneficiaries/019dd525-1939-72c9-818a-eff0999726b7
+          - row "BL Benjamin LEBLANC 67 GIR 2 Schmitt Actif Détail →" [ref=e182]:
+            - cell "BL Benjamin LEBLANC" [ref=e183]:
+              - generic [ref=e184]:
+                - generic [ref=e185]: BL
+                - generic [ref=e186]: Benjamin LEBLANC
+            - cell "67" [ref=e187]
+            - cell "GIR 2" [ref=e188]:
+              - generic [ref=e189]: GIR 2
+            - cell "Schmitt" [ref=e190]
+            - cell "Actif" [ref=e191]:
+              - generic [ref=e192]: Actif
+            - cell "Détail →" [ref=e194]:
+              - link "Détail →" [ref=e195] [cursor=pointer]:
+                - /url: /beneficiaries/019dd525-1935-735e-b1d6-a702700afaad

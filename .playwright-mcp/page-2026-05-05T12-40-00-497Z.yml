@@ -1,0 +1,551 @@
+- generic [ref=e256]:
+  - link "Aller au contenu principal" [ref=e257] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation [ref=e258]:
+    - generic [ref=e259]:
+      - link "Q HS Quality Qualité & QVCT" [ref=e260] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e261]: Q
+        - generic [ref=e262]:
+          - generic [ref=e263]: HS Quality
+          - generic [ref=e264]: Qualité & QVCT
+      - generic [ref=e265]:
+        - link "Fonctionnalités" [ref=e266] [cursor=pointer]:
+          - /url: "#features"
+        - link "Modules" [ref=e267] [cursor=pointer]:
+          - /url: "#modules"
+        - link "Tarifs" [ref=e268] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "FAQ" [ref=e269] [cursor=pointer]:
+          - /url: "#faq"
+      - generic [ref=e270]:
+        - link "Connexion" [ref=e271] [cursor=pointer]:
+          - /url: /login
+        - link "Démarrer gratuitement" [ref=e272] [cursor=pointer]:
+          - /url: "#cta"
+  - generic [ref=e276]:
+    - generic [ref=e278]: Plateforme conforme HAS · RGPD · HDS
+    - heading "La qualité du soin à domicile, enfin pilotée." [level=1] [ref=e280]
+    - paragraph [ref=e281]: HS Quality structure le pilotage qualité et QVCT des services à domicile — interventions, incidents, audits, formations. Du terrain à la direction, en temps réel.
+    - generic [ref=e282]:
+      - link "Démarrer gratuitement" [ref=e283] [cursor=pointer]:
+        - /url: "#cta"
+        - text: Démarrer gratuitement
+        - img [ref=e284]
+      - link "Voir la démo" [ref=e286] [cursor=pointer]:
+        - /url: "#modules"
+    - paragraph [ref=e287]: 50+ structures · 94% traçabilité · < 2 min par incident
+    - generic [ref=e290]:
+      - generic [ref=e295]: app.hsquality.fr/dashboard
+      - generic [ref=e296]:
+        - generic [ref=e297]:
+          - generic [ref=e298]:
+            - paragraph [ref=e299]: Score qualité
+            - generic [ref=e300]:
+              - generic [ref=e301]: "87"
+              - generic [ref=e302]: /100
+          - generic [ref=e303]:
+            - paragraph [ref=e304]: Interventions
+            - generic [ref=e305]:
+              - generic [ref=e306]: 1 248
+              - generic [ref=e307]: ce mois
+          - generic [ref=e308]:
+            - paragraph [ref=e309]: Incidents ouverts
+            - generic [ref=e310]:
+              - generic [ref=e311]: "3"
+              - generic [ref=e312]: à traiter
+          - generic [ref=e313]:
+            - paragraph [ref=e314]: Traçabilité
+            - generic [ref=e315]:
+              - generic [ref=e316]: 94%
+              - generic [ref=e317]: ↑ +6%
+        - generic [ref=e318]:
+          - paragraph [ref=e320]: Interventions / semaine
+          - generic [ref=e334]:
+            - generic [ref=e335]:
+              - paragraph [ref=e336]: Incidents récents
+              - generic [ref=e337]: 2 graves
+            - generic [ref=e338]:
+              - generic [ref=e339]:
+                - generic [ref=e340]: Chute · Mme D.
+                - generic [ref=e341]: Grave
+              - generic [ref=e342]:
+                - generic [ref=e343]: Erreur médic. · M. P.
+                - generic [ref=e344]: En analyse
+              - generic [ref=e345]:
+                - generic [ref=e346]: Retard · Mme R.
+                - generic [ref=e347]: Clos
+  - generic [ref=e349]:
+    - generic [ref=e350]: HAS · Évaluation externe
+    - generic [ref=e352]: AFNOR NF X50-056
+    - generic [ref=e354]: ISO 9001
+    - generic [ref=e356]: Caphandeo
+    - generic [ref=e358]: RGPD
+    - generic [ref=e360]: HDS France
+    - generic [ref=e362]: Code du travail (RPS)
+    - generic [ref=e364]: CNIL
+    - generic [ref=e366]: Code de la santé publique
+    - generic [ref=e368]: HAS · Évaluation externe
+    - generic [ref=e370]: AFNOR NF X50-056
+    - generic [ref=e372]: ISO 9001
+    - generic [ref=e374]: Caphandeo
+    - generic [ref=e376]: RGPD
+    - generic [ref=e378]: HDS France
+    - generic [ref=e380]: Code du travail (RPS)
+    - generic [ref=e382]: CNIL
+    - generic [ref=e384]: Code de la santé publique
+  - generic [ref=e387]:
+    - generic [ref=e388]:
+      - generic [ref=e389]: Fonctionnalités
+      - heading "Tout ce dont vous avez besoin, rien de superflu." [level=2] [ref=e390]
+      - paragraph [ref=e391]: Six modules pensés pour le quotidien des structures médico-sociales, du terrain à la direction.
+    - generic [ref=e392]:
+      - generic [ref=e395]:
+        - img [ref=e397]
+        - heading "Traçabilité terrain" [level=3] [ref=e399]
+        - paragraph [ref=e400]: Pointage géolocalisé, voice-to-text, signature électronique. Chaque intervention est documentée et consultable en temps réel par l'équipe de coordination.
+      - generic [ref=e403]:
+        - img [ref=e405]
+        - heading "Gestion des incidents" [level=3] [ref=e407]
+        - paragraph [ref=e408]: Déclaration mobile en moins de 2 minutes, classification automatique par gravité, analyse 5-pourquoi, notification ARS si événement indésirable grave.
+      - generic [ref=e411]:
+        - img [ref=e413]
+        - heading "Audits & conformité" [level=3] [ref=e415]
+        - paragraph [ref=e416]: Audits HAS, AFNOR NF X50-056, ISO 9001 sur tablette. Scoring automatique, plan d'amélioration continue généré depuis les écarts détectés.
+      - generic [ref=e419]:
+        - img [ref=e421]
+        - heading "Baromètre QVCT" [level=3] [ref=e423]
+        - paragraph [ref=e424]: Enquêtes régulières sur la qualité de vie au travail des intervenants. Cartographie des signaux faibles, prévention de l'épuisement professionnel.
+      - generic [ref=e427]:
+        - img [ref=e429]
+        - heading "Formation continue" [level=3] [ref=e432]
+        - paragraph [ref=e433]: Gestion du plan de développement des compétences, suivi des habilitations, rappels automatiques des échéances réglementaires.
+      - generic [ref=e436]:
+        - img [ref=e438]
+        - heading "Application mobile" [level=3] [ref=e440]
+        - paragraph [ref=e441]: React Native offline-first pour les intervenants en zones blanches. Synchronisation dès retour réseau, interface pensée pour le terrain.
+  - generic [ref=e443]:
+    - generic [ref=e444]:
+      - generic [ref=e445]: Mise en place
+      - heading "Opérationnel en 2 semaines." [level=2] [ref=e446]
+      - paragraph [ref=e447]: Un processus d'intégration pensé pour ne pas perturber votre activité quotidienne.
+    - generic [ref=e448]:
+      - generic [ref=e450]:
+        - generic [ref=e451]:
+          - img [ref=e453]
+          - generic [ref=e455]: Étape 01
+        - heading "Provisioning en 48h" [level=3] [ref=e456]
+        - paragraph [ref=e457]: Création de votre espace sécurisé HDS, import de vos bénéficiaires et intervenants. Configuration des rôles et permissions adaptée à votre organigramme.
+        - img [ref=e460]
+      - generic [ref=e463]:
+        - generic [ref=e464]:
+          - img [ref=e466]
+          - generic [ref=e468]: Étape 02
+        - heading "Formation & déploiement" [level=3] [ref=e469]
+        - paragraph [ref=e470]: Formation des coordinateurs (2h), prise en main par les intervenants via l'app mobile. Un référent qualité dédié vous accompagne pendant tout le pilote.
+        - img [ref=e473]
+      - generic [ref=e476]:
+        - generic [ref=e477]:
+          - img [ref=e479]
+          - generic [ref=e481]: Étape 03
+        - heading "Pilotage en continu" [level=3] [ref=e482]
+        - paragraph [ref=e483]: Vos indicateurs qualité se remplissent automatiquement. Audits, incidents, QVCT, formations — tout converge vers un tableau de bord actionnable.
+  - generic [ref=e485]:
+    - generic [ref=e486]:
+      - generic [ref=e487]: Modules
+      - heading "Une vue sur chaque dimension qualité." [level=2] [ref=e488]
+    - generic [ref=e489]:
+      - generic [ref=e491]:
+        - generic [ref=e492]:
+          - generic [ref=e493]:
+            - heading "Interventions du jour" [level=3] [ref=e494]
+            - paragraph [ref=e495]: Suivi en temps réel
+          - generic [ref=e496]: 12 / 14
+        - generic [ref=e497]:
+          - generic [ref=e498]:
+            - generic [ref=e499]: 08:30
+            - generic [ref=e500]:
+              - paragraph [ref=e501]: Mme Dupont
+              - paragraph [ref=e502]: Aide à la toilette
+            - generic [ref=e503]: Terminée
+          - generic [ref=e504]:
+            - generic [ref=e505]: 09:15
+            - generic [ref=e506]:
+              - paragraph [ref=e507]: M. Bernard
+              - paragraph [ref=e508]: Préparation repas
+            - generic [ref=e509]: En cours
+          - generic [ref=e510]:
+            - generic [ref=e511]: 10:00
+            - generic [ref=e512]:
+              - paragraph [ref=e513]: Mme Léon
+              - paragraph [ref=e514]: Accompagnement
+            - generic [ref=e515]: Planifiée
+          - generic [ref=e516]:
+            - generic [ref=e517]: 11:30
+            - generic [ref=e518]:
+              - paragraph [ref=e519]: M. Petit
+              - paragraph [ref=e520]: Aide au ménage
+            - generic [ref=e521]: Planifiée
+      - generic [ref=e523]:
+        - heading "Incidents" [level=3] [ref=e524]
+        - paragraph [ref=e525]: Ce mois-ci
+        - generic [ref=e526]:
+          - generic [ref=e527]:
+            - text: "2"
+            - paragraph [ref=e528]: Graves
+          - generic [ref=e529]:
+            - text: "5"
+            - paragraph [ref=e530]: En analyse
+        - generic [ref=e534]: 100% notifiés ARS < 24h
+        - generic [ref=e535]:
+          - generic [ref=e536]:
+            - generic [ref=e537]: Déclarés ce mois
+            - generic [ref=e538]: "12"
+          - generic [ref=e539]:
+            - generic [ref=e540]: Délai moyen résolution
+            - generic [ref=e541]: 3,2 j
+    - generic [ref=e542]:
+      - generic [ref=e544]:
+        - generic [ref=e545]:
+          - heading "Audit HAS · 2026" [level=3] [ref=e546]
+          - generic [ref=e547]: Finalisé
+        - generic [ref=e548]:
+          - generic [ref=e549]: "87"
+          - generic [ref=e550]: /100
+        - generic [ref=e551]:
+          - generic [ref=e553]:
+            - generic [ref=e554]: Bientraitance
+            - generic [ref=e555]: 92%
+          - generic [ref=e559]:
+            - generic [ref=e560]: Coordination
+            - generic [ref=e561]: 84%
+          - generic [ref=e565]:
+            - generic [ref=e566]: Traçabilité
+            - generic [ref=e567]: 88%
+          - generic [ref=e571]:
+            - generic [ref=e572]: Droits & éthique
+            - generic [ref=e573]: 79%
+      - generic [ref=e577]:
+        - generic [ref=e578]:
+          - generic [ref=e579]:
+            - heading "Baromètre QVCT" [level=3] [ref=e580]
+            - paragraph [ref=e581]: Dernier trimestre
+          - generic [ref=e582]: 7.2 / 10
+        - generic [ref=e583]:
+          - img [ref=e585]:
+            - generic [ref=e591]:
+              - generic [ref=e592]: Sens
+              - generic [ref=e593]: Charge
+              - generic [ref=e594]: Autonomie
+              - generic [ref=e595]: Relations
+              - generic [ref=e596]: Reconn.
+          - generic [ref=e603]:
+            - generic [ref=e604]:
+              - generic [ref=e605]: Sens du travail
+              - generic [ref=e606]: "8.1"
+            - generic [ref=e607]:
+              - generic [ref=e608]: Charge
+              - generic [ref=e609]: "6.4"
+            - generic [ref=e610]:
+              - generic [ref=e611]: Autonomie
+              - generic [ref=e612]: "7.8"
+            - generic [ref=e613]:
+              - generic [ref=e614]: Relations
+              - generic [ref=e615]: "7.5"
+            - generic [ref=e616]:
+              - generic [ref=e617]: Reconnaissance
+              - generic [ref=e618]: "6.8"
+  - generic [ref=e620]:
+    - generic [ref=e621]:
+      - generic [ref=e622]: Adapté à votre structure
+      - heading "Une solution pour chaque type de service." [level=2] [ref=e623]
+      - paragraph [ref=e624]: Que vous soyez SAAD, SSIAD, ESAD ou CCAS, HS Quality s'adapte à vos obligations réglementaires et vos processus métier.
+    - generic [ref=e625]:
+      - generic [ref=e627]:
+        - generic [ref=e629]: SAAD
+        - paragraph [ref=e630]: Service d'Aide à Domicile
+        - paragraph [ref=e631]: Traçabilité des interventions d'aide (toilette, repas, ménage), gestion des incidents terrain, suivi qualité prestataire et mandataire.
+        - generic [ref=e632]:
+          - generic [ref=e633]: Interventions
+          - generic [ref=e634]: Incidents
+          - generic [ref=e635]: QVCT
+          - generic [ref=e636]: Audits
+      - generic [ref=e638]:
+        - generic [ref=e640]: SSIAD
+        - paragraph [ref=e641]: Service de Soins Infirmiers à Domicile
+        - paragraph [ref=e642]: Coordination des soins infirmiers, suivi des plans de soins, traçabilité des actes, notification ARS des événements indésirables graves.
+        - generic [ref=e643]:
+          - generic [ref=e644]: Plans de soins
+          - generic [ref=e645]: Incidents EIG
+          - generic [ref=e646]: Formations
+          - generic [ref=e647]: Conformité HAS
+      - generic [ref=e649]:
+        - generic [ref=e651]: ESAD / SPASAD
+        - paragraph [ref=e652]: Service Polyvalent d'Aide et de Soins
+        - paragraph [ref=e653]: Pilotage unifié aide + soins, tableau de bord consolidé, audits croisés, indicateurs qualité multi-prestations.
+        - generic [ref=e654]:
+          - generic [ref=e655]: Dashboard unifié
+          - generic [ref=e656]: Audits croisés
+          - generic [ref=e657]: QVCT
+          - generic [ref=e658]: API
+      - generic [ref=e660]:
+        - generic [ref=e662]: CCAS / Associations
+        - paragraph [ref=e663]: Centres Communaux & Associations
+        - paragraph [ref=e664]: Multi-sites, consolidation groupe, benchmark inter-structures, reporting automatique pour les tutelles et financeurs.
+        - generic [ref=e665]:
+          - generic [ref=e666]: Multi-sites
+          - generic [ref=e667]: Consolidation
+          - generic [ref=e668]: Reporting
+          - generic [ref=e669]: Benchmark
+  - generic [ref=e672]:
+    - generic [ref=e673]:
+      - generic [ref=e674]: 0+
+      - paragraph [ref=e675]: années d'expertise
+    - generic [ref=e676]:
+      - generic [ref=e677]: 0+
+      - paragraph [ref=e678]: structures accompagnées
+    - generic [ref=e679]:
+      - generic [ref=e680]: 0%
+      - paragraph [ref=e681]: traçabilité terrain
+    - generic [ref=e682]:
+      - generic [ref=e683]: < 2 min
+      - paragraph [ref=e684]: par incident déclaré
+  - generic [ref=e686]:
+    - generic [ref=e687]:
+      - generic [ref=e688]: Témoignages
+      - heading "Ils pilotent leur qualité avec HS Quality." [level=2] [ref=e689]
+    - generic [ref=e690]:
+      - generic [ref=e692]:
+        - img [ref=e693]
+        - blockquote [ref=e695]: "\"Nos coordinatrices déclarent les incidents en moins de 2 minutes. Notre taux de conformité HAS est passé de 61% à 84% en 6 mois.\""
+        - generic [ref=e696]:
+          - generic [ref=e697]: +23%
+          - generic [ref=e698]: conformité HAS
+        - generic [ref=e699]:
+          - generic [ref=e700]: MF
+          - generic [ref=e701]:
+            - paragraph [ref=e702]: Marie-France Essomba
+            - paragraph [ref=e703]: Directrice qualité · SAAD Horizon
+      - generic [ref=e705]:
+        - img [ref=e706]
+        - blockquote [ref=e708]: "\"Le baromètre QVCT nous a permis de détecter un risque de turn-over chez nos aides-soignantes avant qu'il ne devienne critique. On a pu agir à temps.\""
+        - generic [ref=e709]:
+          - generic [ref=e710]: "-40%"
+          - generic [ref=e711]: turn-over An 1
+        - generic [ref=e712]:
+          - generic [ref=e713]: AT
+          - generic [ref=e714]:
+            - paragraph [ref=e715]: Alain Tchoupo
+            - paragraph [ref=e716]: DRH · SSIAD Solidarité
+      - generic [ref=e718]:
+        - img [ref=e719]
+        - blockquote [ref=e721]: "\"Avant HS Quality, nos audits HAS prenaient 3 semaines de préparation. Aujourd'hui, le scoring est automatique et le PAC se génère depuis les écarts.\""
+        - generic [ref=e722]:
+          - generic [ref=e723]: ÷3
+          - generic [ref=e724]: temps de préparation
+        - generic [ref=e725]:
+          - generic [ref=e726]: CN
+          - generic [ref=e727]:
+            - paragraph [ref=e728]: Claire Nguema
+            - paragraph [ref=e729]: Référente qualité · ESAD Lumière
+  - generic [ref=e731]:
+    - generic [ref=e732]:
+      - generic [ref=e733]: Tarifs
+      - heading "Un plan adapté à votre structure." [level=2] [ref=e734]
+      - paragraph [ref=e735]: Essai pilote gratuit 3 mois. Sans engagement, sans carte bancaire.
+    - generic [ref=e736]:
+      - generic [ref=e738]:
+        - heading "Essentiel" [level=3] [ref=e739]
+        - generic [ref=e740]:
+          - generic [ref=e741]: "149"
+          - generic [ref=e742]: € / mois
+        - paragraph [ref=e743]: Pour les petites structures qui démarrent leur démarche qualité.
+        - list [ref=e744]:
+          - listitem [ref=e745]:
+            - img [ref=e747]
+            - generic [ref=e749]: Jusqu'à 20 intervenants
+          - listitem [ref=e750]:
+            - img [ref=e752]
+            - generic [ref=e754]: Interventions & traçabilité
+          - listitem [ref=e755]:
+            - img [ref=e757]
+            - generic [ref=e759]: Gestion des incidents
+          - listitem [ref=e760]:
+            - img [ref=e762]
+            - generic [ref=e764]: Application mobile
+          - listitem [ref=e765]:
+            - img [ref=e767]
+            - generic [ref=e769]: Support par email
+        - link "Démarrer gratuitement" [ref=e770] [cursor=pointer]:
+          - /url: "#cta"
+      - generic [ref=e772]:
+        - generic [ref=e773]: Recommandé
+        - heading "Professionnel" [level=3] [ref=e774]
+        - generic [ref=e775]:
+          - generic [ref=e776]: "349"
+          - generic [ref=e777]: € / mois
+        - paragraph [ref=e778]: Pour les structures engagées dans une démarche qualité complète.
+        - list [ref=e779]:
+          - listitem [ref=e780]:
+            - img [ref=e782]
+            - generic [ref=e784]: Jusqu'à 80 intervenants
+          - listitem [ref=e785]:
+            - img [ref=e787]
+            - generic [ref=e789]: Tout Essentiel +
+          - listitem [ref=e790]:
+            - img [ref=e792]
+            - generic [ref=e794]: Audits HAS / AFNOR / ISO
+          - listitem [ref=e795]:
+            - img [ref=e797]
+            - generic [ref=e799]: Baromètre QVCT
+          - listitem [ref=e800]:
+            - img [ref=e802]
+            - generic [ref=e804]: Formation continue
+          - listitem [ref=e805]:
+            - img [ref=e807]
+            - generic [ref=e809]: API & connecteurs
+          - listitem [ref=e810]:
+            - img [ref=e812]
+            - generic [ref=e814]: Référent qualité dédié
+        - link "Démarrer gratuitement" [ref=e815] [cursor=pointer]:
+          - /url: "#cta"
+      - generic [ref=e817]:
+        - heading "Groupe" [level=3] [ref=e818]
+        - generic [ref=e820]: Sur mesure
+        - paragraph [ref=e821]: Pour les groupes multi-sites et les grandes associations.
+        - list [ref=e822]:
+          - listitem [ref=e823]:
+            - img [ref=e825]
+            - generic [ref=e827]: Intervenants illimités
+          - listitem [ref=e828]:
+            - img [ref=e830]
+            - generic [ref=e832]: Tout Professionnel +
+          - listitem [ref=e833]:
+            - img [ref=e835]
+            - generic [ref=e837]: Multi-sites & consolidation
+          - listitem [ref=e838]:
+            - img [ref=e840]
+            - generic [ref=e842]: IA prédictive
+          - listitem [ref=e843]:
+            - img [ref=e845]
+            - generic [ref=e847]: SLA garanti 99,9%
+          - listitem [ref=e848]:
+            - img [ref=e850]
+            - generic [ref=e852]: Onboarding personnalisé
+          - listitem [ref=e853]:
+            - img [ref=e855]
+            - generic [ref=e857]: Accompagnement continu
+        - link "Nous contacter" [ref=e858] [cursor=pointer]:
+          - /url: "#cta"
+  - generic [ref=e860]:
+    - generic [ref=e861]:
+      - generic [ref=e862]: Questions fréquentes
+      - heading "Tout ce que vous voulez savoir." [level=2] [ref=e863]
+    - generic [ref=e864]:
+      - generic [ref=e865]:
+        - button "Que comprend exactement HS Quality ?" [expanded] [ref=e866]:
+          - generic [ref=e867]: Que comprend exactement HS Quality ?
+          - img [ref=e869]
+        - paragraph [ref=e873]: "Une plateforme complète : suivi des interventions terrain (mobile + web), gestion des incidents et EI, audits qualité (HAS, AFNOR, ISO 9001, Caphandeo), baromètre QVCT, gestion des compétences et plans de soins. Tout est intégré et conforme HAS / RGPD / HDS."
+      - generic [ref=e874]:
+        - button "À quelle fréquence dois-je faire des audits qualité ?" [ref=e875]:
+          - generic [ref=e876]: À quelle fréquence dois-je faire des audits qualité ?
+          - img [ref=e878]
+        - paragraph [ref=e880]: L'évaluation externe HAS doit avoir lieu tous les 5 ans. En interne, un point trimestriel est recommandé. HS Quality vous permet de programmer ces audits, de scorer en temps réel et de générer le PAC depuis les écarts détectés.
+      - generic [ref=e881]:
+        - button "Combien de temps pour mettre en place HS Quality ?" [ref=e882]:
+          - generic [ref=e883]: Combien de temps pour mettre en place HS Quality ?
+          - img [ref=e885]
+        - paragraph [ref=e887]: Deux semaines en moyenne. Provisioning de votre tenant, import de vos bénéficiaires et intervenants, formation des coordinateurs (2h), puis déploiement progressif. Un référent qualité vous accompagne tout au long du pilote.
+      - generic [ref=e888]:
+        - button "Mes données sont-elles bien sécurisées ?" [ref=e889]:
+          - generic [ref=e890]: Mes données sont-elles bien sécurisées ?
+          - img [ref=e892]
+        - paragraph [ref=e894]: Hébergement HDS en France (AWS Paris ou OVHcloud), chiffrement AES-256 au repos et TLS 1.3 en transit, MFA obligatoire pour les rôles privilégiés. Audit complet de chaque accès aux données de santé. Conformité RGPD et code de la santé publique.
+      - generic [ref=e895]:
+        - button "Puis-je essayer avant de m'engager ?" [ref=e896]:
+          - generic [ref=e897]: Puis-je essayer avant de m'engager ?
+          - img [ref=e899]
+        - paragraph [ref=e901]: Oui, l'essai pilote est gratuit pendant 3 mois, sans carte bancaire et avec un référent dédié. Si la solution ne correspond pas à vos besoins, vos données sont restituées ou supprimées sur simple demande.
+  - generic [ref=e905]:
+    - generic [ref=e906]: Pilote gratuit · 3 mois · accompagnement inclus
+    - heading "Prêt à structurer votre démarche qualité ?" [level=2] [ref=e908]
+    - paragraph [ref=e909]: Échangeons sur vos enjeux et ouvrons un environnement pilote pour vos coordinateurs.
+    - generic [ref=e910]:
+      - link "Demander une démo" [ref=e911] [cursor=pointer]:
+        - /url: mailto:contact@hsquality.fr
+        - text: Demander une démo
+        - img [ref=e912]
+      - link "Déjà client ? Se connecter" [ref=e914] [cursor=pointer]:
+        - /url: /login
+  - contentinfo [ref=e915]:
+    - generic [ref=e916]:
+      - generic [ref=e917]:
+        - generic [ref=e918]:
+          - link "Q HS Quality" [ref=e919] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e920]: Q
+            - generic [ref=e921]: HS Quality
+          - paragraph [ref=e922]: Pilotage qualité et QVCT pour les structures médico-sociales d'aide et de soins à domicile.
+          - generic [ref=e923]:
+            - generic [ref=e924]: RGPD
+            - generic [ref=e925]: HDS
+            - generic [ref=e926]: HAS
+            - generic [ref=e927]: ISO 9001
+            - generic [ref=e928]: AFNOR
+        - generic [ref=e929]:
+          - heading "Plateforme" [level=5] [ref=e930]
+          - list [ref=e931]:
+            - listitem [ref=e932]:
+              - link "Modules" [ref=e933] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e934]:
+              - link "Mobile offline" [ref=e935] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e936]:
+              - link "API & connecteurs" [ref=e937] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e938]:
+              - link "IA prédictive" [ref=e939] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e940]:
+          - heading "Conformité" [level=5] [ref=e941]
+          - list [ref=e942]:
+            - listitem [ref=e943]:
+              - link "HAS" [ref=e944] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e945]:
+              - link "AFNOR NF X50-056" [ref=e946] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e947]:
+              - link "ISO 9001" [ref=e948] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e949]:
+              - link "Caphandeo" [ref=e950] [cursor=pointer]:
+                - /url: "#"
+        - generic [ref=e951]:
+          - heading "Ressources" [level=5] [ref=e952]
+          - list [ref=e953]:
+            - listitem [ref=e954]:
+              - link "Documentation" [ref=e955] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e956]:
+              - link "Support" [ref=e957] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e958]:
+              - link "Formations" [ref=e959] [cursor=pointer]:
+                - /url: "#"
+            - listitem [ref=e960]:
+              - link "Contact" [ref=e961] [cursor=pointer]:
+                - /url: "#"
+      - generic [ref=e962]:
+        - paragraph [ref=e963]: © 2026 HS Quality · CDC-QUALITE-DOM-2024-v2.0
+        - generic [ref=e964]:
+          - link "Confidentialité" [ref=e965] [cursor=pointer]:
+            - /url: "#"
+          - link "CGU" [ref=e966] [cursor=pointer]:
+            - /url: "#"
+          - link "Mentions légales" [ref=e967] [cursor=pointer]:
+            - /url: "#"
+          - link "Accessibilité" [ref=e968] [cursor=pointer]:
+            - /url: "#"

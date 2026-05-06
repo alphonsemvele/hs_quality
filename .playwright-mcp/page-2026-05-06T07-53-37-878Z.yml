@@ -1,0 +1,147 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Communication" [ref=e75] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e77]
+              - generic [ref=e79]: Communication
+    - generic [ref=e81]:
+      - generic [ref=e82]: CB
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Claire Bernard
+        - paragraph [ref=e85]: utilisateur
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - generic [ref=e89]:
+        - heading "Audits & Conformité" [level=1] [ref=e90]
+        - paragraph [ref=e91]: Évaluations HAS, AFNOR, ISO 9001
+      - button "CB Claire Bernard" [ref=e94] [cursor=pointer]:
+        - generic [ref=e95]: CB
+        - generic [ref=e96]: Claire Bernard
+        - img [ref=e97]
+    - main [ref=e99]:
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - navigation "Fil d'ariane" [ref=e102]:
+            - link "Tableau de bord" [ref=e104] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e105]:
+              - img [ref=e106]
+              - generic [ref=e108]: Audits
+          - heading "Audits & Conformité" [level=1] [ref=e109]
+          - paragraph [ref=e110]: Grilles d'évaluation, scoring et plans d'actions correctifs
+        - link "Nouvel audit" [ref=e112] [cursor=pointer]:
+          - /url: /audits/create
+          - button "Nouvel audit" [ref=e113]:
+            - img [ref=e114]
+            - text: Nouvel audit
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - paragraph [ref=e118]: Total audits
+          - paragraph [ref=e119]: "3"
+        - generic [ref=e120]:
+          - paragraph [ref=e121]: En cours
+          - paragraph [ref=e122]: "1"
+        - generic [ref=e123]:
+          - paragraph [ref=e124]: Terminés
+          - paragraph [ref=e125]: "1"
+        - generic [ref=e126]:
+          - paragraph [ref=e127]: Score moyen
+          - paragraph [ref=e128]: 78 %
+      - list [ref=e131]:
+        - 'link "Audit ISO 9001 — Pré-audit de certification Planifié ISO 9001 2026-07-06 Auditeur : Susanne Lefort Voir →" [ref=e132] [cursor=pointer]':
+          - /url: /audits/019dfc2d-25b8-72c4-888d-c5093fca325a
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - generic [ref=e137]:
+                - heading "Audit ISO 9001 — Pré-audit de certification" [level=3] [ref=e138]
+                - generic [ref=e139]: Planifié
+                - generic [ref=e141]: ISO 9001
+              - generic [ref=e142]:
+                - generic [ref=e143]: 2026-07-06
+                - generic [ref=e144]: "Auditeur : Susanne Lefort"
+            - generic [ref=e146]: Voir →
+        - 'link "Audit interne — Prévention des chutes En cours Référentiel interne 2026-05-03 Auditeur : Claire Bernard 1 écart(s) Voir →" [ref=e147] [cursor=pointer]':
+          - /url: /audits/019dfc2d-25b4-73c9-a1d8-a4508ba81f53
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - generic [ref=e152]:
+                - heading "Audit interne — Prévention des chutes" [level=3] [ref=e153]
+                - generic [ref=e154]: En cours
+                - generic [ref=e156]: Référentiel interne
+              - generic [ref=e157]:
+                - generic [ref=e158]: 2026-05-03
+                - generic [ref=e159]: "Auditeur : Claire Bernard"
+                - generic [ref=e160]: 1 écart(s)
+            - generic [ref=e162]: Voir →
+        - 'link "Audit HAS — Évaluation externe annuelle Terminé HAS 2026-03-06 Auditeur : Dr. Lefèvre (cabinet AQS) 3 écart(s) 78% Voir →" [ref=e163] [cursor=pointer]':
+          - /url: /audits/019dfc2d-25a6-71c6-9427-fb00f4a41c23
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - heading "Audit HAS — Évaluation externe annuelle" [level=3] [ref=e169]
+                - generic [ref=e170]: Terminé
+                - generic [ref=e172]: HAS
+              - generic [ref=e173]:
+                - generic [ref=e174]: 2026-03-06
+                - generic [ref=e175]: "Auditeur : Dr. Lefèvre (cabinet AQS)"
+                - generic [ref=e176]: 3 écart(s)
+            - generic [ref=e177]:
+              - generic [ref=e178]: 78%
+              - generic [ref=e179]: Voir →

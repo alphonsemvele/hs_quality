@@ -13,6 +13,7 @@ import {
     Th,
     Tr,
 } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -48,6 +49,7 @@ export default function Interventions({
     filters = { status: null },
 }: Partial<Props>) {
     const activeFilter = filters.status;
+    const canCreate = useCan('interventions.create');
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
             <PageHeader
@@ -55,9 +57,11 @@ export default function Interventions({
                 subtitle={`${total} intervention(s) au total`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Interventions' }]}
                 actions={
-                    <Link href="/interventions/create">
-                        <Button leadingIcon={<PlusIcon />}>Nouvelle intervention</Button>
-                    </Link>
+                    canCreate ? (
+                        <Link href="/interventions/create">
+                            <Button leadingIcon={<PlusIcon />}>Nouvelle intervention</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -134,9 +138,11 @@ export default function Interventions({
                         title="Aucune intervention"
                         description="Planifiez votre première intervention pour démarrer le suivi terrain."
                         action={
-                            <Link href="/interventions/create">
-                                <Button>Nouvelle intervention</Button>
-                            </Link>
+                            canCreate ? (
+                                <Link href="/interventions/create">
+                                    <Button>Nouvelle intervention</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 )}

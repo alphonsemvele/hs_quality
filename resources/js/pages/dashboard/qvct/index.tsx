@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, KpiCard, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -34,6 +35,7 @@ const STATUT_TONE: Record<string, 'sage' | 'warning' | 'brand'> = {
 };
 
 export default function QvctIndex({ campagnes = [], stats = { score_moyen: null, taux_participation: null, alertes_actives: 0, derniere_campagne: null } }: Partial<Props>) {
+    const canManage = useCan('qvct.manage');
     return (
         <DashboardLayout title="Baromètre QVCT" subtitle="Qualité de Vie et Conditions de Travail">
             <PageHeader
@@ -41,9 +43,11 @@ export default function QvctIndex({ campagnes = [], stats = { score_moyen: null,
                 subtitle="Campagnes de sondage, signaux faibles et alertes RPS"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'QVCT' }]}
                 actions={
-                    <Link href="/qvct/questionnaire">
-                        <Button leadingIcon={<PlusIcon />}>Nouvelle campagne</Button>
-                    </Link>
+                    canManage ? (
+                        <Link href="/qvct/questionnaire">
+                            <Button leadingIcon={<PlusIcon />}>Nouvelle campagne</Button>
+                        </Link>
+                    ) : null
                 }
             />
 
@@ -97,9 +101,11 @@ export default function QvctIndex({ campagnes = [], stats = { score_moyen: null,
                         title="Aucune campagne QVCT"
                         description="Lancez votre première campagne de baromètre pour mesurer la qualité de vie au travail de vos équipes."
                         action={
-                            <Link href="/qvct/questionnaire">
-                                <Button>Lancer une campagne</Button>
-                            </Link>
+                            canManage ? (
+                                <Link href="/qvct/questionnaire">
+                                    <Button>Lancer une campagne</Button>
+                                </Link>
+                            ) : undefined
                         }
                     />
                 </Card>

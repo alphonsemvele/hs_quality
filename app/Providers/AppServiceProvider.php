@@ -7,7 +7,9 @@ use App\Models\CarePlan;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
+use App\Models\PlanAmelioration;
 use App\Models\PlannedTask;
+use App\Models\QualityAudit;
 use App\Models\Structure;
 use App\Models\User;
 use App\Observers\IncidentObserver;
@@ -17,7 +19,9 @@ use App\Policies\CarePlanPolicy;
 use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
+use App\Policies\PlanAmeliorationPolicy;
 use App\Policies\PlannedTaskPolicy;
+use App\Policies\QualityAuditPolicy;
 use App\Policies\StructurePolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
@@ -41,7 +45,9 @@ class AppServiceProvider extends ServiceProvider
         Incident::class => IncidentPolicy::class,
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
+        PlanAmelioration::class => PlanAmeliorationPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
+        QualityAudit::class => QualityAuditPolicy::class,
         Structure::class => StructurePolicy::class,
         User::class => UserPolicy::class,
     ];

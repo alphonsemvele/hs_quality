@@ -1,0 +1,118 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Communication" [ref=e75] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e77]
+              - generic [ref=e79]: Communication
+    - generic [ref=e81]:
+      - generic [ref=e82]: CB
+      - generic [ref=e83]:
+        - paragraph [ref=e84]: Claire Bernard
+        - paragraph [ref=e85]: utilisateur
+  - generic [ref=e86]:
+    - banner [ref=e87]:
+      - heading "Modifier le plan" [level=1] [ref=e90]
+      - button "CB Claire Bernard" [ref=e93] [cursor=pointer]:
+        - generic [ref=e94]: CB
+        - generic [ref=e95]: Claire Bernard
+        - img [ref=e96]
+    - main [ref=e98]:
+      - generic [ref=e100]:
+        - navigation "Fil d'ariane" [ref=e101]:
+          - link "Tableau de bord" [ref=e103] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e104]:
+            - img [ref=e105]
+            - link "Plans d'amélioration" [ref=e107] [cursor=pointer]:
+              - /url: /plans-amelioration
+          - generic [ref=e108]:
+            - img [ref=e109]
+            - link "Mise à jour du protocole médicamenteux" [ref=e111] [cursor=pointer]:
+              - /url: /plans-amelioration/019dfc2d-25bc-7240-b783-c6245394b5a6
+          - generic [ref=e112]:
+            - img [ref=e113]
+            - generic [ref=e115]: Modifier
+        - heading "Modifier le plan d'amélioration" [level=1] [ref=e116]
+        - paragraph [ref=e117]: Mise à jour du protocole médicamenteux
+      - generic [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e122]:
+            - heading "Description du plan" [level=3] [ref=e123]
+            - paragraph [ref=e124]: "Source : Audit (non modifiable)"
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - generic [ref=e127]: Titre*
+              - textbox "Titre*" [ref=e128]: Mise à jour du protocole médicamenteux
+            - generic [ref=e129]:
+              - generic [ref=e130]: Constat / écart identifié
+              - textbox "Constat / écart identifié" [ref=e131]: Protocole non mis à jour depuis 14 mois — risque sur la traçabilité de l'administration.
+        - generic [ref=e132]:
+          - heading "Pilotage" [level=3] [ref=e135]
+          - generic [ref=e136]:
+            - generic [ref=e137]:
+              - generic [ref=e138]: Responsable
+              - textbox "Responsable" [ref=e139]: Claire Bernard
+            - generic [ref=e140]:
+              - generic [ref=e141]: Échéance
+              - textbox "Échéance" [ref=e142]: 2026-05-27
+          - generic [ref=e143]:
+            - link "Annuler" [ref=e144] [cursor=pointer]:
+              - /url: /plans-amelioration/019dfc2d-25bc-7240-b783-c6245394b5a6
+            - button "Enregistrer" [ref=e145]
