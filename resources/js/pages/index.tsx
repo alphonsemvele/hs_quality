@@ -172,6 +172,30 @@ function IconCheck() {
     );
 }
 
+function IconChat() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+    );
+}
+
+function IconDashboard() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+    );
+}
+
+function IconSparkles() {
+    return (
+        <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 5L21 10l-5.5 2L13 17l-2.5-5L5 10l5.5-2L13 3z" />
+        </svg>
+    );
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 //  DATA
 // ════════════════════════════════════════════════════════════════════════════
@@ -185,6 +209,9 @@ const FEATURES = [
     { icon: <IconHeart />, title: 'Baromètre QVCT', desc: `Enquêtes régulières sur la qualité de vie au travail des intervenants. Cartographie des signaux faibles, prévention de l'épuisement professionnel.` },
     { icon: <IconAcademic />, title: 'Formation continue', desc: `Gestion du plan de développement des compétences, suivi des habilitations, rappels automatiques des échéances réglementaires.` },
     { icon: <IconPhone />, title: 'Application mobile', desc: `React Native offline-first pour les intervenants en zones blanches. Synchronisation dès retour réseau, interface pensée pour le terrain.` },
+    { icon: <IconChat />, title: 'Communication interne', desc: `Messagerie sécurisée, fil d'actualité, forum d'entraide, bibliothèque de protocoles. Brise l'isolement des intervenants au domicile.` },
+    { icon: <IconDashboard />, title: 'Indicateurs & dashboards', desc: `Tableau de bord exécutif et opérationnel, alertes hors-seuil, export PDF/Excel, rapport annuel qualité généré automatiquement pour les autorités.` },
+    { icon: <IconSparkles />, title: 'IA prédictive', desc: `Détection précoce du risque de burnout, anticipation des pertes d'autonomie, benchmark anonymisé inter-structures. Disponible sur l'offre Premium.` },
 ];
 
 const FAQS: Faq[] = [
@@ -213,44 +240,53 @@ const FAQS: Faq[] = [
 const PRICING = [
     {
         name: 'Essentiel',
-        price: '149',
+        price: '8',
+        unit: '€ / utilisateur / mois',
         desc: 'Pour les petites structures qui démarrent leur démarche qualité.',
         features: [
-            'Jusqu\'à 20 intervenants',
-            'Interventions & traçabilité',
-            'Gestion des incidents',
-            'Application mobile',
-            'Support par email',
+            'Traçabilité des interventions',
+            'Gestion des incidents (basique)',
+            'Tableau de bord basique',
+            'Application mobile offline',
+            'Messagerie interne',
+            'Support par email (48h)',
         ],
         highlighted: false,
     },
     {
-        name: 'Professionnel',
-        price: '349',
+        name: 'Pro',
+        price: '15',
+        unit: '€ / utilisateur / mois',
         desc: 'Pour les structures engagées dans une démarche qualité complète.',
         features: [
-            'Jusqu\'à 80 intervenants',
             'Tout Essentiel +',
-            'Audits HAS / AFNOR / ISO',
-            'Baromètre QVCT',
-            'Formation continue',
+            'Gestion des incidents (complet)',
+            'Module QVCT (baromètre)',
+            'Audits & conformité (grilles standard)',
+            'Plan d\'amélioration continue (PAC)',
+            'Communication : messagerie + forum',
+            'Gestion compétences (basique)',
+            'Tableaux de bord avancés',
             'API & connecteurs',
-            'Référent qualité dédié',
+            'Support email (24h)',
         ],
         highlighted: true,
     },
     {
-        name: 'Groupe',
-        price: 'Sur mesure',
-        desc: 'Pour les groupes multi-sites et les grandes associations.',
+        name: 'Premium',
+        price: '25',
+        unit: '€ / utilisateur / mois',
+        desc: 'Pour les groupes multi-sites et les structures à forte exigence qualité.',
         features: [
-            'Intervenants illimités',
-            'Tout Professionnel +',
-            'Multi-sites & consolidation',
-            'IA prédictive',
-            'SLA garanti 99,9%',
-            'Onboarding personnalisé',
-            'Accompagnement continu',
+            'Tout Pro +',
+            'Gestion des incidents complète + IA',
+            'Audits personnalisés + préparation HAS',
+            'Gestion compétences complète + e-learning',
+            'Communication : messagerie + forum + visioconférence',
+            'Tableau de bord exécutif + export PDF/Excel',
+            'Portail bénéficiaires & familles',
+            'IA prédictive (burnout, autonomie, benchmark)',
+            'Support téléphone + Customer Success Manager dédié',
         ],
         highlighted: false,
     },
@@ -427,7 +463,7 @@ function Nav({ solid, mobileOpen, setMobileOpen }: {
                     <a href="#cta" className={`rounded-full px-5 py-2 text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg ${
                         solid ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-white text-ink-900 hover:bg-ink-50'
                     }`}>
-                        Démarrer gratuitement
+                        Démarrer le pilote 3 mois
                     </a>
                 </div>
 
@@ -482,7 +518,7 @@ function Nav({ solid, mobileOpen, setMobileOpen }: {
                         </Link>
                         <a href="#cta" onClick={() => setMobileOpen(false)}
                             className="rounded-full bg-brand-600 px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-700">
-                            Démarrer gratuitement
+                            Démarrer le pilote 3 mois
                         </a>
                     </div>
                 </div>
@@ -538,7 +574,7 @@ function HeroSection() {
                 <div className="fade-in delay-4 mt-10 flex flex-wrap items-center justify-center gap-3">
                     <a href="#cta"
                         className="btn-glow inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:shadow-2xl">
-                        Démarrer gratuitement
+                        Démarrer le pilote 3 mois
                         <Arrow />
                     </a>
                     <a href="#modules"
@@ -549,7 +585,7 @@ function HeroSection() {
 
                 {/* Social proof */}
                 <p className="fade-in delay-4 mt-8 text-center text-sm text-white/45">
-                    50+ structures · 94% traçabilité · &lt; 2 min par incident
+                    Hébergement HDS France · Conforme RGPD · Référentiel HAS
                 </p>
 
                 {/* Dashboard preview */}
@@ -683,7 +719,7 @@ function FeaturesSection() {
                         <span className="gradient-text">rien de superflu.</span>
                     </h2>
                     <p className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed text-ink-600">
-                        Six modules pensés pour le quotidien des structures médico-sociales, du terrain à la direction.
+                        Neuf modules métier pensés pour le quotidien des structures médico-sociales, du terrain à la direction.
                     </p>
                 </Reveal>
 
@@ -1035,6 +1071,13 @@ const STRUCTURE_TYPES = [
         color: 'sage' as const,
         modules: ['Multi-sites', 'Consolidation', 'Reporting', 'Benchmark'],
     },
+    {
+        name: 'Mandataires',
+        full: 'Mandataires & prestataires indépendants',
+        desc: 'Solution allégée pour les structures de petite taille (1 à 10 intervenants) ou les indépendants. Toute la traçabilité réglementaire à un coût adapté.',
+        color: 'brand' as const,
+        modules: ['Interventions', 'Incidents', 'Mobile offline', 'Conformité'],
+    },
 ];
 
 function StructureTypesSection() {
@@ -1067,7 +1110,7 @@ function StructureTypesSection() {
                     </p>
                 </Reveal>
 
-                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {STRUCTURE_TYPES.map((st, i) => {
                         const colors = colorClasses[st.color];
                         return (
@@ -1102,9 +1145,9 @@ function StructureTypesSection() {
 // ════════════════════════════════════════════════════════════════════════════
 
 function MetricsSection() {
-    const [refYears, valYears] = useCountUp(10);
-    const [refStructures, valStructures] = useCountUp(50);
-    const [refTrace, valTrace] = useCountUp(94);
+    const [refModules, valModules] = useCountUp(9);
+    const [refPersonas, valPersonas] = useCountUp(6);
+    const [refConformite, valConformite] = useCountUp(100);
 
     return (
         <section className="bg-white px-5 py-20 sm:px-8 sm:py-28">
@@ -1112,21 +1155,21 @@ function MetricsSection() {
                 <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
                     <Reveal className="text-center">
                         <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
-                            <span ref={refYears}>{valYears}</span>+
+                            <span ref={refModules}>{valModules}</span>
                         </div>
-                        <p className="mt-2 text-sm text-ink-500">années d'expertise</p>
+                        <p className="mt-2 text-sm text-ink-500">modules métier intégrés</p>
                     </Reveal>
                     <Reveal className="text-center" delay={0.08}>
                         <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
-                            <span ref={refStructures}>{valStructures}</span>+
+                            <span ref={refPersonas}>{valPersonas}</span>
                         </div>
-                        <p className="mt-2 text-sm text-ink-500">structures accompagnées</p>
+                        <p className="mt-2 text-sm text-ink-500">personas couverts</p>
                     </Reveal>
                     <Reveal className="text-center" delay={0.16}>
                         <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
-                            <span ref={refTrace}>{valTrace}</span>%
+                            <span ref={refConformite}>{valConformite}</span>%
                         </div>
-                        <p className="mt-2 text-sm text-ink-500">traçabilité terrain</p>
+                        <p className="mt-2 text-sm text-ink-500">conforme HAS · RGPD · HDS</p>
                     </Reveal>
                     <Reveal className="text-center" delay={0.24}>
                         <div className="mono text-3xl font-semibold tracking-tight text-ink-900 sm:text-4xl">
@@ -1183,6 +1226,9 @@ function TestimonialSection() {
                         Ils pilotent leur qualité{' '}
                         <span className="gradient-text">avec HS Quality.</span>
                     </h2>
+                    <p className="mx-auto mt-4 max-w-xl text-xs italic text-ink-400">
+                        Profils illustratifs reflétant les cibles d'amélioration du cahier des charges. Les vrais retours pilote seront publiés à l'issue de la Phase 1.
+                    </p>
                 </Reveal>
 
                 <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -1243,6 +1289,9 @@ function PricingSection() {
                     <p className="mx-auto mt-4 max-w-lg text-base font-light text-ink-600">
                         Essai pilote gratuit 3 mois. Sans engagement, sans carte bancaire.
                     </p>
+                    <p className="mx-auto mt-2 max-w-lg text-xs text-ink-400">
+                        Tarification à l'utilisateur. Remises volume disponibles à partir de 100 intervenants — nous contacter.
+                    </p>
                 </Reveal>
 
                 <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -1260,14 +1309,8 @@ function PricingSection() {
                                 )}
                                 <h3 className="text-lg font-semibold text-ink-900">{plan.name}</h3>
                                 <div className="mt-3 flex items-baseline gap-1">
-                                    {plan.price === 'Sur mesure' ? (
-                                        <span className="text-2xl font-bold text-ink-900">Sur mesure</span>
-                                    ) : (
-                                        <>
-                                            <span className="mono text-4xl font-bold text-ink-900">{plan.price}</span>
-                                            <span className="text-sm text-ink-500">€ / mois</span>
-                                        </>
-                                    )}
+                                    <span className="mono text-4xl font-bold text-ink-900">{plan.price}</span>
+                                    <span className="text-sm text-ink-500">{plan.unit}</span>
                                 </div>
                                 <p className="mt-3 text-sm text-ink-500">{plan.desc}</p>
                                 <ul className="mt-6 flex-1 space-y-2.5">
@@ -1285,7 +1328,7 @@ function PricingSection() {
                                         ? 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-lg'
                                         : 'bg-ink-900 text-white hover:bg-ink-800 hover:shadow-lg'
                                 }`}>
-                                    {plan.price === 'Sur mesure' ? 'Nous contacter' : 'Démarrer gratuitement'}
+                                    Démarrer le pilote 3 mois
                                 </a>
                             </div>
                         </Reveal>
