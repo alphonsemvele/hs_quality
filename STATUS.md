@@ -1,9 +1,10 @@
 # QualitéDomicile SaaS — Project Status & Model Design Reference
 
-**Generated:** 2026-05-02
-**Branch:** `feature/muma-setup`
-**Test suite:** 403 tests · 1,117 assertions · **ALL GREEN**
+**Generated:** 2026-05-02 · **Last refreshed:** 2026-05-07
+**Branch:** `feature/muma-setup` (83 commits ahead of `origin/main`, 1 behind)
+**Test suite:** 803 test definitions across 118 test files
 **Phase 1 backend:** ✅ closed at commit `ad4f939` — every IMPLEMENTATION_PLAN.txt §4 line item verified against code (see [§3.1](#31-phase-1-close-out-audit))
+**Phase 2 backend:** 🟢 modules M3 / M6 / M4 / M5 closed; commercial slice C1–C7 closed; engineering concerns E1–E5 in progress (see [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md) for the live per-line tracker)
 **Phase 2 tracker:** [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md) — one checkbox per spec line, updated as work lands
 
 Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier des Charges, Feb 2024)
@@ -24,7 +25,7 @@ Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier de
 10. [Testing Strategy](#10-testing-strategy)
 11. [Security Architecture](#11-security-architecture)
 12. [Manual Testing Guide (Postman / browser)](#12-manual-testing-guide-postman--browser)
-13. [What's Next — Phase 1 M4 W2+](#13-whats-next--phase-1-m4-w2)
+13. [What's Next — Phase 2 close-out & Phase 3 outlook](#13-whats-next--phase-2-close-out--phase-3-outlook)
 
 ---
 
@@ -289,7 +290,7 @@ Cache::tags(["structure:{$id}:dashboard"])->remember('stats', 300, fn() => …);
 
 **Framework:** Pest (NOT PHPUnit — overrides Laravel Boost default)
 **Rule:** Every feature ships with both a feature test AND a unit test.
-**Current:** 263 tests · 738 assertions · all green
+**Current:** 803 test definitions across 118 test files (Phase 1 + Phase 2 M3/M4/M5/M6 + Billing C1–C7)
 
 ### Layout
 ```
@@ -590,25 +591,53 @@ Redis cache entries are tenant-tagged and flush themselves as data changes — n
 
 ---
 
-## 13. What's Next — Phase 1 M4 W2+
+## 13. What's Next — Phase 2 close-out & Phase 3 outlook
 
-### M4 W2 — React Native skeleton
-Mobile team scaffolds the Expo app, wires Sanctum login flow, configures SQLite + WatermelonDB for offline storage, builds the intervention list and check-in screens. Backend stays stable through this work — no API changes expected.
+> Phase 1 (Months 1–4) is sealed. Phase 1 M4 W2/W4 (RN skeleton + pilot onboarding) are not engineering — owned by mobile and commercial teams respectively. M4 W3 (offline sync) shipped at `ad4f939`.
 
-### M4 W3 — Offline sync hardening
-- `POST /api/v1/sync/batch` — accepts a JSON array of operations (check-in, check-out, photo upload, incident declare) collected while offline
-- Each operation carries its own `Idempotency-Key` so partial replays are safe
-- Conflict resolution: last-write-wins on intervention status, append-only on incidents/photos
-- `throttle:sync` (20 req/min) protects against runaway clients
+### 13.1 Phase 2 — what's left to land (engineering)
 
-### M4 W4 — Pilot onboarding
-- 1 pilot SAAD structure goes live read-only first, then writes
-- Real GPS check-in/out captured
-- Reverb dashboard monitored for production behaviour
-- Sentry breadcrumbs collected for any silent failures
+The four functional modules are closed. The remaining engineering work is the cross-cutting **engineering concerns** the spec adds in [IMPLEMENTATION_PLAN.txt:457-462](IMPLEMENTATION_PLAN.txt#L457-L462), tracked in [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md) as E1–E5:
 
-### Phase 2 (Months 5–8) — Pro offering
-HAS audit module (~150 criteria) · Formation & habilitation tracking · Document management (signed care plan PDFs) · Advanced reporting dashboard · Automated notifications
+| # | Concern | Plan |
+|---|---|---|
+| **E1** | Full APM | Sentry Performance + Laravel Telescope is the project's interpretation. Datadog / NewRelic deferred pending a procurement decision (license + DPA review for HDS hosting). Documented as such in `PHASE2_PROGRESS.md`. |
+| **E2** | Circuit breakers on outbound calls | Redis-backed `CircuitBreaker` service applied to `NotifyARSJob` (riskiest external call — incident reporting must not stall the queue). Mail and future ML pings reuse the same primitive. |
+| **E3** | Feature flags via Laravel Pennant | Pennant package already present. First risky-rollout flag wires `pro_tier_features` to `Structure::hasFeature()` for tier-gated module surfaces. |
+| **E4** | Quarterly access reviews | Artisan command emitting per-structure effective-permission CSV. Process step (CISO-owned), not blocking. |
+| **E5** | HDS certification documentation pack | `references/compliance/hds-certification-pack/` — compiled audit artefacts (data-flow diagrams, encryption inventory, access matrix, incident-response runbook). Process step. |
 
-### Phase 3 (Months 9–14) — Premium / AI
-AI-assisted care plan suggestions · Predictive scheduling · Voice-to-structured-form incident reporting · Longitudinal QVCT trend analysis
+### 13.2 Phase 1 carry-overs still open
+
+From [PHASE2_PROGRESS.md "Phase 1 deferrals"](PHASE2_PROGRESS.md), opportunistically landed alongside their related Phase 2 module:
+
+- **P1-D1** Beneficiary detail page tab nav — frontend pass alongside M3 UI
+- **P1-D2** `recharts` KPI charts — frontend pass alongside M3 dashboard tile
+- **P1-D3** `useEcho` listener for `InterventionStatusChanged` + `IncidentDeclared` — proves real-time end-to-end (M4.19)
+- **P1-D4** PostGIS extension + `geography(Point)` for check-in coords — only if a Phase 2 feature requires spatial queries
+- **P1-D5** 5-whys structured columns (`why_1`..`why_5`) — only if a Phase 2 audit/QVCT feature needs per-step analytics
+
+### 13.3 Branch hygiene (immediate)
+
+`feature/muma-setup` is **83 commits ahead of `origin/main`**, 1 behind. The Phase 2 backend should land via reviewable PRs before Phase 2 acceptance can be claimed end-to-end. Suggested split: M3 QVCT, M6 Audits, M4 Communication, M5 Compétences, Billing C1–C7, then this E1–E5 sweep.
+
+### 13.4 Phase 2 acceptance (commercial / ops)
+
+Per [IMPLEMENTATION_PLAN.txt:464-470](IMPLEMENTATION_PLAN.txt#L464-L470). Backend is ready; the remaining items are commercial / ops milestones — not engineering:
+
+- 50 pilot structures (from 10) — sales / onboarding
+- Pro tier billing live with paying customers — gated on landing C1–C7 to `main`
+- QVCT baromètre running with measurable weak-signal alerts in pilots — pilot ops + product
+- First HAS évaluation externe prepared via the platform — pilot customer + référent qualité
+- 99.9% uptime — DevOps, observability dashboards must back this number once APM matures
+
+### 13.5 Phase 3 (Months 9–14) — Premium / AI outlook
+
+Not started. Scope per [IMPLEMENTATION_PLAN.txt:473-520](IMPLEMENTATION_PLAN.txt#L473-L520):
+
+- **M9 IA prédictive** — Python microservice (scikit-learn + transformers + LLM API). Burnout risk, autonomy-loss detection, preventive action suggestions, semantic analysis of intervention reports. Laravel queues ML jobs; results written back to a PostgreSQL analytics schema. Fallback: "en calcul" placeholder when the service is down — never error out the main flow.
+- **M8 Portail bénéficiaires** — separate Inertia (or Next.js PWA) app for bénéficiaires + familles. Care plan + intervention history + satisfaction survey + direct incident reporting. Anonymous tokens (signed URL access with limited scope) for family members.
+- **Benchmark anonymisé** — the ONE approved usage of `CrossTenantQueryService`: aggregate anonymised indicators across all comparable-size structures, monthly sector report. Every access logged + auditable.
+- **Reporting engine** — annual quality report auto-generated per structure (PDF), sent to authorities as required.
+
+Engineering concerns scaled in Phase 3: read replicas for analytics, table partitioning on `interventions` / `audit_logs` / `qvct_reponses` (by structure_id, date), layered caching (Redis hot + CDN edge), contract tests run in CI against the OpenAPI spec.
