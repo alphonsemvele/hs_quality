@@ -33,6 +33,8 @@ class AuditRun extends Model implements AuditableContract
         'max_score',
         'finalised_by',
         'finalised_at',
+        'pdf_path',
+        'pdf_generated_at',
     ];
 
     protected function casts(): array
@@ -43,7 +45,13 @@ class AuditRun extends Model implements AuditableContract
             'score' => 'decimal:2',
             'max_score' => 'decimal:2',
             'finalised_at' => 'datetime',
+            'pdf_generated_at' => 'datetime',
         ];
+    }
+
+    public function hasPdf(): bool
+    {
+        return $this->pdf_generated_at !== null && $this->pdf_path !== null;
     }
 
     public function grid(): BelongsTo

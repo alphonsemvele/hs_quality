@@ -7,20 +7,24 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Audits\RecordAuditResponseRequest;
 use App\Http\Requests\Audits\StartAuditRunRequest;
+use App\Jobs\GenerateAuditRunPdfJob;
 use App\Models\AuditGrid;
 use App\Models\AuditGridItem;
 use App\Models\AuditRun;
 use App\Models\Pac;
 use App\Services\AuditExecutionService;
+use App\Services\AuditRunPdfService;
 use App\Services\PacGenerationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuditRunController extends Controller
 {
     public function __construct(
         private readonly AuditExecutionService $execution,
         private readonly PacGenerationService $pacGeneration,
+        private readonly AuditRunPdfService $pdfService,
     ) {}
 
     public function index(): JsonResponse
@@ -88,5 +92,40 @@ class AuditRunController extends Controller
         $this->authorize('create', Pac::class);
 
         return response()->json($this->pacGeneration->generateForRun($auditRun, $request->user()), 201);
+    }
+
+    /**
+     * Phase 2 / M6.20 — kick off PDF export.
+     *
+     * Returns 202 with the audit-run after enqueuing the render job.
+     * Re-calling on a row that already has a PDF is a no-op (the job
+     * short-circuits in the service); callers can poll {@see pdfUrl()}.
+     */
+    public function generatePdf(AuditRun $auditRun): JsonResponse
+    {
+        $this->authorize('view', $auditRun);
+
+        if (! $auditRun->isFinalised()) {
+            throw new HttpException(409, "L'export PDF n'est disponible que pour un audit finalisé.");
+        }
+
+        GenerateAuditRunPdfJob::dispatch($auditRun);
+
+        return response()->json($auditRun, 202);
+    }
+
+    /**
+     * Phase 2 / M6.20 — return a temporary signed S3 URL to the PDF.
+     *
+     * 404 (with French message) if the PDF has not yet been rendered.
+     */
+    public function pdfUrl(AuditRun $auditRun): JsonResponse
+    {
+        $this->authorize('view', $auditRun);
+
+        return response()->json([
+            'url' => $this->pdfService->signedUrl($auditRun),
+            'expires_in_minutes' => 60,
+        ]);
     }
 }
