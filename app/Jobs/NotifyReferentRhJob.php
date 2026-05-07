@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Features\QvctWeakSignalAlerts;
 use App\Models\QvctWeakSignal;
 use App\Models\User;
 use App\Notifications\WeakSignalDetectedNotification;
@@ -12,6 +13,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Pennant\Feature;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
@@ -51,6 +53,18 @@ class NotifyReferentRhJob implements ShouldQueue
             'severity' => $this->signal->severity,
             'mean_score' => $this->signal->details['mean_score'] ?? null,
         ]);
+
+        $structure = $this->signal->structure;
+
+        if (! Feature::for($structure)->active(QvctWeakSignalAlerts::class)) {
+            Log::info('QVCT weak-signal mail fan-out suppressed by Pennant flag', [
+                'signal_id' => $this->signal->id,
+                'structure_id' => $this->signal->structure_id,
+                'flag' => QvctWeakSignalAlerts::class,
+            ]);
+
+            return;
+        }
 
         $recipients = $this->recipients();
         if ($recipients->isNotEmpty()) {
