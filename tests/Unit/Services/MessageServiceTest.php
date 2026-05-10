@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Events\MessagePosted;
 use App\Models\DiscussionGroup;
 use App\Models\Message;
+use App\Models\MessageReadCursor;
 use App\Models\Structure;
 use App\Models\User;
 use App\Services\MessageService;
@@ -97,4 +98,62 @@ it('soft-deletes the message', function (): void {
 
     expect(Message::withTrashed()->find($message->id)?->deleted_at)->not->toBeNull();
     expect(Message::find($message->id))->toBeNull();
+});
+
+// ── markRead + unreadCount ────────────────────────────────────────────────
+
+it('markRead creates a cursor for the reader', function (): void {
+    $reader = User::factory()->forStructure($this->structure)->create();
+    $message = Message::factory()->inGroup($this->group, $this->author)->create();
+
+    $this->service->markRead($message, $reader);
+
+    $cursor = MessageReadCursor::withoutGlobalScopes()
+        ->where('user_id', $reader->id)
+        ->where('discussion_group_id', $this->group->id)
+        ->first();
+
+    expect($cursor)->not->toBeNull();
+    expect($cursor->last_read_message_id)->toBe($message->id);
+});
+
+it('markRead is idempotent — calling twice does not create duplicate cursors', function (): void {
+    $reader = User::factory()->forStructure($this->structure)->create();
+    $message = Message::factory()->inGroup($this->group, $this->author)->create();
+
+    $this->service->markRead($message, $reader);
+    $this->service->markRead($message, $reader);
+
+    $count = MessageReadCursor::withoutGlobalScopes()
+        ->where('user_id', $reader->id)
+        ->where('discussion_group_id', $this->group->id)
+        ->count();
+
+    expect($count)->toBe(1);
+});
+
+it('unreadCount returns 0 when user has no cursor', function (): void {
+    $reader = User::factory()->forStructure($this->structure)->create();
+    Message::factory()->inGroup($this->group, $this->author)->create();
+
+    expect($this->service->unreadCount($this->group, $reader))->toBe(0);
+});
+
+it('unreadCount returns messages after the cursor', function (): void {
+    $reader = User::factory()->forStructure($this->structure)->create();
+
+    $old = Message::factory()->inGroup($this->group, $this->author)->create([
+        'created_at' => now()->subMinutes(10),
+    ]);
+    Message::factory()->inGroup($this->group, $this->author)->create([
+        'created_at' => now()->subMinutes(2),
+    ]);
+    Message::factory()->inGroup($this->group, $this->author)->create([
+        'created_at' => now()->subMinute(),
+    ]);
+
+    // Mark the first message as read — 2 newer ones are unread.
+    $this->service->markRead($old, $reader);
+
+    expect($this->service->unreadCount($this->group, $reader))->toBe(2);
 });

@@ -149,6 +149,8 @@ Route::prefix('v1')
             Route::post('communication/groups/{group}/messages', [MessageController::class, 'store']);
             Route::patch('communication/messages/{message}', [MessageController::class, 'update']);
             Route::delete('communication/messages/{message}', [MessageController::class, 'destroy']);
+            // M4.9 — advance the user's read cursor; returns updated unread_count.
+            Route::post('communication/messages/{message}/mark-read', [MessageController::class, 'markRead']);
         });
 
         Route::get('communication/news', [NewsFeedController::class, 'index']);

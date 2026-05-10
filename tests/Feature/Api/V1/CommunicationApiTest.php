@@ -6,9 +6,11 @@ use App\Events\MessagePosted;
 use App\Events\NewsPostPublished;
 use App\Models\DiscussionGroup;
 use App\Models\DiscussionGroupMember;
+use App\Models\Message;
 use App\Models\NewsFeedPost;
 use App\Models\QaAnswer;
 use App\Models\QaQuestion;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -152,4 +154,44 @@ it('only the question author may accept an answer via the API', function (): voi
 
 it('requires authentication to access communication endpoints', function (): void {
     $this->getJson('/api/v1/communication/news')->assertUnauthorized();
+});
+
+// ── Mark-read ─────────────────────────────────────────────────────────────
+
+it('mark-read returns unread_count and advances the cursor', function (): void {
+    $coord = actingAsApiRole('coordinateur');
+    $group = DiscussionGroup::factory()->forStructure($coord->structure)->create();
+    DiscussionGroupMember::create([
+        'structure_id' => $group->structure_id,
+        'discussion_group_id' => $group->id,
+        'user_id' => $coord->id,
+        'role' => 'member',
+    ]);
+
+    $author = User::factory()->forStructure($coord->structure)->create();
+    $message = Message::factory()->inGroup($group, $author)->create();
+
+    $this->postJson("/api/v1/communication/messages/{$message->id}/mark-read")
+        ->assertSuccessful()
+        ->assertJsonStructure(['unread_count']);
+});
+
+it('mark-read is idempotent — calling twice returns 200 both times', function (): void {
+    $coord = actingAsApiRole('coordinateur');
+    $group = DiscussionGroup::factory()->forStructure($coord->structure)->create();
+    DiscussionGroupMember::create([
+        'structure_id' => $group->structure_id,
+        'discussion_group_id' => $group->id,
+        'user_id' => $coord->id,
+        'role' => 'member',
+    ]);
+
+    $author = User::factory()->forStructure($coord->structure)->create();
+    $message = Message::factory()->inGroup($group, $author)->create();
+
+    $this->postJson("/api/v1/communication/messages/{$message->id}/mark-read")
+        ->assertSuccessful();
+
+    $this->postJson("/api/v1/communication/messages/{$message->id}/mark-read")
+        ->assertSuccessful();
 });

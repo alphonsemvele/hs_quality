@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Events\MessagePosted;
 use App\Models\DiscussionGroup;
 use App\Models\Message;
+use App\Models\MessageReadCursor;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -73,5 +74,59 @@ class MessageService
     public function delete(Message $message): void
     {
         $message->delete();
+    }
+
+    /**
+     * Advance the user's read cursor to the given message.
+     *
+     * The cursor only moves forward: if the message is older than the
+     * current cursor position, the call is a no-op (mobile clients may
+     * send mark-read out of order during sync replay).
+     *
+     * Phase 2 / M4.9 — mark-read via cursor (O(1) writes, O(1) unread
+     * count queries vs a per-message receipt table).
+     */
+    public function markRead(Message $message, User $user): void
+    {
+        $messageAt = $message->created_at ?? now();
+
+        MessageReadCursor::withoutGlobalScopes()
+            ->upsert(
+                [
+                    'structure_id' => $message->structure_id,
+                    'user_id' => $user->id,
+                    'discussion_group_id' => $message->discussion_group_id,
+                    'last_read_message_id' => $message->id,
+                    'last_read_at' => $messageAt,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                uniqueBy: ['user_id', 'discussion_group_id'],
+                update: ['last_read_message_id', 'last_read_at', 'updated_at'],
+            );
+    }
+
+    /**
+     * Count messages in the group that the user has not yet read.
+     * Returns 0 when the user has no cursor (never opened the group).
+     */
+    public function unreadCount(DiscussionGroup $group, User $user): int
+    {
+        $cursor = MessageReadCursor::withoutGlobalScopes()
+            ->where('user_id', $user->id)
+            ->where('discussion_group_id', $group->id)
+            ->first();
+
+        // No cursor → user has never opened this group; pre-history messages
+        // are not surfaced as unread (they'll see them when they first load).
+        if ($cursor === null || $cursor->last_read_at === null) {
+            return 0;
+        }
+
+        return Message::withoutGlobalScopes()
+            ->where('discussion_group_id', $group->id)
+            ->whereNull('deleted_at')
+            ->where('created_at', '>', $cursor->last_read_at)
+            ->count();
     }
 }

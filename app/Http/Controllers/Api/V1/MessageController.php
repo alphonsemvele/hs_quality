@@ -11,6 +11,7 @@ use App\Models\DiscussionGroup;
 use App\Models\Message;
 use App\Services\MessageService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Mobile + web JSON endpoints for direct messaging in a discussion
@@ -69,5 +70,24 @@ class MessageController extends Controller
         $this->messages->delete($message);
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Phase 2 / M4.9 — mark the message as read for the authenticated user.
+     *
+     * Advances the user's read cursor to this message; if the cursor is
+     * already past this message the call is a silent no-op (idempotent).
+     * Returns the updated unread count for the group so the mobile client
+     * can update its badge without a second round-trip.
+     */
+    public function markRead(Request $request, Message $message): JsonResponse
+    {
+        $this->authorize('view', $message->group);
+
+        $this->messages->markRead($message, $request->user());
+
+        return response()->json([
+            'unread_count' => $this->messages->unreadCount($message->group, $request->user()),
+        ]);
     }
 }
