@@ -1,0 +1,20 @@
+{
+    "_note": "M6.10 stub — items are representative placeholders based on ISO 9001:2015 clause structure. Replace with fixture sourced from official ISO 9001 documentation before pilot release.",
+    "title": "Grille ISO 9001 — Système de management de la qualité",
+    "description": "Grille de référence basée sur la norme ISO 9001:2015 pour les organismes de services à la personne. Adaptable par chaque structure selon son périmètre de certification.",
+    "weight_scheme": { "type": "equal" },
+    "items": [
+        { "title": "Le contexte de l'organisme est-il documenté (parties intéressées, enjeux internes/externes) ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 1 },
+        { "title": "La politique qualité est-elle formalisée, communiquée et accessible à tous les personnels ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 2 },
+        { "title": "Les objectifs qualité sont-ils mesurables et suivis régulièrement ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 3 },
+        { "title": "Les ressources nécessaires (humaines, infrastructures, environnement) sont-elles identifiées et fournies ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 4 },
+        { "title": "Les compétences requises pour chaque poste sont-elles documentées et vérifiées ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 5 },
+        { "title": "Les processus opérationnels sont-ils planifiés, maîtrisés et documentés ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 6 },
+        { "title": "La maîtrise des éléments fournis par les parties externes est-elle assurée ?", "scale": "binary", "max_points": 1, "evidence_required": false, "position": 7 },
+        { "title": "Les non-conformités sont-elles identifiées, traitées et capitalisées en actions correctives ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 8 },
+        { "title": "La satisfaction client est-elle mesurée à une fréquence définie ?", "scale": "percentage", "max_points": 100, "evidence_required": false, "position": 9 },
+        { "title": "Des audits internes sont-ils réalisés selon un programme planifié ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 10 },
+        { "title": "La revue de direction est-elle réalisée annuellement avec les données d'entrée requises ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 11 },
+        { "title": "L'amélioration continue est-elle démontrée par des indicateurs d'évolution sur la période ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 12 }
+    ]
+}

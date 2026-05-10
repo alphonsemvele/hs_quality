@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Beneficiary;
+use App\Models\IntervenantAssignment;
 use App\Models\User;
 
 /**
@@ -80,7 +83,7 @@ class BeneficiaryPolicy extends BasePolicy
      */
     private function isAssignedTo(User $user, Beneficiary $beneficiary): bool
     {
-        return \App\Models\IntervenantAssignment::query()
+        return IntervenantAssignment::query()
             ->active()
             ->where('user_id', $user->id)
             ->where('beneficiary_id', $beneficiary->id)

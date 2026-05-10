@@ -12,7 +12,7 @@ it('seeds the HAS reference grid per structure', function (): void {
     $a = Structure::factory()->create();
     $b = Structure::factory()->create();
 
-    (new AuditGridSeeder)->run();
+    app(AuditGridSeeder::class)->run();
 
     expect(AuditGrid::withoutGlobalScopes()->where('structure_id', $a->id)->where('source', 'has')->count())->toBe(1);
     expect(AuditGrid::withoutGlobalScopes()->where('structure_id', $b->id)->where('source', 'has')->count())->toBe(1);
@@ -21,7 +21,7 @@ it('seeds the HAS reference grid per structure', function (): void {
 it('seeds the items defined in the JSON fixture', function (): void {
     Structure::factory()->create();
 
-    (new AuditGridSeeder)->run();
+    app(AuditGridSeeder::class)->run();
 
     $grid = AuditGrid::withoutGlobalScopes()->where('source', 'has')->first();
     expect($grid)->not->toBeNull();
@@ -33,8 +33,8 @@ it('seeds the items defined in the JSON fixture', function (): void {
 it('is idempotent — re-running does not duplicate the HAS grid', function (): void {
     Structure::factory()->create();
 
-    (new AuditGridSeeder)->run();
-    (new AuditGridSeeder)->run();
+    app(AuditGridSeeder::class)->run();
+    app(AuditGridSeeder::class)->run();
 
     $count = AuditGrid::withoutGlobalScopes()
         ->where('source', AuditGridSource::Has->value)

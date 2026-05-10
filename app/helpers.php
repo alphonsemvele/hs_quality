@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Structure;
 
 if (! function_exists('currentStructure')) {

@@ -26,4 +26,18 @@ enum AuditGridSource: string
             self::Custom => 'Grille personnalisée',
         };
     }
+
+    /**
+     * JSON fixture filename under database/seeders/fixtures/, or null
+     * for Custom grids (which have no reference fixture).
+     */
+    public function fixtureFilename(): ?string
+    {
+        return match ($this) {
+            self::Has => 'has-grid.json',
+            self::Iso9001 => 'iso9001-grid.json',
+            self::AfnorX50056 => 'afnor-x50056-grid.json',
+            self::Custom => null,
+        };
+    }
 }
