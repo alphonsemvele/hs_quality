@@ -126,6 +126,8 @@ Route::prefix('v1')
         Route::post('audit-runs/{auditRun}/responses', [AuditRunController::class, 'recordResponse'])->middleware('idempotent');
         Route::post('audit-runs/{auditRun}/finalise', [AuditRunController::class, 'finalise'])->middleware('idempotent');
         Route::post('audit-runs/{auditRun}/generate-pac', [AuditRunController::class, 'generatePac'])->middleware('idempotent');
+        // M6.19 — HAS preparation guide: prioritised conformity gap analysis.
+        Route::get('audit-runs/{auditRun}/has-preparation', [AuditRunController::class, 'hasPreparation']);
         // M6.20 — async PDF export. POST kicks off the render job;
         // GET returns the temporary signed S3 URL once generated.
         Route::post('audit-runs/{auditRun}/generate-pdf', [AuditRunController::class, 'generatePdf'])->middleware('idempotent');

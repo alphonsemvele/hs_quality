@@ -14,6 +14,7 @@ use App\Models\AuditRun;
 use App\Models\Pac;
 use App\Services\AuditExecutionService;
 use App\Services\AuditRunPdfService;
+use App\Services\HASPreparationService;
 use App\Services\PacGenerationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class AuditRunController extends Controller
         private readonly AuditExecutionService $execution,
         private readonly PacGenerationService $pacGeneration,
         private readonly AuditRunPdfService $pdfService,
+        private readonly HASPreparationService $hasPreparation,
     ) {}
 
     public function index(): JsonResponse
@@ -92,6 +94,22 @@ class AuditRunController extends Controller
         $this->authorize('create', Pac::class);
 
         return response()->json($this->pacGeneration->generateForRun($auditRun, $request->user()), 201);
+    }
+
+    /**
+     * Phase 2 / M6.19 — HAS preparation guide gap analysis.
+     *
+     * Returns a prioritised per-item conformity report for the given
+     * finalised HAS audit run. Non-conforme items appear first; items
+     * with linked PAC actions include their IDs for cross-linking.
+     *
+     * 409 if the run is not finalised; 422 if the grid is not HAS.
+     */
+    public function hasPreparation(AuditRun $auditRun): JsonResponse
+    {
+        $this->authorize('view', $auditRun);
+
+        return response()->json($this->hasPreparation->analyse($auditRun));
     }
 
     /**
