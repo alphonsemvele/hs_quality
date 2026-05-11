@@ -194,5 +194,16 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(6)->by('email:'.mb_strtolower((string) $request->input('email', ''))),
             ];
         });
+
+        // Public landing-page contact form. Tight per-IP limit to prevent
+        // form-spam / lead-flooding without blocking a legitimate prospect
+        // who needs to retry after a typo. Per-email backstop blocks the
+        // same address from repeatedly opting in to the marketing list.
+        RateLimiter::for('contact-form', function (Request $request) {
+            return [
+                Limit::perMinute(5)->by('ip:'.$request->ip()),
+                Limit::perMinute(3)->by('email:'.mb_strtolower((string) $request->input('email', ''))),
+            ];
+        });
     }
 }

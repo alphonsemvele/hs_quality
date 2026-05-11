@@ -7,6 +7,7 @@ use App\Http\Controllers\AuditController;
 use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\CarePlanController;
 use App\Http\Controllers\CommunicationController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\HealthController;
@@ -24,10 +25,40 @@ use Inertia\Inertia;
 Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
 Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
 
-// ─── Page d'accueil publique ───────────────────────────────────────────────────
+// ─── Pages publiques (marketing) ──────────────────────────────────────────────
 Route::get('/', function () {
     return Inertia::render('index');
 })->name('home');
+
+Route::get('/fonctionnalites', function () {
+    return Inertia::render('marketing/features');
+})->name('marketing.features');
+
+Route::get('/conformite', function () {
+    return Inertia::render('marketing/compliance');
+})->name('marketing.compliance');
+
+Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:contact-form')
+    ->name('contact.store');
+
+// ─── Pages légales ────────────────────────────────────────────────────────────
+Route::get('/mentions-legales', function () {
+    return Inertia::render('marketing/legal-mentions');
+})->name('marketing.legal-mentions');
+
+Route::get('/confidentialite', function () {
+    return Inertia::render('marketing/privacy');
+})->name('marketing.privacy');
+
+Route::get('/cgu', function () {
+    return Inertia::render('marketing/cgu');
+})->name('marketing.cgu');
+
+Route::get('/accessibilite', function () {
+    return Inertia::render('marketing/accessibility');
+})->name('marketing.accessibility');
 
 // ─── Auth (login, register, logout, password…) ────────────────────────────────
 require __DIR__.'/auth.php';
