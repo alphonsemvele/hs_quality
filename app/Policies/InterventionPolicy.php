@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Intervention;
@@ -93,5 +95,25 @@ class InterventionPolicy extends BasePolicy
     public function delete(User $user, Intervention $intervention): bool
     {
         return $user->hasPermissionTo('interventions.delete');
+    }
+
+    /**
+     * Report submission is permitted while in_progress (live tour) and
+     * after completion (post-checkout amendment — common when an
+     * intervenant remembers a detail). Cancelled / missed visits never
+     * accept a report (no visit happened).
+     */
+    public function submitReport(User $user, Intervention $intervention): bool
+    {
+        if (! $intervention->isInProgress() && ! $intervention->isCompleted()) {
+            return false;
+        }
+
+        if ($user->hasPermissionTo('interventions.update.team')) {
+            return true;
+        }
+
+        return $user->hasPermissionTo('interventions.update.own')
+            && $intervention->intervenant_id === $user->id;
     }
 }

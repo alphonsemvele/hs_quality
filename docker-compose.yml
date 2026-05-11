@@ -150,6 +150,7 @@ services:
       # single-user pattern; we just want the limiter out of the way for
       # throughput measurements. Production keeps the 300/min default.
       MOBILE_API_RATE_LIMIT_PER_MINUTE: "100000"
+      SYNC_RATE_LIMIT_PER_MINUTE: "100000"
       # Disable last_used_at writes: 50 VUs share one token → 50 concurrent
       # writes to the same personal_access_tokens row → row-level lock
       # serialisation → every request waits. Production keeps this ON.

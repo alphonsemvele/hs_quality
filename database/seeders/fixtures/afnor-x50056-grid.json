@@ -1,0 +1,18 @@
+{
+    "_note": "M6.10 stub — items are representative placeholders based on NF X50-056 (Services aux personnes à domicile). Replace with fixture sourced from official AFNOR documentation before pilot release.",
+    "title": "Grille AFNOR NF X50-056 — Services aux personnes à domicile",
+    "description": "Grille de référence basée sur la norme AFNOR NF X50-056 pour la certification des services à la personne à domicile (SAAD, SSIAD, SPASAD, Mandataires).",
+    "weight_scheme": { "type": "equal" },
+    "items": [
+        { "title": "Un entretien d'évaluation des besoins est-il réalisé avant toute prise en charge ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 1 },
+        { "title": "Le plan d'aide personnalisé est-il formalisé et co-signé avec le bénéficiaire ou son représentant ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 2 },
+        { "title": "Les intervenants affectés possèdent-ils les compétences adaptées aux besoins du bénéficiaire ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 3 },
+        { "title": "La continuité du service est-elle garantie en cas d'absence de l'intervenant habituel ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 4 },
+        { "title": "Des évaluations de satisfaction sont-elles réalisées a minima annuellement ?", "scale": "percentage", "max_points": 100, "evidence_required": false, "position": 5 },
+        { "title": "Un système de réclamations est-il accessible aux bénéficiaires et suivi formellement ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 6 },
+        { "title": "Le personnel fait-il l'objet d'un suivi régulier (entretien annuel, formation, évaluation) ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 7 },
+        { "title": "Les informations relatives aux bénéficiaires sont-elles protégées et accessibles uniquement aux personnels habilités ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 8 },
+        { "title": "La traçabilité des prestations réalisées est-elle assurée pour chaque visite ?", "scale": "percentage", "max_points": 100, "evidence_required": false, "position": 9 },
+        { "title": "L'organisme dispose-t-il d'un dispositif de veille réglementaire actif ?", "scale": "binary", "max_points": 1, "evidence_required": false, "position": 10 }
+    ]
+}

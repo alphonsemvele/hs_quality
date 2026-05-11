@@ -24,7 +24,7 @@ it('blocks an unenrolled dirigeant on the web with a 423 + MFA-required page', f
     $response = $this->get('/dashboard');
 
     $response->assertStatus(423);
-    $response->assertInertia(fn ($page) => $page->component('auth/mfa-required'));
+    $response->assertInertia(fn ($page) => $page->component('Auth/mfa-required'));
 });
 
 it('blocks an unenrolled coordinateur on the mobile API with a JSON 423', function (): void {

@@ -74,6 +74,13 @@ class InterventionService
     /**
      * Check out: in_progress → completed.
      * Records actual_end_at and optional report text.
+     *
+     * Concurrent-write semantics: if `report_text` is supplied AND the
+     * intervention already carries a different `report_text` (a previous
+     * sync/HTTP write got there first), the two values are merged with
+     * conflict markers via {@see self::mergeReportText()} so neither
+     * intervenant's narrative is lost. Empty / identical incoming text is
+     * treated as a no-op.
      */
     public function checkOut(Intervention $intervention, array $data = []): Intervention
     {
@@ -85,7 +92,10 @@ class InterventionService
             $intervention->update([
                 'status' => InterventionStatus::Completed->value,
                 'actual_end_at' => now(),
-                'report_text' => $data['report_text'] ?? $intervention->report_text,
+                'report_text' => $this->mergeReportText(
+                    $intervention->report_text,
+                    $data['report_text'] ?? null,
+                ),
             ]);
 
             $fresh = $intervention->fresh();
@@ -93,6 +103,77 @@ class InterventionService
 
             return $fresh;
         });
+    }
+
+    /**
+     * Submit / amend the free-text report on an intervention.
+     *
+     * Permitted while the intervention is in_progress (intervenant fills
+     * the report mid-visit) or completed (post-checkout amendment — common
+     * when an intervenant remembers a detail after closing). Terminal
+     * statuses other than completed (cancelled, missed) are rejected — no
+     * report is recorded for visits that didn't happen.
+     *
+     * Concurrent submissions merge via {@see self::mergeReportText()} so
+     * two intervenants flushing offline queues that both touched this
+     * report keep both narratives instead of LWW-clobbering one.
+     */
+    public function submitReport(Intervention $intervention, string $reportText, ?User $author = null): Intervention
+    {
+        if (! $intervention->isInProgress() && ! $intervention->isCompleted()) {
+            throw new HttpException(409, 'Report can only be submitted on in-progress or completed interventions.');
+        }
+
+        return DB::transaction(function () use ($intervention, $reportText): Intervention {
+            $intervention->update([
+                'report_text' => $this->mergeReportText(
+                    $intervention->report_text,
+                    $reportText,
+                ),
+            ]);
+
+            return $intervention->fresh();
+        });
+    }
+
+    /**
+     * Merge two free-text report values with git-style conflict markers
+     * when both are non-empty and differ. If either side is blank or
+     * trims to the same content, the non-empty / canonical value wins
+     * (no marker noise for trivial cases).
+     *
+     * Format intentionally mirrors `git merge` output so a coordinateur
+     * skimming a flagged report immediately recognises it as a merge
+     * needing manual reconciliation:
+     *
+     *   <<<<<<< saved
+     *   …existing text…
+     *   =======
+     *   …incoming text…
+     *   >>>>>>> incoming
+     *
+     * If `existing` already contains a `<<<<<<< saved` line we still wrap
+     * it again — accumulating offline retries are rare and visible
+     * marker stacking is preferable to silent loss.
+     */
+    public function mergeReportText(?string $existing, ?string $incoming): ?string
+    {
+        $existingTrimmed = $existing !== null && trim($existing) !== '' ? trim($existing) : null;
+        $incomingTrimmed = $incoming !== null && trim($incoming) !== '' ? trim($incoming) : null;
+
+        if ($incomingTrimmed === null) {
+            return $existingTrimmed;
+        }
+
+        if ($existingTrimmed === null) {
+            return $incomingTrimmed;
+        }
+
+        if ($existingTrimmed === $incomingTrimmed) {
+            return $existingTrimmed;
+        }
+
+        return "<<<<<<< saved\n{$existingTrimmed}\n=======\n{$incomingTrimmed}\n>>>>>>> incoming";
     }
 
     /**

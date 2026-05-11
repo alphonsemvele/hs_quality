@@ -1,0 +1,17 @@
+{
+    "title": "Grille HAS — Évaluation interne",
+    "description": "Grille de référence basée sur les recommandations de la Haute Autorité de Santé pour l'évaluation interne des SAAD/SSIAD/SPASAD. Adaptable par chaque structure selon ses besoins.",
+    "weight_scheme": { "type": "equal" },
+    "items": [
+        { "title": "Le projet de service est-il documenté et accessible ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 1 },
+        { "title": "Le projet personnalisé d'accompagnement est-il co-construit avec le bénéficiaire ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 2 },
+        { "title": "Les évaluations des besoins sont-elles révisées au moins annuellement ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 3 },
+        { "title": "La traçabilité des interventions est-elle assurée pour 100% des visites ?", "scale": "percentage", "max_points": 100, "evidence_required": false, "position": 4 },
+        { "title": "Les incidents graves sont-ils déclarés à l'ARS dans les 24h ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 5 },
+        { "title": "Les habilitations et certifications des intervenants sont-elles à jour ?", "scale": "percentage", "max_points": 100, "evidence_required": true, "position": 6 },
+        { "title": "Existe-t-il un dispositif de signalement de la maltraitance ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 7 },
+        { "title": "La continuité des interventions est-elle assurée en cas d'absence ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 8 },
+        { "title": "Le plan d'amélioration continue intègre-t-il les retours d'évaluation ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 9 },
+        { "title": "Les bénéficiaires participent-ils à l'évaluation de la qualité du service ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 10 }
+    ]
+}

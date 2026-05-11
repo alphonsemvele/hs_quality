@@ -10,6 +10,7 @@ use App\Http\Requests\Interventions\CheckOutInterventionRequest;
 use App\Http\Requests\Interventions\StoreInterventionPhotoRequest;
 use App\Http\Requests\Interventions\StoreInterventionRequest;
 use App\Http\Requests\Interventions\StoreInterventionSignatureRequest;
+use App\Http\Requests\Interventions\SubmitInterventionReportRequest;
 use App\Http\Requests\Interventions\UpdateInterventionRequest;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
@@ -315,6 +316,17 @@ class InterventionController extends Controller
         $this->service->cancel($intervention, $request->validated('cancellation_reason'));
 
         return back()->with('success', 'Intervention annulée.');
+    }
+
+    public function submitReport(SubmitInterventionReportRequest $request, Intervention $intervention): RedirectResponse
+    {
+        $this->service->submitReport(
+            $intervention,
+            $request->validated('report_text'),
+            $request->user(),
+        );
+
+        return back()->with('success', 'Compte-rendu enregistré.');
     }
 
     // ── Media ──────────────────────────────────────────────────────────────

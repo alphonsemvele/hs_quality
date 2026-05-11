@@ -60,6 +60,17 @@ class RoleSeeder extends Seeder
         'qvct.alert.receive',
         'qvct.request_rh_exchange',
         'qvct.action_plan.update',
+        // Phase 2 / M3 — questionnaire & campaign management plus
+        // weak-signal triage. Granted to RH + dirigeant + référent qualité.
+        'qvct.questionnaire.manage',
+        'qvct.campaign.manage',
+        'qvct.weak_signal.acknowledge',
+        // Exchange-request addressee triage. Distinct perms so the
+        // routing of incoming requests to RH vs manager is unambiguous —
+        // qvct.view.team_aggregates is too shared to use for queue
+        // separation.
+        'qvct.exchange.rh_triage',
+        'qvct.exchange.manager_triage',
 
         // M4 Communication
         'messages.send',
@@ -158,6 +169,7 @@ class RoleSeeder extends Seeder
             'qvct.respond',
             'qvct.view.team_aggregates',
             'qvct.alert.receive',
+            'qvct.exchange.manager_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',
@@ -195,6 +207,10 @@ class RoleSeeder extends Seeder
             'qvct.view.structure_aggregates',
             'qvct.alert.receive',
             'qvct.action_plan.update',
+            'qvct.questionnaire.manage',
+            'qvct.campaign.manage',
+            'qvct.weak_signal.acknowledge',
+            'qvct.exchange.manager_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',
@@ -230,6 +246,11 @@ class RoleSeeder extends Seeder
             'incidents.close',
             'incidents.notify_ars',
             'qvct.respond',
+            'qvct.view.team_aggregates',
+            'qvct.view.structure_aggregates',
+            'qvct.questionnaire.manage',
+            'qvct.campaign.manage',
+            'qvct.weak_signal.acknowledge',
             'messages.send',
             'documents.upload',
             'audits.view',
@@ -254,6 +275,10 @@ class RoleSeeder extends Seeder
             'qvct.alert.receive',
             'qvct.request_rh_exchange',
             'qvct.action_plan.update',
+            'qvct.questionnaire.manage',
+            'qvct.campaign.manage',
+            'qvct.weak_signal.acknowledge',
+            'qvct.exchange.rh_triage',
             'messages.send',
             'messages.moderate',
             'newsfeed.post',

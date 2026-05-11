@@ -2,26 +2,43 @@
 
 namespace App\Providers;
 
+use App\Listeners\Billing\SyncSubscriptionToStructure;
+use App\Models\AuditGrid;
+use App\Models\AuditRun;
+use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
+use App\Models\Certification;
+use App\Models\DiscussionGroup;
+use App\Models\Document;
+use App\Models\Habilitation;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
-use App\Models\PlanAmelioration;
 use App\Models\PlannedTask;
-use App\Models\QualityAudit;
 use App\Models\Structure;
 use App\Models\User;
+use App\Observers\AuditRunObserver;
 use App\Observers\IncidentObserver;
 use App\Observers\InterventionObserver;
+use App\Observers\PacActionObserver;
+use App\Observers\PacObserver;
+use App\Observers\QvctCampaignObserver;
+use App\Observers\QvctResponseObserver;
+use App\Observers\QvctWeakSignalObserver;
+use App\Policies\AuditGridPolicy;
+use App\Policies\AuditRunPolicy;
+use App\Policies\AuditRunResponsePolicy;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\CarePlanPolicy;
+use App\Policies\CertificationPolicy;
+use App\Policies\DiscussionGroupPolicy;
+use App\Policies\DocumentPolicy;
+use App\Policies\HabilitationPolicy;
 use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
-use App\Policies\PlanAmeliorationPolicy;
 use App\Policies\PlannedTaskPolicy;
-use App\Policies\QualityAuditPolicy;
 use App\Policies\StructurePolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
@@ -30,9 +47,12 @@ use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
+use Laravel\Cashier\Events\WebhookReceived;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,14 +60,19 @@ class AppServiceProvider extends ServiceProvider
      * Policy mapping. Every new domain Policy is registered here.
      */
     protected array $policies = [
+        AuditGrid::class => AuditGridPolicy::class,
+        AuditRun::class => AuditRunPolicy::class,
+        AuditRunResponse::class => AuditRunResponsePolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
+        Certification::class => CertificationPolicy::class,
+        DiscussionGroup::class => DiscussionGroupPolicy::class,
+        Document::class => DocumentPolicy::class,
+        Habilitation::class => HabilitationPolicy::class,
         Incident::class => IncidentPolicy::class,
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
-        PlanAmelioration::class => PlanAmeliorationPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
-        QualityAudit::class => QualityAuditPolicy::class,
         Structure::class => StructurePolicy::class,
         User::class => UserPolicy::class,
     ];
@@ -63,7 +88,23 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiters();
         $this->registerPolicies();
         $this->registerObservers();
+        $this->registerListeners();
         $this->configureScramble();
+        $this->configureCashier();
+    }
+
+    /**
+     * Cashier is configured to use Structure as the billable customer
+     * model — subscriptions belong to the tenant (per-seat pricing),
+     * not to the individual user. The customer-columns + subscriptions
+     * migrations target the `structures` table accordingly.
+     *
+     * Spec: PHASE2_PROGRESS.md C1.
+     */
+    private function configureCashier(): void
+    {
+        Cashier::useCustomerModel(Structure::class);
+        Cashier::calculateTaxes(); // Stripe Tax handles French TVA automatically
     }
 
     /**
@@ -93,10 +134,21 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
+    private function registerListeners(): void
+    {
+        Event::listen(WebhookReceived::class, SyncSubscriptionToStructure::class);
+    }
+
     private function registerObservers(): void
     {
         Intervention::observe(InterventionObserver::class);
         Incident::observe(IncidentObserver::class);
+        QvctCampaign::observe(QvctCampaignObserver::class);
+        QvctResponse::observe(QvctResponseObserver::class);
+        QvctWeakSignal::observe(QvctWeakSignalObserver::class);
+        AuditRun::observe(AuditRunObserver::class);
+        Pac::observe(PacObserver::class);
+        PacAction::observe(PacActionObserver::class);
     }
 
     private function configureScramble(): void
@@ -168,7 +220,7 @@ class AppServiceProvider extends ServiceProvider
         // Mobile sync — bulk endpoint, tuned for offline-first clients that
         // queue many operations and flush them on reconnect.
         RateLimiter::for('sync', function (Request $request) {
-            return Limit::perMinute(20)->by(
+            return Limit::perMinute(config('sanctum.sync_rate_limit_per_minute', 20))->by(
                 $request->user()?->getKey() ?: $request->ip(),
             );
         });

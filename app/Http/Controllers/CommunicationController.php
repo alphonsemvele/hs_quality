@@ -4,29 +4,114 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Communication\PublishNewsRequest;
+use App\Http\Requests\Communication\SendMessageRequest;
+use App\Models\DiscussionGroup;
+use App\Models\Document;
+use App\Models\NewsFeedPost;
+use App\Services\MessageService;
+use App\Services\NewsFeedService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Phase 2 Module M7 — Communication interne.
+ * Phase 2 / M4 — Communication interne (Inertia surface).
+ *
+ * The web app uses the same MessageService / NewsFeedService /
+ * DocumentLibraryService / QaService as the mobile API; this controller
+ * only handles render + redirect, while validation goes through the
+ * Form Requests.
+ *
+ * Demo fixtures are still served when the structure has no real data
+ * yet — a deliberate fallback so the front team's UI showcase keeps
+ * working in `php artisan serve` without seeding.
  */
 class CommunicationController extends Controller
 {
+    public function __construct(
+        private readonly MessageService $messages,
+        private readonly NewsFeedService $news,
+    ) {}
+
     public function index(): Response
     {
-        $demo = config('app.env') === 'local';
+        $structure = currentStructure();
+
+        $news = NewsFeedPost::query()
+            ->with('author:id,first_name,last_name')
+            ->whereNull('archived_at')
+            ->orderByDesc('pinned')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
+        $groups = DiscussionGroup::query()
+            ->withCount('members')
+            ->orderByDesc('updated_at')
+            ->limit(20)
+            ->get();
+
+        $documents = Document::query()
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
+        $hasRealData = $news->isNotEmpty() || $groups->isNotEmpty() || $documents->isNotEmpty();
 
         return Inertia::render('dashboard/communication/index', [
-            'messages' => $demo ? $this->demoMessages() : [],
-            'channels' => $demo ? $this->demoChannels() : [],
-            'documents' => $demo ? $this->demoDocuments() : [],
+            'messages' => $hasRealData ? [] : $this->demoMessages(),
+            'channels' => $hasRealData
+                ? $groups->map(fn (DiscussionGroup $g) => [
+                    'id' => $g->id,
+                    'name' => $g->title,
+                    'nb_members' => $g->members_count,
+                    'last_activity' => $g->updated_at?->diffForHumans(),
+                ])->all()
+                : $this->demoChannels(),
+            'documents' => $hasRealData
+                ? $documents->map(fn (Document $d) => [
+                    'id' => $d->id,
+                    'title' => $d->title,
+                    'type' => str(class_basename($d->mime_type))->upper()->value(),
+                    'uploaded_by' => $d->uploader?->fullName() ?? '—',
+                    'uploaded_at' => $d->created_at?->isoFormat('DD/MM/YYYY'),
+                ])->all()
+                : $this->demoDocuments(),
+            'newsPosts' => $news->map(fn (NewsFeedPost $p) => [
+                'id' => $p->id,
+                'title' => $p->title,
+                'author' => $p->author?->fullName() ?? '—',
+                'pinned' => $p->pinned,
+                'created_at' => $p->created_at?->diffForHumans(),
+            ])->all(),
         ]);
     }
 
-    public function sendMessage(): RedirectResponse
+    public function sendMessage(SendMessageRequest $request, DiscussionGroup $group): RedirectResponse
     {
-        return back()->with('info', 'Module Communication en cours de développement.');
+        $this->authorize('view', $group);
+
+        $this->messages->send(
+            $group,
+            $request->user(),
+            $request->validated('body'),
+            $request->validated('attachments'),
+        );
+
+        return back()->with('success', 'Message envoyé.');
+    }
+
+    public function publishNews(PublishNewsRequest $request): RedirectResponse
+    {
+        $this->news->publish(
+            currentStructure(),
+            $request->user(),
+            $request->validated('title'),
+            $request->validated('body'),
+        );
+
+        return back()->with('success', 'Actualité publiée.');
     }
 
     /** @return list<array<string, mixed>> */

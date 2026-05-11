@@ -38,7 +38,12 @@ class SyncBatchRequest extends BaseFormRequest
                 'intervention.check_in',
                 'intervention.check_out',
                 'intervention.cancel',
+                'intervention.submit_report',
                 'incident.create',
+                'qvct.submit_response',
+                'qvct.write_journal',
+                'qvct.request_exchange',
+                'audit.record_response',
             ])],
             'operations.*.resource_id' => ['nullable', 'string'],
             'operations.*.client_timestamp' => ['nullable', 'date'],
@@ -57,7 +62,7 @@ class SyncBatchRequest extends BaseFormRequest
                 self::MAX_OPERATIONS_PER_BATCH,
             ),
             'operations.*.client_op_id.uuid' => 'Each operation needs a UUID client_op_id (used to correlate the per-op response).',
-            'operations.*.kind.in' => 'Unknown operation kind. Supported: intervention.check_in/check_out/cancel, incident.create.',
+            'operations.*.kind.in' => 'Unknown operation kind. Supported: intervention.check_in/check_out/cancel/submit_report, incident.create, qvct.submit_response.',
         ];
     }
 }

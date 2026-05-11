@@ -16,7 +16,9 @@ use App\Http\Controllers\IndicateurController;
 use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\PlannedTaskController;
+use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
+use App\Http\Controllers\QvctQuestionnaireController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -86,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/interventions/{intervention}/checkin', [InterventionController::class, 'checkIn'])->name('interventions.checkin');
         Route::post('/interventions/{intervention}/checkout', [InterventionController::class, 'checkOut'])->name('interventions.checkout');
         Route::post('/interventions/{intervention}/cancel', [InterventionController::class, 'cancel'])->name('interventions.cancel');
+        Route::post('/interventions/{intervention}/report', [InterventionController::class, 'submitReport'])->name('interventions.report');
 
         Route::post('/interventions/{intervention}/photos', [InterventionController::class, 'storePhoto'])->name('interventions.photos.store');
         Route::delete('/interventions/{intervention}/photos/{photo}', [InterventionController::class, 'destroyPhoto'])->name('interventions.photos.destroy');
@@ -193,16 +196,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/indicateurs', [IndicateurController::class, 'index'])->name('indicateurs.index');
 
     // ── QVCT & RH ─────────────────────────────────────────────────────────────
+    // Phase 1 placeholder routes (kept for tier-gate UX until M3 frontend lands).
     Route::get('/qvct', [QvctController::class, 'index'])->name('qvct.index');
     Route::get('/qvct/questionnaire', [QvctController::class, 'questionnaire'])->name('qvct.questionnaire');
     Route::post('/qvct', [QvctController::class, 'store'])->name('qvct.store');
+
+    // Phase 2 / M3 — questionnaire + campaign management.
+    Route::prefix('qvct')->name('qvct.')->group(function (): void {
+        Route::get('/questionnaires', [QvctQuestionnaireController::class, 'index'])->name('questionnaires.index');
+        Route::get('/questionnaires/create', [QvctQuestionnaireController::class, 'create'])->name('questionnaires.create');
+        Route::post('/questionnaires', [QvctQuestionnaireController::class, 'store'])->name('questionnaires.store');
+        Route::get('/questionnaires/{questionnaire}', [QvctQuestionnaireController::class, 'show'])->name('questionnaires.show');
+        Route::post('/questionnaires/{questionnaire}/archive', [QvctQuestionnaireController::class, 'archive'])->name('questionnaires.archive');
+        Route::delete('/questionnaires/{questionnaire}', [QvctQuestionnaireController::class, 'destroy'])->name('questionnaires.destroy');
+
+        Route::get('/campaigns', [QvctCampaignController::class, 'index'])->name('campaigns.index');
+        Route::get('/campaigns/{campaign}', [QvctCampaignController::class, 'show'])->name('campaigns.show');
+        Route::post('/questionnaires/{questionnaire}/campaigns', [QvctCampaignController::class, 'launch'])->name('campaigns.launch');
+        Route::post('/campaigns/{campaign}/close', [QvctCampaignController::class, 'close'])->name('campaigns.close');
+    });
 
     Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
     Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
     Route::put('/formations/{id}', [FormationController::class, 'update'])->name('formations.update');
 
     Route::get('/communication', [CommunicationController::class, 'index'])->name('communication.index');
-    Route::post('/communication/message', [CommunicationController::class, 'sendMessage'])->name('communication.send');
+    Route::post('/communication/groups/{group}/messages', [CommunicationController::class, 'sendMessage'])
+        ->name('communication.send');
+    Route::post('/communication/news', [CommunicationController::class, 'publishNews'])
+        ->name('communication.news.publish');
 
     // ── Platform admin (super_admin only) ─────────────────────────────────────
     // Tenants are managed here. NOT inside the `tenant` middleware group —

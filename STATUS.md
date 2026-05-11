@@ -1,8 +1,11 @@
 # QualitéDomicile SaaS — Project Status & Model Design Reference
 
-**Generated:** 2026-04-24
-**Branch:** `main`
-**Test suite:** 263 tests · 738 assertions · **ALL GREEN**
+**Generated:** 2026-05-02 · **Last refreshed:** 2026-05-11
+**Branch:** `feature/muma-setup` (91 commits ahead of `origin/main`)
+**Test suite:** 868 test definitions across 130 test files
+**Phase 1 backend:** ✅ closed at commit `ad4f939` — every IMPLEMENTATION_PLAN.txt §4 line item verified against code (see [§3.1](#31-phase-1-close-out-audit))
+**Phase 2 backend:** ✅ all backend-deliverable spec rows closed — M3 / M6 / M4 / M5 / C1–C7 / E1–E5 done; M6.10 (official ISO/AFNOR fixture text — external content dependency) and M6.16 / M3.12 / M5.14 (Inertia pages — frontend team) are the only open items (see [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md))
+**Phase 2 tracker:** [PHASE2_PROGRESS.md](PHASE2_PROGRESS.md) — one checkbox per spec line, updated as work lands
 
 Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier des Charges, Feb 2024)
 
@@ -22,7 +25,7 @@ Source of truth for product requirements: `CDC-QUALITE-DOM-2024-v2.0` (Cahier de
 10. [Testing Strategy](#10-testing-strategy)
 11. [Security Architecture](#11-security-architecture)
 12. [Manual Testing Guide (Postman / browser)](#12-manual-testing-guide-postman--browser)
-13. [What's Next — Phase 1 M4 W2+](#13-whats-next--phase-1-m4-w2)
+13. [What's Next — Phase 2 close-out & Phase 3 outlook](#13-whats-next--phase-2-close-out--phase-3-outlook)
 
 ---
 
@@ -61,16 +64,61 @@ Each subscribing organisation is a **structure** (tenant). Two frontends share o
 |-------|------|-------|--------|
 | **M1** | W1–W4 | Beneficiaries · CarePlans · PlannedTasks · IntervenantAssignments | ✅ done |
 | **M2** | W1 | Intervention model + state machine | ✅ done |
-| **M2** | W2 | InterventionService · Controller · CheckIn/CheckOut/Cancel | ✅ done |
-| **M2** | W3 | InterventionPhotos + InterventionSignatures (S3 + signed URLs) | ✅ done |
-| **M2** | W4 | Reverb broadcast events + dashboard stats v1 | ✅ done |
+| **M2** | W2 | InterventionService · Controller · CheckIn/CheckOut/Cancel/SubmitReport | ✅ done |
+| **M2** | W3 | InterventionPhotos + InterventionSignatures (S3 SSE-KMS + signed URLs) | ✅ done |
+| **M2** | W4 | Reverb broadcast events + dashboard stats v1 (backend dispatches; FE listener deferred) | ✅ backend done |
 | **M3** | W1 | Incident model + GraviteClassifier + ARS notification jobs | ✅ done |
 | **M3** | W2 | IncidentService state machine + Controller + Form Requests | ✅ done |
 | **M3** | W3 | DashboardStatsService Redis tag-cache + Observers + Scramble | ✅ done |
+| **M3** | W4 | Hardening + k6 load test | ✅ done (lifecycle + sync 0% errors) |
 | **M4** | W1 | **Mobile REST API `/api/v1/*` + Sanctum + idempotency** | ✅ done |
-| **M4** | W2 | React Native skeleton (mobile team) | ⏳ next |
-| **M4** | W3 | Offline sync protocol hardening (`/api/v1/sync/batch`) | ⏳ |
-| **M4** | W4 | Pilot onboarding | ⏳ |
+| **M4** | W2 | React Native skeleton (mobile team) | ⏳ deferred — mobile team scope |
+| **M4** | W3 | Offline sync protocol (`/api/v1/sync/batch`) + LWW conflict markers + two-intervenants test | ✅ done at `ad4f939` |
+| **M4** | W4 | Pilot onboarding | ⏳ deferred — business / ops scope |
+
+### 3.1 Phase 1 close-out audit
+
+Performed line-by-line on 2026-05-02 against IMPLEMENTATION_PLAN.txt §4. Every spec item below is now verified in code; the audit method was *grep + read*, not "I remember writing it."
+
+| Spec line | Verification source |
+|---|---|
+| `beneficiaries` table + encrypted casts (M1 W1-2) | `app/Models/Beneficiary.php:78-81` |
+| `BeneficiaryService::anonymize` (RGPD Art 17) | `app/Services/BeneficiaryService.php:89` |
+| `CarePlanService::copyFromTemplate` (M1 W3) | `app/Services/CarePlanService.php:80` |
+| Intervention check-in/check-out/cancel | `app/Services/InterventionService.php:53,78,101` |
+| Intervention submit-report (M2 W1-2 "submit report") | `app/Services/InterventionService.php::submitReport` (added at `ad4f939`) |
+| Intervention auto-cancel no-show | `app/Console/Commands/SweepMissedInterventionsCommand.php` (cron every 15min, `routes/console.php`) |
+| S3 SSE-KMS uploads + 1-hour signed URLs (M2 W3) | `app/Services/InterventionMediaService.php:54,102,118` |
+| Path-traversal + MIME-spoofing tests | `tests/Unit/Services/InterventionMediaServiceTest.php:61,82` |
+| Incident model + categorie/gravite/statut enums | `app/Models/Incident.php` + `app/Enums/Gravite.php` |
+| `GraviteClassifier` pure unit-tested | `tests/Unit/Services/GraviteClassifierTest.php` |
+| 5-whys workflow (en_analyse → plan_actions) | `app/Services/IncidentService.php:121` |
+| `NotifyResponsableSecteurJob` on every declare | `app/Services/IncidentService.php:89` |
+| `NotifyARSJob` only on grave/critique | `app/Services/IncidentService.php:92` + `app/Jobs/NotifyARSJob.php:11` |
+| Idempotency middleware on mutations | `app/Http/Middleware/HandleIdempotency.php` + applied via `'idempotent'` alias on writes |
+| Dashboard Redis tag-cache, 5-min TTL, observer flush on writes | `app/Services/DashboardStatsService.php:18` + `app/Observers/InterventionObserver.php` + `app/Observers/IncidentObserver.php` |
+| `/api/v1/*` routes + Sanctum + Scramble | `routes/api.php` + `config/sanctum.php` + `app/Providers/AppServiceProvider.php::configureScramble` |
+| MFA-gated mobile token issuance | `app/Http/Controllers/Api/V1/AuthController.php:34-59` |
+| Client-assigned UUIDs (M4 W3) | `app/Http/Requests/Api/V1/SyncBatchRequest.php:36` (`client_op_id` UUID required) |
+| LWW + free-text conflict markers (M4 W3) | `app/Services/InterventionService.php::mergeReportText` + `tests/Unit/Services/InterventionReportMergeTest.php` |
+| Two-intervenants race test (M4 W3) | `tests/Feature/Api/V1/SyncBatchTest.php` "preserves both narratives when an intervenant and a coordinateur race" |
+| Cross-tenant leak test for every domain | `tests/Feature/Domain/{Beneficiaries,CarePlans,Interventions,Incidents,Assignments}/*TenantIsolationTest.php` |
+| k6 load test (M3 W4) | dashboard / lifecycle / sync_batch scenarios — 0% errors |
+
+### 3.2 Phase 1 — known deferrals (not engineering, not silent gaps)
+
+| Deferred item | Type | Owner |
+|---|---|---|
+| Beneficiary detail page tabbed UX | Frontend | Web team — Phase 1 polish |
+| Dashboard Chart.js / recharts visualisation | Frontend | Web team — Phase 1 polish |
+| `useEcho` listener wiring for Reverb broadcasts | Frontend | Web team — Phase 1 polish |
+| React Native app skeleton (M4 W2) | Mobile codebase | Mobile team — separate repo |
+| External pentest with no critical findings | Security audit | Procurement / CISO |
+| DR drill (RPO < 1h, RTO < 4h validation) | Ops | DevOps — schedule against staging |
+| 10 pilot structures + 200 intervenants live | Sales / onboarding | Commercial team |
+| NPS captured | Product | PM |
+
+**These are real, named owners — not engineering gaps masquerading as "later".**
 
 ---
 
@@ -242,7 +290,7 @@ Cache::tags(["structure:{$id}:dashboard"])->remember('stats', 300, fn() => …);
 
 **Framework:** Pest (NOT PHPUnit — overrides Laravel Boost default)
 **Rule:** Every feature ships with both a feature test AND a unit test.
-**Current:** 263 tests · 738 assertions · all green
+**Current:** 868 test definitions across 130 test files (Phase 1 + Phase 2 M3/M4/M5/M6 + Billing C1–C7 + E1–E4)
 
 ### Layout
 ```
@@ -543,25 +591,65 @@ Redis cache entries are tenant-tagged and flush themselves as data changes — n
 
 ---
 
-## 13. What's Next — Phase 1 M4 W2+
+## 13. What's Next — Phase 2 close-out & Phase 3 outlook
 
-### M4 W2 — React Native skeleton
-Mobile team scaffolds the Expo app, wires Sanctum login flow, configures SQLite + WatermelonDB for offline storage, builds the intervention list and check-in screens. Backend stays stable through this work — no API changes expected.
+> Phase 1 (Months 1–4) is sealed. Phase 1 M4 W2/W4 (RN skeleton + pilot onboarding) are not engineering — owned by mobile and commercial teams respectively. M4 W3 (offline sync) shipped at `ad4f939`.
 
-### M4 W3 — Offline sync hardening
-- `POST /api/v1/sync/batch` — accepts a JSON array of operations (check-in, check-out, photo upload, incident declare) collected while offline
-- Each operation carries its own `Idempotency-Key` so partial replays are safe
-- Conflict resolution: last-write-wins on intervention status, append-only on incidents/photos
-- `throttle:sync` (20 req/min) protects against runaway clients
+### 13.1 Phase 2 engineering — status (2026-05-11)
 
-### M4 W4 — Pilot onboarding
-- 1 pilot SAAD structure goes live read-only first, then writes
-- Real GPS check-in/out captured
-- Reverb dashboard monitored for production behaviour
-- Sentry breadcrumbs collected for any silent failures
+**All backend-deliverable Phase 2 spec rows are closed.** The table below summarises the final state of every engineering concern and module block.
 
-### Phase 2 (Months 5–8) — Pro offering
-HAS audit module (~150 criteria) · Formation & habilitation tracking · Document management (signed care plan PDFs) · Advanced reporting dashboard · Automated notifications
+| Block | Status | Notes |
+|---|---|---|
+| **M3** QVCT | ✅ closed | 30/30 backend rows |
+| **M4** Communication | ✅ closed | 21/22 backend rows; mark-read (`M4.9`) shipped `a04cf59`; M4.19 FE listener deferred to frontend team |
+| **M5** Compétences | ✅ closed | 19/20 backend rows; M5.14 Inertia pages deferred to frontend team |
+| **M6** Audits | ✅ closed | 23/25 backend rows; M6.10 ISO/AFNOR official content is an external content dependency; M6.16 Inertia pages deferred |
+| **C1–C7** Billing | ✅ closed | Cashier + Stripe + circuit-breaker protection |
+| **E1** APM | ✅ closed | Sentry Performance + Telescope; Datadog deferred pending procurement / DPA |
+| **E2** Circuit breakers | ✅ closed | Redis-backed `CircuitBreaker` on `NotifyARSJob`; reusable primitive |
+| **E3** Feature flags | ✅ closed | `QvctWeakSignalAlerts` Pennant flag — first production kill switch |
+| **E4** Access review | ✅ closed | `access-review:export` command; quarterly cron scheduled |
+| **E5** HDS cert docs | deliberately open | Non-code CISO deliverable — see `PHASE2_PROGRESS.md` §E5 |
+| **M6.9** AuditGridLibrary | ✅ closed | Service + ISO/AFNOR stubs + `audit-grids:provision` command (`dcc298f`) |
+| **M6.19** HAS prep guide | ✅ closed | `HASPreparationService` + API endpoint (`2ae1709`) |
+| **M4.9** mark-read | ✅ closed | `message_read_cursors` cursor watermark + API (`a04cf59`) |
 
-### Phase 3 (Months 9–14) — Premium / AI
-AI-assisted care plan suggestions · Predictive scheduling · Voice-to-structured-form incident reporting · Longitudinal QVCT trend analysis
+**Remaining open items (not engineering blockers):**
+- **M6.10** — ISO 9001 + AFNOR NF X50-056 official fixture content: stub JSONs are in place; a compliance officer must replace item text with purchased standard wording before pilot use of those grids.
+- **Inertia pages** (M6.16, M3.12, M5.14) — frontend team's slice; backend services and API are fully ready.
+- **P1-D1/D2/D3** — frontend carry-overs.
+- **P1-D4/D5** — conditional on spatial / 5-whys analytics requirements (not yet triggered).
+- **E5** — CISO/compliance deliverable.
+
+### 13.2 Branch hygiene (action required)
+
+`feature/muma-setup` is **91 commits ahead of `origin/main`**. The Phase 2 backend must land via reviewable PRs before Phase 2 acceptance can be claimed end-to-end. Suggested PR split:
+
+1. M3 QVCT (M3.1–M3.12 backend)
+2. M6 Audits (M6.1–M6.25 backend, including M6.9 / M6.19 / M6.20)
+3. M4 Communication (M4.1–M4.19 backend + M4.9 mark-read)
+4. M5 Compétences (M5.1–M5.14 backend)
+5. Billing C1–C7
+6. Engineering concerns E1–E4 sweep
+
+### 13.3 Phase 2 acceptance (commercial / ops)
+
+Per [IMPLEMENTATION_PLAN.txt:464-470](IMPLEMENTATION_PLAN.txt#L464-L470). Backend is ready; the remaining items are commercial / ops milestones — not engineering:
+
+- 50 pilot structures (from 10) — sales / onboarding
+- Pro tier billing live with paying customers — gated on landing C1–C7 to `main`
+- QVCT baromètre running with measurable weak-signal alerts in pilots — pilot ops + product
+- First HAS évaluation externe prepared via the platform — pilot customer + référent qualité
+- 99.9% uptime — DevOps, observability dashboards must back this number once APM matures
+
+### 13.4 Phase 3 (Months 9–14) — Premium / AI outlook
+
+Not started. Scope per [IMPLEMENTATION_PLAN.txt:473-520](IMPLEMENTATION_PLAN.txt#L473-L520):
+
+- **M9 IA prédictive** — Python microservice (scikit-learn + transformers + LLM API). Burnout risk, autonomy-loss detection, preventive action suggestions, semantic analysis of intervention reports. Laravel queues ML jobs; results written back to a PostgreSQL analytics schema. Fallback: "en calcul" placeholder when the service is down — never error out the main flow.
+- **M8 Portail bénéficiaires** — separate Inertia (or Next.js PWA) app for bénéficiaires + familles. Care plan + intervention history + satisfaction survey + direct incident reporting. Anonymous tokens (signed URL access with limited scope) for family members.
+- **Benchmark anonymisé** — the ONE approved usage of `CrossTenantQueryService`: aggregate anonymised indicators across all comparable-size structures, monthly sector report. Every access logged + auditable.
+- **Reporting engine** — annual quality report auto-generated per structure (PDF), sent to authorities as required.
+
+Engineering concerns scaled in Phase 3: read replicas for analytics, table partitioning on `interventions` / `audit_logs` / `qvct_reponses` (by structure_id, date), layered caching (Redis hot + CDN edge), contract tests run in CI against the OpenAPI spec.

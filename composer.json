@@ -13,9 +13,11 @@
     "license": "proprietary",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "dedoc/scramble": "^0.13.20",
         "inertiajs/inertia-laravel": "^2.0",
         "intervention/image": "^4.0",
+        "laravel/cashier": "^16.5",
         "laravel/fortify": "^1.29",
         "laravel/framework": "^12.0",
         "laravel/pennant": "^1.19",

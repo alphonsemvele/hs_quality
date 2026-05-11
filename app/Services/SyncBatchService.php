@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\QvctExchangeAddresseeRole;
+use App\Enums\QvctMood;
+use App\Models\AuditGridItem;
+use App\Models\AuditRun;
 use App\Models\Incident;
 use App\Models\Intervention;
+use App\Models\QvctCampaign;
+use App\Models\QvctExchangeRequest;
+use App\Models\QvctJournalEntry;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -30,17 +37,28 @@ use Throwable;
  * persistent dedup belongs to the caller via HandleIdempotency middleware
  * keyed on the batch envelope.
  *
- * Phase 1 supports four ops (sufficient for offline tour completion):
- *   - intervention.check_in / check_out / cancel
+ * Phase 1 + Phase 2 / M3 supports six ops:
+ *   - intervention.check_in / check_out / cancel / submit_report
  *   - incident.create
+ *   - qvct.submit_response (anonymous; tenant-scoped via campaign FK)
  * Photos / signatures are NOT batchable (binary blobs); the mobile app
  * uploads those one-by-one to the existing endpoints once online.
+ *
+ * Concurrency: free-text fields (intervention.report_text) are merged via
+ * git-style conflict markers when two writers arrive with different
+ * non-empty values. See InterventionService::mergeReportText() — same
+ * helper is used by direct check_out and report submission paths so the
+ * sync layer behaves identically to always-online clients.
  */
 class SyncBatchService
 {
     public function __construct(
         private readonly InterventionService $interventions,
         private readonly IncidentService $incidents,
+        private readonly QvctService $qvct,
+        private readonly JournalEntryService $journal,
+        private readonly ExchangeRequestService $exchanges,
+        private readonly AuditExecutionService $audits,
     ) {}
 
     /**
@@ -88,7 +106,12 @@ class SyncBatchService
                 'intervention.check_in' => $this->interventionCheckIn($op, $actor),
                 'intervention.check_out' => $this->interventionCheckOut($op, $actor),
                 'intervention.cancel' => $this->interventionCancel($op, $actor),
+                'intervention.submit_report' => $this->interventionSubmitReport($op, $actor),
                 'incident.create' => $this->incidentCreate($op, $actor),
+                'qvct.submit_response' => $this->qvctSubmitResponse($op, $actor),
+                'qvct.write_journal' => $this->qvctWriteJournal($op, $actor),
+                'qvct.request_exchange' => $this->qvctRequestExchange($op, $actor),
+                'audit.record_response' => $this->auditRecordResponse($op, $actor),
                 default => throw new HttpException(400, 'Unknown operation kind: '.$op['kind']),
             };
 
@@ -180,6 +203,171 @@ class SyncBatchService
         $fresh = $this->interventions->cancel($intervention, $reason);
 
         return $this->interventionState($fresh);
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function interventionSubmitReport(array $op, User $actor): array
+    {
+        $intervention = $this->resolveIntervention($op);
+        $this->authorize($actor, 'submitReport', $intervention);
+
+        $reportText = (string) ($op['payload']['report_text'] ?? '');
+        if ($reportText === '') {
+            throw new HttpException(422, 'A submit_report op requires a non-empty report_text.');
+        }
+
+        $fresh = $this->interventions->submitReport($intervention, $reportText, $actor);
+
+        return $this->interventionState($fresh);
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctSubmitResponse(array $op, User $actor): array
+    {
+        $campaignId = $op['resource_id'] ?? null;
+        if ($campaignId === null || $campaignId === '') {
+            throw new HttpException(422, 'resource_id (campaign id) is required for qvct.submit_response.');
+        }
+
+        $campaign = QvctCampaign::query()->find($campaignId);
+        if ($campaign === null) {
+            throw new HttpException(404, "Campaign {$campaignId} not found in your tenant.");
+        }
+
+        $this->authorize($actor, 'respond', $campaign);
+
+        $answers = $op['payload']['answers'] ?? null;
+        if (! is_array($answers) || $answers === []) {
+            throw new HttpException(422, 'A qvct.submit_response op requires non-empty answers.');
+        }
+
+        $response = $this->qvct->recordResponse(
+            $campaign,
+            $answers,
+            teamTag: $op['payload']['team_tag'] ?? null,
+        );
+
+        // Anonymity: never echo the response id back. The mobile client
+        // only needs to know "the server accepted my submission" to drop
+        // it from the offline queue.
+        return [
+            'campaign_id' => $campaign->id,
+            'submitted_at' => $response->submitted_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctWriteJournal(array $op, User $actor): array
+    {
+        $this->authorize($actor, 'create', QvctJournalEntry::class);
+
+        $body = (string) ($op['payload']['body'] ?? '');
+        $moodValue = (string) ($op['payload']['mood'] ?? '');
+        if ($body === '' || $moodValue === '') {
+            throw new HttpException(422, 'A qvct.write_journal op requires non-empty body and mood.');
+        }
+
+        $mood = QvctMood::tryFrom($moodValue);
+        if ($mood === null) {
+            throw new HttpException(422, 'Invalid mood value.');
+        }
+
+        $entry = $this->journal->write(
+            $actor,
+            $body,
+            $mood,
+            (bool) ($op['payload']['shared_with_rh'] ?? false),
+        );
+
+        return [
+            'id' => $entry->id,
+            'mood' => $entry->mood->value,
+            'shared_with_rh' => $entry->shared_with_rh,
+            'created_at' => $entry->created_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function qvctRequestExchange(array $op, User $actor): array
+    {
+        $this->authorize($actor, 'create', QvctExchangeRequest::class);
+
+        $addresseeRoleValue = (string) ($op['payload']['addressee_role'] ?? '');
+        $addressee = QvctExchangeAddresseeRole::tryFrom($addresseeRoleValue);
+        if ($addressee === null) {
+            throw new HttpException(422, 'A qvct.request_exchange op requires a valid addressee_role.');
+        }
+
+        $exchange = $this->exchanges->create(
+            $actor,
+            $addressee,
+            $op['payload']['message'] ?? null,
+        );
+
+        return [
+            'id' => $exchange->id,
+            'addressee_role' => $exchange->addressee_role->value,
+            'status' => $exchange->status->value,
+            'created_at' => $exchange->created_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * @param  array{resource_id?: ?string, payload: array<string, mixed>}  $op
+     * @return array<string, mixed>
+     */
+    private function auditRecordResponse(array $op, User $actor): array
+    {
+        $runId = $op['resource_id'] ?? null;
+        if ($runId === null || $runId === '') {
+            throw new HttpException(422, 'resource_id (audit run id) is required for audit.record_response.');
+        }
+
+        $run = AuditRun::query()->find($runId);
+        if ($run === null) {
+            throw new HttpException(404, "Audit run {$runId} not found in your tenant.");
+        }
+
+        $itemId = (string) ($op['payload']['audit_grid_item_id'] ?? '');
+        if ($itemId === '') {
+            throw new HttpException(422, 'payload.audit_grid_item_id is required for audit.record_response.');
+        }
+
+        $item = AuditGridItem::query()->find($itemId);
+        if ($item === null) {
+            throw new HttpException(404, "Audit grid item {$itemId} not found in your tenant.");
+        }
+
+        $this->authorize($actor, 'create', AuditRunResponse::class);
+
+        $response = $this->audits->recordResponse(
+            $run,
+            $item,
+            isset($op['payload']['score']) ? (float) $op['payload']['score'] : null,
+            $op['payload']['comment'] ?? null,
+            $op['payload']['evidence_url'] ?? null,
+            $actor,
+        );
+
+        return [
+            'id' => $response->id,
+            'audit_run_id' => $run->id,
+            'audit_grid_item_id' => $item->id,
+            'score' => $response->score !== null ? (float) $response->score : null,
+            'recorded_at' => $response->recorded_at?->toIso8601String(),
+        ];
     }
 
     /**

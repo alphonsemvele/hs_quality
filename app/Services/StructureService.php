@@ -10,6 +10,7 @@ use App\Enums\StructureType;
 use App\Enums\UserType;
 use App\Models\Structure;
 use App\Models\User;
+use App\Notifications\StructureWelcomeNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -50,7 +51,7 @@ class StructureService
      */
     public function provision(array $structureData, array $dirigeantData): array
     {
-        return DB::transaction(function () use ($structureData, $dirigeantData): array {
+        $result = DB::transaction(function () use ($structureData, $dirigeantData): array {
             $structure = Structure::create([
                 'code' => mb_strtoupper($structureData['code']),
                 'name' => $structureData['name'],
@@ -93,6 +94,15 @@ class StructureService
                 'password_reset_url' => $resetUrl,
             ];
         });
+
+        // Dispatch welcome email outside the transaction so the queued job
+        // runs against already-committed rows. If the queue worker is down
+        // the notification retries automatically; provisioning is unaffected.
+        $result['dirigeant']->notify(
+            new StructureWelcomeNotification($result['structure'], $result['password_reset_url'])
+        );
+
+        return $result;
     }
 
     public function suspend(Structure $structure): Structure
