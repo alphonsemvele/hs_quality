@@ -48,5 +48,5 @@ pre-push:
     pest:
       # Run the full suite on push so a broken commit can't make it to
       # the remote. ~7 min on a dev workstation; skip via --no-verify
-      # only for emergencies.
+      # only for emergencies. memory_limit is bumped in phpunit.xml.
       run: php artisan test --compact
