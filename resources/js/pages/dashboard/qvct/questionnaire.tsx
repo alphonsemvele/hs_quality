@@ -1,39 +1,78 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, EmptyState, FormField, Input, PageHeader, Textarea } from '@/components/ui';
-import { Form, Link } from '@inertiajs/react';
+import { AnonymityBanner, LikertScale, MoodSelector, type LikertValue, type MoodValue } from '@/components/qvct';
+import { Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { cn } from '@/lib/utils';
+import { Form } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
 import DashboardLayout from '../layout';
-
-interface Question {
-    id: number;
-    texte: string;
-    type: 'echelle' | 'texte_libre' | 'choix_multiple';
-    options?: string[];
-}
 
 interface Campagne {
     id: string;
     titre: string;
+    date_fin: string | null;
+    description: string | null;
+}
+
+interface Question {
+    id: string;
+    type: 'mood' | 'likert' | 'open';
+    label: string;
+    help?: string | null;
+    min_label?: string;
+    max_label?: string;
+    required: boolean;
 }
 
 interface Props {
-    questions: Question[];
     campagne: Campagne | null;
+    questions: Question[];
+    threshold: number;
 }
 
-export default function QvctQuestionnaire({ questions = [], campagne }: Partial<Props>) {
-    const defaultQuestions: Question[] = questions.length > 0 ? questions : [
-        { id: 1, texte: 'Comment évaluez-vous votre charge de travail actuelle ?', type: 'echelle' },
-        { id: 2, texte: 'Vous sentez-vous soutenu(e) par votre encadrement ?', type: 'echelle' },
-        { id: 3, texte: 'Comment jugez-vous l\'ambiance au sein de votre équipe ?', type: 'echelle' },
-        { id: 4, texte: 'Disposez-vous des moyens matériels nécessaires ?', type: 'echelle' },
-        { id: 5, texte: 'Comment évaluez-vous votre équilibre vie pro / vie perso ?', type: 'echelle' },
-        { id: 6, texte: 'Avez-vous des suggestions d\'amélioration ?', type: 'texte_libre' },
-    ];
+export default function QvctQuestionnaire({ campagne, questions = [], threshold = 5 }: Partial<Props>) {
+    const [answers, setAnswers] = useState<Record<string, MoodValue | LikertValue | string | null>>(
+        () => Object.fromEntries(questions.map((q) => [q.id, null])),
+    );
+
+    const setAnswer = (id: string, v: MoodValue | LikertValue | string | null) => {
+        setAnswers((prev) => ({ ...prev, [id]: v }));
+    };
+
+    const requiredCount = questions.filter((q) => q.required).length;
+    const requiredAnswered = useMemo(
+        () => questions.filter((q) => q.required && answers[q.id] !== null && answers[q.id] !== '').length,
+        [answers, questions],
+    );
+    const progress = requiredCount > 0 ? (requiredAnswered / requiredCount) * 100 : 0;
+    const canSubmit = requiredAnswered === requiredCount && requiredCount > 0;
+
+    if (!campagne) {
+        return (
+            <DashboardLayout title="Questionnaire QVCT" subtitle="">
+                <PageHeader
+                    title="Questionnaire QVCT"
+                    subtitle="Aucune campagne ouverte actuellement"
+                    breadcrumb={[
+                        { label: 'Tableau de bord', href: '/dashboard' },
+                        { label: 'QVCT', href: '/qvct' },
+                        { label: 'Questionnaire' },
+                    ]}
+                />
+                <Card>
+                    <EmptyState
+                        icon={<HeartIcon />}
+                        title="Pas de campagne en cours"
+                        description="Aucun baromètre n'est ouvert pour le moment. Revenez plus tard ou contactez votre RH."
+                    />
+                </Card>
+            </DashboardLayout>
+        );
+    }
 
     return (
-        <DashboardLayout title="Questionnaire QVCT" subtitle="">
+        <DashboardLayout title={campagne.titre} subtitle="Réponses anonymes">
             <PageHeader
-                title="Questionnaire QVCT"
-                subtitle="Réponses anonymes — aucune identification individuelle transmise au management."
+                title={campagne.titre}
+                subtitle={campagne.date_fin ? `Ouvert jusqu'au ${campagne.date_fin}` : 'Ouvert'}
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: 'QVCT', href: '/qvct' },
@@ -41,56 +80,131 @@ export default function QvctQuestionnaire({ questions = [], campagne }: Partial<
                 ]}
             />
 
-            <div className="mb-5 flex items-start gap-3 rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-700/50 dark:bg-brand-900/20">
-                <svg className="size-5 shrink-0 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-brand-700 dark:text-brand-300">
-                    Ce questionnaire est <strong>strictement anonyme</strong>. Les résultats sont agrégés par équipe (minimum 5 réponses) pour garantir la non-identification individuelle conformément au RGPD.
-                </p>
-            </div>
+            <div className="mx-auto grid max-w-3xl gap-5">
+                <AnonymityBanner variant="callout" threshold={threshold} />
 
-            <Form action="/qvct" method="post">
-                {({ errors, processing }) => (
-                    <Card>
-                        <CardHeader title="Baromètre QVCT" subtitle={`${defaultQuestions.length} question(s)`} />
-                        <CardBody className="space-y-6">
-                            {defaultQuestions.map((q, index) => (
-                                <div key={q.id} className="rounded-xl border border-ink-100 bg-ink-50/30 p-4 dark:border-ink-700/60 dark:bg-ink-800/50">
-                                    <p className="mb-3 text-sm font-medium text-ink-900 dark:text-white">
-                                        <span className="mr-2 font-mono text-xs text-ink-400 dark:text-ink-500">{index + 1}.</span>
-                                        {q.texte}
-                                    </p>
-                                    {q.type === 'echelle' ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-ink-500 dark:text-ink-400">Pas du tout</span>
-                                            <div className="flex gap-1.5">
-                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => (
-                                                    <label key={v} className="group cursor-pointer">
-                                                        <input type="radio" name={`q_${q.id}`} value={v} className="peer sr-only" />
-                                                        <span className="flex size-9 items-center justify-center rounded-lg border border-ink-200 bg-white text-xs font-medium text-ink-600 transition-all peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:text-white group-hover:border-ink-300 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-300 dark:peer-checked:border-brand-400 dark:peer-checked:bg-brand-500 dark:group-hover:border-ink-500">
-                                                            {v}
-                                                        </span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                            <span className="text-xs text-ink-500 dark:text-ink-400">Totalement</span>
-                                        </div>
-                                    ) : (
-                                        <Textarea name={`q_${q.id}`} rows={3} placeholder="Votre réponse (optionnelle)…" />
-                                    )}
-                                </div>
-                            ))}
-                        </CardBody>
-                        <CardFooter>
-                            <Link href="/qvct" className="rounded-lg px-3 py-2 text-sm font-medium text-ink-600 hover:bg-ink-100 dark:text-ink-400 dark:hover:bg-ink-700">
-                                Annuler
-                            </Link>
-                            <Button type="submit" loading={processing}>Soumettre (anonyme)</Button>
-                        </CardFooter>
-                    </Card>
+                {campagne.description && (
+                    <p className="text-sm leading-relaxed text-ink-600 dark:text-ink-300">{campagne.description}</p>
                 )}
-            </Form>
+
+                {/* Progress sticky bar */}
+                <div className="sticky top-16 z-20 -mx-2 rounded-xl border border-ink-100 bg-white/90 px-4 py-2.5 backdrop-blur sm:mx-0 dark:border-ink-700/60 dark:bg-ink-800/90">
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                        <span className="font-medium text-ink-700 dark:text-ink-200">
+                            {requiredAnswered}/{requiredCount} questions répondues
+                        </span>
+                        <span className="font-mono text-ink-500 dark:text-ink-400">{progress.toFixed(0)}%</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">
+                        <div
+                            className={cn(
+                                'h-full rounded-full transition-all duration-500',
+                                progress === 100 ? 'bg-sage-500' : 'bg-brand-500',
+                            )}
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                </div>
+
+                <Form action="/qvct" method="post" disableWhileProcessing>
+                    {({ processing }) => (
+                        <>
+                            <ul className="space-y-4">
+                                {questions.map((q, i) => (
+                                    <li key={q.id}>
+                                        <Card>
+                                            <CardHeader
+                                                title={`Q${i + 1}. ${q.label}`}
+                                                subtitle={q.help ?? undefined}
+                                                action={
+                                                    q.required && (
+                                                        <span className="rounded-full bg-danger-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                                                            Requis
+                                                        </span>
+                                                    )
+                                                }
+                                            />
+                                            <CardBody>
+                                                <QuestionField
+                                                    q={q}
+                                                    value={answers[q.id]}
+                                                    onChange={(v) => setAnswer(q.id, v)}
+                                                    disabled={processing}
+                                                />
+                                            </CardBody>
+                                        </Card>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-ink-100 bg-ink-50/40 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-ink-700/60 dark:bg-ink-900/30">
+                                <p className="text-xs text-ink-600 dark:text-ink-300">
+                                    En envoyant ce questionnaire, vous confirmez que vos réponses sont anonymes et
+                                    qu'aucune donnée identifiante n'est conservée.
+                                </p>
+                                <Button type="submit" disabled={!canSubmit} loading={processing}>
+                                    Envoyer mes réponses
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </Form>
+            </div>
         </DashboardLayout>
+    );
+}
+
+function QuestionField({
+    q,
+    value,
+    onChange,
+    disabled,
+}: {
+    q: Question;
+    value: MoodValue | LikertValue | string | null;
+    onChange: (v: MoodValue | LikertValue | string | null) => void;
+    disabled?: boolean;
+}) {
+    if (q.type === 'mood') {
+        return (
+            <MoodSelector
+                name={q.id}
+                value={(value as MoodValue) ?? null}
+                onChange={(v) => onChange(v)}
+                disabled={disabled}
+            />
+        );
+    }
+    if (q.type === 'likert') {
+        return (
+            <LikertScale
+                name={q.id}
+                value={(value as LikertValue) ?? null}
+                onChange={(v) => onChange(v)}
+                minLabel={q.min_label}
+                maxLabel={q.max_label}
+                disabled={disabled}
+            />
+        );
+    }
+    return (
+        <textarea
+            name={q.id}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            rows={4}
+            maxLength={2000}
+            disabled={disabled}
+            placeholder="Votre réponse (optionnelle, anonyme)…"
+            className="w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-ink-700 dark:bg-ink-900/40 dark:text-white dark:placeholder:text-ink-500 dark:focus:ring-brand-900/30"
+        />
+    );
+}
+
+function HeartIcon() {
+    return (
+        <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+        </svg>
     );
 }

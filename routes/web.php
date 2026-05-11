@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\BeneficiaryController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CarePlanController;
 use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\ContactController;
@@ -14,11 +15,13 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\IndicateurController;
 use App\Http\Controllers\InterventionController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\PlannedTaskController;
 use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
 use App\Http\Controllers\QvctQuestionnaireController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -71,6 +74,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
+
+    // Notifications (in-app — see HandleInertiaRequests for shared payload)
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+
+    // Cross-domain quick search for the Cmd+K command palette
+    Route::middleware('tenant')->get('/search/quick', [SearchController::class, 'quick'])->name('search.quick');
+
+    // Billing & subscription (Inertia surface — write paths go through Api\V1\SubscriptionController)
+    Route::middleware('tenant')->group(function () {
+        Route::get('/billing', [BillingController::class, 'show'])->name('billing.show');
+        Route::post('/billing/change-plan', [BillingController::class, 'changePlan'])->name('billing.change-plan');
+        Route::post('/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
+    });
 
     Route::middleware(['tenant'])->group(function () {
 
@@ -200,6 +217,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/qvct', [QvctController::class, 'index'])->name('qvct.index');
     Route::get('/qvct/questionnaire', [QvctController::class, 'questionnaire'])->name('qvct.questionnaire');
     Route::post('/qvct', [QvctController::class, 'store'])->name('qvct.store');
+
+    // Wave B extension — read-only demo surfaces wired to QvctController until
+    // dedicated controllers (weak-signal, indicator, action-plan, journal,
+    // exchange) gain Inertia entry points alongside the existing API surface.
+    Route::get('/qvct/weak-signals', [QvctController::class, 'weakSignals'])->name('qvct.weak-signals');
+    Route::post('/qvct/weak-signals/{id}/acknowledge', [QvctController::class, 'acknowledgeWeakSignal'])->name('qvct.weak-signals.acknowledge');
+    Route::get('/qvct/indicators', [QvctController::class, 'indicators'])->name('qvct.indicators');
+    Route::get('/qvct/action-plans', [QvctController::class, 'actionPlans'])->name('qvct.action-plans');
+    Route::get('/qvct/journal', [QvctController::class, 'journal'])->name('qvct.journal');
+    Route::post('/qvct/journal', [QvctController::class, 'storeJournalEntry'])->name('qvct.journal.store');
+    Route::get('/qvct/exchanges', [QvctController::class, 'exchanges'])->name('qvct.exchanges');
+    Route::post('/qvct/exchanges', [QvctController::class, 'storeExchange'])->name('qvct.exchanges.store');
 
     // Phase 2 / M3 — questionnaire + campaign management.
     Route::prefix('qvct')->name('qvct.')->group(function (): void {

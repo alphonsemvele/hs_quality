@@ -65,6 +65,45 @@ class HandleInertiaRequests extends Middleware
                 'password_reset_url' => fn () => $request->session()->get('password_reset_url'),
                 'invitation_url' => fn () => $request->session()->get('invitation_url'),
             ],
+            'notifications' => fn () => $request->user() ? $this->notificationsPayload($request) : null,
+        ];
+    }
+
+    /**
+     * Build a compact payload of recent in-app notifications for the header
+     * dropdown. We cap to 15 most recent and surface only the fields the UI
+     * needs — never serialise the full Eloquent model.
+     *
+     * @return array{unread_count: int, items: array<int, array<string, mixed>>}
+     */
+    private function notificationsPayload(Request $request): array
+    {
+        $user = $request->user();
+
+        $items = $user
+            ->notifications()
+            ->latest()
+            ->limit(15)
+            ->get();
+
+        return [
+            'unread_count' => $user->unreadNotifications()->count(),
+            'items' => $items
+                ->map(function ($notification) {
+                    $data = is_array($notification->data) ? $notification->data : [];
+
+                    return [
+                        'id' => $notification->id,
+                        'type' => class_basename($notification->type),
+                        'title' => $data['title'] ?? __('notifications.untitled', [], 'fr') ?? 'Notification',
+                        'message' => $data['message'] ?? null,
+                        'href' => $data['href'] ?? null,
+                        'level' => $data['level'] ?? 'info',
+                        'created_at' => $notification->created_at?->toIso8601String(),
+                        'read_at' => $notification->read_at?->toIso8601String(),
+                    ];
+                })
+                ->toArray(),
         ];
     }
 }

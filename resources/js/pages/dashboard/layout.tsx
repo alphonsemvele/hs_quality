@@ -3,6 +3,8 @@ import { useAbilities, type Ability } from '@/lib/can';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
+import CommandPalette from '@/components/CommandPalette';
+import NotificationsCenter from '@/components/NotificationsCenter';
 import ThemeToggle from '@/components/ThemeToggle';
 import { FlashToasts } from '@/components/ui';
 
@@ -96,6 +98,11 @@ export default function DashboardLayout({
                   section: 'QVCT & RH',
                   links: [
                       { href: '/qvct', label: 'Baromètre QVCT', icon: <HeartIcon />, requires: 'qvct.view' },
+                      { href: '/qvct/weak-signals', label: 'Signaux faibles', icon: <RadarIcon />, requires: 'qvct.view' },
+                      { href: '/qvct/indicators', label: 'Cartographie RPS', icon: <LayersIcon />, requires: 'qvct.view' },
+                      { href: '/qvct/action-plans', label: "Plans d'action", icon: <CheckListIcon />, requires: 'qvct.view' },
+                      { href: '/qvct/journal', label: 'Mon journal', icon: <BookIcon />, requires: 'qvct.view' },
+                      { href: '/qvct/exchanges', label: "Demandes d'échange", icon: <InboxIcon />, requires: 'qvct.view' },
                       { href: '/formations', label: 'Formations', icon: <AcademicIcon />, requires: 'formations.view' },
                       { href: '/communication', label: 'Communication', icon: <ChatIcon />, requires: 'communication.view' },
                   ],
@@ -233,6 +240,8 @@ export default function DashboardLayout({
                         </div>
 
                         <div className="flex items-center gap-2">
+                            <CommandPalette />
+
                             {canDeclareIncident && (
                                 <Link
                                     href="/incidents/create"
@@ -244,6 +253,8 @@ export default function DashboardLayout({
                                     Déclarer un incident
                                 </Link>
                             )}
+
+                            <NotificationsCenter />
 
                             {auth?.user && (
                                 <UserMenu
@@ -340,6 +351,14 @@ function UserMenu({
                             >
                                 <UserIcon />
                                 Mon profil
+                            </Link>
+                            <Link
+                                href="/billing"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <CardIcon />
+                                Abonnement & facturation
                             </Link>
                         </div>
 
@@ -476,10 +495,53 @@ function UserIcon() {
         </Icon>
     );
 }
+function RadarIcon() {
+    return (
+        <Icon>
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <line x1="12" y1="3" x2="12" y2="21" />
+        </Icon>
+    );
+}
+function LayersIcon() {
+    return (
+        <Icon>
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+        </Icon>
+    );
+}
+function BookIcon() {
+    return (
+        <Icon>
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5V4.5A2.5 2.5 0 016.5 2z" />
+        </Icon>
+    );
+}
+function InboxIcon() {
+    return (
+        <Icon>
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+            <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
+        </Icon>
+    );
+}
 function LogoutIcon() {
     return (
         <Icon>
             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+        </Icon>
+    );
+}
+function CardIcon() {
+    return (
+        <Icon>
+            <rect x="2" y="6" width="20" height="13" rx="2" />
+            <line x1="2" y1="11" x2="22" y2="11" />
         </Icon>
     );
 }

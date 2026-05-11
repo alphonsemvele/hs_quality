@@ -1,14 +1,8 @@
-import { Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { useCan } from '@/lib/can';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
-
-interface Message {
-    id: string;
-    author: string;
-    initials: string;
-    content: string;
-    channel: string | null;
-    created_at: string;
-}
 
 interface Channel {
     id: string;
@@ -17,125 +11,522 @@ interface Channel {
     last_activity: string | null;
 }
 
+interface ThreadMessage {
+    id: string;
+    author: string;
+    initials: string;
+    content: string;
+    created_at: string;
+    is_self: boolean;
+}
+
+interface CurrentChannel {
+    id: string;
+    name: string;
+    description: string;
+    nb_members: number;
+    messages: ThreadMessage[];
+}
+
+interface NewsPost {
+    id: string;
+    title: string;
+    body: string;
+    author: string;
+    pinned: boolean;
+    created_at: string;
+}
+
 interface Document {
     id: string;
     title: string;
     type: string;
+    size_kb?: number;
     uploaded_by: string;
     uploaded_at: string;
 }
 
-interface Props {
-    messages: Message[];
-    channels: Channel[];
-    documents: Document[];
+interface QaQuestion {
+    id: string;
+    title: string;
+    asker: string;
+    votes: number;
+    answers_count: number;
+    accepted: boolean;
+    created_at: string;
+    preview: string;
 }
 
-export default function CommunicationIndex({ messages = [], channels = [], documents = [] }: Partial<Props>) {
+interface Props {
+    channels: Channel[];
+    currentChannel: CurrentChannel | null;
+    newsPosts: NewsPost[];
+    documents: Document[];
+    qaQuestions: QaQuestion[];
+}
+
+type Tab = 'messages' | 'news' | 'docs' | 'qa';
+
+export default function CommunicationIndex({
+    channels = [],
+    currentChannel = null,
+    newsPosts = [],
+    documents = [],
+    qaQuestions = [],
+}: Partial<Props>) {
+    const [tab, setTab] = useState<Tab>('messages');
+    const canPublish = useCan('communication.post');
+
     return (
-        <DashboardLayout title="Communication" subtitle="Messagerie, actualités et documents">
+        <DashboardLayout title="Communication" subtitle="Messagerie, actualités, documents, Q&A">
             <PageHeader
                 title="Communication interne"
-                subtitle="Messagerie d'équipe, fil d'actualité et bibliothèque documentaire"
+                subtitle="Messagerie temps réel, fil d'actualité, bibliothèque documentaire et forum Q&A"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Communication' }]}
             />
 
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                {/* Messages / Fil d'actualité */}
-                <Card className="lg:col-span-2">
-                    <CardHeader title="Fil d'actualité" subtitle="Messages récents de votre structure" />
-                    <CardBody>
-                        {messages.length > 0 ? (
-                            <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                {messages.map((m) => (
-                                    <li key={m.id} className="flex items-start gap-3 py-3">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-                                            {m.initials}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-ink-900 dark:text-white">{m.author}</span>
-                                                <span className="font-mono text-[11px] text-ink-400 dark:text-ink-500">{m.created_at}</span>
-                                            </div>
-                                            <p className="mt-1 text-sm text-ink-700 dark:text-ink-300">{m.content}</p>
-                                        </div>
+            <div className="mb-5 flex flex-wrap gap-1 rounded-lg border border-ink-200 bg-white p-1 dark:border-ink-700 dark:bg-ink-800">
+                <TabButton active={tab === 'messages'} onClick={() => setTab('messages')} icon={<ChatIcon />}>
+                    Messages
+                </TabButton>
+                <TabButton
+                    active={tab === 'news'}
+                    onClick={() => setTab('news')}
+                    icon={<NewsIcon />}
+                    badge={newsPosts.filter((p) => p.pinned).length}
+                >
+                    Actualités
+                </TabButton>
+                <TabButton active={tab === 'docs'} onClick={() => setTab('docs')} icon={<FileIcon />}>
+                    Documents
+                </TabButton>
+                <TabButton active={tab === 'qa'} onClick={() => setTab('qa')} icon={<HelpIcon />}>
+                    Q&A
+                </TabButton>
+            </div>
+
+            {tab === 'messages' && <MessagesTab channels={channels} channel={currentChannel} />}
+            {tab === 'news' && <NewsTab posts={newsPosts} canPublish={canPublish} />}
+            {tab === 'docs' && <DocsTab documents={documents} />}
+            {tab === 'qa' && <QaTab questions={qaQuestions} />}
+        </DashboardLayout>
+    );
+}
+
+function TabButton({
+    active,
+    onClick,
+    icon,
+    badge,
+    children,
+}: {
+    active: boolean;
+    onClick: () => void;
+    icon?: React.ReactNode;
+    badge?: number;
+    children: React.ReactNode;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={cn(
+                'inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors sm:flex-initial sm:px-4',
+                active
+                    ? 'bg-brand-600 text-white shadow-sm'
+                    : 'text-ink-600 hover:bg-ink-100 dark:text-ink-300 dark:hover:bg-ink-700/60',
+            )}
+        >
+            <span className="size-3.5">{icon}</span>
+            {children}
+            {badge !== undefined && badge > 0 && (
+                <span
+                    className={cn(
+                        'inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold',
+                        active ? 'bg-white/20 text-white' : 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300',
+                    )}
+                >
+                    {badge}
+                </span>
+            )}
+        </button>
+    );
+}
+
+function MessagesTab({ channels, channel }: { channels: Channel[]; channel: CurrentChannel | null }) {
+    return (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-4">
+            {/* Channels sidebar */}
+            <Card className="lg:col-span-1">
+                <CardHeader title="Groupes" subtitle={`${channels.length} canal(aux)`} />
+                <CardBody className="px-2 py-2">
+                    {channels.length > 0 ? (
+                        <ul className="flex flex-col gap-0.5">
+                            {channels.map((c) => {
+                                const active = channel?.id === c.id;
+                                return (
+                                    <li key={c.id}>
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                                                active
+                                                    ? 'bg-brand-50 text-brand-900 dark:bg-brand-900/30 dark:text-brand-100'
+                                                    : 'text-ink-700 hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/40',
+                                            )}
+                                        >
+                                            <span className="min-w-0">
+                                                <span className="block truncate font-medium"># {c.name}</span>
+                                                <span className="block truncate text-[11px] text-ink-500 dark:text-ink-400">
+                                                    {c.nb_members} membres · {c.last_activity ?? '—'}
+                                                </span>
+                                            </span>
+                                        </button>
                                     </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <EmptyState
-                                icon={<ChatIcon />}
-                                title="Aucun message"
-                                description="La messagerie temps-réel sera disponible prochainement avec les discussions d'équipe et le fil d'actualité."
-                            />
-                        )}
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <EmptyState title="Aucun groupe" description="Les groupes seront configurés par votre coordinateur." />
+                    )}
+                </CardBody>
+            </Card>
+
+            {/* Thread */}
+            <Card className="lg:col-span-3">
+                {channel ? (
+                    <>
+                        <CardHeader
+                            title={`# ${channel.name}`}
+                            subtitle={`${channel.description} · ${channel.nb_members} membres`}
+                            action={
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-sage-700 dark:bg-sage-900/30 dark:text-sage-300">
+                                    <span className="size-1.5 animate-pulse rounded-full bg-sage-500" />
+                                    Temps réel
+                                </span>
+                            }
+                        />
+                        <CardBody className="flex h-[28rem] flex-col gap-3 overflow-y-auto p-4">
+                            {channel.messages.map((m) => (
+                                <MessageBubble key={m.id} m={m} />
+                            ))}
+                        </CardBody>
+                        <div className="border-t border-ink-100 p-3 dark:border-ink-700/60">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    placeholder={`Message dans #${channel.name}…`}
+                                    className="h-10 flex-1 rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-ink-700 dark:bg-ink-900/40 dark:text-white dark:placeholder:text-ink-500 dark:focus:ring-brand-900/30"
+                                />
+                                <Button size="sm">Envoyer</Button>
+                            </div>
+                            <p className="mt-1.5 text-[11px] text-ink-400 dark:text-ink-500">
+                                Reverb WebSocket prêt côté backend — l'envoi se branche au prochain incrément.
+                            </p>
+                        </div>
+                    </>
+                ) : (
+                    <CardBody>
+                        <EmptyState
+                            icon={<ChatIcon />}
+                            title="Aucun canal sélectionné"
+                            description="Choisissez un groupe dans la colonne de gauche pour afficher la conversation."
+                        />
+                    </CardBody>
+                )}
+            </Card>
+        </div>
+    );
+}
+
+function MessageBubble({ m }: { m: ThreadMessage }) {
+    return (
+        <div className={cn('flex items-start gap-3', m.is_self && 'flex-row-reverse')}>
+            <div className={cn('flex size-9 shrink-0 items-center justify-center rounded-lg font-semibold text-white', m.is_self ? 'bg-brand-600' : 'bg-gradient-to-br from-ink-500 to-ink-700')}>
+                <span className="text-[11px]">{m.initials}</span>
+            </div>
+            <div className={cn('min-w-0 max-w-[80%] rounded-2xl px-3.5 py-2', m.is_self ? 'bg-brand-600 text-white' : 'bg-ink-50 text-ink-900 dark:bg-ink-700/60 dark:text-ink-100')}>
+                <div className={cn('flex items-baseline gap-2 text-[11px] font-medium', m.is_self ? 'text-white/80' : 'text-ink-500 dark:text-ink-400')}>
+                    <span>{m.author}</span>
+                    <span className="font-mono">{m.created_at}</span>
+                </div>
+                <p className="mt-0.5 whitespace-pre-line text-sm leading-relaxed">{m.content}</p>
+            </div>
+        </div>
+    );
+}
+
+function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean }) {
+    const pinned = posts.filter((p) => p.pinned);
+    const others = posts.filter((p) => !p.pinned);
+
+    return (
+        <div className="space-y-5">
+            {canPublish && (
+                <Card>
+                    <CardBody className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium text-ink-900 dark:text-white">Publier une actualité</p>
+                            <p className="text-xs text-ink-500 dark:text-ink-400">Communiquez à toute la structure en quelques clics.</p>
+                        </div>
+                        <Button size="sm" leadingIcon={<PlusIcon />}>Nouvelle actu</Button>
                     </CardBody>
                 </Card>
+            )}
 
-                <div className="flex flex-col gap-5">
-                    {/* Channels */}
-                    <Card>
-                        <CardHeader title="Groupes de discussion" subtitle={`${channels.length} groupe(s)`} />
-                        <CardBody>
-                            {channels.length > 0 ? (
-                                <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                    {channels.map((c) => (
-                                        <li key={c.id} className="flex items-center justify-between py-2.5">
-                                            <div>
-                                                <p className="text-sm font-medium text-ink-900 dark:text-white"># {c.name}</p>
-                                                <p className="text-xs text-ink-500 dark:text-ink-400">{c.nb_members} membre(s)</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <EmptyState title="Aucun groupe" description="Les groupes de discussion seront configurés par votre coordinateur." />
-                            )}
-                        </CardBody>
-                    </Card>
+            {pinned.length > 0 && (
+                <section>
+                    <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                        <PinIcon /> Épinglées
+                    </h3>
+                    <ul className="space-y-3">
+                        {pinned.map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
 
-                    {/* Documents */}
-                    <Card>
-                        <CardHeader title="Bibliothèque documentaire" subtitle={`${documents.length} document(s)`} />
-                        <CardBody>
-                            {documents.length > 0 ? (
-                                <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                    {documents.map((d) => (
-                                        <li key={d.id} className="flex items-center gap-3 py-2.5">
-                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-ink-50 text-ink-500 dark:bg-ink-700 dark:text-ink-400">
-                                                <FileIcon />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{d.title}</p>
-                                                <p className="text-xs text-ink-500 dark:text-ink-400">{d.uploaded_by} · {d.uploaded_at}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <EmptyState title="Aucun document" description="Partagez les protocoles, procédures et documents de référence ici." />
-                            )}
-                        </CardBody>
-                    </Card>
+            {others.length > 0 && (
+                <section>
+                    {pinned.length > 0 && (
+                        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                            Récentes
+                        </h3>
+                    )}
+                    <ul className="space-y-3">
+                        {others.map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {posts.length === 0 && (
+                <Card>
+                    <EmptyState icon={<NewsIcon />} title="Aucune actualité" description="Le fil d'actualité affichera les publications de votre structure." />
+                </Card>
+            )}
+        </div>
+    );
+}
+
+function NewsCard({ post }: { post: NewsPost }) {
+    return (
+        <article className={cn('rounded-2xl border bg-white p-4 transition-shadow hover:shadow-md dark:bg-ink-800', post.pinned ? 'border-warning-200 dark:border-warning-700/40' : 'border-ink-100 dark:border-ink-700/60')}>
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {post.pinned && (
+                            <Badge tone="warning" size="xs">
+                                <PinIcon /> Épinglée
+                            </Badge>
+                        )}
+                        <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{post.title}</h3>
+                    </div>
+                    <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+                        <span className="font-medium">{post.author}</span> · {post.created_at}
+                    </p>
                 </div>
             </div>
-        </DashboardLayout>
+            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-ink-200">{post.body}</p>
+        </article>
+    );
+}
+
+function DocsTab({ documents }: { documents: Document[] }) {
+    if (documents.length === 0) {
+        return (
+            <Card>
+                <EmptyState icon={<FileIcon />} title="Aucun document" description="Partagez les protocoles, procédures et documents de référence ici." />
+            </Card>
+        );
+    }
+    return (
+        <Card>
+            <CardHeader
+                title="Bibliothèque documentaire"
+                subtitle={`${documents.length} document(s)`}
+                action={<Button size="sm" leadingIcon={<UploadIcon />}>Téléverser</Button>}
+            />
+            <CardBody className="px-2 py-2">
+                <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                    {documents.map((d) => (
+                        <li key={d.id} className="flex items-center gap-3 px-3 py-3">
+                            <FileTypeBadge type={d.type} />
+                            <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{d.title}</p>
+                                <p className="text-[11px] text-ink-500 dark:text-ink-400">
+                                    {d.uploaded_by} · {d.uploaded_at}
+                                    {d.size_kb !== undefined && ` · ${formatSize(d.size_kb)}`}
+                                </p>
+                            </div>
+                            <Button size="sm" variant="secondary">
+                                Télécharger
+                            </Button>
+                        </li>
+                    ))}
+                </ul>
+            </CardBody>
+        </Card>
+    );
+}
+
+function FileTypeBadge({ type }: { type: string }) {
+    const colors: Record<string, string> = {
+        PDF: 'bg-danger-100 text-danger-700 dark:bg-danger-900/40 dark:text-danger-300',
+        XLSX: 'bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300',
+        DOCX: 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300',
+        PNG: 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300',
+        JPG: 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300',
+    };
+    return (
+        <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg font-mono text-[10px] font-bold', colors[type] ?? 'bg-ink-100 text-ink-600 dark:bg-ink-700 dark:text-ink-300')}>
+            {type}
+        </span>
+    );
+}
+
+function formatSize(kb: number): string {
+    if (kb < 1024) return `${kb} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+}
+
+function QaTab({ questions }: { questions: QaQuestion[] }) {
+    if (questions.length === 0) {
+        return (
+            <Card>
+                <EmptyState icon={<HelpIcon />} title="Aucune question" description="Posez vos questions à toute l'équipe et bénéficiez de leur expertise." />
+            </Card>
+        );
+    }
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center justify-between">
+                <p className="text-xs text-ink-500 dark:text-ink-400">{questions.length} question(s)</p>
+                <Button size="sm" leadingIcon={<PlusIcon />}>Poser une question</Button>
+            </div>
+            <ul className="space-y-3">
+                {questions.map((q) => (
+                    <li key={q.id}>
+                        <Card>
+                            <CardBody>
+                                <div className="flex gap-4">
+                                    {/* Vote column */}
+                                    <div className="flex w-12 shrink-0 flex-col items-center gap-1.5 text-center">
+                                        <button
+                                            type="button"
+                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-brand-400 hover:text-brand-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
+                                            aria-label="Voter pour"
+                                        >
+                                            <ChevronUpIcon />
+                                        </button>
+                                        <span className="font-mono text-sm font-bold tabular-nums text-ink-900 dark:text-white">{q.votes}</span>
+                                        <button
+                                            type="button"
+                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-danger-400 hover:text-danger-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
+                                            aria-label="Voter contre"
+                                        >
+                                            <ChevronDownIcon />
+                                        </button>
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{q.title}</h3>
+                                            {q.accepted && (
+                                                <Badge tone="sage" size="xs">
+                                                    ✓ Réponse acceptée
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <p className="mt-1 line-clamp-2 text-xs text-ink-600 dark:text-ink-300">{q.preview}</p>
+                                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
+                                            <span><span className="font-medium text-ink-700 dark:text-ink-200">{q.asker}</span> · {q.created_at}</span>
+                                            <span className="font-mono">{q.answers_count} réponse{q.answers_count > 1 ? 's' : ''}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    </li>
+                ))}
+            </ul>
+        </div>
     );
 }
 
 function ChatIcon() {
     return (
-        <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
         </svg>
     );
 }
-
+function NewsIcon() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2" />
+            <path d="M18 14h-8M15 18h-5M10 6h8v4h-8z" />
+        </svg>
+    );
+}
 function FileIcon() {
     return (
         <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
             <polyline points="14 2 14 8 20 8" />
+        </svg>
+    );
+}
+function HelpIcon() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+    );
+}
+function PlusIcon() {
+    return (
+        <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
+    );
+}
+function PinIcon() {
+    return (
+        <svg className="size-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <line x1="12" y1="17" x2="12" y2="22" />
+            <path d="M5 17h14V8L12 3 5 8v9z" />
+        </svg>
+    );
+}
+function UploadIcon() {
+    return (
+        <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+    );
+}
+function ChevronUpIcon() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <polyline points="18 15 12 9 6 15" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+}
+function ChevronDownIcon() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }
