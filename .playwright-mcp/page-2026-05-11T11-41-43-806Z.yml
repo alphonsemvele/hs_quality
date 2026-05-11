@@ -1,0 +1,240 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Signaux faibles" [ref=e75] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e77]
+              - generic [ref=e81]: Signaux faibles
+          - listitem [ref=e82]:
+            - link "Cartographie RPS" [ref=e83] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e85]
+              - generic [ref=e89]: Cartographie RPS
+          - listitem [ref=e90]:
+            - link "Plans d'action" [ref=e91] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e93]
+              - generic [ref=e96]: Plans d'action
+          - listitem [ref=e97]:
+            - link "Mon journal" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e100]
+              - generic [ref=e103]: Mon journal
+          - listitem [ref=e104]:
+            - link "Demandes d'échange" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e107]
+              - generic [ref=e110]: Demandes d'échange
+          - listitem [ref=e111]:
+            - link "Formations" [ref=e112] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e114]
+              - generic [ref=e117]: Formations
+          - listitem [ref=e118]:
+            - link "Communication" [ref=e119] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e121]
+              - generic [ref=e123]: Communication
+      - generic [ref=e124]:
+        - paragraph [ref=e125]: Administration
+        - list [ref=e126]:
+          - listitem [ref=e127]:
+            - link "Utilisateurs" [ref=e128] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e130]
+              - generic [ref=e134]: Utilisateurs
+    - generic [ref=e136]:
+      - generic [ref=e137]: SM
+      - generic [ref=e138]:
+        - paragraph [ref=e139]: Sophie Martin
+        - paragraph [ref=e140]: utilisateur
+  - generic [ref=e141]:
+    - banner [ref=e142]:
+      - generic [ref=e144]:
+        - heading "Mon journal" [level=1] [ref=e145]
+        - paragraph [ref=e146]: Espace personnel et confidentiel
+      - generic [ref=e147]:
+        - button "Rechercher (Cmd+K)" [ref=e148] [cursor=pointer]:
+          - img [ref=e149]
+          - generic [ref=e152]: Rechercher
+          - generic [ref=e153]: ⌘K
+        - link "Déclarer un incident" [ref=e154] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e155]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e158] [cursor=pointer]:
+          - img [ref=e159]
+        - button "SM Sophie Martin" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: SM
+          - generic [ref=e164]: Sophie Martin
+          - img [ref=e165]
+    - main [ref=e167]:
+      - generic [ref=e169]:
+        - navigation "Fil d'ariane" [ref=e170]:
+          - link "Tableau de bord" [ref=e172] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "QVCT" [ref=e176] [cursor=pointer]:
+              - /url: /qvct
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - generic [ref=e180]: Mon journal
+        - heading "Mon journal psychosocial" [level=1] [ref=e181]
+        - paragraph [ref=e182]: Espace personnel et confidentiel — vous choisissez ce que vous partagez avec la RH
+      - generic [ref=e183]:
+        - generic [ref=e184]:
+          - generic [ref=e185]:
+            - generic [ref=e187]:
+              - heading "Nouvelle entrée" [level=3] [ref=e188]
+              - paragraph [ref=e189]: Comment s'est passée cette journée ?
+            - generic [ref=e192]:
+              - generic [ref=e193]:
+                - generic [ref=e194]: Mon humeur
+                - group "Sélecteur d'humeur" [ref=e195]:
+                  - generic [ref=e196] [cursor=pointer]:
+                    - radio "Très difficile"
+                    - generic [ref=e197]: 😞
+                    - generic [ref=e198]: Très difficile
+                  - generic [ref=e199] [cursor=pointer]:
+                    - radio "Difficile"
+                    - generic [ref=e200]: 😕
+                    - generic [ref=e201]: Difficile
+                  - generic [ref=e202] [cursor=pointer]:
+                    - radio "Neutre"
+                    - generic [ref=e203]: 😐
+                    - generic [ref=e204]: Neutre
+                  - generic [ref=e205] [cursor=pointer]:
+                    - radio "Bon"
+                    - generic [ref=e206]: 🙂
+                    - generic [ref=e207]: Bon
+                  - generic [ref=e208] [cursor=pointer]:
+                    - radio "Très bon"
+                    - generic [ref=e209]: 😄
+                    - generic [ref=e210]: Très bon
+              - generic [ref=e211]:
+                - generic [ref=e212]: Notes (optionnel)
+                - textbox "Notes (optionnel)" [ref=e213]:
+                  - /placeholder: Ce que vous avez vécu, ressenti, observé… Cet espace est privé sauf si vous choisissez de partager.
+              - generic [ref=e214]:
+                - generic [ref=e215] [cursor=pointer]:
+                  - checkbox "Partager avec la RH Si coché, cette entrée sera lisible par votre référent·e RH. Sinon, elle reste privée." [ref=e216]
+                  - generic [ref=e217]:
+                    - text: Partager avec la RH
+                    - generic [ref=e218]: Si coché, cette entrée sera lisible par votre référent·e RH. Sinon, elle reste privée.
+                - button "Enregistrer" [disabled] [ref=e219]
+          - generic [ref=e220]:
+            - generic [ref=e222]:
+              - heading "Mes dernières entrées" [level=3] [ref=e223]
+              - paragraph [ref=e224]: 4 entrée(s) — 2 partagée(s) avec RH
+            - list [ref=e226]:
+              - listitem [ref=e227]:
+                - generic [ref=e228]:
+                  - generic [ref=e229]: 🙂
+                  - generic [ref=e230]:
+                    - generic [ref=e231]:
+                      - generic [ref=e232]: 2026-05-10
+                      - generic [ref=e233]: Bon
+                      - generic [ref=e234]: Privée
+                    - paragraph [ref=e235]: Bonne semaine — bénéficiaires en forme, planning respecté. Un peu de fatigue jeudi mais bien récupéré.
+              - listitem [ref=e236]:
+                - generic [ref=e237]:
+                  - generic [ref=e238]: 😐
+                  - generic [ref=e239]:
+                    - generic [ref=e240]:
+                      - generic [ref=e241]: 2026-05-03
+                      - generic [ref=e242]: Neutre
+                      - generic [ref=e243]: Partagée RH
+                    - paragraph [ref=e245]: Charge importante cette semaine, 3 visites supplémentaires. Besoin de souffler.
+              - listitem [ref=e246]:
+                - generic [ref=e247]:
+                  - generic [ref=e248]: 😄
+                  - generic [ref=e249]:
+                    - generic [ref=e250]:
+                      - generic [ref=e251]: 2026-04-26
+                      - generic [ref=e252]: Très bon
+                      - generic [ref=e253]: Privée
+                    - paragraph [ref=e254]: Très belle semaine — j'ai pu accompagner Mme L. à son rendez-vous médical, très reconnaissante.
+              - listitem [ref=e255]:
+                - generic [ref=e256]:
+                  - generic [ref=e257]: 😕
+                  - generic [ref=e258]:
+                    - generic [ref=e259]:
+                      - generic [ref=e260]: 2026-04-19
+                      - generic [ref=e261]: Difficile
+                      - generic [ref=e262]: Partagée RH
+                    - paragraph [ref=e264]: Difficile — incident chez M. R., je ne sais pas si j'ai bien réagi. Voir avec coordinateur.
+        - complementary [ref=e265]:
+          - generic [ref=e267]:
+            - img [ref=e269]
+            - generic [ref=e272]:
+              - paragraph [ref=e273]: Réponses anonymes
+              - paragraph [ref=e274]: Vos réponses sont collectées de façon anonyme. Aucune information ne permettra de vous identifier dans les résultats . Seules des statistiques agrégées seront partagées avec votre direction.
+          - generic [ref=e275]:
+            - heading "Comment ça marche ?" [level=3] [ref=e278]
+            - generic [ref=e279]:
+              - paragraph [ref=e280]:
+                - strong [ref=e281]: Privé par défaut.
+                - text: Vos entrées ne sont accessibles qu'à vous.
+              - paragraph [ref=e282]:
+                - strong [ref=e283]: Partage explicite.
+                - text: Si vous cochez « Partager avec la RH », votre référent·e RH pourra lire l'entrée et vous proposer un échange.
+              - paragraph [ref=e284]:
+                - strong [ref=e285]: Pas d'utilisation analytique.
+                - text: Le contenu de votre journal n'alimente jamais les indicateurs agrégés.

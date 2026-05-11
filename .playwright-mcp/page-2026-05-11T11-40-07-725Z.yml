@@ -1,0 +1,288 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Signaux faibles" [ref=e75] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e77]
+              - generic [ref=e81]: Signaux faibles
+          - listitem [ref=e82]:
+            - link "Cartographie RPS" [ref=e83] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e85]
+              - generic [ref=e89]: Cartographie RPS
+          - listitem [ref=e90]:
+            - link "Plans d'action" [ref=e91] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e93]
+              - generic [ref=e96]: Plans d'action
+          - listitem [ref=e97]:
+            - link "Mon journal" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e100]
+              - generic [ref=e103]: Mon journal
+          - listitem [ref=e104]:
+            - link "Demandes d'échange" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e107]
+              - generic [ref=e110]: Demandes d'échange
+          - listitem [ref=e111]:
+            - link "Formations" [ref=e112] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e114]
+              - generic [ref=e117]: Formations
+          - listitem [ref=e118]:
+            - link "Communication" [ref=e119] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e121]
+              - generic [ref=e123]: Communication
+      - generic [ref=e124]:
+        - paragraph [ref=e125]: Administration
+        - list [ref=e126]:
+          - listitem [ref=e127]:
+            - link "Utilisateurs" [ref=e128] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e130]
+              - generic [ref=e134]: Utilisateurs
+    - generic [ref=e136]:
+      - generic [ref=e137]: SM
+      - generic [ref=e138]:
+        - paragraph [ref=e139]: Sophie Martin
+        - paragraph [ref=e140]: utilisateur
+  - generic [ref=e141]:
+    - banner [ref=e142]:
+      - generic [ref=e144]:
+        - heading "Baromètre QVCT" [level=1] [ref=e145]
+        - paragraph [ref=e146]: Qualité de Vie et Conditions de Travail
+      - generic [ref=e147]:
+        - button "Rechercher (Cmd+K)" [ref=e148] [cursor=pointer]:
+          - img [ref=e149]
+          - generic [ref=e152]: Rechercher
+          - generic [ref=e153]: ⌘K
+        - link "Déclarer un incident" [ref=e154] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e155]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e158] [cursor=pointer]:
+          - img [ref=e159]
+        - button "SM Sophie Martin" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: SM
+          - generic [ref=e164]: Sophie Martin
+          - img [ref=e165]
+    - main [ref=e167]:
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - navigation "Fil d'ariane" [ref=e170]:
+            - link "Tableau de bord" [ref=e172] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e173]:
+              - img [ref=e174]
+              - generic [ref=e176]: QVCT
+          - heading "Baromètre QVCT" [level=1] [ref=e177]
+          - paragraph [ref=e178]: Campagnes, signaux faibles RPS et cartographie par équipe
+        - link "Nouvelle campagne" [ref=e180] [cursor=pointer]:
+          - /url: /qvct/questionnaire
+          - button "Nouvelle campagne" [ref=e181]:
+            - img [ref=e182]
+            - text: Nouvelle campagne
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - img [ref=e188]
+          - paragraph [ref=e190]: Score moyen
+          - paragraph [ref=e191]: 6.8/10
+          - paragraph [ref=e194]: Échelle 0-10
+        - generic [ref=e195]:
+          - img [ref=e198]
+          - paragraph [ref=e202]: Participation
+          - paragraph [ref=e203]: 75 %
+        - generic [ref=e206]:
+          - img [ref=e209]
+          - paragraph [ref=e211]: Alertes actives
+          - paragraph [ref=e212]: "2"
+          - paragraph [ref=e213]: Signaux faibles non traités
+        - generic [ref=e214]:
+          - img [ref=e217]
+          - paragraph [ref=e219]: Dernière campagne
+          - paragraph [ref=e220]: 2026-04-01
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]:
+            - generic [ref=e224]:
+              - heading "Évolution du score QVCT" [level=3] [ref=e225]
+              - paragraph [ref=e226]: 7 derniers mois — moyenne tous secteurs
+            - img "Tendance" [ref=e228]
+          - img "Évolution du score QVCT" [ref=e231]:
+            - img [ref=e232]:
+              - generic [ref=e233]: "0"
+              - generic [ref=e234]: 1,8
+              - generic [ref=e235]: 3,6
+              - generic [ref=e236]: 5,4
+              - generic [ref=e237]: 7,2
+              - generic [ref=e238]: Oct
+              - generic [ref=e239]: Nov
+              - generic [ref=e240]: Déc
+              - generic [ref=e241]: Jan
+              - generic [ref=e242]: Fév
+              - generic [ref=e243]: Mar
+              - generic [ref=e244]: Avr
+            - generic:
+              - generic: 6,4
+              - generic: Oct
+        - generic [ref=e255]:
+          - generic [ref=e256]:
+            - generic [ref=e257]:
+              - heading "Signaux faibles RPS" [level=3] [ref=e258]
+              - paragraph [ref=e259]: 2 à traiter
+            - link "Tout voir" [ref=e261] [cursor=pointer]:
+              - /url: /qvct
+          - generic [ref=e262]:
+            - article [ref=e263]:
+              - generic [ref=e264]:
+                - generic [ref=e265]: 🔥
+                - generic [ref=e266]:
+                  - heading "Risque de burnout" [level=3] [ref=e268]
+                  - paragraph [ref=e269]: Plusieurs réponses indiquent une fatigue inhabituelle et une perte de sens.
+                  - generic [ref=e270]:
+                    - generic [ref=e271]: Secteur Nord — soirée
+                    - generic [ref=e273]: "Score : 7.2"
+                    - generic [ref=e274]: Détecté il y a 2 jours
+            - article [ref=e275]:
+              - generic [ref=e276]:
+                - generic [ref=e277]: 📍
+                - generic [ref=e278]:
+                  - heading "Cluster RPS détecté" [level=3] [ref=e280]
+                  - paragraph [ref=e281]: Concentration de réponses négatives sur une équipe ou un horaire.
+                  - generic [ref=e282]:
+                    - generic [ref=e283]: Secteur Sud — week-end
+                    - generic [ref=e285]: "Score : 6.5"
+                    - generic [ref=e286]: Détecté il y a 5 jours
+        - generic [ref=e287]:
+          - generic [ref=e289]:
+            - heading "Cartographie par équipe" [level=3] [ref=e290]
+            - paragraph [ref=e291]: Score moyen et taux de réponse de la dernière campagne
+          - generic [ref=e292]:
+            - generic [ref=e293]:
+              - generic [ref=e294]:
+                - paragraph [ref=e295]: Secteur Nord
+                - paragraph [ref=e296]: 70% de participation
+              - generic [ref=e300]: 5.8/10
+            - generic [ref=e301]:
+              - generic [ref=e302]:
+                - paragraph [ref=e303]: Secteur Sud
+                - paragraph [ref=e304]: 75% de participation
+              - generic [ref=e308]: 6.2/10
+            - generic [ref=e309]:
+              - generic [ref=e310]:
+                - paragraph [ref=e311]: Secteur Est
+                - paragraph [ref=e312]: 82% de participation
+              - generic [ref=e316]: 7.4/10
+            - generic [ref=e317]:
+              - generic [ref=e318]:
+                - paragraph [ref=e319]: Secteur Ouest
+                - paragraph [ref=e320]: 88% de participation
+              - generic [ref=e324]: 7.8/10
+            - generic [ref=e325]:
+              - generic [ref=e326]:
+                - paragraph [ref=e327]: Coordination
+                - paragraph [ref=e328]: 100% de participation
+              - generic [ref=e332]: 6.9/10
+        - generic [ref=e333]:
+          - generic [ref=e334]:
+            - generic [ref=e335]:
+              - heading "Campagnes" [level=3] [ref=e336]
+              - paragraph [ref=e337]: 3 campagne(s)
+            - link "Nouvelle" [ref=e339] [cursor=pointer]:
+              - /url: /qvct/questionnaire
+              - button "Nouvelle" [ref=e340]:
+                - img [ref=e341]
+                - text: Nouvelle
+          - list [ref=e344]:
+            - listitem [ref=e345]:
+              - article [ref=e346]:
+                - generic [ref=e347]:
+                  - generic [ref=e348]:
+                    - heading "Baromètre QVCT — Avril 2026" [level=3] [ref=e349]
+                    - generic [ref=e350]: Terminée
+                    - generic [ref=e352]: 2 alertes
+                  - generic [ref=e353]:
+                    - generic [ref=e354]: 2026-04-01 → 2026-04-15
+                    - generic [ref=e355]: 9 réponses
+                    - generic [ref=e356]: "Participation : 75%"
+                - paragraph [ref=e358]: 6.8/10
+            - listitem [ref=e359]:
+              - article [ref=e360]:
+                - generic [ref=e361]:
+                  - generic [ref=e362]:
+                    - heading "Baromètre QVCT — Janvier 2026" [level=3] [ref=e363]
+                    - generic [ref=e364]: Terminée
+                    - generic [ref=e366]: 1 alerte
+                  - generic [ref=e367]:
+                    - generic [ref=e368]: 2026-01-10 → 2026-01-24
+                    - generic [ref=e369]: 10 réponses
+                    - generic [ref=e370]: "Participation : 83%"
+                - paragraph [ref=e372]: 7.2/10
+            - listitem [ref=e373]:
+              - article [ref=e374]:
+                - generic [ref=e375]:
+                  - generic [ref=e376]:
+                    - heading "Baromètre QVCT — Juillet 2026" [level=3] [ref=e377]
+                    - generic [ref=e378]: Planifiée
+                  - generic [ref=e380]:
+                    - generic [ref=e381]: 2026-07-01 (en cours)
+                    - generic [ref=e382]: 0 réponse
+                    - generic [ref=e383]: "Participation : 0%"

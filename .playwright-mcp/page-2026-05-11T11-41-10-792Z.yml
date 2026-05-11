@@ -1,0 +1,207 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Signaux faibles" [ref=e75] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e77]
+              - generic [ref=e81]: Signaux faibles
+          - listitem [ref=e82]:
+            - link "Cartographie RPS" [ref=e83] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e85]
+              - generic [ref=e89]: Cartographie RPS
+          - listitem [ref=e90]:
+            - link "Plans d'action" [ref=e91] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e93]
+              - generic [ref=e96]: Plans d'action
+          - listitem [ref=e97]:
+            - link "Mon journal" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e100]
+              - generic [ref=e103]: Mon journal
+          - listitem [ref=e104]:
+            - link "Demandes d'échange" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e107]
+              - generic [ref=e110]: Demandes d'échange
+          - listitem [ref=e111]:
+            - link "Formations" [ref=e112] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e114]
+              - generic [ref=e117]: Formations
+          - listitem [ref=e118]:
+            - link "Communication" [ref=e119] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e121]
+              - generic [ref=e123]: Communication
+      - generic [ref=e124]:
+        - paragraph [ref=e125]: Administration
+        - list [ref=e126]:
+          - listitem [ref=e127]:
+            - link "Utilisateurs" [ref=e128] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e130]
+              - generic [ref=e134]: Utilisateurs
+    - generic [ref=e136]:
+      - generic [ref=e137]: SM
+      - generic [ref=e138]:
+        - paragraph [ref=e139]: Sophie Martin
+        - paragraph [ref=e140]: utilisateur
+  - generic [ref=e141]:
+    - banner [ref=e142]:
+      - generic [ref=e144]:
+        - heading "Plans d'action QVCT" [level=1] [ref=e145]
+        - paragraph [ref=e146]: Mesurer l'impact des actions RH
+      - generic [ref=e147]:
+        - button "Rechercher (Cmd+K)" [ref=e148] [cursor=pointer]:
+          - img [ref=e149]
+          - generic [ref=e152]: Rechercher
+          - generic [ref=e153]: ⌘K
+        - link "Déclarer un incident" [ref=e154] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e155]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e158] [cursor=pointer]:
+          - img [ref=e159]
+        - button "SM Sophie Martin" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: SM
+          - generic [ref=e164]: Sophie Martin
+          - img [ref=e165]
+    - main [ref=e167]:
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - navigation "Fil d'ariane" [ref=e170]:
+            - link "Tableau de bord" [ref=e172] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e173]:
+              - img [ref=e174]
+              - link "QVCT" [ref=e176] [cursor=pointer]:
+                - /url: /qvct
+            - generic [ref=e177]:
+              - img [ref=e178]
+              - generic [ref=e180]: Plans d'action
+          - heading "Plans d'action QVCT" [level=1] [ref=e181]
+          - paragraph [ref=e182]: Définissez des actions concrètes et mesurez leur impact sur les indicateurs
+        - link "Nouveau plan" [ref=e184] [cursor=pointer]:
+          - /url: /qvct/action-plans
+          - button "Nouveau plan" [ref=e185]:
+            - img [ref=e186]
+            - text: Nouveau plan
+      - generic [ref=e188]:
+        - generic [ref=e189]:
+          - img [ref=e192]
+          - paragraph [ref=e194]: Total
+          - paragraph [ref=e195]: "4"
+        - generic [ref=e196]:
+          - img [ref=e199]
+          - paragraph [ref=e201]: En cours
+          - paragraph [ref=e202]: "2"
+        - generic [ref=e203]:
+          - img [ref=e206]
+          - paragraph [ref=e208]: Clos
+          - paragraph [ref=e209]: "2"
+        - generic [ref=e210]:
+          - img [ref=e213]
+          - paragraph [ref=e217]: Items en progression
+          - paragraph [ref=e218]: "6"
+      - generic [ref=e219]:
+        - button "En cours 2" [ref=e220]:
+          - text: En cours
+          - generic [ref=e221]: "2"
+        - button "Brouillons 1" [ref=e222]:
+          - text: Brouillons
+          - generic [ref=e223]: "1"
+        - button "Clos 1" [ref=e224]:
+          - text: Clos
+          - generic [ref=e225]: "1"
+        - button "Tous 4" [ref=e226]:
+          - text: Tous
+          - generic [ref=e227]: "4"
+      - list [ref=e228]:
+        - listitem [ref=e229]:
+          - generic [ref=e232]:
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - heading "Réduire la charge de soirée — Secteur Nord" [level=3] [ref=e235]
+                - generic [ref=e236]: Publié
+              - paragraph [ref=e238]: "Pilote : Claire Dupont (RH)"
+              - paragraph [ref=e239]: "Objectif d'impact : Score charge +1.5 pt"
+            - generic [ref=e240]:
+              - generic [ref=e241]:
+                - generic [ref=e242]:
+                  - text: 2/4 items
+                  - generic [ref=e243]: (1 en cours)
+                - generic [ref=e244]: 50%
+              - paragraph [ref=e247]: Publié 2026-04-20
+        - listitem [ref=e248]:
+          - generic [ref=e251]:
+            - generic [ref=e252]:
+              - generic [ref=e253]:
+                - heading "Plan soutien week-end — Secteur Sud" [level=3] [ref=e254]
+                - generic [ref=e255]: Publié
+              - paragraph [ref=e257]: "Pilote : Pierre Martin (Dirigeant)"
+              - paragraph [ref=e258]: "Objectif d'impact : Réduire signal RPS week-end"
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - generic [ref=e261]:
+                  - text: 1/3 items
+                  - generic [ref=e262]: (1 en cours)
+                - generic [ref=e263]: 33%
+              - paragraph [ref=e266]: Publié 2026-04-15

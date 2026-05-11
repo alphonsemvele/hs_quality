@@ -1,0 +1,274 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+      - generic [ref=e65]:
+        - paragraph [ref=e66]: QVCT & RH
+        - list [ref=e67]:
+          - listitem [ref=e68]:
+            - link "Baromètre QVCT" [ref=e69] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e71]
+              - generic [ref=e73]: Baromètre QVCT
+          - listitem [ref=e74]:
+            - link "Signaux faibles" [ref=e75] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e77]
+              - generic [ref=e81]: Signaux faibles
+          - listitem [ref=e82]:
+            - link "Cartographie RPS" [ref=e83] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e85]
+              - generic [ref=e89]: Cartographie RPS
+          - listitem [ref=e90]:
+            - link "Plans d'action" [ref=e91] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e93]
+              - generic [ref=e96]: Plans d'action
+          - listitem [ref=e97]:
+            - link "Mon journal" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e100]
+              - generic [ref=e103]: Mon journal
+          - listitem [ref=e104]:
+            - link "Demandes d'échange" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e107]
+              - generic [ref=e110]: Demandes d'échange
+          - listitem [ref=e111]:
+            - link "Formations" [ref=e112] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e114]
+              - generic [ref=e117]: Formations
+          - listitem [ref=e118]:
+            - link "Communication" [ref=e119] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e121]
+              - generic [ref=e123]: Communication
+      - generic [ref=e124]:
+        - paragraph [ref=e125]: Administration
+        - list [ref=e126]:
+          - listitem [ref=e127]:
+            - link "Utilisateurs" [ref=e128] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e130]
+              - generic [ref=e134]: Utilisateurs
+    - generic [ref=e136]:
+      - generic [ref=e137]: SM
+      - generic [ref=e138]:
+        - paragraph [ref=e139]: Sophie Martin
+        - paragraph [ref=e140]: utilisateur
+  - generic [ref=e141]:
+    - banner [ref=e142]:
+      - generic [ref=e144]:
+        - heading "Indicateurs RPS" [level=1] [ref=e145]
+        - paragraph [ref=e146]: Cartographie par équipe et dimension
+      - generic [ref=e147]:
+        - button "Rechercher (Cmd+K)" [ref=e148] [cursor=pointer]:
+          - img [ref=e149]
+          - generic [ref=e152]: Rechercher
+          - generic [ref=e153]: ⌘K
+        - link "Déclarer un incident" [ref=e154] [cursor=pointer]:
+          - /url: /incidents/create
+          - img [ref=e155]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e158] [cursor=pointer]:
+          - img [ref=e159]
+        - button "SM Sophie Martin" [ref=e162] [cursor=pointer]:
+          - generic [ref=e163]: SM
+          - generic [ref=e164]: Sophie Martin
+          - img [ref=e165]
+    - main [ref=e167]:
+      - generic [ref=e169]:
+        - navigation "Fil d'ariane" [ref=e170]:
+          - link "Tableau de bord" [ref=e172] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "QVCT" [ref=e176] [cursor=pointer]:
+              - /url: /qvct
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - generic [ref=e180]: Indicateurs RPS
+        - heading "Cartographie RPS" [level=1] [ref=e181]
+        - paragraph [ref=e182]: Risques psycho-sociaux croisés par équipe et dimension (charge, soutien, sens, récupération, autonomie)
+      - generic [ref=e183]:
+        - generic [ref=e184]:
+          - img [ref=e187]
+          - paragraph [ref=e189]: Score moyen global
+          - paragraph [ref=e190]: 6.8/10
+        - generic [ref=e193]:
+          - img [ref=e196]
+          - paragraph [ref=e200]: Équipes mesurées
+          - paragraph [ref=e201]: "5"
+        - generic [ref=e202]:
+          - img [ref=e205]
+          - paragraph [ref=e209]: Dimensions
+          - paragraph [ref=e210]: "5"
+        - generic [ref=e211]:
+          - img [ref=e214]
+          - paragraph [ref=e218]: Point d'attention
+          - paragraph [ref=e219]: charge
+          - paragraph [ref=e220]: Secteur Nord · 4.2/10
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e224]:
+            - heading "Cartographie équipes × dimensions" [level=3] [ref=e225]
+            - paragraph [ref=e226]: Survolez une cellule pour la mettre en évidence — cliquez pour zoomer (à venir)
+          - img "Cartographie des risques psychosociaux par équipe et dimension" [ref=e228]:
+            - table [ref=e229]:
+              - rowgroup [ref=e230]:
+                - row "Équipe Charge de travail Soutien social Sens du travail Récupération Autonomie Moy." [ref=e231]:
+                  - columnheader "Équipe" [ref=e232]
+                  - columnheader "Charge de travail" [ref=e233]
+                  - columnheader "Soutien social" [ref=e234]
+                  - columnheader "Sens du travail" [ref=e235]
+                  - columnheader "Récupération" [ref=e236]
+                  - columnheader "Autonomie" [ref=e237]
+                  - columnheader "Moy." [ref=e238]
+              - rowgroup [ref=e239]:
+                - row "Secteur Nord 4.2 6.5 7.8 5.1 6.0 5.9" [ref=e240]:
+                  - rowheader "Secteur Nord" [ref=e241]
+                  - cell "4.2" [ref=e242]
+                  - cell "6.5" [ref=e243]
+                  - cell "7.8" [ref=e244]
+                  - cell "5.1" [ref=e245]
+                  - cell "6.0" [ref=e246]
+                  - cell "5.9" [ref=e247]:
+                    - generic [ref=e248]: "5.9"
+                - row "Secteur Sud 5.0 5.8 7.2 5.4 6.4 6.0" [ref=e249]:
+                  - rowheader "Secteur Sud" [ref=e250]
+                  - cell "5.0" [ref=e251]
+                  - cell "5.8" [ref=e252]
+                  - cell "7.2" [ref=e253]
+                  - cell "5.4" [ref=e254]
+                  - cell "6.4" [ref=e255]
+                  - cell "6.0" [ref=e256]:
+                    - generic [ref=e257]: "6.0"
+                - row "Secteur Est 6.8 7.5 8.2 7.0 7.4 7.4" [ref=e258]:
+                  - rowheader "Secteur Est" [ref=e259]
+                  - cell "6.8" [ref=e260]
+                  - cell "7.5" [ref=e261]
+                  - cell "8.2" [ref=e262]
+                  - cell "7.0" [ref=e263]
+                  - cell "7.4" [ref=e264]
+                  - cell "7.4" [ref=e265]:
+                    - generic [ref=e266]: "7.4"
+                - row "Secteur Ouest 7.2 8.0 8.5 7.4 7.8 7.8" [ref=e267]:
+                  - rowheader "Secteur Ouest" [ref=e268]
+                  - cell "7.2" [ref=e269]
+                  - cell "8.0" [ref=e270]
+                  - cell "8.5" [ref=e271]
+                  - cell "7.4" [ref=e272]
+                  - cell "7.8" [ref=e273]
+                  - cell "7.8" [ref=e274]:
+                    - generic [ref=e275]: "7.8"
+                - row "Coordination 5.5 7.0 8.6 6.2 7.0 6.9" [ref=e276]:
+                  - rowheader "Coordination" [ref=e277]
+                  - cell "5.5" [ref=e278]
+                  - cell "7.0" [ref=e279]
+                  - cell "8.6" [ref=e280]
+                  - cell "6.2" [ref=e281]
+                  - cell "7.0" [ref=e282]
+                  - cell "6.9" [ref=e283]:
+                    - generic [ref=e284]: "6.9"
+            - generic [ref=e285]:
+              - generic [ref=e286]: "Échelle :"
+              - generic [ref=e288]: < 5 critique
+              - generic [ref=e290]: 5-6,5 attention
+              - generic [ref=e292]: 6,5-8 bon
+              - generic [ref=e294]: "> 8 excellent"
+        - generic [ref=e295]:
+          - generic [ref=e297]:
+            - heading "Moyenne par dimension" [level=3] [ref=e298]
+            - paragraph [ref=e299]: Tous secteurs confondus
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - generic [ref=e302]:
+                - generic [ref=e303]: Charge de travail
+                - generic [ref=e304]: "5.7"
+              - paragraph [ref=e307]: Volume et intensité du travail.
+            - generic [ref=e308]:
+              - generic [ref=e309]:
+                - generic [ref=e310]: Soutien social
+                - generic [ref=e311]: "7.0"
+              - paragraph [ref=e314]: Collègues et hiérarchie.
+            - generic [ref=e315]:
+              - generic [ref=e316]:
+                - generic [ref=e317]: Sens du travail
+                - generic [ref=e318]: "8.1"
+              - paragraph [ref=e321]: Utilité et reconnaissance.
+            - generic [ref=e322]:
+              - generic [ref=e323]:
+                - generic [ref=e324]: Récupération
+                - generic [ref=e325]: "6.2"
+              - paragraph [ref=e328]: Repos et coupures.
+            - generic [ref=e329]:
+              - generic [ref=e330]:
+                - generic [ref=e331]: Autonomie
+                - generic [ref=e332]: "6.9"
+              - paragraph [ref=e335]: Marge de manœuvre.
+        - generic [ref=e336]:
+          - generic [ref=e338]:
+            - heading "Évolution du score global" [level=3] [ref=e339]
+            - paragraph [ref=e340]: 7 derniers mois
+          - img "Évolution du score global RPS" [ref=e342]:
+            - img [ref=e343]:
+              - generic [ref=e344]: "0"
+              - generic [ref=e345]: 1,8
+              - generic [ref=e346]: 3,6
+              - generic [ref=e347]: 5,4
+              - generic [ref=e348]: 7,2
+              - generic [ref=e349]: Oct
+              - generic [ref=e350]: Nov
+              - generic [ref=e351]: Déc
+              - generic [ref=e352]: Jan
+              - generic [ref=e353]: Fév
+              - generic [ref=e354]: Mar
+              - generic [ref=e355]: Avr
