@@ -100,7 +100,8 @@ it('logs and flashes success on a valid contact submission', function (): void {
 });
 
 it('throttles contact submissions after 5 requests per IP', function (): void {
-    Log::spy();
+    Log::shouldReceive('channel')->andReturnSelf();
+    Log::shouldReceive('info');
 
     $payload = validContactPayload();
 
