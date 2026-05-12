@@ -8,7 +8,7 @@ import {
     Button,
     Card,
     ConfirmDialog,
-    EmptyState,
+    EmptyStateRich,
     FilterChipsBar,
     FilterDrawer,
     FormField,
@@ -97,13 +97,22 @@ export default function Interventions({
         .filter((i) => i.statut === 'planifiee' || i.statut === 'en_cours');
 
     const performBulkCancel = () => {
-        // Backend bulk endpoint deferred — for now we trigger one POST per item
-        // sequentially. A real implementation would post a single request
-        // to /interventions/bulk/cancel handled by a dedicated controller.
-        const ids = Array.from(selectedIds);
-        ids.forEach((id) => router.post(`/interventions/${id}/cancel`, undefined, { preserveScroll: true, preserveState: true }));
-        clearSelection();
-        setBulkAction(null);
+        const ids = bulkCancellable.map((i) => String(i.id));
+        if (ids.length === 0) {
+            setBulkAction(null);
+            return;
+        }
+        router.post(
+            '/interventions/bulk/cancel',
+            { ids, cancellation_reason: 'Annulation en masse depuis la liste' },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    clearSelection();
+                    setBulkAction(null);
+                },
+            },
+        );
     };
 
     const applyFilters = (next: Record<string, string>) => {
@@ -278,14 +287,44 @@ export default function Interventions({
                         </TBody>
                     </Table>
                 ) : (
-                    <EmptyState
-                        title="Aucune intervention"
-                        description="Planifiez votre première intervention pour démarrer le suivi terrain."
-                        action={
+                    <EmptyStateRich
+                        icon={
+                            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        }
+                        title="Aucune intervention planifiée"
+                        description="Planifiez vos premières visites à domicile pour démarrer le suivi terrain. Les intervenants saisiront leurs comptes-rendus depuis le mobile."
+                        primaryAction={
                             canCreate ? (
-                                <Button onClick={() => setShowQuickAdd(true)}>Nouvelle intervention</Button>
+                                <Button size="lg" onClick={() => setShowQuickAdd(true)}>
+                                    Planifier la première intervention →
+                                </Button>
                             ) : undefined
                         }
+                        suggestions={[
+                            {
+                                icon: '👥',
+                                title: "Affecter les intervenants",
+                                description: 'Avant de planifier des visites, associez vos intervenants aux bénéficiaires.',
+                                tone: 'sage',
+                                cta: { label: 'Voir les bénéficiaires', href: '/beneficiaries' },
+                            },
+                            {
+                                icon: '📋',
+                                title: 'Créer un plan de soins',
+                                description: 'Définissez les tâches récurrentes que les intervenants devront cocher à chaque visite.',
+                                tone: 'brand',
+                                cta: { label: 'Aller aux bénéficiaires', href: '/beneficiaries' },
+                            },
+                            {
+                                icon: '📱',
+                                title: 'Activer le mobile',
+                                description: 'Les intervenants saisissent les visites depuis leur smartphone, même en zone blanche.',
+                                tone: 'neutral',
+                                cta: { label: "Voir l'aide mobile", href: '/dashboard/profile' },
+                            },
+                        ]}
                     />
                 )}
                 <div className="px-4 pb-4">

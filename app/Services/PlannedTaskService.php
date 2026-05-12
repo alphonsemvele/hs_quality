@@ -63,6 +63,30 @@ class PlannedTaskService
         $task->delete();
     }
 
+    /**
+     * Atomically re-sequence tasks of a plan to match the given ordered list.
+     *
+     * @param  array<int, int>  $orderedIds  Task IDs in their desired order.
+     */
+    public function reorder(CarePlan $plan, array $orderedIds): void
+    {
+        $this->guardArchived($plan);
+
+        // Validate that all IDs belong to this plan — never trust client input
+        // to span plans, that would let the UI swap tasks between plans of
+        // possibly different bénéficiaires.
+        $owned = $plan->tasks()->whereIn('id', $orderedIds)->pluck('id')->all();
+        if (count($owned) !== count($orderedIds)) {
+            throw new HttpException(422, 'Some task ids do not belong to this care plan.');
+        }
+
+        DB::transaction(function () use ($plan, $orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                $plan->tasks()->where('id', $id)->update(['task_order' => $index]);
+            }
+        });
+    }
+
     private function guardArchived(CarePlan $plan): void
     {
         if ($plan->status === CarePlanStatus::Archived) {

@@ -66,6 +66,38 @@ class HandleInertiaRequests extends Middleware
                 'invitation_url' => fn () => $request->session()->get('invitation_url'),
             ],
             'notifications' => fn () => $request->user() ? $this->notificationsPayload($request) : null,
+            'structure' => fn () => $this->structurePayload(),
+            'systemBanners' => fn () => $this->systemBannersPayload(),
+        ];
+    }
+
+    /**
+     * @return array{trial_ends_at: string|null, status: string}|null
+     */
+    private function structurePayload(): ?array
+    {
+        $s = app()->bound('current_structure') ? app('current_structure') : null;
+        if (! $s) {
+            return null;
+        }
+
+        return [
+            'trial_ends_at' => $s->trial_ends_at?->toIso8601String(),
+            'status' => $s->status instanceof \BackedEnum ? $s->status->value : (string) $s->status,
+        ];
+    }
+
+    /**
+     * Ad-hoc admin-driven banners (maintenance windows, release notes…).
+     * Driven by config('app.system_banners', []) so DevOps can flip them on
+     * via env without a deploy.
+     *
+     * @return array{items: array<int, array<string, mixed>>}
+     */
+    private function systemBannersPayload(): array
+    {
+        return [
+            'items' => (array) config('app.system_banners', []),
         ];
     }
 

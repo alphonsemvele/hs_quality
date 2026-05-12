@@ -7,6 +7,7 @@ import CommandPalette from '@/components/CommandPalette';
 import HelpDrawer from '@/components/HelpDrawer';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
+import SystemBanners from '@/components/SystemBanners';
 import { QuickAddIncidentModal } from '@/components/quick-add';
 import ThemeToggle from '@/components/ThemeToggle';
 import { FlashToasts } from '@/components/ui';
@@ -287,6 +288,7 @@ export default function DashboardLayout({
                         </div>
                     </header>
 
+                    <SystemBanners />
                     <MfaSetupBanner />
 
                     <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>

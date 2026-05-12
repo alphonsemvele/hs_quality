@@ -8,6 +8,7 @@ use App\Models\CarePlan;
 use App\Models\PlannedTask;
 use App\Services\PlannedTaskService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
  * Inertia controller for individual PlannedTask CRUD inside a care plan.
@@ -47,5 +48,23 @@ class PlannedTaskController extends Controller
         $this->service->delete($task);
 
         return back()->with('success', 'Tâche supprimée.');
+    }
+
+    /**
+     * Re-sequence tasks of a plan from an ordered list of UUIDs.
+     * Atomically updates task_order for each entry to its index in the payload.
+     */
+    public function reorder(Request $request, CarePlan $carePlan): RedirectResponse
+    {
+        $this->authorize('update', $carePlan);
+
+        $validated = $request->validate([
+            'order' => ['required', 'array', 'min:1'],
+            'order.*' => ['required', 'integer', 'distinct'],
+        ]);
+
+        $this->service->reorder($carePlan, $validated['order']);
+
+        return back()->with('success', 'Ordre des tâches mis à jour.');
     }
 }

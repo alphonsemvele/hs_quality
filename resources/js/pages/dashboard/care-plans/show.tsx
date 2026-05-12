@@ -1,3 +1,4 @@
+import { moveItem, useReorderable } from '@/lib/reorderable';
 import {
     Badge,
     Button,
@@ -9,12 +10,13 @@ import {
     EmptyState,
     PageHeader,
 } from '@/components/ui';
+import { cn } from '@/lib/utils';
 
 type PendingAction = { kind: 'copy' } | { kind: 'activate' } | { kind: 'deleteTask'; taskId: number } | null;
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { FormField, Input, Textarea } from '@/components/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface PlannedTask {
@@ -59,7 +61,46 @@ function unwrap<T>(value: { data: T } | T): T {
 export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan } | Plan; beneficiary: { data: Beneficiary } | Beneficiary }) {
     const p = unwrap<Plan>(plan);
     const b = unwrap<Beneficiary>(beneficiary);
-    const tasks = unwrap<PlannedTask[]>(p.tasks ?? []) ?? [];
+    const initialTasks = unwrap<PlannedTask[]>(p.tasks ?? []) ?? [];
+    const [tasks, setTasks] = useState<PlannedTask[]>(initialTasks);
+
+    // Re-sync optimistic state when Inertia delivers fresh server state
+    // (post-create/delete). Comparing by `id|task_order` join detects both
+    // membership changes and reorder commits.
+    const signature = initialTasks.map((t) => `${t.id}:${t.task_order}`).join('|');
+    useEffect(() => {
+        setTasks(initialTasks);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [signature]);
+
+    const persistOrder = (orderedIds: number[]) => {
+        router.post(
+            `/care-plans/${p.id}/tasks/reorder`,
+            { order: orderedIds },
+            { preserveScroll: true, preserveState: true },
+        );
+    };
+
+    const reorderTasks = (fromId: string, toId: string) => {
+        const fromIdx = tasks.findIndex((t) => String(t.id) === fromId);
+        const toIdx = tasks.findIndex((t) => String(t.id) === toId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const next = moveItem(tasks, fromIdx, toIdx);
+        setTasks(next);
+        persistOrder(next.map((t) => t.id));
+    };
+
+    const moveTask = (id: number, direction: -1 | 1) => {
+        const idx = tasks.findIndex((t) => t.id === id);
+        if (idx === -1) return;
+        const target = idx + direction;
+        if (target < 0 || target >= tasks.length) return;
+        const next = moveItem(tasks, idx, target);
+        setTasks(next);
+        persistOrder(next.map((t) => t.id));
+    };
+
+    const { draggedId, overId, bindItem } = useReorderable(reorderTasks);
     const canManage = useCan('beneficiaries.update');
 
     const [showArchive, setShowArchive] = useState(false);
@@ -261,35 +302,82 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                         )}
                         {tasks.length > 0 ? (
                             <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                {tasks.map((t) => (
-                                    <li key={t.id} className="flex items-start gap-4 py-3">
-                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-                                            {t.task_order}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <p className="text-sm font-medium text-ink-900 dark:text-white">{t.title}</p>
-                                                {t.mandatory && (
-                                                    <Badge tone="danger" size="xs">
-                                                        Obligatoire
-                                                    </Badge>
-                                                )}
-                                                <Badge tone="brand" size="xs">
-                                                    {t.frequency_label}
-                                                </Badge>
-                                                {t.duration_minutes && (
-                                                    <span className="text-xs text-ink-500 dark:text-ink-400">{t.duration_minutes} min</span>
-                                                )}
+                                {tasks.map((t, idx) => {
+                                    const reorderProps = !p.is_archived && canManage ? bindItem(String(t.id)) : {};
+                                    const isDragged = String(t.id) === draggedId;
+                                    const isDropTarget = String(t.id) === overId && !isDragged;
+                                    return (
+                                        <li
+                                            key={t.id}
+                                            {...reorderProps}
+                                            className={cn(
+                                                'flex items-start gap-3 py-3 transition-all',
+                                                isDragged && 'opacity-40',
+                                                isDropTarget && 'border-t-2 border-brand-500 pt-3.5',
+                                                !p.is_archived && canManage && 'cursor-move',
+                                            )}
+                                        >
+                                            {!p.is_archived && canManage && (
+                                                <div className="flex shrink-0 flex-col items-center gap-0.5 self-stretch">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveTask(t.id, -1)}
+                                                        disabled={idx === 0}
+                                                        aria-label="Monter cette tâche"
+                                                        className="rounded p-0.5 text-ink-300 transition-colors hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 dark:text-ink-600 dark:hover:bg-ink-700 dark:hover:text-ink-200"
+                                                    >
+                                                        <svg className="size-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                            <polyline points="18 15 12 9 6 15" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                    <span aria-hidden className="flex size-5 cursor-move items-center justify-center text-ink-400 dark:text-ink-600" title="Glisser pour réordonner">
+                                                        <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <circle cx="9" cy="6" r="1.5" /><circle cx="15" cy="6" r="1.5" />
+                                                            <circle cx="9" cy="12" r="1.5" /><circle cx="15" cy="12" r="1.5" />
+                                                            <circle cx="9" cy="18" r="1.5" /><circle cx="15" cy="18" r="1.5" />
+                                                        </svg>
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveTask(t.id, 1)}
+                                                        disabled={idx === tasks.length - 1}
+                                                        aria-label="Descendre cette tâche"
+                                                        className="rounded p-0.5 text-ink-300 transition-colors hover:bg-ink-100 hover:text-ink-600 disabled:opacity-30 dark:text-ink-600 dark:hover:bg-ink-700 dark:hover:text-ink-200"
+                                                    >
+                                                        <svg className="size-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
+                                                {idx + 1}
                                             </div>
-                                            {t.description && <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{t.description}</p>}
-                                        </div>
-                                        {!p.is_archived && canManage && (
-                                            <button type="button" onClick={() => deleteTask(t.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">
-                                                Supprimer
-                                            </button>
-                                        )}
-                                    </li>
-                                ))}
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <p className="text-sm font-medium text-ink-900 dark:text-white">{t.title}</p>
+                                                    {t.mandatory && (
+                                                        <Badge tone="danger" size="xs">
+                                                            Obligatoire
+                                                        </Badge>
+                                                    )}
+                                                    <Badge tone="brand" size="xs">
+                                                        {t.frequency_label}
+                                                    </Badge>
+                                                    {t.duration_minutes && (
+                                                        <span className="text-xs text-ink-500 dark:text-ink-400">{t.duration_minutes} min</span>
+                                                    )}
+                                                </div>
+                                                {t.description && <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">{t.description}</p>}
+                                            </div>
+                                            {!p.is_archived && canManage && (
+                                                <button type="button" onClick={() => deleteTask(t.id)} className="shrink-0 text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">
+                                                    Supprimer
+                                                </button>
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         ) : (
                             <EmptyState

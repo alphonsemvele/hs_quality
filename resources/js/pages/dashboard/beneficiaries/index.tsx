@@ -1,6 +1,6 @@
 import { BeneficiaryPreviewSheet, type BeneficiaryPreview } from '@/components/preview-sheets';
 import { QuickAddBeneficiaryModal } from '@/components/quick-add';
-import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { Badge, Button, Card, EmptyStateRich, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
@@ -107,14 +107,42 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                         </TBody>
                     </Table>
                 ) : (
-                    <EmptyState
-                        title="Aucun bénéficiaire"
-                        description="Créez votre premier bénéficiaire pour démarrer le suivi."
-                        action={
+                    <EmptyStateRich
+                        icon={
+                            <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        }
+                        title="Démarrez votre suivi"
+                        description="Ajoutez votre premier bénéficiaire pour structurer le suivi qualité. L'ajout prend 30 secondes — vous compléterez le dossier ensuite."
+                        primaryAction={
                             canCreate ? (
-                                <Button onClick={() => setShowQuickAdd(true)}>Nouveau bénéficiaire</Button>
+                                <Button size="lg" onClick={() => setShowQuickAdd(true)}>
+                                    Ajouter mon premier bénéficiaire →
+                                </Button>
                             ) : undefined
                         }
+                        suggestions={[
+                            {
+                                icon: '🔒',
+                                title: 'Conformité RGPD',
+                                description: 'Les données médicales sont chiffrées au repos. Tout accès est tracé dans le registre d\'audit.',
+                                tone: 'brand',
+                            },
+                            {
+                                icon: '👨‍⚕️',
+                                title: 'Plan de soins individualisé',
+                                description: 'Définissez des tâches récurrentes à cocher à chaque visite. Modifiable à tout moment.',
+                                tone: 'sage',
+                            },
+                            {
+                                icon: '📊',
+                                title: 'Suivi automatique',
+                                description: 'Les indicateurs se calculent automatiquement à partir des visites réalisées.',
+                                tone: 'neutral',
+                            },
+                        ]}
                     />
                 )}
                 <div className="px-4 pb-4">

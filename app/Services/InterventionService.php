@@ -199,6 +199,44 @@ class InterventionService
     }
 
     /**
+     * Bulk cancel: applies cancel() to multiple interventions inside a single
+     * DB transaction so partial failures roll back. Already-terminal items are
+     * silently skipped (the caller has already filtered them in the UI).
+     *
+     * @param  array<int, string>  $ids
+     * @return array{cancelled: int, skipped: int}
+     */
+    public function bulkCancel(array $ids, string $reason): array
+    {
+        if (empty($ids)) {
+            return ['cancelled' => 0, 'skipped' => 0];
+        }
+
+        return DB::transaction(function () use ($ids, $reason): array {
+            $cancelled = 0;
+            $skipped = 0;
+
+            $interventions = Intervention::query()->whereIn('id', $ids)->lockForUpdate()->get();
+
+            foreach ($interventions as $intervention) {
+                if ($intervention->isTerminal()) {
+                    $skipped++;
+
+                    continue;
+                }
+                $intervention->update([
+                    'status' => InterventionStatus::Cancelled->value,
+                    'cancellation_reason' => $reason,
+                ]);
+                InterventionStatusChanged::dispatch($intervention->fresh(), InterventionStatus::Cancelled);
+                $cancelled++;
+            }
+
+            return ['cancelled' => $cancelled, 'skipped' => $skipped];
+        });
+    }
+
+    /**
      * Mark missed: planned → missed (for no-shows after planned_date passes).
      */
     public function markMissed(Intervention $intervention): Intervention

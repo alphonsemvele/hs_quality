@@ -112,6 +112,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/interventions/{intervention}/checkin', [InterventionController::class, 'checkIn'])->name('interventions.checkin');
         Route::post('/interventions/{intervention}/checkout', [InterventionController::class, 'checkOut'])->name('interventions.checkout');
         Route::post('/interventions/{intervention}/cancel', [InterventionController::class, 'cancel'])->name('interventions.cancel');
+        Route::post('/interventions/bulk/cancel', [InterventionController::class, 'bulkCancel'])->name('interventions.bulk.cancel');
         Route::post('/interventions/{intervention}/report', [InterventionController::class, 'submitReport'])->name('interventions.report');
 
         Route::post('/interventions/{intervention}/photos', [InterventionController::class, 'storePhoto'])->name('interventions.photos.store');
@@ -171,6 +172,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // ── Tâches planifiées ─────────────────────────────────────────────────
         Route::post('/care-plans/{carePlan}/tasks', [PlannedTaskController::class, 'store'])
             ->name('care-plans.tasks.store');
+        Route::post('/care-plans/{carePlan}/tasks/reorder', [PlannedTaskController::class, 'reorder'])
+            ->name('care-plans.tasks.reorder');
         Route::put('/tasks/{task}', [PlannedTaskController::class, 'update'])
             ->name('tasks.update');
         Route::delete('/tasks/{task}', [PlannedTaskController::class, 'destroy'])

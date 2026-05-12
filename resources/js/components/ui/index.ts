@@ -6,6 +6,7 @@ export { BarChart, DonutChart, LineChart, Sparkline } from './Chart';
 export type { ChartTone, SeriesPoint as ChartSeriesPoint } from './Chart';
 export { ConfirmDialog } from './ConfirmDialog';
 export { EmptyState } from './EmptyState';
+export { EmptyStateRich } from './EmptyStateRich';
 export { FilterChipsBar, FilterDrawer } from './FilterDrawer';
 export { HoverCard } from './HoverCard';
 export { Modal } from './Modal';

@@ -356,6 +356,40 @@ class InterventionController extends Controller
         return back()->with('success', 'Intervention annulée.');
     }
 
+    /**
+     * Bulk cancellation — applies one atomic transaction over an ID list.
+     * Already-terminal interventions are silently skipped (no error). The
+     * caller is expected to have already filtered them client-side.
+     */
+    public function bulkCancel(Request $request): RedirectResponse
+    {
+        $this->authorize('viewAny', Intervention::class);
+
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:200'],
+            'ids.*' => ['required', 'uuid'],
+            'cancellation_reason' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        // Authorize each item — tenant scope is already enforced by the global
+        // scope on Intervention, but cancel itself is a policy decision per row.
+        Intervention::query()->whereIn('id', $validated['ids'])->each(function (Intervention $i): void {
+            $this->authorize('update', $i);
+        });
+
+        $result = $this->service->bulkCancel($validated['ids'], $validated['cancellation_reason']);
+
+        $msg = sprintf(
+            '%d intervention%s annulée%s%s',
+            $result['cancelled'],
+            $result['cancelled'] > 1 ? 's' : '',
+            $result['cancelled'] > 1 ? 's' : '',
+            $result['skipped'] > 0 ? sprintf(' (%d déjà clôturée%s ignorée%s).', $result['skipped'], $result['skipped'] > 1 ? 's' : '', $result['skipped'] > 1 ? 's' : '') : '.',
+        );
+
+        return back()->with('success', $msg);
+    }
+
     public function submitReport(SubmitInterventionReportRequest $request, Intervention $intervention): RedirectResponse
     {
         $this->service->submitReport(

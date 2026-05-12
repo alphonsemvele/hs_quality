@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, EmptyState, KpiCard, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, EmptyStateRich, KpiCard, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
@@ -103,17 +103,40 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                 </ul>
             ) : (
                 <Card>
-                    <EmptyState
+                    <EmptyStateRich
                         icon={<ShieldIcon />}
-                        title="Aucun audit planifié"
-                        description="Lancez votre premier audit de conformité — HAS, AFNOR NF X50-056 ou ISO 9001."
-                        action={
+                        title="Démarrer mon premier audit"
+                        description="Préparez votre visite HAS sereinement. Un audit ISO ou AFNOR se configure en moins de 5 minutes via notre wizard guidé."
+                        primaryAction={
                             canManage ? (
                                 <Link href="/audits/create">
-                                    <Button>Planifier un audit</Button>
+                                    <Button size="lg">Lancer un audit guidé →</Button>
                                 </Link>
                             ) : undefined
                         }
+                        suggestions={[
+                            {
+                                icon: '🏥',
+                                title: 'Audit HAS',
+                                description: '~86 critères. Référentiel principal pour les structures médico-sociales.',
+                                tone: 'sage',
+                                cta: canManage ? { label: 'Configurer un audit HAS', href: '/audits/create' } : undefined,
+                            },
+                            {
+                                icon: '⚙️',
+                                title: 'ISO 9001',
+                                description: '~52 critères. Management de la qualité et amélioration continue.',
+                                tone: 'brand',
+                                cta: canManage ? { label: 'Configurer un audit ISO', href: '/audits/create' } : undefined,
+                            },
+                            {
+                                icon: '🇫🇷',
+                                title: 'AFNOR NF X50-056',
+                                description: '~64 critères. Qualité des services aux personnes à domicile.',
+                                tone: 'warning',
+                                cta: canManage ? { label: 'Configurer un audit AFNOR', href: '/audits/create' } : undefined,
+                            },
+                        ]}
                     />
                 </Card>
             )}
