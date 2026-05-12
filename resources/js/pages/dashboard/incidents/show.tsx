@@ -4,6 +4,7 @@ import {
     Card,
     CardBody,
     CardHeader,
+    ConfirmDialog,
     EmptyState,
     IncidentGraviteBadge,
     IncidentStatusBadge,
@@ -57,11 +58,14 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
     const [showActionForm, setShowActionForm] = useState(false);
     const canAnalyze = useCan('incidents.analyze');
 
+    const [showCloseDialog, setShowCloseDialog] = useState(false);
+
     const startAnalyse = () => router.post(`/incidents/${incident.id}/assign`, { assigned_to: incident.declarant.id });
-    const closeIncident = () => {
-        if (confirm('Confirmer la clôture de cet incident ?')) {
-            router.post(`/incidents/${incident.id}/close`);
-        }
+    const closeIncident = () => setShowCloseDialog(true);
+    const confirmClose = () => {
+        router.post(`/incidents/${incident.id}/close`, undefined, {
+            onFinish: () => setShowCloseDialog(false),
+        });
     };
 
     const isClosed = incident.statut === 'clos';
@@ -309,6 +313,16 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     </CardBody>
                 </Card>
             </div>
+
+            <ConfirmDialog
+                open={showCloseDialog}
+                onClose={() => setShowCloseDialog(false)}
+                onConfirm={confirmClose}
+                title="Clôturer cet incident ?"
+                description="Cette action verrouille l'incident. Les actions correctives restent consultables et l'incident sera marqué comme clos dans le registre de qualité."
+                confirmLabel="Clôturer"
+                tone="warning"
+            />
         </DashboardLayout>
     );
 }

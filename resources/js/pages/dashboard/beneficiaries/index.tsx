@@ -1,6 +1,8 @@
+import { QuickAddBeneficiaryModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface Beneficiary {
@@ -23,6 +25,7 @@ interface Props {
 export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
     const list = beneficiaries?.data ?? [];
     const canCreate = useCan('beneficiaries.create');
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
 
     return (
         <DashboardLayout title="Bénéficiaires" subtitle="Personnes accompagnées par votre structure">
@@ -32,9 +35,9 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Bénéficiaires' }]}
                 actions={
                     canCreate ? (
-                        <Link href="/beneficiaries/create">
-                            <Button leadingIcon={<PlusIcon />}>Nouveau bénéficiaire</Button>
-                        </Link>
+                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                            Nouveau bénéficiaire
+                        </Button>
                     ) : null
                 }
             />
@@ -94,9 +97,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                         description="Créez votre premier bénéficiaire pour démarrer le suivi."
                         action={
                             canCreate ? (
-                                <Link href="/beneficiaries/create">
-                                    <Button>Nouveau bénéficiaire</Button>
-                                </Link>
+                                <Button onClick={() => setShowQuickAdd(true)}>Nouveau bénéficiaire</Button>
                             ) : undefined
                         }
                     />
@@ -110,6 +111,8 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                     />
                 </div>
             </Card>
+
+            <QuickAddBeneficiaryModal open={showQuickAdd} onClose={() => setShowQuickAdd(false)} />
         </DashboardLayout>
     );
 }

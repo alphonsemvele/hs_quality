@@ -1,6 +1,8 @@
+import { QuickAddInviteModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface UserSummary {
@@ -30,6 +32,7 @@ interface Props {
 export default function UsersIndex({ users }: Props) {
     const list = users?.data ?? [];
     const canManage = useCan('users.manage');
+    const [showInvite, setShowInvite] = useState(false);
 
     return (
         <DashboardLayout title="Utilisateurs" subtitle="Gestion des membres de votre structure">
@@ -39,9 +42,9 @@ export default function UsersIndex({ users }: Props) {
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Utilisateurs' }]}
                 actions={
                     canManage ? (
-                        <Link href="/users/create">
-                            <Button leadingIcon={<PlusIcon />}>Inviter un utilisateur</Button>
-                        </Link>
+                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowInvite(true)}>
+                            Inviter un utilisateur
+                        </Button>
                     ) : null
                 }
             />
@@ -125,9 +128,7 @@ export default function UsersIndex({ users }: Props) {
                         description="Invitez les premiers membres de votre équipe (coordinateurs, intervenants, référent qualité)."
                         action={
                             canManage ? (
-                                <Link href="/users/create">
-                                    <Button>Inviter un utilisateur</Button>
-                                </Link>
+                                <Button onClick={() => setShowInvite(true)}>Inviter un utilisateur</Button>
                             ) : undefined
                         }
                     />
@@ -141,6 +142,8 @@ export default function UsersIndex({ users }: Props) {
                     />
                 </div>
             </Card>
+
+            <QuickAddInviteModal open={showInvite} onClose={() => setShowInvite(false)} />
         </DashboardLayout>
     );
 }

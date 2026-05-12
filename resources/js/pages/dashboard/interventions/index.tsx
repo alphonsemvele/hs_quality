@@ -1,3 +1,4 @@
+import { QuickAddInterventionModal } from '@/components/quick-add';
 import {
     Badge,
     Button,
@@ -15,7 +16,13 @@ import {
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+interface QuickOption {
+    id: number | string;
+    name: string;
+}
 
 type Statut = 'planifiee' | 'en_cours' | 'realisee' | 'annulee' | 'non_realisee';
 
@@ -39,6 +46,7 @@ interface Props {
     pagination: { current_page: number; last_page: number; per_page: number };
     stats: { planifiees: number; en_cours: number; realisees: number; annulees: number };
     filters: { status: string | null };
+    quickAddOptions: { intervenants: QuickOption[]; beneficiaries: QuickOption[] } | null;
 }
 
 export default function Interventions({
@@ -47,9 +55,12 @@ export default function Interventions({
     pagination = { current_page: 1, last_page: 1, per_page: 20 },
     stats = { planifiees: 0, en_cours: 0, realisees: 0, annulees: 0 },
     filters = { status: null },
+    quickAddOptions = null,
 }: Partial<Props>) {
     const activeFilter = filters.status;
     const canCreate = useCan('interventions.create');
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
             <PageHeader
@@ -58,9 +69,9 @@ export default function Interventions({
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Interventions' }]}
                 actions={
                     canCreate ? (
-                        <Link href="/interventions/create">
-                            <Button leadingIcon={<PlusIcon />}>Nouvelle intervention</Button>
-                        </Link>
+                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                            Nouvelle intervention
+                        </Button>
                     ) : null
                 }
             />
@@ -139,9 +150,7 @@ export default function Interventions({
                         description="Planifiez votre première intervention pour démarrer le suivi terrain."
                         action={
                             canCreate ? (
-                                <Link href="/interventions/create">
-                                    <Button>Nouvelle intervention</Button>
-                                </Link>
+                                <Button onClick={() => setShowQuickAdd(true)}>Nouvelle intervention</Button>
                             ) : undefined
                         }
                     />
@@ -155,6 +164,15 @@ export default function Interventions({
                     />
                 </div>
             </Card>
+
+            {canCreate && quickAddOptions && (
+                <QuickAddInterventionModal
+                    open={showQuickAdd}
+                    onClose={() => setShowQuickAdd(false)}
+                    intervenants={quickAddOptions.intervenants}
+                    beneficiaries={quickAddOptions.beneficiaries}
+                />
+            )}
         </DashboardLayout>
     );
 }

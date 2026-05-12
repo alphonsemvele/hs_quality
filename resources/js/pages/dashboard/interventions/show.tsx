@@ -4,12 +4,20 @@ import {
     Card,
     CardBody,
     CardHeader,
+    ConfirmDialog,
     EmptyState,
     InterventionStatusBadge,
     PageHeader,
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link, router } from '@inertiajs/react';
+import { useState } from 'react';
+
+type PendingAction =
+    | { kind: 'checkout' }
+    | { kind: 'cancel' }
+    | { kind: 'deletePhoto'; photoId: number }
+    | null;
 import DashboardLayout from '../layout';
 
 interface Person {
@@ -61,22 +69,46 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
     const isInProgress = intervention.statut === 'en_cours';
     const canAct = useCan('interventions.update');
 
+    const [pending, setPending] = useState<PendingAction>(null);
+
     const checkIn = () => router.post(`/interventions/${intervention.id}/checkin`);
-    const checkOut = () => {
-        if (confirm('Clôturer cette intervention ?')) {
-            router.post(`/interventions/${intervention.id}/checkout`);
+    const checkOut = () => setPending({ kind: 'checkout' });
+    const cancel = () => setPending({ kind: 'cancel' });
+    const deletePhoto = (photoId: number) => setPending({ kind: 'deletePhoto', photoId });
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const done = { onFinish: () => setPending(null) };
+        if (pending.kind === 'checkout') {
+            router.post(`/interventions/${intervention.id}/checkout`, undefined, done);
+        } else if (pending.kind === 'cancel') {
+            router.post(`/interventions/${intervention.id}/cancel`, undefined, done);
+        } else if (pending.kind === 'deletePhoto') {
+            router.delete(`/interventions/${intervention.id}/photos/${pending.photoId}`, done);
         }
     };
-    const cancel = () => {
-        if (confirm("Confirmer l'annulation de cette intervention ?")) {
-            router.post(`/interventions/${intervention.id}/cancel`);
-        }
-    };
-    const deletePhoto = (photoId: number) => {
-        if (confirm('Supprimer cette photo ?')) {
-            router.delete(`/interventions/${intervention.id}/photos/${photoId}`);
-        }
-    };
+
+    const pendingMeta = (() => {
+        if (!pending) return null;
+        if (pending.kind === 'checkout') return {
+            title: 'Clôturer cette intervention ?',
+            description: "Le rapport et les éventuelles photos seront verrouillés. Vous pourrez toujours les consulter mais plus les modifier.",
+            confirmLabel: 'Clôturer',
+            tone: 'warning' as const,
+        };
+        if (pending.kind === 'cancel') return {
+            title: "Annuler cette intervention ?",
+            description: "L'intervention sera marquée comme annulée. Cette action est tracée et visible dans l'historique du bénéficiaire.",
+            confirmLabel: 'Confirmer l\'annulation',
+            tone: 'danger' as const,
+        };
+        return {
+            title: 'Supprimer cette photo ?',
+            description: 'La photo sera définitivement supprimée du rapport. Cette action est irréversible.',
+            confirmLabel: 'Supprimer',
+            tone: 'danger' as const,
+        };
+    })();
 
     return (
         <DashboardLayout title="Détail intervention" subtitle="">
@@ -244,6 +276,18 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                     </CardBody>
                 </Card>
             </div>
+
+            {pendingMeta && (
+                <ConfirmDialog
+                    open={pending !== null}
+                    onClose={() => setPending(null)}
+                    onConfirm={confirmPending}
+                    title={pendingMeta.title}
+                    description={pendingMeta.description}
+                    confirmLabel={pendingMeta.confirmLabel}
+                    tone={pendingMeta.tone}
+                />
+            )}
         </DashboardLayout>
     );
 }

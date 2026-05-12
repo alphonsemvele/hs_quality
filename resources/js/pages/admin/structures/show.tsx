@@ -1,6 +1,9 @@
-import { Badge, Button, Card, CardBody, CardHeader, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, PageHeader } from '@/components/ui';
 import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../../dashboard/layout';
+
+type StructurePending = { kind: 'toggle' } | { kind: 'delete' } | null;
 
 interface StructureDetail {
     id: number;
@@ -27,20 +30,41 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
     const passwordResetUrl = props.flash?.password_reset_url;
 
     const isActive = structure.status === 'active';
+    const [pending, setPending] = useState<StructurePending>(null);
 
-    const toggleStatus = () => {
-        const path = isActive ? `/admin/structures/${structure.id}/suspend` : `/admin/structures/${structure.id}/reactivate`;
-        const message = isActive ? 'Suspendre cette structure ?' : 'Réactiver cette structure ?';
-        if (confirm(message)) {
-            router.post(path);
+    const toggleStatus = () => setPending({ kind: 'toggle' });
+    const remove = () => setPending({ kind: 'delete' });
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const done = { onFinish: () => setPending(null) };
+        if (pending.kind === 'toggle') {
+            const path = isActive ? `/admin/structures/${structure.id}/suspend` : `/admin/structures/${structure.id}/reactivate`;
+            router.post(path, undefined, done);
+        } else {
+            router.delete(`/admin/structures/${structure.id}`, done);
         }
     };
 
-    const remove = () => {
-        if (confirm("Supprimer définitivement cette structure ? L'opération est irréversible.")) {
-            router.delete(`/admin/structures/${structure.id}`);
+    const pendingMeta = pending?.kind === 'toggle'
+        ? {
+            title: isActive ? 'Suspendre cette structure ?' : 'Réactiver cette structure ?',
+            description: isActive
+                ? "Les utilisateurs de la structure ne pourront plus se connecter. Les données restent stockées et l'abonnement reste actif."
+                : "Les utilisateurs retrouveront l'accès à leur espace.",
+            confirmLabel: isActive ? 'Suspendre' : 'Réactiver',
+            tone: (isActive ? 'warning' : 'info') as 'warning' | 'info',
+            requireTyped: undefined as string | undefined,
         }
-    };
+        : pending?.kind === 'delete'
+            ? {
+                title: 'Supprimer définitivement cette structure ?',
+                description: "Toutes les données seront supprimées sous 30 jours conformément à la politique RGPD. Cette opération est irréversible.",
+                confirmLabel: 'Supprimer définitivement',
+                tone: 'danger' as 'danger',
+                requireTyped: structure.code,
+            }
+            : null;
 
     return (
         <DashboardLayout title={structure.name} subtitle="">
@@ -143,6 +167,19 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
                     ← Retour à la liste
                 </Link>
             </div>
+
+            {pendingMeta && (
+                <ConfirmDialog
+                    open={pending !== null}
+                    onClose={() => setPending(null)}
+                    onConfirm={confirmPending}
+                    title={pendingMeta.title}
+                    description={pendingMeta.description}
+                    confirmLabel={pendingMeta.confirmLabel}
+                    tone={pendingMeta.tone}
+                    requireTyped={pendingMeta.requireTyped}
+                />
+            )}
         </DashboardLayout>
     );
 }

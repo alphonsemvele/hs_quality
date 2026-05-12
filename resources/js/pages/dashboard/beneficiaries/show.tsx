@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -62,11 +62,14 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
     const canUpdate = useCan('beneficiaries.update');
 
     const [showAttach, setShowAttach] = useState(false);
+    const [detachTarget, setDetachTarget] = useState<{ id: number | string; name: string } | null>(null);
 
-    const detach = (id: number | string) => {
-        if (confirm('Désaffecter cet intervenant ?')) {
-            router.delete(`/assignments/${id}`);
-        }
+    const requestDetach = (id: number | string, name: string) => setDetachTarget({ id, name });
+    const confirmDetach = () => {
+        if (!detachTarget) return;
+        router.delete(`/assignments/${detachTarget.id}`, {
+            onFinish: () => setDetachTarget(null),
+        });
     };
 
     return (
@@ -232,7 +235,7 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                                             </Badge>
                                         )}
                                         {a.is_active && can_assign && (
-                                            <Button variant="ghost" size="sm" onClick={() => detach(a.id)}>
+                                            <Button variant="ghost" size="sm" onClick={() => requestDetach(a.id, a.intervenant?.full_name ?? 'cet intervenant')}>
                                                 Désaffecter
                                             </Button>
                                         )}
@@ -248,6 +251,20 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                     </CardBody>
                 </Card>
             </div>
+
+            <ConfirmDialog
+                open={detachTarget !== null}
+                onClose={() => setDetachTarget(null)}
+                onConfirm={confirmDetach}
+                title="Désaffecter cet intervenant ?"
+                description={
+                    <span>
+                        L'historique de la relation entre <span className="font-medium">{detachTarget?.name}</span> et ce bénéficiaire est conservé, mais l'intervenant ne pourra plus saisir de nouvelles visites.
+                    </span>
+                }
+                confirmLabel="Désaffecter"
+                tone="warning"
+            />
         </DashboardLayout>
     );
 }

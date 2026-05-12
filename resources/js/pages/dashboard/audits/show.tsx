@@ -1,7 +1,9 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+type AuditPending = { kind: 'finaliser' } | { kind: 'deleteEcart'; ecartId: number } | null;
 
 interface Ecart {
     id: number;
@@ -84,16 +86,35 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
         );
     }
 
-    const finaliser = () => {
-        if (confirm("Finaliser cet audit ? Le score sera calculé à partir des écarts saisis et l'audit ne pourra plus être modifié.")) {
-            router.post(`/audits/${audit.id}/finaliser`);
+    const [pending, setPending] = useState<AuditPending>(null);
+    const finaliser = () => setPending({ kind: 'finaliser' });
+    const deleteEcart = (ecartId: number) => setPending({ kind: 'deleteEcart', ecartId });
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const done = { onFinish: () => setPending(null) };
+        if (pending.kind === 'finaliser') {
+            router.post(`/audits/${audit.id}/finaliser`, undefined, done);
+        } else {
+            router.delete(`/audits/${audit.id}/ecarts/${pending.ecartId}`, done);
         }
     };
-    const deleteEcart = (ecartId: number) => {
-        if (confirm('Supprimer cet écart ?')) {
-            router.delete(`/audits/${audit.id}/ecarts/${ecartId}`);
+
+    const pendingMeta = pending?.kind === 'finaliser'
+        ? {
+            title: 'Finaliser cet audit ?',
+            description: "Le score sera calculé à partir des écarts saisis. L'audit ne pourra plus être modifié et un PDF horodaté sera généré en arrière-plan.",
+            confirmLabel: 'Finaliser',
+            tone: 'warning' as const,
         }
-    };
+        : pending?.kind === 'deleteEcart'
+            ? {
+                title: 'Supprimer cet écart ?',
+                description: "L'écart sera retiré du registre. Cette action est irréversible avant la finalisation de l'audit.",
+                confirmLabel: 'Supprimer',
+                tone: 'danger' as const,
+            }
+            : null;
 
     return (
         <DashboardLayout title={audit.titre} subtitle="">
@@ -267,6 +288,18 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                     </CardBody>
                 </Card>
             </div>
+
+            {pendingMeta && (
+                <ConfirmDialog
+                    open={pending !== null}
+                    onClose={() => setPending(null)}
+                    onConfirm={confirmPending}
+                    title={pendingMeta.title}
+                    description={pendingMeta.description}
+                    confirmLabel={pendingMeta.confirmLabel}
+                    tone={pendingMeta.tone}
+                />
+            )}
         </DashboardLayout>
     );
 }

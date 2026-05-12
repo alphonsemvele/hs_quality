@@ -5,9 +5,12 @@ import {
     CardBody,
     CardHeader,
     CarePlanStatusBadge,
+    ConfirmDialog,
     EmptyState,
     PageHeader,
 } from '@/components/ui';
+
+type PendingAction = { kind: 'copy' } | { kind: 'activate' } | { kind: 'deleteTask'; taskId: number } | null;
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { FormField, Input, Textarea } from '@/components/ui';
@@ -61,23 +64,45 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
 
     const [showArchive, setShowArchive] = useState(false);
     const [showAddTask, setShowAddTask] = useState(false);
+    const [pending, setPending] = useState<PendingAction>(null);
 
-    const copyPlan = () => {
-        if (confirm('Dupliquer ce plan d\'accompagnement ?')) {
-            router.post(`/care-plans/${p.id}/copy`);
-        }
-    };
-    const deleteTask = (taskId: number) => {
-        if (confirm('Supprimer cette tâche ?')) {
-            router.delete(`/tasks/${taskId}`);
+    const copyPlan = () => setPending({ kind: 'copy' });
+    const deleteTask = (taskId: number) => setPending({ kind: 'deleteTask', taskId });
+    const activate = () => setPending({ kind: 'activate' });
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const done = { onFinish: () => setPending(null) };
+        if (pending.kind === 'copy') {
+            router.post(`/care-plans/${p.id}/copy`, undefined, done);
+        } else if (pending.kind === 'activate') {
+            router.post(`/care-plans/${p.id}/activate`, undefined, done);
+        } else if (pending.kind === 'deleteTask') {
+            router.delete(`/tasks/${pending.taskId}`, done);
         }
     };
 
-    const activate = () => {
-        if (confirm("Activer ce plan ? Tout plan déjà actif pour ce bénéficiaire sera automatiquement archivé.")) {
-            router.post(`/care-plans/${p.id}/activate`);
-        }
-    };
+    const pendingMeta = (() => {
+        if (!pending) return null;
+        if (pending.kind === 'copy') return {
+            title: "Dupliquer ce plan d'accompagnement ?",
+            description: "Une copie du plan sera créée en brouillon, avec toutes ses tâches. Vous pourrez ensuite l'activer pour un autre bénéficiaire.",
+            confirmLabel: 'Dupliquer',
+            tone: 'info' as const,
+        };
+        if (pending.kind === 'activate') return {
+            title: 'Activer ce plan ?',
+            description: "Tout plan déjà actif pour ce bénéficiaire sera automatiquement archivé. L'historique reste consultable.",
+            confirmLabel: 'Activer',
+            tone: 'warning' as const,
+        };
+        return {
+            title: 'Supprimer cette tâche ?',
+            description: 'La tâche sera retirée du plan. Les visites futures ne devront plus la cocher.',
+            confirmLabel: 'Supprimer',
+            tone: 'danger' as const,
+        };
+    })();
 
     return (
         <DashboardLayout title={p.title} subtitle="">
@@ -275,6 +300,18 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                     </CardBody>
                 </Card>
             </div>
+
+            {pendingMeta && (
+                <ConfirmDialog
+                    open={pending !== null}
+                    onClose={() => setPending(null)}
+                    onConfirm={confirmPending}
+                    title={pendingMeta.title}
+                    description={pendingMeta.description}
+                    confirmLabel={pendingMeta.confirmLabel}
+                    tone={pendingMeta.tone}
+                />
+            )}
         </DashboardLayout>
     );
 }

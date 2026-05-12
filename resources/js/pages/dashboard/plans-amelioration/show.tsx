@@ -1,7 +1,9 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+type PacPending = { kind: 'markDone'; actionId: number } | { kind: 'deleteAction'; actionId: number } | null;
 
 interface Action {
     id: number;
@@ -74,16 +76,36 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
         );
     }
 
-    const markActionDone = (actionId: number) => {
-        if (confirm('Marquer cette action comme réalisée ?')) {
-            router.post(`/plans-amelioration/${plan.id}/actions/${actionId}/done`);
+    const [pending, setPending] = useState<PacPending>(null);
+
+    const markActionDone = (actionId: number) => setPending({ kind: 'markDone', actionId });
+    const deleteAction = (actionId: number) => setPending({ kind: 'deleteAction', actionId });
+
+    const confirmPending = () => {
+        if (!pending) return;
+        const done = { onFinish: () => setPending(null) };
+        if (pending.kind === 'markDone') {
+            router.post(`/plans-amelioration/${plan.id}/actions/${pending.actionId}/done`, undefined, done);
+        } else {
+            router.delete(`/plans-amelioration/${plan.id}/actions/${pending.actionId}`, done);
         }
     };
-    const deleteAction = (actionId: number) => {
-        if (confirm('Supprimer cette action ?')) {
-            router.delete(`/plans-amelioration/${plan.id}/actions/${actionId}`);
+
+    const pendingMeta = pending?.kind === 'markDone'
+        ? {
+            title: 'Marquer cette action comme réalisée ?',
+            description: "L'action sera comptabilisée dans le taux de complétion du plan d'amélioration.",
+            confirmLabel: 'Marquer réalisée',
+            tone: 'info' as const,
         }
-    };
+        : pending?.kind === 'deleteAction'
+            ? {
+                title: 'Supprimer cette action ?',
+                description: "L'action sera définitivement retirée du plan. Le taux de complétion sera recalculé.",
+                confirmLabel: 'Supprimer',
+                tone: 'danger' as const,
+            }
+            : null;
 
     return (
         <DashboardLayout title={plan.titre} subtitle="">
@@ -277,6 +299,18 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
                     </CardBody>
                 </Card>
             </div>
+
+            {pendingMeta && (
+                <ConfirmDialog
+                    open={pending !== null}
+                    onClose={() => setPending(null)}
+                    onConfirm={confirmPending}
+                    title={pendingMeta.title}
+                    description={pendingMeta.description}
+                    confirmLabel={pendingMeta.confirmLabel}
+                    tone={pendingMeta.tone}
+                />
+            )}
         </DashboardLayout>
     );
 }

@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Services\InterventionMediaService;
 use App\Services\InterventionService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,11 +31,11 @@ class InterventionController extends Controller
         private readonly InterventionMediaService $mediaService,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Intervention::class);
 
-        $user = request()->user();
+        $user = $request->user();
 
         $query = Intervention::query()
             ->with([
@@ -54,7 +55,7 @@ class InterventionController extends Controller
         }
 
         // Optional status filter via query string.
-        $statusFilter = request()->input('status');
+        $statusFilter = $request->input('status');
         $statusEnumMap = [
             'planifiee' => InterventionStatus::Planned->value,
             'en_cours' => InterventionStatus::InProgress->value,
@@ -104,6 +105,8 @@ class InterventionController extends Controller
             'annulees' => (clone $statsBase)->where('status', InterventionStatus::Cancelled->value)->count(),
         ];
 
+        $canCreate = $request->user()?->can('create', Intervention::class) ?? false;
+
         return Inertia::render('dashboard/interventions/index', [
             'interventions' => $paginator->items(),
             'total' => $paginator->total(),
@@ -116,7 +119,24 @@ class InterventionController extends Controller
             'filters' => [
                 'status' => $statusFilter,
             ],
+            // Lazy prop — only resolved when the quick-add modal mounts.
+            'quickAddOptions' => fn () => $canCreate
+                ? $this->quickAddOptions((string) $request->user()->structure_id)
+                : null,
         ]);
+    }
+
+    /**
+     * @return array{intervenants: list<array{id:int|string,name:string}>, beneficiaries: list<array{id:int|string,name:string}>}
+     */
+    private function quickAddOptions(string $structureId): array
+    {
+        $opts = $this->formOptions($structureId);
+
+        return [
+            'intervenants' => $opts['intervenants'] ?? [],
+            'beneficiaries' => $opts['beneficiaries'] ?? [],
+        ];
     }
 
     public function create(): Response

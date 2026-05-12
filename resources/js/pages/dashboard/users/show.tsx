@@ -1,6 +1,7 @@
-import { Badge, Button, Card, CardBody, CardHeader, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface UserDetail {
@@ -30,13 +31,12 @@ export default function ShowUser({ user }: { user: UserDetail }) {
     const canManage = useCan('users.manage');
 
     const isActive = user.status === 'active';
+    const [showToggle, setShowToggle] = useState(false);
 
-    const toggleStatus = () => {
+    const toggleStatus = () => setShowToggle(true);
+    const confirmToggle = () => {
         const path = isActive ? `/users/${user.id}/deactivate` : `/users/${user.id}/reactivate`;
-        const message = isActive ? 'Désactiver cet utilisateur ?' : 'Réactiver cet utilisateur ?';
-        if (confirm(message)) {
-            router.post(path);
-        }
+        router.post(path, undefined, { onFinish: () => setShowToggle(false) });
     };
 
     return (
@@ -162,6 +162,20 @@ export default function ShowUser({ user }: { user: UserDetail }) {
                     ← Retour à la liste
                 </Link>
             </div>
+
+            <ConfirmDialog
+                open={showToggle}
+                onClose={() => setShowToggle(false)}
+                onConfirm={confirmToggle}
+                title={isActive ? 'Désactiver cet utilisateur ?' : 'Réactiver cet utilisateur ?'}
+                description={
+                    isActive
+                        ? "L'utilisateur ne pourra plus se connecter. Ses contributions passées (interventions, incidents…) restent visibles dans l'historique."
+                        : "L'utilisateur retrouvera l'accès à son tableau de bord avec son rôle d'origine."
+                }
+                confirmLabel={isActive ? 'Désactiver' : 'Réactiver'}
+                tone={isActive ? 'danger' : 'info'}
+            />
         </DashboardLayout>
     );
 }

@@ -4,7 +4,9 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import CommandPalette from '@/components/CommandPalette';
+import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
+import { QuickAddIncidentModal } from '@/components/quick-add';
 import ThemeToggle from '@/components/ThemeToggle';
 import { FlashToasts } from '@/components/ui';
 
@@ -48,6 +50,7 @@ export default function DashboardLayout({
     const abilities = useAbilities();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [showQuickIncident, setShowQuickIncident] = useState(false);
 
     const isActive = (path: string) => {
         const current = url.split('?')[0].replace(/\/$/, '');
@@ -243,15 +246,16 @@ export default function DashboardLayout({
                             <CommandPalette />
 
                             {canDeclareIncident && (
-                                <Link
-                                    href="/incidents/create"
+                                <button
+                                    type="button"
+                                    onClick={() => setShowQuickIncident(true)}
                                     className="hidden cursor-pointer items-center gap-1.5 rounded-lg bg-danger-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-danger-700 hover:shadow-md active:scale-[0.97] md:inline-flex"
                                 >
                                     <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
                                     </svg>
                                     Déclarer un incident
-                                </Link>
+                                </button>
                             )}
 
                             <NotificationsCenter />
@@ -267,9 +271,15 @@ export default function DashboardLayout({
                         </div>
                     </header>
 
+                    <MfaSetupBanner />
+
                     <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
                 </div>
             </div>
+
+            {canDeclareIncident && (
+                <QuickAddIncidentModal open={showQuickIncident} onClose={() => setShowQuickIncident(false)} />
+            )}
         </>
     );
 }
