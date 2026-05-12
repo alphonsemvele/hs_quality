@@ -11,9 +11,12 @@ use App\Http\Requests\Audits\StoreAuditRequest;
 use App\Http\Requests\Audits\StoreEcartRequest;
 use App\Http\Requests\Audits\UpdateAuditRequest;
 use App\Models\AuditEcart;
+use App\Models\AuditRun;
 use App\Models\QualityAudit;
+use App\Services\HASPreparationService;
 use App\Services\QualityAuditService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -191,5 +194,49 @@ class AuditController extends Controller
     private function currentStructureId(): ?string
     {
         return currentStructure()?->getKey();
+    }
+
+    /**
+     * HAS preparation guide — gap analysis on the latest finalised HAS run
+     * (or a specific one via ?run_id). Powered by HASPreparationService.
+     */
+    public function hasPreparation(Request $request, HASPreparationService $service): Response
+    {
+        $this->authorize('viewAny', AuditRun::class);
+
+        $runs = AuditRun::query()
+            ->where('status', 'finalised')
+            ->whereHas('grid', fn ($q) => $q->where('source', 'has'))
+            ->with(['grid:id,title,source'])
+            ->orderByDesc('finalised_at')
+            ->limit(10)
+            ->get();
+
+        $selected = null;
+        $analysis = null;
+        $runId = $request->string('run_id')->toString();
+        if ($runId !== '') {
+            $selected = $runs->firstWhere('id', $runId) ?? AuditRun::query()->whereKey($runId)->first();
+        } elseif ($runs->isNotEmpty()) {
+            $selected = $runs->first();
+        }
+
+        if ($selected) {
+            try {
+                $analysis = $service->analyse($selected);
+            } catch (\Throwable $e) {
+                $analysis = ['error' => $e->getMessage()];
+            }
+        }
+
+        return Inertia::render('dashboard/audits/has-preparation', [
+            'runs' => $runs->map(fn (AuditRun $r) => [
+                'id' => $r->id,
+                'title' => $r->title,
+                'finalised_at' => $r->finalised_at?->toIso8601String(),
+            ])->all(),
+            'selected_run_id' => $selected?->id,
+            'analysis' => $analysis,
+        ]);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\AuditGridController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\BillingController;
@@ -77,6 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
     Route::get('/dashboard/profile/mfa-setup', fn () => Inertia::render('dashboard/profile/mfa-setup'))->name('profile.mfa-setup');
+    Route::get('/dashboard/profile/notifications', fn () => Inertia::render('dashboard/profile/notifications-preferences'))->name('profile.notifications');
+    Route::get('/dashboard/profile/api-tokens', fn () => Inertia::render('dashboard/profile/api-tokens'))->name('profile.api-tokens');
+    Route::get('/dashboard/profile/sessions', fn () => Inertia::render('dashboard/profile/sessions'))->name('profile.sessions');
     Route::get('/dashboard/onboarding', fn () => Inertia::render('dashboard/onboarding'))->name('onboarding');
 
     // Notifications (in-app — see HandleInertiaRequests for shared payload)
@@ -198,6 +202,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Qualité (M6 — Audits + Plans d'Amélioration Continue) ─────────────────
     Route::middleware(['tenant'])->group(function () {
         Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
+        // Audit grids library (read-only — declare before /audits/{audit}
+        // so the literal "grids" segment is not matched as a UUID).
+        Route::get('/audits/grids', [AuditGridController::class, 'index'])->name('audits.grids.index');
+        Route::get('/audits/grids/{auditGrid}', [AuditGridController::class, 'show'])->name('audits.grids.show');
+        Route::get('/audits/has-preparation', [AuditController::class, 'hasPreparation'])->name('audits.has-preparation');
+
         Route::get('/audits/create', [AuditController::class, 'create'])->name('audits.create');
         Route::post('/audits', [AuditController::class, 'store'])->name('audits.store');
         Route::get('/audits/{audit}', [AuditController::class, 'show'])->name('audits.show');
@@ -262,6 +272,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+    Route::get('/formations/competencies/mine', [FormationController::class, 'myCompetencies'])->name('formations.competencies.mine');
+    Route::get('/formations/sessions/{id}', [FormationController::class, 'showSession'])->name('formations.sessions.show');
     Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
     Route::put('/formations/{id}', [FormationController::class, 'update'])->name('formations.update');
 

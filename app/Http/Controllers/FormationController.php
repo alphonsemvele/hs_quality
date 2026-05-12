@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,6 +42,113 @@ class FormationController extends Controller
     public function update(string $id): RedirectResponse
     {
         return back()->with('info', 'Module Formations en cours de développement.');
+    }
+
+    /**
+     * Demo session detail with attendance roster. Backend session model
+     * (TrainingSession + TrainingAttendance) exists but the Inertia wiring
+     * here serves demo data until the dedicated controller writes are
+     * exposed to the web layer.
+     */
+    public function showSession(Request $request, string $id): Response
+    {
+        $demo = config('app.env') === 'local';
+
+        return Inertia::render('dashboard/formations/sessions/show', [
+            'session' => $demo ? $this->demoSessionDetail($id) : null,
+            'attendees' => $demo ? $this->demoAttendees() : [],
+        ]);
+    }
+
+    /**
+     * "Mes compétences" — vue intervenant centrée sur ses habilitations
+     * et certifications personnelles. Persona-aware: filters by the
+     * current user's identity.
+     */
+    public function myCompetencies(Request $request): Response
+    {
+        $demo = config('app.env') === 'local';
+
+        return Inertia::render('dashboard/formations/competencies/mine', [
+            'me' => [
+                'name' => $request->user()->fullName(),
+                'role' => $request->user()->type instanceof \BackedEnum ? $request->user()->type->value : (string) $request->user()->type,
+            ],
+            'habilitations' => $demo ? $this->demoMyHabilitations() : [],
+            'certifications' => $demo ? $this->demoMyCertifications() : [],
+            'enrollments' => $demo ? $this->demoMyEnrollments() : [],
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function demoSessionDetail(string $id): array
+    {
+        return [
+            'id' => $id,
+            'title' => 'PSC1 — Session de rappel',
+            'plan_title' => 'Renouvellement PSC1 — Année 2026',
+            'date' => '2026-05-14',
+            'time' => '09:00',
+            'duration_minutes' => 240,
+            'location' => 'Croix-Rouge Paris 11e',
+            'capacity' => 8,
+            'registered' => 6,
+            'attended' => 0,
+            'status' => 'scheduled',
+            'organisme' => 'Croix-Rouge française',
+            'description' => 'Rappel des gestes de premiers secours — réanimation, position latérale de sécurité, malaise cardiaque, étouffement. Examen blanc en fin de session.',
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function demoAttendees(): array
+    {
+        return [
+            ['id' => 'att-1', 'user_id' => 'u-1', 'name' => 'Marie Leclerc', 'initials' => 'ML', 'role' => 'Intervenante', 'status' => 'registered', 'status_label' => 'Inscrite', 'last_psc1' => '2024-06-10'],
+            ['id' => 'att-2', 'user_id' => 'u-2', 'name' => 'Luc Moreau', 'initials' => 'LM', 'role' => 'Intervenant', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2024-06-10'],
+            ['id' => 'att-3', 'user_id' => 'u-3', 'name' => 'Sophie Bernard', 'initials' => 'SB', 'role' => 'Intervenante', 'status' => 'registered', 'status_label' => 'Inscrite', 'last_psc1' => null],
+            ['id' => 'att-4', 'user_id' => 'u-4', 'name' => 'Karim Benali', 'initials' => 'KB', 'role' => 'Intervenant', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2023-09-15'],
+            ['id' => 'att-5', 'user_id' => 'u-5', 'name' => 'Claire Bernard', 'initials' => 'CB', 'role' => 'Référente qualité', 'status' => 'cancelled', 'status_label' => 'Annulée', 'last_psc1' => '2024-06-10'],
+            ['id' => 'att-6', 'user_id' => 'u-6', 'name' => 'Thomas Dupont', 'initials' => 'TD', 'role' => 'Coordinateur', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2024-06-10'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function demoMyHabilitations(): array
+    {
+        return [
+            ['id' => 'h-1', 'intitule' => 'Aide à la toilette et soins d\'hygiène', 'organisme' => 'INRS', 'date_obtention' => '2025-03-15', 'date_expiration' => '2027-03-15', 'days_to_expiry' => 670, 'statut' => 'valide'],
+            ['id' => 'h-2', 'intitule' => 'Aide à la prise médicamenteuse', 'organisme' => 'ARS IDF', 'date_obtention' => '2025-02-01', 'date_expiration' => '2026-08-01', 'days_to_expiry' => 82, 'statut' => 'expire_bientot'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function demoMyCertifications(): array
+    {
+        return [
+            ['id' => 'c-1', 'intitule' => 'PSC1 — Premiers secours', 'organisme' => 'Croix-Rouge', 'date_obtention' => '2024-06-10', 'date_expiration' => '2026-06-10', 'days_to_expiry' => 30, 'statut' => 'expire_bientot'],
+            ['id' => 'c-2', 'intitule' => 'Gestes et postures — Manutention', 'organisme' => 'PRAP', 'date_obtention' => '2024-11-20', 'date_expiration' => '2026-11-20', 'days_to_expiry' => 193, 'statut' => 'valide'],
+            ['id' => 'c-3', 'intitule' => 'Accompagnement Alzheimer', 'organisme' => 'France Alzheimer', 'date_obtention' => '2025-09-01', 'date_expiration' => '2027-09-01', 'days_to_expiry' => 843, 'statut' => 'valide'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function demoMyEnrollments(): array
+    {
+        return [
+            ['id' => 'e-1', 'session_id' => 's-001', 'title' => 'PSC1 — Session de rappel', 'date' => '2026-05-14', 'location' => 'Croix-Rouge Paris 11e', 'status' => 'registered', 'status_label' => 'Inscrit'],
+            ['id' => 'e-2', 'session_id' => 's-002', 'title' => 'Bientraitance — Module 1', 'date' => '2026-05-22', 'location' => 'Visioconférence', 'status' => 'registered', 'status_label' => 'Inscrit'],
+        ];
     }
 
     /** @return list<array<string, mixed>> */
