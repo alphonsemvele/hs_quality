@@ -1,10 +1,13 @@
 export { Badge } from './Badge';
+export { BulkActionsToolbar, BulkSelectCheckbox } from './BulkActionsToolbar';
 export { Button } from './Button';
 export { Card, CardBody, CardFooter, CardHeader } from './Card';
 export { BarChart, DonutChart, LineChart, Sparkline } from './Chart';
 export type { ChartTone, SeriesPoint as ChartSeriesPoint } from './Chart';
 export { ConfirmDialog } from './ConfirmDialog';
 export { EmptyState } from './EmptyState';
+export { FilterChipsBar, FilterDrawer } from './FilterDrawer';
+export { HoverCard } from './HoverCard';
 export { Modal } from './Modal';
 export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from './Input';
 export { KpiCard } from './KpiCard';

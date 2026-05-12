@@ -66,6 +66,21 @@ class InterventionController extends Controller
             $query->where('status', $statusEnumMap[$statusFilter]);
         }
 
+        // Date range filters — optional, both bounds inclusive on planned_date.
+        if ($from = $request->date('from')) {
+            $query->where('planned_date', '>=', $from->toDateString());
+        }
+        if ($to = $request->date('to')) {
+            $query->where('planned_date', '<=', $to->toDateString());
+        }
+
+        // Optional intervenant filter (coordinators only — intervenants are
+        // already scoped to their own interventions earlier).
+        $intervenantFilter = $request->input('intervenant_id');
+        if ($intervenantFilter && ! $scopedToOwn) {
+            $query->where('intervenant_id', $intervenantFilter);
+        }
+
         $statutMap = [
             InterventionStatus::Planned->value => 'planifiee',
             InterventionStatus::InProgress->value => 'en_cours',
@@ -118,6 +133,9 @@ class InterventionController extends Controller
             'stats' => $stats,
             'filters' => [
                 'status' => $statusFilter,
+                'from' => $request->input('from'),
+                'to' => $request->input('to'),
+                'intervenant_id' => $intervenantFilter,
             ],
             // Lazy prop — only resolved when the quick-add modal mounts.
             'quickAddOptions' => fn () => $canCreate

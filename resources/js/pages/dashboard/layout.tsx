@@ -4,6 +4,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import CommandPalette from '@/components/CommandPalette';
+import HelpDrawer from '@/components/HelpDrawer';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
 import { QuickAddIncidentModal } from '@/components/quick-add';
@@ -51,6 +52,7 @@ export default function DashboardLayout({
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showQuickIncident, setShowQuickIncident] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
 
     const isActive = (path: string) => {
         const current = url.split('?')[0].replace(/\/$/, '');
@@ -259,6 +261,19 @@ export default function DashboardLayout({
                                 </button>
                             )}
 
+                            <button
+                                type="button"
+                                onClick={() => setShowHelp(true)}
+                                aria-label="Ouvrir l'aide contextuelle"
+                                className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-400 dark:hover:bg-ink-700 dark:hover:text-white"
+                            >
+                                <svg className="size-[18px]" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                            </button>
+
                             <NotificationsCenter />
 
                             {auth?.user && (
@@ -281,6 +296,8 @@ export default function DashboardLayout({
             {canDeclareIncident && (
                 <QuickAddIncidentModal open={showQuickIncident} onClose={() => setShowQuickIncident(false)} />
             )}
+
+            <HelpDrawer open={showHelp} onClose={() => setShowHelp(false)} />
         </>
     );
 }
