@@ -10,6 +10,7 @@ export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from
 export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
+export { Sheet } from './Sheet';
 export {
     CarePlanStatusBadge,
     IncidentGraviteBadge,
@@ -18,3 +19,4 @@ export {
 } from './StatusBadge';
 export { TBody, THead, Table, Td, Th, Tr } from './Table';
 export { FlashToasts } from './Toast';
+export { Wizard, type WizardStep } from './Wizard';

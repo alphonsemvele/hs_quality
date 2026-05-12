@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CarePlanController;
@@ -74,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
+    Route::get('/dashboard/profile/mfa-setup', fn () => Inertia::render('dashboard/profile/mfa-setup'))->name('profile.mfa-setup');
 
     // Notifications (in-app — see HandleInertiaRequests for shared payload)
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -211,6 +213,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/indicateurs', [IndicateurController::class, 'index'])->name('indicateurs.index');
+
+    // RGPD Art. 30 — registre d'audit (owen-it/laravel-auditing)
+    Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
     // ── QVCT & RH ─────────────────────────────────────────────────────────────
     // Phase 1 placeholder routes (kept for tier-gate UX until M3 frontend lands).

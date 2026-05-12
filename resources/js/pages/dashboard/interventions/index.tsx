@@ -1,3 +1,4 @@
+import { InterventionPreviewSheet, type InterventionPreview } from '@/components/preview-sheets';
 import { QuickAddInterventionModal } from '@/components/quick-add';
 import {
     Badge,
@@ -60,6 +61,7 @@ export default function Interventions({
     const activeFilter = filters.status;
     const canCreate = useCan('interventions.create');
     const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [preview, setPreview] = useState<InterventionPreview | null>(null);
 
     return (
         <DashboardLayout title="Interventions" subtitle="Suivi des interventions à domicile">
@@ -133,12 +135,22 @@ export default function Interventions({
                                         </div>
                                     </Td>
                                     <Td className="text-right">
-                                        <Link
-                                            href={`/interventions/${i.id}`}
-                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-                                        >
-                                            Voir →
-                                        </Link>
+                                        <div className="flex items-center justify-end gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPreview(i)}
+                                                aria-label="Aperçu rapide"
+                                                className="rounded-md p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:text-ink-500 dark:hover:bg-ink-700 dark:hover:text-brand-400"
+                                            >
+                                                <EyeIcon />
+                                            </button>
+                                            <Link
+                                                href={`/interventions/${i.id}`}
+                                                className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                                            >
+                                                Voir →
+                                            </Link>
+                                        </div>
                                     </Td>
                                 </Tr>
                             ))}
@@ -173,6 +185,8 @@ export default function Interventions({
                     beneficiaries={quickAddOptions.beneficiaries}
                 />
             )}
+
+            <InterventionPreviewSheet intervention={preview} onClose={() => setPreview(null)} />
         </DashboardLayout>
     );
 }
@@ -198,6 +212,15 @@ function PlusIcon() {
     return (
         <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
+    );
+}
+
+function EyeIcon() {
+    return (
+        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
         </svg>
     );
 }

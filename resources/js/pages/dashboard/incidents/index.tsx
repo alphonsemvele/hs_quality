@@ -1,3 +1,4 @@
+import { IncidentPreviewSheet, type IncidentPreview } from '@/components/preview-sheets';
 import {
     Badge,
     Button,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 type Gravite = 'mineur' | 'significatif' | 'grave' | 'critique';
@@ -44,6 +46,8 @@ export default function Incidents({
     stats = { declare: 0, en_analyse: 0, plan_actions: 0, clos: 0, graves: 0 },
 }: Partial<Props>) {
     const canDeclare = useCan('incidents.create');
+    const [preview, setPreview] = useState<IncidentPreview | null>(null);
+
     return (
         <DashboardLayout title="Incidents & événements indésirables" subtitle="Déclaration, analyse et suivi">
             <PageHeader
@@ -97,12 +101,25 @@ export default function Incidents({
                                         <span className="font-mono">{inc.date_heure}</span>
                                     </div>
                                 </div>
-                                <Link
-                                    href={`/incidents/${inc.id}`}
-                                    className="shrink-0 self-center text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-                                >
-                                    Traiter →
-                                </Link>
+                                <div className="flex shrink-0 items-center gap-1 self-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreview(inc)}
+                                        aria-label="Aperçu rapide"
+                                        className="rounded-md p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-danger-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-500/40 dark:text-ink-500 dark:hover:bg-ink-700 dark:hover:text-danger-400"
+                                    >
+                                        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                    <Link
+                                        href={`/incidents/${inc.id}`}
+                                        className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                                    >
+                                        Traiter →
+                                    </Link>
+                                </div>
                             </div>
                         </Card>
                     ))}
@@ -119,6 +136,8 @@ export default function Incidents({
                 total={total}
                 perPage={pagination.per_page}
             />
+
+            <IncidentPreviewSheet incident={preview} onClose={() => setPreview(null)} />
         </DashboardLayout>
     );
 }

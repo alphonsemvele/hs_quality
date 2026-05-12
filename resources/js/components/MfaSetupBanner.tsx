@@ -81,7 +81,7 @@ export default function MfaSetupBanner() {
                         Plus tard
                     </button>
                     <Link
-                        href="/dashboard/profile"
+                        href="/dashboard/profile/mfa-setup"
                         className="inline-flex items-center gap-1.5 rounded-lg bg-warning-700 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-warning-800 dark:bg-warning-600 dark:hover:bg-warning-500"
                     >
                         Configurer maintenant

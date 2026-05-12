@@ -1,3 +1,4 @@
+import { BeneficiaryPreviewSheet, type BeneficiaryPreview } from '@/components/preview-sheets';
 import { QuickAddBeneficiaryModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
@@ -26,6 +27,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
     const list = beneficiaries?.data ?? [];
     const canCreate = useCan('beneficiaries.create');
     const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [preview, setPreview] = useState<BeneficiaryPreview | null>(null);
 
     return (
         <DashboardLayout title="Bénéficiaires" subtitle="Personnes accompagnées par votre structure">
@@ -80,12 +82,25 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                                         </Badge>
                                     </Td>
                                     <Td className="text-right">
-                                        <Link
-                                            href={`/beneficiaries/${b.id}`}
-                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-                                        >
-                                            Détail →
-                                        </Link>
+                                        <div className="flex items-center justify-end gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPreview(b)}
+                                                aria-label="Aperçu rapide"
+                                                className="rounded-md p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-sage-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-500/40 dark:text-ink-500 dark:hover:bg-ink-700 dark:hover:text-sage-400"
+                                            >
+                                                <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                            </button>
+                                            <Link
+                                                href={`/beneficiaries/${b.id}`}
+                                                className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                                            >
+                                                Détail →
+                                            </Link>
+                                        </div>
                                     </Td>
                                 </Tr>
                             ))}
@@ -113,6 +128,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
             </Card>
 
             <QuickAddBeneficiaryModal open={showQuickAdd} onClose={() => setShowQuickAdd(false)} />
+            <BeneficiaryPreviewSheet beneficiary={preview} onClose={() => setPreview(null)} />
         </DashboardLayout>
     );
 }

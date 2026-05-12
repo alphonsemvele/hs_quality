@@ -95,6 +95,7 @@ export default function DashboardLayout({
                       { href: '/audits', label: 'Audits & conformité', icon: <BadgeIcon />, requires: 'audits.view' },
                       { href: '/plans-amelioration', label: "Plans d'amélioration", icon: <CheckListIcon />, requires: 'plans_amelioration.view' },
                       { href: '/indicateurs', label: 'Indicateurs', icon: <ChartIcon />, requires: 'indicateurs.view' },
+                      { href: '/audit-log', label: 'Registre d\'audit', icon: <DatabaseIcon />, requires: 'audits.view' },
                   ],
               },
               {
@@ -552,6 +553,14 @@ function CardIcon() {
         <Icon>
             <rect x="2" y="6" width="20" height="13" rx="2" />
             <line x1="2" y1="11" x2="22" y2="11" />
+        </Icon>
+    );
+}
+function DatabaseIcon() {
+    return (
+        <Icon>
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
         </Icon>
     );
 }
