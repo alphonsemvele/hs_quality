@@ -23,6 +23,7 @@ use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
 use App\Http\Controllers\QvctQuestionnaireController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -76,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
     Route::get('/dashboard/profile/mfa-setup', fn () => Inertia::render('dashboard/profile/mfa-setup'))->name('profile.mfa-setup');
+    Route::get('/dashboard/onboarding', fn () => Inertia::render('dashboard/onboarding'))->name('onboarding');
 
     // Notifications (in-app — see HandleInertiaRequests for shared payload)
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -89,6 +91,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/billing', [BillingController::class, 'show'])->name('billing.show');
         Route::post('/billing/change-plan', [BillingController::class, 'changePlan'])->name('billing.change-plan');
         Route::post('/billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
+
+        Route::get('/settings/structure', [SettingsController::class, 'structure'])->name('settings.structure');
+        Route::put('/settings/contact', [SettingsController::class, 'updateContact'])->name('settings.contact.update');
     });
 
     Route::middleware(['tenant'])->group(function () {
@@ -245,6 +250,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/questionnaires/{questionnaire}', [QvctQuestionnaireController::class, 'destroy'])->name('questionnaires.destroy');
 
         Route::get('/campaigns', [QvctCampaignController::class, 'index'])->name('campaigns.index');
+        Route::get('/campaigns/create', [QvctCampaignController::class, 'create'])->name('campaigns.create');
         Route::get('/campaigns/{campaign}', [QvctCampaignController::class, 'show'])->name('campaigns.show');
         Route::post('/questionnaires/{questionnaire}/campaigns', [QvctCampaignController::class, 'launch'])->name('campaigns.launch');
         Route::post('/campaigns/{campaign}/close', [QvctCampaignController::class, 'close'])->name('campaigns.close');

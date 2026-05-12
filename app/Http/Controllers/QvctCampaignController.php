@@ -29,6 +29,43 @@ class QvctCampaignController extends Controller
         ]);
     }
 
+    public function create(): Response
+    {
+        $this->authorize('create', QvctCampaign::class);
+
+        $questionnaires = QvctQuestionnaire::query()
+            ->where('is_active', true)
+            ->withCount(['campaigns'])
+            ->orderByDesc('created_at')
+            ->get(['id', 'title', 'frequency', 'questions', 'created_at']);
+
+        return Inertia::render('dashboard/qvct/campaigns/create', [
+            'questionnaires' => $questionnaires->map(fn (QvctQuestionnaire $q) => [
+                'id' => $q->id,
+                'title' => $q->title,
+                'frequency' => $q->frequency instanceof \BackedEnum ? $q->frequency->value : $q->frequency,
+                'question_count' => is_array($q->questions) ? count($q->questions) : 0,
+                'campaigns_count' => $q->campaigns_count ?? 0,
+            ])->all(),
+            'teams' => $this->demoTeams(),
+        ]);
+    }
+
+    /**
+     * @return list<array{value: string, label: string, members: int}>
+     */
+    private function demoTeams(): array
+    {
+        return [
+            ['value' => '', 'label' => 'Toute la structure', 'members' => 0],
+            ['value' => 'secteur_nord', 'label' => 'Secteur Nord', 'members' => 6],
+            ['value' => 'secteur_sud', 'label' => 'Secteur Sud', 'members' => 5],
+            ['value' => 'secteur_est', 'label' => 'Secteur Est', 'members' => 4],
+            ['value' => 'secteur_ouest', 'label' => 'Secteur Ouest', 'members' => 4],
+            ['value' => 'coordination', 'label' => 'Coordination', 'members' => 3],
+        ];
+    }
+
     public function show(QvctCampaign $campaign): Response
     {
         $this->authorize('view', $campaign);
