@@ -1,0 +1,303 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+          - listitem [ref=e65]:
+            - link "Registre d'audit" [ref=e66] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e68]
+              - generic [ref=e71]: Registre d'audit
+      - generic [ref=e72]:
+        - paragraph [ref=e73]: QVCT & RH
+        - list [ref=e74]:
+          - listitem [ref=e75]:
+            - link "Baromètre QVCT" [ref=e76] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e78]
+              - generic [ref=e80]: Baromètre QVCT
+          - listitem [ref=e81]:
+            - link "Signaux faibles" [ref=e82] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e84]
+              - generic [ref=e88]: Signaux faibles
+          - listitem [ref=e89]:
+            - link "Cartographie RPS" [ref=e90] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e92]
+              - generic [ref=e96]: Cartographie RPS
+          - listitem [ref=e97]:
+            - link "Plans d'action" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e100]
+              - generic [ref=e103]: Plans d'action
+          - listitem [ref=e104]:
+            - link "Mon journal" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e107]
+              - generic [ref=e110]: Mon journal
+          - listitem [ref=e111]:
+            - link "Demandes d'échange" [ref=e112] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e114]
+              - generic [ref=e117]: Demandes d'échange
+          - listitem [ref=e118]:
+            - link "Formations" [ref=e119] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e121]
+              - generic [ref=e124]: Formations
+          - listitem [ref=e125]:
+            - link "Communication" [ref=e126] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e128]
+              - generic [ref=e130]: Communication
+      - generic [ref=e131]:
+        - paragraph [ref=e132]: Administration
+        - list [ref=e133]:
+          - listitem [ref=e134]:
+            - link "Utilisateurs" [ref=e135] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e137]
+              - generic [ref=e141]: Utilisateurs
+    - generic [ref=e143]:
+      - generic [ref=e144]: SM
+      - generic [ref=e145]:
+        - paragraph [ref=e146]: Sophie Martin
+        - paragraph [ref=e147]: utilisateur
+  - generic [ref=e148]:
+    - banner [ref=e149]:
+      - generic [ref=e151]:
+        - heading "Bénéficiaires" [level=1] [ref=e152]
+        - paragraph [ref=e153]: Personnes accompagnées par votre structure
+      - generic [ref=e154]:
+        - button "Rechercher (Cmd+K)" [ref=e155] [cursor=pointer]:
+          - img [ref=e156]
+          - generic [ref=e159]: Rechercher
+          - generic [ref=e160]: ⌘K
+        - button "Déclarer un incident" [ref=e161] [cursor=pointer]:
+          - img [ref=e162]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e165] [cursor=pointer]:
+          - img [ref=e166]
+        - button "SM Sophie Martin" [ref=e169] [cursor=pointer]:
+          - generic [ref=e170]: SM
+          - generic [ref=e171]: Sophie Martin
+          - img [ref=e172]
+    - status [ref=e174]:
+      - generic [ref=e175]:
+        - generic [ref=e176]:
+          - img [ref=e178]
+          - generic [ref=e181]:
+            - paragraph [ref=e182]: Double authentification non configurée
+            - paragraph [ref=e183]: Votre rôle implique l'accès à des données de santé. Activez le MFA TOTP pour protéger votre compte — moins de 2 minutes.
+        - generic [ref=e184]:
+          - button "Plus tard" [ref=e185]
+          - link "Configurer maintenant" [ref=e186] [cursor=pointer]:
+            - /url: /dashboard/profile/mfa-setup
+            - text: Configurer maintenant
+            - img [ref=e187]
+    - main [ref=e189]:
+      - generic [ref=e190]:
+        - generic [ref=e191]:
+          - navigation "Fil d'ariane" [ref=e192]:
+            - link "Tableau de bord" [ref=e194] [cursor=pointer]:
+              - /url: /dashboard
+            - generic [ref=e195]:
+              - img [ref=e196]
+              - generic [ref=e198]: Bénéficiaires
+          - heading "Bénéficiaires" [level=1] [ref=e199]
+          - paragraph [ref=e200]: 8 bénéficiaire(s) — page 1 sur 1
+        - button "Nouveau bénéficiaire" [ref=e202]:
+          - img [ref=e203]
+          - text: Nouveau bénéficiaire
+      - table [ref=e207]:
+        - rowgroup [ref=e208]:
+          - row "Bénéficiaire Âge GIR Ville Statut" [ref=e209]:
+            - columnheader "Bénéficiaire" [ref=e210]
+            - columnheader "Âge" [ref=e211]
+            - columnheader "GIR" [ref=e212]
+            - columnheader "Ville" [ref=e213]
+            - columnheader "Statut" [ref=e214]
+            - columnheader [ref=e215]
+        - rowgroup [ref=e216]:
+          - row "MB Monique BRETON 94 GIR 5 Diallo Actif Aperçu rapide Détail →" [ref=e217]:
+            - cell "MB Monique BRETON" [ref=e218]:
+              - generic [ref=e219]:
+                - generic [ref=e220]: MB
+                - generic [ref=e221]: Monique BRETON
+            - cell "94" [ref=e222]
+            - cell "GIR 5" [ref=e223]:
+              - generic [ref=e224]: GIR 5
+            - cell "Diallo" [ref=e225]
+            - cell "Actif" [ref=e226]:
+              - generic [ref=e227]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e229]:
+              - generic [ref=e230]:
+                - button "Aperçu rapide" [ref=e231]:
+                  - img [ref=e232]
+                - link "Détail →" [ref=e235] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24c9-72a2-bdb3-365d281e0c2d
+          - row "SB Suzanne BRUN 72 GIR 4 Berger-sur-Mer Actif Aperçu rapide Détail →" [ref=e236]:
+            - cell "SB Suzanne BRUN" [ref=e237]:
+              - generic [ref=e238]:
+                - generic [ref=e239]: SB
+                - generic [ref=e240]: Suzanne BRUN
+            - cell "72" [ref=e241]
+            - cell "GIR 4" [ref=e242]:
+              - generic [ref=e243]: GIR 4
+            - cell "Berger-sur-Mer" [ref=e244]
+            - cell "Actif" [ref=e245]:
+              - generic [ref=e246]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e248]:
+              - generic [ref=e249]:
+                - button "Aperçu rapide" [ref=e250]:
+                  - img [ref=e251]
+                - link "Détail →" [ref=e254] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24d0-72bf-88ac-8f7baee7396d
+          - row "CC Christophe CHEVALLIER 72 GIR 4 Leclercq Actif Aperçu rapide Détail →" [ref=e255]:
+            - cell "CC Christophe CHEVALLIER" [ref=e256]:
+              - generic [ref=e257]:
+                - generic [ref=e258]: CC
+                - generic [ref=e259]: Christophe CHEVALLIER
+            - cell "72" [ref=e260]
+            - cell "GIR 4" [ref=e261]:
+              - generic [ref=e262]: GIR 4
+            - cell "Leclercq" [ref=e263]
+            - cell "Actif" [ref=e264]:
+              - generic [ref=e265]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e267]:
+              - generic [ref=e268]:
+                - button "Aperçu rapide" [ref=e269]:
+                  - img [ref=e270]
+                - link "Détail →" [ref=e273] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24d2-733a-9daf-72ccb03d2a35
+          - row "RL Roland LEGER 69 GIR 5 Couturier-sur-Mer Actif Aperçu rapide Détail →" [ref=e274]:
+            - cell "RL Roland LEGER" [ref=e275]:
+              - generic [ref=e276]:
+                - generic [ref=e277]: RL
+                - generic [ref=e278]: Roland LEGER
+            - cell "69" [ref=e279]
+            - cell "GIR 5" [ref=e280]:
+              - generic [ref=e281]: GIR 5
+            - cell "Couturier-sur-Mer" [ref=e282]
+            - cell "Actif" [ref=e283]:
+              - generic [ref=e284]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e286]:
+              - generic [ref=e287]:
+                - button "Aperçu rapide" [ref=e288]:
+                  - img [ref=e289]
+                - link "Détail →" [ref=e292] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24cb-7275-96c6-ce369f462102
+          - row "OL Olivie LEVY 87 GIR 2 Meunier Actif Aperçu rapide Détail →" [ref=e293]:
+            - cell "OL Olivie LEVY" [ref=e294]:
+              - generic [ref=e295]:
+                - generic [ref=e296]: OL
+                - generic [ref=e297]: Olivie LEVY
+            - cell "87" [ref=e298]
+            - cell "GIR 2" [ref=e299]:
+              - generic [ref=e300]: GIR 2
+            - cell "Meunier" [ref=e301]
+            - cell "Actif" [ref=e302]:
+              - generic [ref=e303]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e305]:
+              - generic [ref=e306]:
+                - button "Aperçu rapide" [ref=e307]:
+                  - img [ref=e308]
+                - link "Détail →" [ref=e311] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24cd-71d3-b473-a9e90fdcecd2
+          - row "GM Guy MASSE 60 GIR 6 Parent Actif Aperçu rapide Détail →" [ref=e312]:
+            - cell "GM Guy MASSE" [ref=e313]:
+              - generic [ref=e314]:
+                - generic [ref=e315]: GM
+                - generic [ref=e316]: Guy MASSE
+            - cell "60" [ref=e317]
+            - cell "GIR 6" [ref=e318]:
+              - generic [ref=e319]: GIR 6
+            - cell "Parent" [ref=e320]
+            - cell "Actif" [ref=e321]:
+              - generic [ref=e322]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e324]:
+              - generic [ref=e325]:
+                - button "Aperçu rapide" [ref=e326]:
+                  - img [ref=e327]
+                - link "Détail →" [ref=e330] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24cc-73cb-bd44-d18fd412bff3
+          - row "LR Laurent REY 69 GIR 3 Bouchet Actif Aperçu rapide Détail →" [ref=e331]:
+            - cell "LR Laurent REY" [ref=e332]:
+              - generic [ref=e333]:
+                - generic [ref=e334]: LR
+                - generic [ref=e335]: Laurent REY
+            - cell "69" [ref=e336]
+            - cell "GIR 3" [ref=e337]:
+              - generic [ref=e338]: GIR 3
+            - cell "Bouchet" [ref=e339]
+            - cell "Actif" [ref=e340]:
+              - generic [ref=e341]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e343]:
+              - generic [ref=e344]:
+                - button "Aperçu rapide" [ref=e345]:
+                  - img [ref=e346]
+                - link "Détail →" [ref=e349] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24d4-70bc-8739-4813d0fa42d3
+          - row "MV Marc VALLEE 60 GIR 6 ChauveauBourg Actif Aperçu rapide Détail →" [ref=e350]:
+            - cell "MV Marc VALLEE" [ref=e351]:
+              - generic [ref=e352]:
+                - generic [ref=e353]: MV
+                - generic [ref=e354]: Marc VALLEE
+            - cell "60" [ref=e355]
+            - cell "GIR 6" [ref=e356]:
+              - generic [ref=e357]: GIR 6
+            - cell "ChauveauBourg" [ref=e358]
+            - cell "Actif" [ref=e359]:
+              - generic [ref=e360]: Actif
+            - cell "Aperçu rapide Détail →" [ref=e362]:
+              - generic [ref=e363]:
+                - button "Aperçu rapide" [ref=e364]:
+                  - img [ref=e365]
+                - link "Détail →" [ref=e368] [cursor=pointer]:
+                  - /url: /beneficiaries/019dfc2d-24ce-727a-aeff-14cffa077219

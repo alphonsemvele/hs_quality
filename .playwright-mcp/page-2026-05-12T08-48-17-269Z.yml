@@ -1,0 +1,204 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Q
+      - generic [ref=e7]:
+        - generic [ref=e8]: HS Quality
+        - generic [ref=e9]: Qualité & QVCT
+    - navigation [ref=e10]:
+      - list [ref=e12]:
+        - listitem [ref=e13]:
+          - link "Tableau de bord" [ref=e14] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e19]: Tableau de bord
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Terrain
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Interventions" [ref=e24] [cursor=pointer]:
+              - /url: /interventions
+              - img [ref=e26]
+              - generic [ref=e28]: Interventions
+          - listitem [ref=e29]:
+            - link "Incidents & EI" [ref=e30] [cursor=pointer]:
+              - /url: /incidents
+              - img [ref=e32]
+              - generic [ref=e34]: Incidents & EI
+          - listitem [ref=e35]:
+            - link "Bénéficiaires" [ref=e36] [cursor=pointer]:
+              - /url: /beneficiaries
+              - img [ref=e38]
+              - generic [ref=e41]: Bénéficiaires
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Qualité
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Audits & conformité" [ref=e46] [cursor=pointer]:
+              - /url: /audits
+              - img [ref=e48]
+              - generic [ref=e51]: Audits & conformité
+          - listitem [ref=e52]:
+            - link "Plans d'amélioration" [ref=e53] [cursor=pointer]:
+              - /url: /plans-amelioration
+              - img [ref=e55]
+              - generic [ref=e58]: Plans d'amélioration
+          - listitem [ref=e59]:
+            - link "Indicateurs" [ref=e60] [cursor=pointer]:
+              - /url: /indicateurs
+              - img [ref=e62]
+              - generic [ref=e64]: Indicateurs
+          - listitem [ref=e65]:
+            - link "Registre d'audit" [ref=e66] [cursor=pointer]:
+              - /url: /audit-log
+              - img [ref=e68]
+              - generic [ref=e71]: Registre d'audit
+      - generic [ref=e72]:
+        - paragraph [ref=e73]: QVCT & RH
+        - list [ref=e74]:
+          - listitem [ref=e75]:
+            - link "Baromètre QVCT" [ref=e76] [cursor=pointer]:
+              - /url: /qvct
+              - img [ref=e78]
+              - generic [ref=e80]: Baromètre QVCT
+          - listitem [ref=e81]:
+            - link "Signaux faibles" [ref=e82] [cursor=pointer]:
+              - /url: /qvct/weak-signals
+              - img [ref=e84]
+              - generic [ref=e88]: Signaux faibles
+          - listitem [ref=e89]:
+            - link "Cartographie RPS" [ref=e90] [cursor=pointer]:
+              - /url: /qvct/indicators
+              - img [ref=e92]
+              - generic [ref=e96]: Cartographie RPS
+          - listitem [ref=e97]:
+            - link "Plans d'action" [ref=e98] [cursor=pointer]:
+              - /url: /qvct/action-plans
+              - img [ref=e100]
+              - generic [ref=e103]: Plans d'action
+          - listitem [ref=e104]:
+            - link "Mon journal" [ref=e105] [cursor=pointer]:
+              - /url: /qvct/journal
+              - img [ref=e107]
+              - generic [ref=e110]: Mon journal
+          - listitem [ref=e111]:
+            - link "Demandes d'échange" [ref=e112] [cursor=pointer]:
+              - /url: /qvct/exchanges
+              - img [ref=e114]
+              - generic [ref=e117]: Demandes d'échange
+          - listitem [ref=e118]:
+            - link "Formations" [ref=e119] [cursor=pointer]:
+              - /url: /formations
+              - img [ref=e121]
+              - generic [ref=e124]: Formations
+          - listitem [ref=e125]:
+            - link "Communication" [ref=e126] [cursor=pointer]:
+              - /url: /communication
+              - img [ref=e128]
+              - generic [ref=e130]: Communication
+      - generic [ref=e131]:
+        - paragraph [ref=e132]: Administration
+        - list [ref=e133]:
+          - listitem [ref=e134]:
+            - link "Utilisateurs" [ref=e135] [cursor=pointer]:
+              - /url: /users
+              - img [ref=e137]
+              - generic [ref=e141]: Utilisateurs
+    - generic [ref=e143]:
+      - generic [ref=e144]: SM
+      - generic [ref=e145]:
+        - paragraph [ref=e146]: Sophie Martin
+        - paragraph [ref=e147]: utilisateur
+  - generic [ref=e148]:
+    - banner [ref=e149]:
+      - generic [ref=e151]:
+        - heading "Bienvenue sur HS Quality" [level=1] [ref=e152]
+        - paragraph [ref=e153]: Premiers pas
+      - generic [ref=e154]:
+        - button "Rechercher (Cmd+K)" [ref=e155] [cursor=pointer]:
+          - img [ref=e156]
+          - generic [ref=e159]: Rechercher
+          - generic [ref=e160]: ⌘K
+        - button "Déclarer un incident" [ref=e161] [cursor=pointer]:
+          - img [ref=e162]
+          - text: Déclarer un incident
+        - button "Notifications" [ref=e165] [cursor=pointer]:
+          - img [ref=e166]
+        - button "SM Sophie Martin" [ref=e169] [cursor=pointer]:
+          - generic [ref=e170]: SM
+          - generic [ref=e171]: Sophie Martin
+          - img [ref=e172]
+    - status [ref=e174]:
+      - generic [ref=e175]:
+        - generic [ref=e176]:
+          - img [ref=e178]
+          - generic [ref=e181]:
+            - paragraph [ref=e182]: Double authentification non configurée
+            - paragraph [ref=e183]: Votre rôle implique l'accès à des données de santé. Activez le MFA TOTP pour protéger votre compte — moins de 2 minutes.
+        - generic [ref=e184]:
+          - button "Plus tard" [ref=e185]
+          - link "Configurer maintenant" [ref=e186] [cursor=pointer]:
+            - /url: /dashboard/profile/mfa-setup
+            - text: Configurer maintenant
+            - img [ref=e187]
+    - main [ref=e189]:
+      - generic [ref=e191]:
+        - navigation "Fil d'ariane" [ref=e192]:
+          - link "Tableau de bord" [ref=e194] [cursor=pointer]:
+            - /url: /dashboard
+          - generic [ref=e195]:
+            - img [ref=e196]
+            - generic [ref=e198]: Premiers pas
+        - heading "Bienvenue Sophie !" [level=1] [ref=e199]
+        - paragraph [ref=e200]: 5 étapes pour configurer votre espace — 5 minutes top chrono
+      - generic [ref=e201]:
+        - navigation "Progression" [ref=e202]:
+          - list [ref=e203]:
+            - listitem [ref=e204]:
+              - button "1 Bienvenue" [disabled] [ref=e205]:
+                - generic [ref=e206]: "1"
+                - generic [ref=e207]: Bienvenue
+            - listitem [ref=e208]:
+              - button "2 Équipe" [disabled] [ref=e210]:
+                - generic [ref=e211]: "2"
+                - generic [ref=e212]: Équipe
+            - listitem [ref=e213]:
+              - button "3 Sécurité" [disabled] [ref=e215]:
+                - generic [ref=e216]: "3"
+                - generic [ref=e217]: Sécurité
+            - listitem [ref=e218]:
+              - button "4 Bénéficiaire" [disabled] [ref=e220]:
+                - generic [ref=e221]: "4"
+                - generic [ref=e222]: Bénéficiaire
+            - listitem [ref=e223]:
+              - button "5 C'est parti" [disabled] [ref=e225]:
+                - generic [ref=e226]: "5"
+                - generic [ref=e227]: C'est parti
+        - generic [ref=e228]:
+          - paragraph [ref=e229]: Étape 1 sur 5
+          - heading "Bienvenue" [level=2] [ref=e230]
+          - paragraph [ref=e231]: Vue d'ensemble de votre espace HS Quality.
+        - generic [ref=e233]:
+          - paragraph [ref=e235]:
+            - text: HS Quality structure votre démarche qualité et QVCT — du terrain à la direction, en conformité HAS et RGPD. Voici les
+            - strong [ref=e236]: 3 piliers
+            - text: "de votre nouvelle plateforme :"
+          - generic [ref=e237]:
+            - generic [ref=e238]:
+              - generic [ref=e239]: 🏥
+              - heading "Terrain tracé" [level=4] [ref=e240]
+              - paragraph [ref=e241]: Chaque intervention, chaque incident est consigné — preuve auditable en visite HAS.
+            - generic [ref=e242]:
+              - generic [ref=e243]: 💚
+              - heading "QVCT mesurée" [level=4] [ref=e244]
+              - paragraph [ref=e245]: Baromètres anonymes, signaux faibles RPS détectés automatiquement, plans d'action ciblés.
+            - generic [ref=e246]:
+              - generic [ref=e247]: 📊
+              - heading "Conformité prouvée" [level=4] [ref=e248]
+              - paragraph [ref=e249]: Registre d'audit RGPD Art. 30, données chiffrées, hébergement HDS France.
+          - generic [ref=e250]:
+            - button "Commencer la configuration →" [ref=e251]
+            - paragraph [ref=e252]: Vous pourrez interrompre à tout moment et reprendre plus tard.
+        - generic [ref=e253]:
+          - button "Annuler" [ref=e255]
+          - button "Suivant" [ref=e257]

@@ -1,0 +1,247 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]: Internal Server Error
+    - button "Copy as Markdown" [ref=e11] [cursor=pointer]:
+      - img [ref=e12]
+      - generic [ref=e15]: Copy as Markdown
+  - generic [ref=e18]:
+    - generic [ref=e19]:
+      - heading "Illuminate\\Database\\QueryException" [level=1] [ref=e20]
+      - generic [ref=e22]: vendor/laravel/framework/src/Illuminate/Database/Connection.php:838
+      - paragraph [ref=e23]: "SQLSTATE[42703]: Undefined column: 7 ERROR: column \"archived_at\" does not exist LINE 1: ...campaigns_count\" from \"qvct_questionnaires\" where \"archived_... ^ (Connection: pgsql, Host: 127.0.0.1, Port: 5432, Database: qualite_domicile, SQL: select \"qvct_questionnaires\".*, (select count(*) from \"qvct_campaigns\" where \"qvct_questionnaires\".\"id\" = \"qvct_campaigns\".\"questionnaire_id\" and \"qvct_campaigns\".\"structure_id\" = 019dfc2d-1a71-70a4-bfa9-797165f21f05 and \"qvct_campaigns\".\"deleted_at\" is null) as \"campaigns_count\" from \"qvct_questionnaires\" where \"archived_at\" is null and \"qvct_questionnaires\".\"structure_id\" = 019dfc2d-1a71-70a4-bfa9-797165f21f05 and \"qvct_questionnaires\".\"deleted_at\" is null order by \"created_at\" desc)"
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: LARAVEL
+          - generic [ref=e28]: 12.56.0
+        - generic [ref=e29]:
+          - generic [ref=e30]: PHP
+          - generic [ref=e31]: 8.4.8
+      - generic [ref=e32]:
+        - img [ref=e33]
+        - text: UNHANDLED
+      - generic [ref=e36]: CODE 42703
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - img [ref=e40]
+        - text: "500"
+      - generic [ref=e43]:
+        - img [ref=e44]
+        - text: GET
+      - generic [ref=e47]: http://127.0.0.1:8765/qvct/campaigns/create
+      - button [ref=e48] [cursor=pointer]:
+        - img [ref=e49]
+  - generic [ref=e53]:
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - img [ref=e57]
+        - heading "Exception trace" [level=3] [ref=e60]
+      - generic [ref=e61]:
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e64]
+          - generic [ref=e68]: 9 vendor frames
+          - button [ref=e69]:
+            - img [ref=e70]
+        - generic [ref=e74]:
+          - generic [ref=e75] [cursor=pointer]:
+            - generic [ref=e78]:
+              - code [ref=e82]:
+                - generic [ref=e83]: Illuminate\Database\Eloquent\Builder->get(array)
+              - generic [ref=e85]: app/Http/Controllers/QvctCampaignController.php:40
+            - button [ref=e87]:
+              - img [ref=e88]
+          - code [ref=e96]:
+            - generic [ref=e97]: "35"
+            - generic [ref=e98]: 36 $questionnaires = QvctQuestionnaire::query()
+            - generic [ref=e99]: 37 ->whereNull('archived_at')
+            - generic [ref=e100]: 38 ->withCount(['campaigns'])
+            - generic [ref=e101]: 39 ->orderByDesc('created_at')
+            - generic [ref=e102]: 40 ->get(['id', 'title', 'frequency', 'questions', 'created_at']);
+            - generic [ref=e103]: "41"
+            - generic [ref=e104]: 42 return Inertia::render('dashboard/qvct/campaigns/create', [
+            - generic [ref=e105]: 43 'questionnaires' => $questionnaires->map(fn (QvctQuestionnaire $q) => [
+            - generic [ref=e106]: 44 'id' => $q->id,
+            - generic [ref=e107]: 45 'title' => $q->title,
+            - generic [ref=e108]: "46 'frequency' => $q->frequency instanceof \\BackedEnum ? $q->frequency->value : $q->frequency,"
+            - generic [ref=e109]: "47 'question_count' => is_array($q->questions) ? count($q->questions) : 0,"
+            - generic [ref=e110]: 48 'campaigns_count' => $q->campaigns_count ?? 0,
+            - generic [ref=e111]: 49 ])->all(),
+            - generic [ref=e112]: 50 'teams' => $this->demoTeams(),
+            - generic [ref=e113]: 51 ]);
+            - generic [ref=e114]: "52"
+        - generic [ref=e116] [cursor=pointer]:
+          - img [ref=e117]
+          - generic [ref=e121]: 9 vendor frames
+          - button [ref=e122]:
+            - img [ref=e123]
+        - generic [ref=e128] [cursor=pointer]:
+          - generic [ref=e131]:
+            - code [ref=e135]:
+              - generic [ref=e136]: "Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(object(Illuminate\\Http\\Request))"
+            - generic [ref=e138]: app/Http/Middleware/RequireMfa.php:55
+          - button [ref=e140]:
+            - img [ref=e141]
+        - generic [ref=e146] [cursor=pointer]:
+          - img [ref=e147]
+          - generic [ref=e151]: 1 vendor frame
+          - button [ref=e152]:
+            - img [ref=e153]
+        - generic [ref=e158] [cursor=pointer]:
+          - generic [ref=e161]:
+            - code [ref=e165]:
+              - generic [ref=e166]: "Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(object(Illuminate\\Http\\Request))"
+            - generic [ref=e168]: app/Http/Middleware/TenantResolver.php:50
+          - button [ref=e170]:
+            - img [ref=e171]
+        - generic [ref=e176] [cursor=pointer]:
+          - img [ref=e177]
+          - generic [ref=e181]: 5 vendor frames
+          - button [ref=e182]:
+            - img [ref=e183]
+        - generic [ref=e188] [cursor=pointer]:
+          - generic [ref=e191]:
+            - code [ref=e195]:
+              - generic [ref=e196]: "Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():194}:195}(object(Illuminate\\Http\\Request))"
+            - generic [ref=e198]: app/Http/Middleware/ThrottlePasswordEndpoints.php:57
+          - button [ref=e200]:
+            - img [ref=e201]
+        - generic [ref=e206] [cursor=pointer]:
+          - img [ref=e207]
+          - generic [ref=e211]: 23 vendor frames
+          - button [ref=e212]:
+            - img [ref=e213]
+        - generic [ref=e218] [cursor=pointer]:
+          - generic [ref=e221]:
+            - code [ref=e225]:
+              - generic [ref=e226]: "Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():178}(object(Illuminate\\Http\\Request))"
+            - generic [ref=e228]: app/Http/Middleware/SecurityHeaders.php:23
+          - button [ref=e230]:
+            - img [ref=e231]
+        - generic [ref=e236] [cursor=pointer]:
+          - img [ref=e237]
+          - generic [ref=e241]: 23 vendor frames
+          - button [ref=e242]:
+            - img [ref=e243]
+        - generic [ref=e248] [cursor=pointer]:
+          - generic [ref=e251]:
+            - code [ref=e255]:
+              - generic [ref=e256]: Illuminate\Foundation\Application->handleRequest(object(Illuminate\Http\Request))
+            - generic [ref=e258]: public/index.php:20
+          - button [ref=e260]:
+            - img [ref=e261]
+        - generic [ref=e266] [cursor=pointer]:
+          - img [ref=e267]
+          - generic [ref=e271]: 1 vendor frame
+          - button [ref=e272]:
+            - img [ref=e273]
+    - generic [ref=e277]:
+      - generic [ref=e278]:
+        - generic [ref=e279]:
+          - img [ref=e281]
+          - heading "Queries" [level=3] [ref=e283]
+        - generic [ref=e285]: 1-4 of 4
+      - generic [ref=e286]:
+        - generic [ref=e287]:
+          - generic [ref=e288]:
+            - generic [ref=e289]:
+              - img [ref=e290]
+              - generic [ref=e292]: pgsql
+            - code [ref=e296]:
+              - generic [ref=e297]: select * from "users" where "id" = 1 and "users"."deleted_at" is null limit 1
+          - generic [ref=e298]: 13.15ms
+        - generic [ref=e299]:
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - img [ref=e302]
+              - generic [ref=e304]: pgsql
+            - code [ref=e308]:
+              - generic [ref=e309]: select * from "structures" where "structures"."id" = '019dfc2d-1a71-70a4-bfa9-797165f21f05' and "structures"."deleted_at" is null limit 1
+          - generic [ref=e310]: 1.66ms
+        - generic [ref=e311]:
+          - generic [ref=e312]:
+            - generic [ref=e313]:
+              - img [ref=e314]
+              - generic [ref=e316]: pgsql
+            - code [ref=e320]:
+              - generic [ref=e321]: select "permissions".*, "model_has_permissions"."model_id" as "pivot_model_id", "model_has_permissions"."permission_id" as "pivot_permission_id", "model_has_permissions"."model_type" as "pivot_model_type", "model_has_permissions"."structure_id" as "pivot_structure_id" from "permissions" inner join "model_has_permissions" on "permissions"."id" = "model_has_permissions"."permission_id" where "model_has_permissions"."structure_id" = '019dfc2d-1a71-70a4-bfa9-797165f21f05' and "model_has_permissions"."model_id" in (1) and "model_has_permissions"."model_type" = 'App\Models\User'
+          - generic [ref=e322]: 2.28ms
+        - generic [ref=e323]:
+          - generic [ref=e324]:
+            - generic [ref=e325]:
+              - img [ref=e326]
+              - generic [ref=e328]: pgsql
+            - code [ref=e332]:
+              - generic [ref=e333]: select "roles".*, "model_has_roles"."model_id" as "pivot_model_id", "model_has_roles"."role_id" as "pivot_role_id", "model_has_roles"."model_type" as "pivot_model_type", "model_has_roles"."structure_id" as "pivot_structure_id" from "roles" inner join "model_has_roles" on "roles"."id" = "model_has_roles"."role_id" where "model_has_roles"."structure_id" = '019dfc2d-1a71-70a4-bfa9-797165f21f05' and ("roles"."structure_id" is null or "roles"."structure_id" = '019dfc2d-1a71-70a4-bfa9-797165f21f05') and "model_has_roles"."model_id" in (1) and "model_has_roles"."model_type" = 'App\Models\User'
+          - generic [ref=e334]: 71.92ms
+  - generic [ref=e336]:
+    - generic [ref=e337]:
+      - heading "Headers" [level=2] [ref=e338]
+      - generic [ref=e339]:
+        - generic [ref=e340]:
+          - generic [ref=e341]: host
+          - generic [ref=e343]: 127.0.0.1:8765
+        - generic [ref=e344]:
+          - generic [ref=e345]: connection
+          - generic [ref=e347]: keep-alive
+        - generic [ref=e348]:
+          - generic [ref=e349]: sec-ch-ua
+          - generic [ref=e351]: "\"Chromium\";v=\"148\", \"Google Chrome\";v=\"148\", \"Not/A)Brand\";v=\"99\""
+        - generic [ref=e352]:
+          - generic [ref=e353]: sec-ch-ua-mobile
+          - generic [ref=e355]: "?0"
+        - generic [ref=e356]:
+          - generic [ref=e357]: sec-ch-ua-platform
+          - generic [ref=e359]: "\"macOS\""
+        - generic [ref=e360]:
+          - generic [ref=e361]: upgrade-insecure-requests
+          - generic [ref=e363]: "1"
+        - generic [ref=e364]:
+          - generic [ref=e365]: user-agent
+          - generic [ref=e367]: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36
+        - generic [ref=e368]:
+          - generic [ref=e369]: accept
+          - generic [ref=e371]: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+        - generic [ref=e372]:
+          - generic [ref=e373]: sec-fetch-site
+          - generic [ref=e375]: none
+        - generic [ref=e376]:
+          - generic [ref=e377]: sec-fetch-mode
+          - generic [ref=e379]: navigate
+        - generic [ref=e380]:
+          - generic [ref=e381]: sec-fetch-user
+          - generic [ref=e383]: "?1"
+        - generic [ref=e384]:
+          - generic [ref=e385]: sec-fetch-dest
+          - generic [ref=e387]: document
+        - generic [ref=e388]:
+          - generic [ref=e389]: accept-encoding
+          - generic [ref=e391]: gzip, deflate, br, zstd
+        - generic [ref=e392]:
+          - generic [ref=e393]: accept-language
+          - generic [ref=e395]: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7
+        - generic [ref=e396]:
+          - generic [ref=e397]: cookie
+          - generic [ref=e399]: XSRF-TOKEN=eyJpdiI6IjhXQWJLWjFYSFFXbWlmZmNHUzlNSkE9PSIsInZhbHVlIjoic0FVRFZNSFBxelFDMWMwZVFJL1VXSHNmNTAyM0VqejJMZW9GZytQNVlLLy8xeWpnU0xDL0JqMysxci9yT29vVmNsN1haU0l1VDJoYWk1VTRGL3l6TitES2pBbDNqVWxzS1o5Zmpqc1dTbWhBWDFIUkpTVmx3blE2Y3pxMlA1R0EiLCJtYWMiOiI3MGFlOGQ3MWEyZDZiNmRjZWQ5NmU1ODEwMDNiZDM5ODBjYjIxMmFjOWE1YjM0NTkzMTI2MzRlYzQzNDVlYTJkIiwidGFnIjoiIn0%3D; qualitedomicile-session=eyJpdiI6IjcycWdZWWVpdFZETm0rdEI0TWkwc2c9PSIsInZhbHVlIjoiaUEzWWpHWm9FRWRxZm9qRUI4TWNTWUhjV0ZiL1d1UVpoOHVlS3ZsZnlhV3dmOFBVRE9wbUpETjU1UGREU2VIN2pObjBSbjlESGFZb2RXMkgrTzdZV2QvYU42WkhqRlBra3JwcjdDSFI4MW1CWHFDczNsa0I1WlpBY0ZWazNUYlQiLCJtYWMiOiJmZDQyZTNiOWI4ZjA5ZGViNjAzOTAxNjFlZDI4YzI1M2Y4MmQwYTIzMjM2ZjllMjE3MDZkZDk1YjdkZDU0NDE3IiwidGFnIjoiIn0%3D
+    - generic [ref=e400]:
+      - heading "Body" [level=2] [ref=e401]
+      - generic [ref=e402]: // No request body
+    - generic [ref=e403]:
+      - heading "Routing" [level=2] [ref=e404]
+      - generic [ref=e405]:
+        - generic [ref=e406]:
+          - generic [ref=e407]: controller
+          - generic [ref=e409]: App\Http\Controllers\QvctCampaignController@create
+        - generic [ref=e410]:
+          - generic [ref=e411]: route name
+          - generic [ref=e413]: qvct.campaigns.create
+        - generic [ref=e414]:
+          - generic [ref=e415]: middleware
+          - generic [ref=e417]: web, auth, verified
+    - generic [ref=e418]:
+      - heading "Routing parameters" [level=2] [ref=e419]
+      - generic [ref=e420]: // No routing parameters
+  - generic [ref=e423]:
+    - img [ref=e425]
+    - img [ref=e3463]
