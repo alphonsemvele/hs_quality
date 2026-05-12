@@ -60,7 +60,7 @@ class PlannedTaskController extends Controller
 
         $validated = $request->validate([
             'order' => ['required', 'array', 'min:1'],
-            'order.*' => ['required', 'integer', 'distinct'],
+            'order.*' => ['required', 'uuid', 'distinct'],
         ]);
 
         $this->service->reorder($carePlan, $validated['order']);

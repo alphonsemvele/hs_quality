@@ -373,9 +373,14 @@ class InterventionController extends Controller
 
         // Authorize each item — tenant scope is already enforced by the global
         // scope on Intervention, but cancel itself is a policy decision per row.
-        Intervention::query()->whereIn('id', $validated['ids'])->each(function (Intervention $i): void {
-            $this->authorize('update', $i);
-        });
+        // Skip terminal rows here — the service silently skips them anyway and
+        // most `update` policies refuse mutations on completed interventions,
+        // which would fail every bulk call that includes historical rows.
+        Intervention::query()
+            ->whereIn('id', $validated['ids'])
+            ->get()
+            ->reject(fn (Intervention $i) => $i->isTerminal())
+            ->each(fn (Intervention $i) => $this->authorize('update', $i));
 
         $result = $this->service->bulkCancel($validated['ids'], $validated['cancellation_reason']);
 
