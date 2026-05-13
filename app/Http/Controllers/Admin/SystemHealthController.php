@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FailedJob;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -72,7 +73,7 @@ class SystemHealthController extends Controller
     {
         try {
             $start = microtime(true);
-            DB::connection()->select('SELECT 1 AS ok');
+            DB::connection()->select('SELECT 1 AS ok'); // connectivity probe — no Eloquent equivalent
             $latencyMs = (int) round((microtime(true) - $start) * 1000);
 
             return [
@@ -129,20 +130,20 @@ class SystemHealthController extends Controller
     private function failedJobsMetrics(): array
     {
         try {
-            $last24h = (int) DB::table('failed_jobs')
+            $last24h = (int) FailedJob::query()
                 ->where('failed_at', '>=', CarbonImmutable::now()->subDay())
                 ->count();
-            $total = (int) DB::table('failed_jobs')->count();
-            $recent = DB::table('failed_jobs')
+            $total = (int) FailedJob::query()->count();
+            $recent = FailedJob::query()
                 ->orderByDesc('failed_at')
                 ->limit(5)
                 ->get(['id', 'connection', 'queue', 'exception', 'failed_at'])
-                ->map(fn (object $row): array => [
-                    'id' => (int) $row->id,
-                    'connection' => (string) $row->connection,
-                    'queue' => (string) $row->queue,
-                    'exception_class' => $this->firstLineOfException((string) $row->exception),
-                    'failed_at' => (string) $row->failed_at,
+                ->map(fn (FailedJob $job): array => [
+                    'id' => (int) $job->id,
+                    'connection' => (string) $job->connection,
+                    'queue' => (string) $job->queue,
+                    'exception_class' => $this->firstLineOfException((string) $job->exception),
+                    'failed_at' => (string) $job->failed_at,
                 ])
                 ->all();
 
