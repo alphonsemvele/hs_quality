@@ -78,6 +78,9 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
                 ]}
                 actions={
                     <>
+                        <Link href={`/admin/structures/${structure.id}/audit-trail`}>
+                            <Button variant="secondary">Audit-trail</Button>
+                        </Link>
                         <Link href={`/admin/structures/${structure.id}/edit`}>
                             <Button variant="secondary">Modifier</Button>
                         </Link>

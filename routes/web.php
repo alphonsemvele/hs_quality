@@ -167,6 +167,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->middleware('log_sensitive_read:beneficiary_dossier')
             ->name('beneficiaries.dossier');
 
+        Route::get('/beneficiaries/{beneficiary}/timeline', [BeneficiaryController::class, 'timeline'])
+            ->name('beneficiaries.timeline');
+
         // ── Care plans ────────────────────────────────────────────────────────
         Route::get('/beneficiaries/{beneficiary}/care-plans', [CarePlanController::class, 'indexForBeneficiary'])
             ->name('beneficiaries.care-plans.index');
@@ -326,6 +329,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
             Route::post('/', [AdminStructureController::class, 'store'])->name('store');
             Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
+            Route::get('/{structure}/audit-trail', [AdminStructureController::class, 'auditTrail'])->name('audit-trail');
             Route::get('/{structure}/edit', [AdminStructureController::class, 'edit'])->name('edit');
             Route::put('/{structure}', [AdminStructureController::class, 'update'])->name('update');
             Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');
