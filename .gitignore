@@ -27,3 +27,8 @@ yarn-error.log
 /.zed
 public/hot
 tests/load/summary.json
+
+# Screenshot artefacts — keep only intentional images
+*.png
+!public/**/*.png
+!tests/**/fixtures/*.png
