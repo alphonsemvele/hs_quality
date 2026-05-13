@@ -76,6 +76,8 @@ export default function DashboardLayout({
                   section: 'Plateforme',
                   links: [
                       { href: '/admin/structures', label: 'Structures', icon: <BuildingIcon /> },
+                      { href: '/admin/feature-flags', label: 'Feature flags', icon: <FlagIcon /> },
+                      { href: '/admin/system-health', label: 'Santé système', icon: <BoltIcon /> },
                   ],
               },
           ]
@@ -653,6 +655,20 @@ function KeyIcon() {
     return (
         <Icon>
             <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </Icon>
+    );
+}
+function FlagIcon() {
+    return (
+        <Icon>
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22V15" />
+        </Icon>
+    );
+}
+function BoltIcon() {
+    return (
+        <Icon>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </Icon>
     );
 }

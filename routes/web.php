@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\FeatureFlagController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
+use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuditGridController;
@@ -45,6 +47,18 @@ Route::get('/fonctionnalites', function () {
 Route::get('/conformite', function () {
     return Inertia::render('marketing/compliance');
 })->name('marketing.compliance');
+
+Route::get('/tarifs', function () {
+    return Inertia::render('marketing/tarifs');
+})->name('marketing.tarifs');
+
+Route::get('/clients', function () {
+    return Inertia::render('marketing/clients');
+})->name('marketing.clients');
+
+Route::get('/changelog', function () {
+    return Inertia::render('marketing/changelog');
+})->name('marketing.changelog');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 Route::post('/contact', [ContactController::class, 'store'])
@@ -297,6 +311,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('admin.')
         ->group(function (): void {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+            Route::get('/feature-flags', [FeatureFlagController::class, 'index'])->name('feature-flags.index');
+            Route::post('/feature-flags/toggle', [FeatureFlagController::class, 'toggle'])->name('feature-flags.toggle');
+
+            Route::get('/system-health', [SystemHealthController::class, 'index'])->name('system-health.index');
         });
 
     Route::middleware(['super_admin'])

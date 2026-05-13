@@ -91,7 +91,7 @@ export function MarketingStyles() {
 // Shared marketing links — single source of truth for nav + footer.
 const NAV_LINKS: [string, string][] = [
     ['Fonctionnalités', '/fonctionnalites'],
-    ['Tarifs', '/#pricing'],
+    ['Tarifs', '/tarifs'],
     ['Conformité', '/conformite'],
     ['Contact', '/contact'],
 ];
@@ -268,9 +268,17 @@ export function MarketingFooter() {
             h: 'Plateforme',
             links: [
                 { label: 'Fonctionnalités', href: '/fonctionnalites' },
-                { label: 'Tarifs', href: '/#pricing' },
+                { label: 'Tarifs', href: '/tarifs' },
                 { label: 'Conformité', href: '/conformite' },
                 { label: 'Contact', href: '/contact' },
+            ],
+        },
+        {
+            h: 'Ressources',
+            links: [
+                { label: 'Clients & témoignages', href: '/clients' },
+                { label: 'Changelog produit', href: '/changelog' },
+                { label: 'Documentation API', href: '/docs/api' },
             ],
         },
         {
@@ -296,7 +304,7 @@ export function MarketingFooter() {
     return (
         <footer className="border-t border-ink-100 bg-white px-5 py-14 sm:px-8">
             <div className="mx-auto max-w-7xl">
-                <div className="grid grid-cols-2 gap-8 border-b border-ink-100 pb-10 lg:grid-cols-5">
+                <div className="grid grid-cols-2 gap-8 border-b border-ink-100 pb-10 lg:grid-cols-6">
                     <div className="col-span-2">
                         <Link href="/" className="flex items-center gap-2.5">
                             <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-semibold italic text-white">
