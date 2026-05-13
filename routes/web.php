@@ -300,6 +300,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('communication.send');
     Route::post('/communication/news', [CommunicationController::class, 'publishNews'])
         ->name('communication.news.publish');
+    Route::post('/communication/documents', [CommunicationController::class, 'uploadDocument'])
+        ->name('communication.documents.upload');
+    Route::get('/communication/documents/{document}/download', [CommunicationController::class, 'downloadDocument'])
+        ->name('communication.documents.download');
 
     // ── Platform admin (super_admin only) ─────────────────────────────────────
     // Tenants are managed here. NOT inside the `tenant` middleware group —

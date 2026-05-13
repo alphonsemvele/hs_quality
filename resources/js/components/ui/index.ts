@@ -5,6 +5,7 @@ export { Card, CardBody, CardFooter, CardHeader } from './Card';
 export { BarChart, DonutChart, LineChart, Sparkline } from './Chart';
 export type { ChartTone, SeriesPoint as ChartSeriesPoint } from './Chart';
 export { ConfirmDialog } from './ConfirmDialog';
+export { DropzoneUploader, type DropzoneFieldDefinition } from './DropzoneUploader';
 export { EmptyState } from './EmptyState';
 export { EmptyStateRich } from './EmptyStateRich';
 export { FilterChipsBar, FilterDrawer } from './FilterDrawer';
@@ -15,6 +16,7 @@ export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from
 export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
+export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
 export {
     CarePlanStatusBadge,

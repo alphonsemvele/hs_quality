@@ -6,11 +6,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Communication\PublishNewsRequest;
 use App\Http\Requests\Communication\SendMessageRequest;
+use App\Http\Requests\Communication\UploadDocumentRequest;
 use App\Models\DiscussionGroup;
 use App\Models\Document;
 use App\Models\NewsFeedPost;
+use App\Services\DocumentLibraryService;
 use App\Services\MessageService;
 use App\Services\NewsFeedService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,6 +35,7 @@ class CommunicationController extends Controller
     public function __construct(
         private readonly MessageService $messages,
         private readonly NewsFeedService $news,
+        private readonly DocumentLibraryService $documents,
     ) {}
 
     public function index(): Response
@@ -117,6 +121,45 @@ class CommunicationController extends Controller
         );
 
         return back()->with('success', 'Actualité publiée.');
+    }
+
+    /**
+     * Upload a new document to the structure library. Multipart endpoint
+     * called by the Inertia DropzoneUploader. Returns JSON so the JS client
+     * can render the file in its progress list without a full page reload.
+     */
+    public function uploadDocument(UploadDocumentRequest $request): JsonResponse
+    {
+        $document = $this->documents->upload(
+            currentStructure(),
+            $request->user(),
+            $request->file('file'),
+            $request->validated('title'),
+            $request->validated('description'),
+            $request->validated('roles_acl'),
+        );
+
+        return response()->json([
+            'id' => $document->id,
+            'title' => $document->title,
+            'mime_type' => $document->mime_type,
+            'size_bytes' => $document->size_bytes,
+            'version' => $document->version,
+            'uploaded_at' => $document->created_at?->isoFormat('DD/MM/YYYY'),
+        ], 201);
+    }
+
+    /**
+     * Issue a temporary signed download URL for a stored document. The
+     * service re-checks the role ACL before returning the URL.
+     */
+    public function downloadDocument(Document $document): RedirectResponse
+    {
+        $this->authorize('view', $document);
+
+        $url = $this->documents->downloadUrl($document, request()->user());
+
+        return redirect()->away($url);
     }
 
     /** @return list<array<string, mixed>> */
