@@ -560,66 +560,167 @@ function formatSize(kb: number): string {
 }
 
 function QaTab({ questions }: { questions: QaQuestion[] }) {
-    if (questions.length === 0) {
-        return (
-            <Card>
-                <EmptyState icon={<HelpIcon />} title="Aucune question" description="Posez vos questions à toute l'équipe et bénéficiez de leur expertise." />
-            </Card>
-        );
-    }
+    const [composing, setComposing] = useState(false);
+
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
-                <p className="text-xs text-ink-500 dark:text-ink-400">{questions.length} question(s)</p>
-                <Button size="sm" leadingIcon={<PlusIcon />}>Poser une question</Button>
+                <p className="text-xs text-ink-500 dark:text-ink-400">
+                    {questions.length} question{questions.length > 1 ? 's' : ''}
+                </p>
+                {!composing && (
+                    <Button size="sm" leadingIcon={<PlusIcon />} onClick={() => setComposing(true)}>
+                        Poser une question
+                    </Button>
+                )}
             </div>
-            <ul className="space-y-3">
-                {questions.map((q) => (
-                    <li key={q.id}>
-                        <Card>
-                            <CardBody>
-                                <div className="flex gap-4">
-                                    {/* Vote column */}
-                                    <div className="flex w-12 shrink-0 flex-col items-center gap-1.5 text-center">
-                                        <button
-                                            type="button"
-                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-brand-400 hover:text-brand-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
-                                            aria-label="Voter pour"
-                                        >
-                                            <ChevronUpIcon />
-                                        </button>
-                                        <span className="font-mono text-sm font-bold tabular-nums text-ink-900 dark:text-white">{q.votes}</span>
-                                        <button
-                                            type="button"
-                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-danger-400 hover:text-danger-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
-                                            aria-label="Voter contre"
-                                        >
-                                            <ChevronDownIcon />
-                                        </button>
-                                    </div>
 
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{q.title}</h3>
-                                            {q.accepted && (
-                                                <Badge tone="sage" size="xs">
-                                                    ✓ Réponse acceptée
-                                                </Badge>
-                                            )}
+            {composing && <QuestionComposer onClose={() => setComposing(false)} />}
+
+            {questions.length === 0 ? (
+                <Card>
+                    <EmptyState
+                        icon={<HelpIcon />}
+                        title="Aucune question"
+                        description="Posez vos questions à toute l'équipe et bénéficiez de leur expertise."
+                    />
+                </Card>
+            ) : (
+                <ul className="space-y-3">
+                    {questions.map((q) => (
+                        <li key={q.id}>
+                            <Link href={`/communication/qa/${q.id}`} className="block">
+                                <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                                    <CardBody>
+                                        <div className="flex gap-4">
+                                            <div className="flex w-12 shrink-0 flex-col items-center gap-1 text-center">
+                                                <span className="font-mono text-lg font-bold tabular-nums text-ink-900 dark:text-white">
+                                                    {q.votes}
+                                                </span>
+                                                <span className="text-[10px] uppercase tracking-wider text-ink-400 dark:text-ink-500">
+                                                    votes
+                                                </span>
+                                            </div>
+
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{q.title}</h3>
+                                                    {q.accepted && (
+                                                        <Badge tone="sage" size="xs">
+                                                            ✓ Réponse acceptée
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <p className="mt-1 line-clamp-2 text-xs text-ink-600 dark:text-ink-300">{q.preview}</p>
+                                                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
+                                                    <span>
+                                                        <span className="font-medium text-ink-700 dark:text-ink-200">{q.asker}</span> ·{' '}
+                                                        {q.created_at}
+                                                    </span>
+                                                    <span className="font-mono">
+                                                        {q.answers_count} réponse{q.answers_count > 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <span className="self-center text-sm font-medium text-brand-600 dark:text-brand-400">
+                                                Voir →
+                                            </span>
                                         </div>
-                                        <p className="mt-1 line-clamp-2 text-xs text-ink-600 dark:text-ink-300">{q.preview}</p>
-                                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
-                                            <span><span className="font-medium text-ink-700 dark:text-ink-200">{q.asker}</span> · {q.created_at}</span>
-                                            <span className="font-mono">{q.answers_count} réponse{q.answers_count > 1 ? 's' : ''}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardBody>
-                        </Card>
-                    </li>
-                ))}
-            </ul>
+                                    </CardBody>
+                                </Card>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
+    );
+}
+
+function QuestionComposer({ onClose }: { onClose: () => void }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        title: '',
+        body: '',
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/communication/qa', {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('title', 'body');
+                onClose();
+            },
+        });
+    };
+
+    return (
+        <Card>
+            <CardBody>
+                <form onSubmit={submit}>
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">Poser une question</h3>
+                            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                                Visible par toute la structure. Markdown supporté dans le corps.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-full p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-500 dark:hover:bg-ink-700"
+                            aria-label="Fermer"
+                        >
+                            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <label className="mt-4 block">
+                        <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                            Titre <span className="text-danger-500">*</span>
+                        </span>
+                        <input
+                            type="text"
+                            value={data.title}
+                            onChange={(e) => setData('title', e.target.value)}
+                            required
+                            maxLength={200}
+                            placeholder="Ex. « Que faire en cas de refus médicamenteux ? »"
+                            className="mt-1 block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        {errors.title && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.title}</p>}
+                    </label>
+
+                    <label className="mt-4 block">
+                        <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                            Détail <span className="text-danger-500">*</span>
+                        </span>
+                        <textarea
+                            value={data.body}
+                            onChange={(e) => setData('body', e.target.value)}
+                            rows={6}
+                            required
+                            maxLength={20000}
+                            placeholder="Décrivez le contexte et précisez votre question…"
+                            className="mt-1 block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        {errors.body && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.body}</p>}
+                    </label>
+
+                    <div className="mt-4 flex justify-end gap-2">
+                        <Button type="button" variant="secondary" onClick={onClose} disabled={processing}>
+                            Annuler
+                        </Button>
+                        <Button type="submit" disabled={processing || data.title.trim() === '' || data.body.trim() === ''}>
+                            {processing ? 'Publication…' : 'Poser la question'}
+                        </Button>
+                    </div>
+                </form>
+            </CardBody>
+        </Card>
     );
 }
 
@@ -676,20 +777,6 @@ function UploadIcon() {
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-    );
-}
-function ChevronUpIcon() {
-    return (
-        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <polyline points="18 15 12 9 6 15" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
-}
-function ChevronDownIcon() {
-    return (
-        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }

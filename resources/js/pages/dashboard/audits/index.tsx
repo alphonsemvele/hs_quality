@@ -1,3 +1,4 @@
+import { AuditHoverCard } from '@/components/hover-cards';
 import { Badge, Button, Card, CardBody, EmptyStateRich, KpiCard, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
@@ -73,7 +74,14 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{audit.titre}</h3>
+                                                <AuditHoverCard
+                                                    title={audit.titre}
+                                                    referentiel={audit.referentiel_label}
+                                                    statusLabel={audit.statut_label}
+                                                    statusTone={STATUT_TONE[audit.statut] === 'danger' ? 'neutral' : (STATUT_TONE[audit.statut] as 'sage' | 'warning' | 'brand' | 'neutral')}
+                                                    runDate={audit.date_audit}
+                                                    progress={audit.score}
+                                                />
                                                 <Badge tone={STATUT_TONE[audit.statut] ?? 'neutral'} size="sm" dot>
                                                     {audit.statut_label}
                                                 </Badge>

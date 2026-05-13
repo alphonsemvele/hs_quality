@@ -315,6 +315,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/communication/documents/{document}/download', [CommunicationController::class, 'downloadDocument'])
         ->name('communication.documents.download');
 
+    Route::get('/communication/qa/{question}', [CommunicationController::class, 'showQuestion'])
+        ->name('communication.qa.show');
+    Route::post('/communication/qa', [CommunicationController::class, 'askQuestion'])
+        ->name('communication.qa.ask');
+    Route::post('/communication/qa/{question}/answers', [CommunicationController::class, 'answerQuestion'])
+        ->name('communication.qa.answer');
+    Route::post('/communication/qa/{question}/accept-answer', [CommunicationController::class, 'acceptAnswer'])
+        ->name('communication.qa.accept');
+    Route::post('/communication/qa/answers/{answer}/vote', [CommunicationController::class, 'voteAnswer'])
+        ->name('communication.qa.vote');
+
     // ── Platform admin (super_admin only) ─────────────────────────────────────
     // Tenants are managed here. NOT inside the `tenant` middleware group —
     // these endpoints operate on the structure rows themselves and do not

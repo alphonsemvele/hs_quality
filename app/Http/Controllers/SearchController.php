@@ -39,16 +39,33 @@ class SearchController extends Controller
         // PostgreSQL exposes ILIKE for case-insensitive matching. SQLite (used
         // by the test DB) only supports LIKE, which is already case-insensitive
         // for ASCII. Pick the right operator per driver to stay portable.
-        $ilike = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+        $isPg = DB::connection()->getDriverName() === 'pgsql';
+        $ilike = $isPg ? 'ilike' : 'like';
         $groups = [];
 
         if (($abilities['beneficiaries.view'] ?? false) === true) {
             $rows = Beneficiary::query()
-                ->where(function ($q) use ($like, $ilike) {
+                ->where(function ($q) use ($like, $ilike, $isPg, $query) {
                     $q->where('first_name', $ilike, $like)
                         ->orWhere('last_name', $ilike, $like)
                         ->orWhere(DB::raw("first_name || ' ' || last_name"), $ilike, $like);
+
+                    // Trigram fuzzy match in Postgres catches typos and
+                    // mis-accents that substring LIKE misses (e.g. "berge"
+                    // → "Berger"). The GIN indexes from the enable_pg_trgm
+                    // migration keep this cheap.
+                    if ($isPg) {
+                        $q->orWhereRaw('first_name % ?', [$query])
+                            ->orWhereRaw('last_name % ?', [$query]);
+                    }
                 })
+                ->when(
+                    $isPg,
+                    fn ($q) => $q->orderByRaw(
+                        'GREATEST(similarity(first_name, ?), similarity(last_name, ?)) DESC',
+                        [$query, $query],
+                    ),
+                )
                 ->limit(5)
                 ->get(['id', 'first_name', 'last_name', 'gir', 'status']);
 
@@ -71,13 +88,21 @@ class SearchController extends Controller
         if (($abilities['interventions.view'] ?? false) === true) {
             $rows = Intervention::query()
                 ->with(['beneficiary:id,first_name,last_name', 'intervenant:id,first_name,last_name'])
-                ->where(function ($q) use ($like, $ilike) {
-                    $q->whereHas('beneficiary', function ($q2) use ($like, $ilike) {
+                ->where(function ($q) use ($like, $ilike, $isPg, $query) {
+                    $q->whereHas('beneficiary', function ($q2) use ($like, $ilike, $isPg, $query) {
                         $q2->where('first_name', $ilike, $like)
                             ->orWhere('last_name', $ilike, $like);
-                    })->orWhereHas('intervenant', function ($q2) use ($like, $ilike) {
+                        if ($isPg) {
+                            $q2->orWhereRaw('first_name % ?', [$query])
+                                ->orWhereRaw('last_name % ?', [$query]);
+                        }
+                    })->orWhereHas('intervenant', function ($q2) use ($like, $ilike, $isPg, $query) {
                         $q2->where('first_name', $ilike, $like)
                             ->orWhere('last_name', $ilike, $like);
+                        if ($isPg) {
+                            $q2->orWhereRaw('first_name % ?', [$query])
+                                ->orWhereRaw('last_name % ?', [$query]);
+                        }
                     });
                 })
                 ->latest('planned_date')
@@ -129,7 +154,13 @@ class SearchController extends Controller
 
         if (($abilities['audits.view'] ?? false) === true) {
             $rows = AuditRun::query()
-                ->where('title', $ilike, $like)
+                ->where(function ($q) use ($like, $ilike, $isPg, $query) {
+                    $q->where('title', $ilike, $like);
+                    if ($isPg) {
+                        $q->orWhereRaw('title % ?', [$query]);
+                    }
+                })
+                ->when($isPg, fn ($q) => $q->orderByRaw('similarity(title, ?) DESC', [$query]))
                 ->latest('run_date')
                 ->limit(5)
                 ->get(['id', 'title', 'run_date', 'status']);
@@ -152,7 +183,13 @@ class SearchController extends Controller
 
         if (($abilities['plans_amelioration.view'] ?? false) === true) {
             $rows = PlanAmelioration::query()
-                ->where('title', $ilike, $like)
+                ->where(function ($q) use ($like, $ilike, $isPg, $query) {
+                    $q->where('title', $ilike, $like);
+                    if ($isPg) {
+                        $q->orWhereRaw('title % ?', [$query]);
+                    }
+                })
+                ->when($isPg, fn ($q) => $q->orderByRaw('similarity(title, ?) DESC', [$query]))
                 ->latest()
                 ->limit(5)
                 ->get(['id', 'title', 'status']);
