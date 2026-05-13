@@ -170,6 +170,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/beneficiaries/{beneficiary}/timeline', [BeneficiaryController::class, 'timeline'])
             ->name('beneficiaries.timeline');
 
+        Route::get('/beneficiaries/{beneficiary}/contacts', [BeneficiaryController::class, 'contacts'])
+            ->name('beneficiaries.contacts');
+        Route::put('/beneficiaries/{beneficiary}/contacts', [BeneficiaryController::class, 'updateContacts'])
+            ->name('beneficiaries.contacts.update');
+
+        Route::get('/beneficiaries/{beneficiary}/satisfaction', [BeneficiaryController::class, 'satisfaction'])
+            ->name('beneficiaries.satisfaction');
+        Route::post('/beneficiaries/{beneficiary}/satisfaction', [BeneficiaryController::class, 'storeSatisfaction'])
+            ->name('beneficiaries.satisfaction.store');
+
         // ── Care plans ────────────────────────────────────────────────────────
         Route::get('/beneficiaries/{beneficiary}/care-plans', [CarePlanController::class, 'indexForBeneficiary'])
             ->name('beneficiaries.care-plans.index');

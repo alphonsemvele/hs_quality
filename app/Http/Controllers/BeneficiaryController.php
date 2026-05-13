@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserType;
 use App\Http\Requests\Beneficiaries\StoreBeneficiaryRequest;
+use App\Http\Requests\Beneficiaries\StoreSatisfactionRatingRequest;
+use App\Http\Requests\Beneficiaries\UpdateBeneficiaryContactsRequest;
 use App\Http\Requests\Beneficiaries\UpdateBeneficiaryRequest;
 use App\Http\Resources\BeneficiaryDossierResource;
 use App\Http\Resources\BeneficiaryResource;
 use App\Http\Resources\IntervenantAssignmentResource;
 use App\Models\Beneficiary;
+use App\Models\BeneficiarySatisfactionRating;
 use App\Models\CarePlan;
 use App\Models\Incident;
 use App\Models\IntervenantAssignment;
@@ -250,6 +253,110 @@ class BeneficiaryController extends Controller
                 'assignments' => $assignments->count(),
             ],
         ]);
+    }
+
+    /**
+     * Non-medical contacts surface. Deliberately separated from the
+     * dossier médical: this view never reads encrypted health fields
+     * (allergies, medical_history, current_treatments, medical_notes).
+     *
+     * RH and coordinators with "beneficiaries.update" but without medical
+     * read access can use this page to keep family/doctor/emergency
+     * details up to date without ever touching health data.
+     */
+    public function contacts(Beneficiary $beneficiary): Response
+    {
+        $this->authorize('view', $beneficiary);
+
+        return Inertia::render('dashboard/beneficiaries/contacts', [
+            'beneficiary' => [
+                'id' => $beneficiary->id,
+                'full_name' => $beneficiary->fullName(),
+                'initials' => mb_substr($beneficiary->first_name, 0, 1).mb_substr($beneficiary->last_name, 0, 1),
+                'phone' => $beneficiary->phone,
+                'email' => $beneficiary->email,
+                'address' => $beneficiary->address,
+                'postal_code' => $beneficiary->postal_code,
+                'city' => $beneficiary->city,
+                'primary_doctor' => $beneficiary->primary_doctor,
+                'primary_doctor_phone' => $beneficiary->primary_doctor_phone,
+                'emergency_contact_name' => $beneficiary->emergency_contact_name,
+                'emergency_contact_phone' => $beneficiary->emergency_contact_phone,
+                'emergency_contact_relationship' => $beneficiary->emergency_contact_relationship,
+            ],
+            'can_update' => request()->user()->can('update', $beneficiary),
+        ]);
+    }
+
+    public function updateContacts(UpdateBeneficiaryContactsRequest $request, Beneficiary $beneficiary): RedirectResponse
+    {
+        $beneficiary->fill($request->validated())->save();
+
+        return redirect()
+            ->route('beneficiaries.contacts', $beneficiary)
+            ->with('success', 'Contacts mis à jour.');
+    }
+
+    /**
+     * Satisfaction ratings — read view + inline form. Free text is encrypted
+     * at the model layer so the audit trail records the score change but
+     * never the comment ciphertext.
+     */
+    public function satisfaction(Beneficiary $beneficiary): Response
+    {
+        $this->authorize('view', $beneficiary);
+
+        $ratings = BeneficiarySatisfactionRating::query()
+            ->where('beneficiary_id', $beneficiary->id)
+            ->with('ratedBy:id,first_name,last_name')
+            ->orderByDesc('rated_at')
+            ->limit(60)
+            ->get();
+
+        $serialised = $ratings->map(fn (BeneficiarySatisfactionRating $r): array => [
+            'id' => $r->id,
+            'score' => $r->score,
+            'comment' => $r->comment,
+            'rated_at' => Carbon::parse($r->rated_at)->toDateString(),
+            'rated_by' => $r->ratedBy
+                ? trim($r->ratedBy->first_name.' '.$r->ratedBy->last_name)
+                : 'Anonyme',
+            'created_at' => $r->created_at?->toIso8601String(),
+        ])->all();
+
+        $average = $ratings->avg('score');
+
+        return Inertia::render('dashboard/beneficiaries/satisfaction', [
+            'beneficiary' => [
+                'id' => $beneficiary->id,
+                'full_name' => $beneficiary->fullName(),
+                'initials' => mb_substr($beneficiary->first_name, 0, 1).mb_substr($beneficiary->last_name, 0, 1),
+            ],
+            'ratings' => $serialised,
+            'stats' => [
+                'count' => $ratings->count(),
+                'average' => $average !== null ? round((float) $average, 1) : null,
+                'last_rated_at' => $ratings->first()?->rated_at?->toDateString(),
+            ],
+            'can_record' => request()->user()->can('create', BeneficiarySatisfactionRating::class),
+        ]);
+    }
+
+    public function storeSatisfaction(StoreSatisfactionRatingRequest $request, Beneficiary $beneficiary): RedirectResponse
+    {
+        BeneficiarySatisfactionRating::create([
+            'structure_id' => $beneficiary->structure_id,
+            'beneficiary_id' => $beneficiary->id,
+            'intervention_id' => $request->validated('intervention_id'),
+            'score' => $request->validated('score'),
+            'comment' => $request->validated('comment'),
+            'rated_at' => $request->validated('rated_at'),
+            'rated_by' => $request->user()->id,
+        ]);
+
+        return redirect()
+            ->route('beneficiaries.satisfaction', $beneficiary)
+            ->with('success', 'Évaluation enregistrée.');
     }
 
     /**
