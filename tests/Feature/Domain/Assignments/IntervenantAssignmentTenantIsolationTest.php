@@ -8,7 +8,6 @@ use App\Models\User;
 /**
  * Mandatory cross-tenant leak test for IntervenantAssignment.
  */
-
 beforeEach(function () {
     if (app()->bound('current_structure')) {
         app()->forgetInstance('current_structure');

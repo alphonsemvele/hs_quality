@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\RateLimiter;
  * Tests the limiter directly rather than hitting routes (route wiring is
  * tested once routes are added in Phase 1 Month 1).
  */
-
 it('registers the login limiter with 5-per-minute per IP', function () {
     $request = Request::create('/login', 'POST', ['email' => 'user@example.com']);
     $request->server->set('REMOTE_ADDR', '10.0.0.1');

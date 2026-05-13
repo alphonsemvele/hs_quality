@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Schema;
  * See: references/tenancy/tenant-scoped-trait.md
  *      references/tenancy/testing.md
  */
-
 beforeEach(function () {
     Schema::create('test_tenant_records', function (Blueprint $table) {
         $table->id();

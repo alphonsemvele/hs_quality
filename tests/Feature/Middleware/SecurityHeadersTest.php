@@ -4,7 +4,6 @@
  * Verifies SecurityHeaders middleware adds the expected headers on every
  * response (HDS compliance — references/compliance/hds-checklist.md).
  */
-
 it('adds core security headers to web responses', function () {
     $response = $this->get('/up');
 

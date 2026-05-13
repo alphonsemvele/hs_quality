@@ -8,7 +8,6 @@ use App\Models\Structure;
 /**
  * Mandatory cross-tenant leak tests for CarePlan + PlannedTask.
  */
-
 beforeEach(function () {
     if (app()->bound('current_structure')) {
         app()->forgetInstance('current_structure');

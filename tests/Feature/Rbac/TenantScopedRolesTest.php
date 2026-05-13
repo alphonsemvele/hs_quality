@@ -10,7 +10,6 @@ use Spatie\Permission\PermissionRegistrar;
  * correctly scopes role assignments per tenant. A user assigned a role in
  * structure A does NOT have that role when queried from structure B's context.
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });

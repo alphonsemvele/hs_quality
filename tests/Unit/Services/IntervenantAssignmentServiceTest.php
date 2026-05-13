@@ -6,6 +6,7 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Services\IntervenantAssignmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 uses(RefreshDatabase::class);
 
@@ -44,7 +45,7 @@ it('refuses to assign across structures', function () {
     expect(fn () => $this->service->assign(
         intervenant: $this->intervenant,
         beneficiary: $foreignBeneficiary,
-    ))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    ))->toThrow(HttpException::class);
 
     expect(IntervenantAssignment::count())->toBe(0);
 });
@@ -55,7 +56,7 @@ it('refuses a duplicate active assignment', function () {
     expect(fn () => $this->service->assign(
         intervenant: $this->intervenant,
         beneficiary: $this->beneficiary,
-    ))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    ))->toThrow(HttpException::class);
 
     expect(IntervenantAssignment::active()->count())->toBe(1);
 });
@@ -89,5 +90,5 @@ it('refuses to unassign an already-unassigned assignment', function () {
         ->create();
 
     expect(fn () => $this->service->unassign($assignment))
-        ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        ->toThrow(HttpException::class);
 });

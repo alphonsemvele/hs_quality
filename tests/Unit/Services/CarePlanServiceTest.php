@@ -8,6 +8,7 @@ use App\Models\PlannedTask;
 use App\Models\Structure;
 use App\Services\CarePlanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 uses(RefreshDatabase::class);
 
@@ -106,7 +107,7 @@ it('refuses to copy a plan across structures', function () {
         source: $foreignPlan,
         target: $this->beneficiary,
         title: 'Should fail',
-    ))->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+    ))->toThrow(HttpException::class);
 });
 
 it('encrypts the objectives field at rest', function () {

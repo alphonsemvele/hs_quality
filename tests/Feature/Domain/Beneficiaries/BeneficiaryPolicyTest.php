@@ -8,7 +8,6 @@ use Database\Seeders\RoleSeeder;
  * BeneficiaryPolicy — role-based access to beneficiary records.
  * See: references/rbac/matrix.md (M1 row)
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });

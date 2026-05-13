@@ -10,7 +10,6 @@ use OwenIt\Auditing\Models\Audit;
  * denial, validation failure, cross-tenant isolation, and sensitive-read
  * audit logging on the dossier endpoint.
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });
