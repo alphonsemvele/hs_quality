@@ -113,6 +113,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     icon={<BuildingIcon />}
                     tone="brand"
                     progress={activeRatio}
+                    hint="Tenants en production sur la plateforme. La barre de progression montre la part active sur l'ensemble du portefeuille (actives + suspendues)."
                 />
                 <KpiCard
                     label="Utilisateurs plateforme"
@@ -120,6 +121,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub={`${kpis.total_intervenants} intervenants terrain`}
                     icon={<UsersIcon />}
                     tone="sage"
+                    hint="Comptes utilisateurs actifs (tous rôles, tous tenants confondus). Le sous-total cible les intervenants à domicile — leur volumétrie pilote la facturation par siège."
                 />
                 <KpiCard
                     label="Bénéficiaires suivis"
@@ -127,6 +129,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub="Tous tenants confondus"
                     icon={<HeartIcon />}
                     tone="neutral"
+                    hint="Personnes accompagnées par les structures de la plateforme. Données strictement agrégées — aucun accès aux dossiers individuels depuis cette console."
                 />
                 <KpiCard
                     label="MRR estimé"
@@ -134,6 +137,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub="Active × tier × users"
                     icon={<EuroIcon />}
                     tone="sage"
+                    hint="Monthly Recurring Revenue : revenu mensuel récurrent estimé. Calculé à partir du tier d'abonnement × nombre d'utilisateurs facturables, uniquement pour les structures actives."
                 />
             </div>
 
@@ -145,6 +149,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub={`${kpis.interventions_in_progress} en cours`}
                     icon={<ClipboardIcon />}
                     tone="brand"
+                    hint="Visites à domicile planifiées ou réalisées sur le mois en cours (toutes structures). Le sous-total « en cours » correspond aux interventions ayant un check-in mais pas encore de check-out."
                 />
                 <KpiCard
                     label="Incidents ouverts"
@@ -152,6 +157,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub={`${kpis.incidents_critical_open} graves / critiques`}
                     icon={<AlertIcon />}
                     tone={kpis.incidents_critical_open > 0 ? 'danger' : 'warning'}
+                    hint="Incidents non clôturés (statuts : déclaré, en analyse, plan d'actions). Les niveaux « grave » et « critique » déclenchent une notification ARS automatique sous 48 h."
                 />
                 <KpiCard
                     label="Tier Premium"
@@ -159,6 +165,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub={`${kpis.structures_pro} Pro · ${kpis.structures_essential} Essentiel`}
                     icon={<StarIcon />}
                     tone="brand"
+                    hint="Répartition par niveau d'abonnement. Premium inclut tous les modules (QVCT, audits HAS, API mobile). Pro exclut la QVCT avancée. Essentiel se limite à la planification + dossiers."
                 />
                 <KpiCard
                     label="Suspendues"
@@ -166,6 +173,7 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                     sub="À surveiller"
                     icon={<PauseIcon />}
                     tone={kpis.suspended_structures > 0 ? 'warning' : 'neutral'}
+                    hint="Tenants avec accès bloqué (impayé, non-conformité ou pause volontaire). Leurs utilisateurs ne peuvent plus se connecter mais les données restent conservées."
                 />
             </div>
 
@@ -184,13 +192,39 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                                 <Table>
                                     <THead>
                                         <Tr>
-                                            <Th>Structure</Th>
-                                            <Th>Tier</Th>
-                                            <Th>Statut</Th>
-                                            <Th className="text-right">Users</Th>
-                                            <Th className="text-right">Bénéf.</Th>
-                                            <Th className="text-right">Interv./mois</Th>
-                                            <Th className="text-right">Incid. critiques</Th>
+                                            <Th hint="Tenant client de la plateforme : nom + code court + type d'établissement (SAAD, SSIAD, SPASAD, ESAD, CCAS).">
+                                                Structure
+                                            </Th>
+                                            <Th hint="Niveau d'abonnement : Starter (essentiel), Pro, Premium. Détermine les quotas et les modules disponibles.">
+                                                Tier
+                                            </Th>
+                                            <Th hint="État opérationnel du tenant : Actif ou Suspendu (impayé / non-conformité).">
+                                                Statut
+                                            </Th>
+                                            <Th
+                                                hint="Nombre total d'utilisateurs avec un compte actif sur cette structure (tous rôles : dirigeants, coordinateurs, qualité, RH, intervenants)."
+                                                className="text-right"
+                                            >
+                                                Users
+                                            </Th>
+                                            <Th
+                                                hint="Bénéficiaires actifs accompagnés par cette structure (dossiers non archivés)."
+                                                className="text-right"
+                                            >
+                                                Bénéf.
+                                            </Th>
+                                            <Th
+                                                hint="Nombre d'interventions à domicile réalisées ou planifiées sur le mois en cours."
+                                                className="text-right"
+                                            >
+                                                Interv./mois
+                                            </Th>
+                                            <Th
+                                                hint="Incidents classés « grave » ou « critique » non clôturés. Un incident critique déclenche automatiquement une notification ARS (Agence Régionale de Santé)."
+                                                className="text-right"
+                                            >
+                                                Incid. critiques
+                                            </Th>
                                         </Tr>
                                     </THead>
                                     <TBody>

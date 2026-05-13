@@ -424,6 +424,14 @@ function UserMenu({
                                 <KeyIcon />
                                 Tokens d'API
                             </Link>
+                            <Link
+                                href="/dashboard/aide/glossaire"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <BookIcon />
+                                Glossaire métier
+                            </Link>
                         </div>
 
                         {/* Theme toggle section */}

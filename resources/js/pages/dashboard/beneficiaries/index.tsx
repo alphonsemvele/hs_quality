@@ -1,6 +1,6 @@
 import { BeneficiaryPreviewSheet, type BeneficiaryPreview } from '@/components/preview-sheets';
 import { QuickAddBeneficiaryModal } from '@/components/quick-add';
-import { Badge, Button, Card, EmptyStateRich, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { Badge, Button, Card, EmptyStateRich, GirBadge, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
@@ -49,11 +49,17 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                     <Table>
                         <THead>
                             <Tr>
-                                <Th>Bénéficiaire</Th>
-                                <Th>Âge</Th>
-                                <Th>GIR</Th>
-                                <Th>Ville</Th>
-                                <Th>Statut</Th>
+                                <Th hint="Personne accompagnée par votre structure à son domicile. Le nom complet et les initiales sont affichés ; le badge « Anonymisé » apparaît si une demande d'effacement RGPD a été traitée.">
+                                    Bénéficiaire
+                                </Th>
+                                <Th hint="Âge calculé à partir de la date de naissance enregistrée dans la fiche bénéficiaire.">Âge</Th>
+                                <Th hint="Groupe Iso-Ressources : classification de 1 à 6 du niveau de dépendance. GIR 1 = très dépendant (assistance permanente), GIR 6 = autonome. Détermine l'éligibilité à l'APA et oriente le plan d'accompagnement.">
+                                    GIR
+                                </Th>
+                                <Th hint="Ville de résidence du bénéficiaire — utile pour optimiser les tournées par secteur géographique.">Ville</Th>
+                                <Th hint="Statut administratif du dossier : Actif (suivi en cours), Suspendu (pause temporaire), Archivé (sortie de la structure). Seuls les dossiers actifs apparaissent dans le planning.">
+                                    Statut
+                                </Th>
                                 <Th></Th>
                             </Tr>
                         </THead>
@@ -158,15 +164,6 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
             <QuickAddBeneficiaryModal open={showQuickAdd} onClose={() => setShowQuickAdd(false)} />
             <BeneficiaryPreviewSheet beneficiary={preview} onClose={() => setPreview(null)} />
         </DashboardLayout>
-    );
-}
-
-function GirBadge({ gir }: { gir: number }) {
-    const tone = gir <= 2 ? 'danger' : gir <= 4 ? 'warning' : 'sage';
-    return (
-        <Badge tone={tone} size="sm">
-            GIR {gir}
-        </Badge>
     );
 }
 

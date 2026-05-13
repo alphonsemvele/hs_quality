@@ -27,3 +27,4 @@ yarn-error.log
 /.zed
 public/hot
 tests/load/summary.json
+/.playwright-mcp
