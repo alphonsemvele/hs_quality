@@ -76,6 +76,8 @@ export default function DashboardLayout({
                   section: 'Plateforme',
                   links: [
                       { href: '/admin/structures', label: 'Structures', icon: <BuildingIcon /> },
+                      { href: '/admin/feature-flags', label: 'Feature flags', icon: <FlagIcon /> },
+                      { href: '/admin/system-health', label: 'Santé système', icon: <BoltIcon /> },
                   ],
               },
           ]
@@ -98,6 +100,8 @@ export default function DashboardLayout({
                       { href: '/audits', label: 'Audits & conformité', icon: <BadgeIcon />, requires: 'audits.view' },
                       { href: '/plans-amelioration', label: "Plans d'amélioration", icon: <CheckListIcon />, requires: 'plans_amelioration.view' },
                       { href: '/indicateurs', label: 'Indicateurs', icon: <ChartIcon />, requires: 'indicateurs.view' },
+                      { href: '/audits/grids', label: 'Référentiels', icon: <BookIcon />, requires: 'audits.view' },
+                      { href: '/audits/has-preparation', label: 'Préparation HAS', icon: <BadgeIcon />, requires: 'audits.view' },
                       { href: '/audit-log', label: 'Registre d\'audit', icon: <DatabaseIcon />, requires: 'audits.view' },
                   ],
               },
@@ -398,6 +402,38 @@ function UserMenu({
                                 <SettingsIcon />
                                 Paramètres de la structure
                             </Link>
+                            <Link
+                                href="/dashboard/profile/notifications"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <BellIcon />
+                                Préférences notifications
+                            </Link>
+                            <Link
+                                href="/dashboard/profile/sessions"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <DevicesIcon />
+                                Sessions actives
+                            </Link>
+                            <Link
+                                href="/dashboard/profile/api-tokens"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <KeyIcon />
+                                Tokens d'API
+                            </Link>
+                            <Link
+                                href="/dashboard/aide/glossaire"
+                                onClick={onClose}
+                                className="flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-200 dark:hover:bg-ink-700/50"
+                            >
+                                <BookIcon />
+                                Glossaire métier
+                            </Link>
                         </div>
 
                         {/* Theme toggle section */}
@@ -596,6 +632,43 @@ function SettingsIcon() {
         <Icon>
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008.91 19a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 005 8.91a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+        </Icon>
+    );
+}
+function BellIcon() {
+    return (
+        <Icon>
+            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </Icon>
+    );
+}
+function DevicesIcon() {
+    return (
+        <Icon>
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+        </Icon>
+    );
+}
+function KeyIcon() {
+    return (
+        <Icon>
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </Icon>
+    );
+}
+function FlagIcon() {
+    return (
+        <Icon>
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22V15" />
+        </Icon>
+    );
+}
+function BoltIcon() {
+    return (
+        <Icon>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
         </Icon>
     );
 }

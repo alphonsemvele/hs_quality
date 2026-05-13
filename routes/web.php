@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\FeatureFlagController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
+use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\AuditGridController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BeneficiaryController;
 use App\Http\Controllers\BillingController;
@@ -45,6 +48,18 @@ Route::get('/conformite', function () {
     return Inertia::render('marketing/compliance');
 })->name('marketing.compliance');
 
+Route::get('/tarifs', function () {
+    return Inertia::render('marketing/tarifs');
+})->name('marketing.tarifs');
+
+Route::get('/clients', function () {
+    return Inertia::render('marketing/clients');
+})->name('marketing.clients');
+
+Route::get('/changelog', function () {
+    return Inertia::render('marketing/changelog');
+})->name('marketing.changelog');
+
 Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact-form')
@@ -77,7 +92,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/profile', fn () => Inertia::render('dashboard/profile'))->name('profile');
     Route::get('/dashboard/profile/mfa-setup', fn () => Inertia::render('dashboard/profile/mfa-setup'))->name('profile.mfa-setup');
+    Route::get('/dashboard/profile/notifications', fn () => Inertia::render('dashboard/profile/notifications-preferences'))->name('profile.notifications');
+    Route::get('/dashboard/profile/api-tokens', fn () => Inertia::render('dashboard/profile/api-tokens'))->name('profile.api-tokens');
+    Route::get('/dashboard/profile/sessions', fn () => Inertia::render('dashboard/profile/sessions'))->name('profile.sessions');
     Route::get('/dashboard/onboarding', fn () => Inertia::render('dashboard/onboarding'))->name('onboarding');
+    Route::get('/dashboard/aide/glossaire', fn () => Inertia::render('dashboard/aide/glossaire'))->name('aide.glossaire');
 
     // Notifications (in-app — see HandleInertiaRequests for shared payload)
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
@@ -148,6 +167,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->middleware('log_sensitive_read:beneficiary_dossier')
             ->name('beneficiaries.dossier');
 
+        Route::get('/beneficiaries/{beneficiary}/timeline', [BeneficiaryController::class, 'timeline'])
+            ->name('beneficiaries.timeline');
+
+        Route::get('/beneficiaries/{beneficiary}/contacts', [BeneficiaryController::class, 'contacts'])
+            ->name('beneficiaries.contacts');
+        Route::put('/beneficiaries/{beneficiary}/contacts', [BeneficiaryController::class, 'updateContacts'])
+            ->name('beneficiaries.contacts.update');
+
+        Route::get('/beneficiaries/{beneficiary}/satisfaction', [BeneficiaryController::class, 'satisfaction'])
+            ->name('beneficiaries.satisfaction');
+        Route::post('/beneficiaries/{beneficiary}/satisfaction', [BeneficiaryController::class, 'storeSatisfaction'])
+            ->name('beneficiaries.satisfaction.store');
+
         // ── Care plans ────────────────────────────────────────────────────────
         Route::get('/beneficiaries/{beneficiary}/care-plans', [CarePlanController::class, 'indexForBeneficiary'])
             ->name('beneficiaries.care-plans.index');
@@ -198,6 +230,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Qualité (M6 — Audits + Plans d'Amélioration Continue) ─────────────────
     Route::middleware(['tenant'])->group(function () {
         Route::get('/audits', [AuditController::class, 'index'])->name('audits.index');
+        // Audit grids library (read-only — declare before /audits/{audit}
+        // so the literal "grids" segment is not matched as a UUID).
+        Route::get('/audits/grids', [AuditGridController::class, 'index'])->name('audits.grids.index');
+        Route::get('/audits/grids/{auditGrid}', [AuditGridController::class, 'show'])->name('audits.grids.show');
+        Route::get('/audits/has-preparation', [AuditController::class, 'hasPreparation'])->name('audits.has-preparation');
+
         Route::get('/audits/create', [AuditController::class, 'create'])->name('audits.create');
         Route::post('/audits', [AuditController::class, 'store'])->name('audits.store');
         Route::get('/audits/{audit}', [AuditController::class, 'show'])->name('audits.show');
@@ -262,6 +300,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+    Route::get('/formations/competencies/mine', [FormationController::class, 'myCompetencies'])->name('formations.competencies.mine');
+    Route::get('/formations/sessions/{id}', [FormationController::class, 'showSession'])->name('formations.sessions.show');
     Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
     Route::put('/formations/{id}', [FormationController::class, 'update'])->name('formations.update');
 
@@ -270,6 +310,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('communication.send');
     Route::post('/communication/news', [CommunicationController::class, 'publishNews'])
         ->name('communication.news.publish');
+    Route::post('/communication/documents', [CommunicationController::class, 'uploadDocument'])
+        ->name('communication.documents.upload');
+    Route::get('/communication/documents/{document}/download', [CommunicationController::class, 'downloadDocument'])
+        ->name('communication.documents.download');
+
+    Route::get('/communication/qa/{question}', [CommunicationController::class, 'showQuestion'])
+        ->name('communication.qa.show');
+    Route::post('/communication/qa', [CommunicationController::class, 'askQuestion'])
+        ->name('communication.qa.ask');
+    Route::post('/communication/qa/{question}/answers', [CommunicationController::class, 'answerQuestion'])
+        ->name('communication.qa.answer');
+    Route::post('/communication/qa/{question}/accept-answer', [CommunicationController::class, 'acceptAnswer'])
+        ->name('communication.qa.accept');
+    Route::post('/communication/qa/answers/{answer}/vote', [CommunicationController::class, 'voteAnswer'])
+        ->name('communication.qa.vote');
 
     // ── Platform admin (super_admin only) ─────────────────────────────────────
     // Tenants are managed here. NOT inside the `tenant` middleware group —
@@ -284,6 +339,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('admin.')
         ->group(function (): void {
             Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+            Route::get('/feature-flags', [FeatureFlagController::class, 'index'])->name('feature-flags.index');
+            Route::post('/feature-flags/toggle', [FeatureFlagController::class, 'toggle'])->name('feature-flags.toggle');
+
+            Route::get('/system-health', [SystemHealthController::class, 'index'])->name('system-health.index');
         });
 
     Route::middleware(['super_admin'])
@@ -294,6 +354,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
             Route::post('/', [AdminStructureController::class, 'store'])->name('store');
             Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
+            Route::get('/{structure}/audit-trail', [AdminStructureController::class, 'auditTrail'])->name('audit-trail');
             Route::get('/{structure}/edit', [AdminStructureController::class, 'edit'])->name('edit');
             Route::put('/{structure}', [AdminStructureController::class, 'update'])->name('update');
             Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');

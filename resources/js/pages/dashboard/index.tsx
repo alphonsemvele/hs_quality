@@ -234,6 +234,7 @@ export default function Dashboard({
                     icon={<BadgeIcon />}
                     tone="sage"
                     progress={s.score_conformite || 0}
+                    hint="Pourcentage d'items conformes sur l'ensemble des audits internes réalisés (référentiels HAS, ISO 9001, AFNOR NF X50-056). Le seuil de 85 % correspond au niveau exigé pour la visite HAS quinquennale."
                 />
                 <KpiCard
                     label="Plan d'actions correctives"
@@ -242,6 +243,7 @@ export default function Dashboard({
                     icon={<CheckListIcon />}
                     tone="brand"
                     progress={s.taux_completion_pac || 0}
+                    hint="Taux d'avancement du PAC (Plan d'Amélioration Continue) : actions correctives clôturées rapportées au total ouvert. Une cadence > 60 % démontre une dynamique d'amélioration aux évaluateurs HAS."
                 />
                 <KpiCard
                     label="Score QVCT moyen"
@@ -250,6 +252,7 @@ export default function Dashboard({
                     icon={<HeartIcon />}
                     tone={alertes_qvct.length > 0 ? 'warning' : 'sage'}
                     progress={(s.score_qvct_moyen || 0) * 10}
+                    hint="Note moyenne (sur 10) de la Qualité de Vie et des Conditions de Travail, calculée à partir du dernier baromètre. Un signal faible (RPS, charge, isolement) déclenche une alerte automatique."
                 />
             </div>
 

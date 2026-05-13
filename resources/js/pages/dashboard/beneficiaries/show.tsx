@@ -93,6 +93,15 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                 ]}
                 actions={
                     <>
+                        <Link href={`/beneficiaries/${b.id}/timeline`}>
+                            <Button variant="secondary">Parcours</Button>
+                        </Link>
+                        <Link href={`/beneficiaries/${b.id}/contacts`}>
+                            <Button variant="secondary">Contacts</Button>
+                        </Link>
+                        <Link href={`/beneficiaries/${b.id}/satisfaction`}>
+                            <Button variant="secondary">Satisfaction</Button>
+                        </Link>
                         <Link href={`/beneficiaries/${b.id}/dossier`}>
                             <Button variant="secondary">Dossier médical</Button>
                         </Link>

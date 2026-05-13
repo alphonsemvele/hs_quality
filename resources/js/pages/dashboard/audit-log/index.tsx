@@ -156,11 +156,19 @@ export default function AuditLogIndex({
                     <Table>
                         <THead>
                             <Tr>
-                                <Th>Quand</Th>
-                                <Th>Événement</Th>
-                                <Th>Ressource</Th>
-                                <Th>Utilisateur</Th>
-                                <Th>Champs modifiés</Th>
+                                <Th hint="Date et heure exactes de l'action (fuseau Europe/Paris).">Quand</Th>
+                                <Th hint="Type d'action effectuée : created (création), updated (modification), deleted (suppression logique), restored (restauration). Chaque écriture sensible est tracée automatiquement.">
+                                    Événement
+                                </Th>
+                                <Th hint="Type et identifiant de l'enregistrement touché : Bénéficiaire, Intervention, Incident, Audit, PAC, Utilisateur, etc.">
+                                    Ressource
+                                </Th>
+                                <Th hint="Utilisateur authentifié à l'origine de l'action. « Système » indique un job automatique (cron, webhook).">
+                                    Utilisateur
+                                </Th>
+                                <Th hint="Liste des champs modifiés. Cliquer sur la ligne pour voir le diff complet avant/après — preuve exigible en évaluation HAS et en cas de contrôle CNIL.">
+                                    Champs modifiés
+                                </Th>
                                 <Th />
                             </Tr>
                         </THead>

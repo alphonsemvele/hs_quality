@@ -1,3 +1,4 @@
+import { IncidentHoverCard } from '@/components/hover-cards';
 import { IncidentPreviewSheet, type IncidentPreview } from '@/components/preview-sheets';
 import {
     Badge,
@@ -85,7 +86,15 @@ export default function Incidents({
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-sm font-semibold text-ink-900 dark:text-white">{inc.categorie}</span>
+                                        <IncidentHoverCard
+                                            title={inc.categorie}
+                                            categorie={inc.categorie}
+                                            gravite={inc.gravite}
+                                            statut={inc.statut}
+                                            occurredAt={inc.date_heure}
+                                            declaredBy={inc.declarant}
+                                            href={`/incidents/${inc.id}`}
+                                        />
                                         <IncidentGraviteBadge gravite={inc.gravite} />
                                         <IncidentStatusBadge statut={inc.statut} />
                                         {inc.notifie_autorites && (

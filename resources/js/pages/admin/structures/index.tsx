@@ -45,11 +45,21 @@ export default function StructuresIndex({ structures }: Props) {
                     <Table>
                         <THead>
                             <Tr>
-                                <Th>Code</Th>
-                                <Th>Nom</Th>
-                                <Th>Type</Th>
-                                <Th>Tier</Th>
-                                <Th>Statut</Th>
+                                <Th hint="Identifiant court interne (slug) du tenant, utilisé dans les URLs d'administration et les exports comptables. Doit rester stable dans le temps.">
+                                    Code
+                                </Th>
+                                <Th hint="Raison sociale de la structure, telle qu'elle apparaît dans les conventions, sur les factures et dans les exports HAS.">
+                                    Nom
+                                </Th>
+                                <Th hint="Catégorie d'établissement médico-social : SAAD (Service d'Aide à Domicile), SSIAD (Soins Infirmiers À Domicile), SPASAD (mixte), ESAD (Équipe Spécialisée Alzheimer), CCAS (Centre Communal d'Action Sociale). Détermine les modules métier activés pour ce tenant.">
+                                    Type
+                                </Th>
+                                <Th hint="Niveau d'abonnement plateforme : Starter, Pro, Premium. Détermine les quotas (bénéficiaires, utilisateurs, stockage S3) et les modules optionnels (QVCT, audits HAS, API mobile).">
+                                    Tier
+                                </Th>
+                                <Th hint="État opérationnel du tenant : Actif (en production), Suspendu (impayé / non-conformité), Archivé (résilié). Un tenant suspendu bloque les connexions de ses utilisateurs.">
+                                    Statut
+                                </Th>
                                 <Th></Th>
                             </Tr>
                         </THead>

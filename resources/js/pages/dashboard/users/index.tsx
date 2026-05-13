@@ -54,11 +54,17 @@ export default function UsersIndex({ users }: Props) {
                     <Table>
                         <THead>
                             <Tr>
-                                <Th>Nom</Th>
-                                <Th>Rôle</Th>
-                                <Th>Email</Th>
-                                <Th>Statut</Th>
-                                <Th>2FA</Th>
+                                <Th hint="Identité de l'utilisateur (prénom + nom). Les initiales sont affichées dans une pastille colorée.">Nom</Th>
+                                <Th hint="Rôle métier qui détermine les permissions : Dirigeant (admin complet + facturation), Coordinateur (opérationnel), Référent qualité (audits/PAC), RH (formations/QVCT), Intervenant (terrain).">
+                                    Rôle
+                                </Th>
+                                <Th hint="Adresse e-mail professionnelle utilisée pour la connexion et les notifications.">Email</Th>
+                                <Th hint="Statut du compte : Actif (peut se connecter), Désactivé (compte conservé pour historique mais accès bloqué).">
+                                    Statut
+                                </Th>
+                                <Th hint="2-Factor Authentication : authentification à deux facteurs via une application authenticator (TOTP, RFC 6238). Obligatoire pour tous les rôles bureau ; optionnelle pour les intervenants (biométrie mobile recommandée).">
+                                    2FA
+                                </Th>
                                 <Th></Th>
                             </Tr>
                         </THead>

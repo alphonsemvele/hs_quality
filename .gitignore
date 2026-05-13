@@ -27,6 +27,7 @@ yarn-error.log
 /.zed
 public/hot
 tests/load/summary.json
+/.playwright-mcp
 
 # Screenshot artefacts — keep only intentional images
 *.png

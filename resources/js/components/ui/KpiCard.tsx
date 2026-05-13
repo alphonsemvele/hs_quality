@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import { Tooltip } from './Tooltip';
 
 type Tone = 'brand' | 'sage' | 'warning' | 'danger' | 'neutral';
 
@@ -19,6 +20,7 @@ export function KpiCard({
     tone = 'neutral',
     progress,
     trend,
+    hint,
 }: {
     label: string;
     value: string | number;
@@ -27,6 +29,8 @@ export function KpiCard({
     tone?: Tone;
     progress?: number;
     trend?: { value: string; positive?: boolean };
+    /** Pedagogical explanation of the metric — rendered as a `?` icon next to the label. */
+    hint?: ReactNode;
 }) {
     const t = TONE[tone];
     const displayValue = value === undefined || value === null || String(value).includes('undefined') || String(value).includes('NaN')
@@ -57,7 +61,15 @@ export function KpiCard({
                     </span>
                 )}
             </div>
-            <p className="mt-3 text-xs font-medium text-ink-500 dark:text-ink-400">{label}</p>
+            <p className="mt-3 text-xs font-medium text-ink-500 dark:text-ink-400">
+                {hint ? (
+                    <Tooltip content={hint} indicator="question" triggerLabel={`Explication : ${label}`}>
+                        {label}
+                    </Tooltip>
+                ) : (
+                    label
+                )}
+            </p>
             <p className="mt-1 font-mono text-2xl font-bold tabular tracking-tight text-ink-900 dark:text-white">{displayValue}</p>
             {progress !== undefined && !isNaN(progress) && (
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">

@@ -7,6 +7,7 @@ use App\Models\AuditGrid;
 use App\Models\AuditRun;
 use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
+use App\Models\BeneficiarySatisfactionRating;
 use App\Models\CarePlan;
 use App\Models\Certification;
 use App\Models\DiscussionGroup;
@@ -35,6 +36,7 @@ use App\Policies\AuditGridPolicy;
 use App\Policies\AuditRunPolicy;
 use App\Policies\AuditRunResponsePolicy;
 use App\Policies\BeneficiaryPolicy;
+use App\Policies\BeneficiarySatisfactionRatingPolicy;
 use App\Policies\CarePlanPolicy;
 use App\Policies\CertificationPolicy;
 use App\Policies\DiscussionGroupPolicy;
@@ -69,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
         AuditRun::class => AuditRunPolicy::class,
         AuditRunResponse::class => AuditRunResponsePolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
+        BeneficiarySatisfactionRating::class => BeneficiarySatisfactionRatingPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
         Certification::class => CertificationPolicy::class,
         DiscussionGroup::class => DiscussionGroupPolicy::class,

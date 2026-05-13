@@ -460,12 +460,18 @@ function CompetenciesTab({ formations }: { formations: Formation[] }) {
             <Table>
                 <THead>
                     <Tr>
-                        <Th>Intervenant</Th>
-                        <Th>Formation</Th>
-                        <Th>Organisme</Th>
-                        <Th>Obtenue</Th>
-                        <Th>Expire</Th>
-                        <Th>Statut</Th>
+                        <Th hint="Salarié(e) terrain titulaire de la certification : DEAVS, AES, ADVF, CQP, etc.">Intervenant</Th>
+                        <Th hint="Nom du diplôme ou de la certification professionnelle (DEAVS = Diplôme d'État d'Auxiliaire de Vie Sociale, AES = Accompagnant Éducatif et Social, ADVF = Assistant De Vie aux Familles, CQP = Certificat de Qualification Professionnelle).">
+                            Formation
+                        </Th>
+                        <Th hint="Organisme certificateur ou centre de formation ayant délivré la qualification.">Organisme</Th>
+                        <Th hint="Date d'obtention initiale de la certification.">Obtenue</Th>
+                        <Th hint="Date d'expiration. Des alertes automatiques sont envoyées au RH et au titulaire à J-60 et J-30 avant cette date.">
+                            Expire
+                        </Th>
+                        <Th hint="Validité actuelle : Valide, À renouveler (< 60 j), Expirée. Une certification expirée empêche d'assigner l'intervenant à un bénéficiaire requérant cette compétence.">
+                            Statut
+                        </Th>
                     </Tr>
                 </THead>
                 <TBody>

@@ -1,6 +1,8 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, PageHeader, RichTextEditor } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { renderSafeMarkdown } from '@/lib/safe-markdown';
 import { cn } from '@/lib/utils';
+import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
 
@@ -259,18 +261,27 @@ function MessageBubble({ m }: { m: ThreadMessage }) {
 function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean }) {
     const pinned = posts.filter((p) => p.pinned);
     const others = posts.filter((p) => !p.pinned);
+    const [composing, setComposing] = useState(false);
 
     return (
         <div className="space-y-5">
             {canPublish && (
                 <Card>
-                    <CardBody className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                            <p className="text-sm font-medium text-ink-900 dark:text-white">Publier une actualité</p>
-                            <p className="text-xs text-ink-500 dark:text-ink-400">Communiquez à toute la structure en quelques clics.</p>
-                        </div>
-                        <Button size="sm" leadingIcon={<PlusIcon />}>Nouvelle actu</Button>
-                    </CardBody>
+                    {composing ? (
+                        <NewsComposer onClose={() => setComposing(false)} />
+                    ) : (
+                        <CardBody className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-sm font-medium text-ink-900 dark:text-white">Publier une actualité</p>
+                                <p className="text-xs text-ink-500 dark:text-ink-400">
+                                    Communiquez à toute la structure en Markdown — gras, listes, liens et titres.
+                                </p>
+                            </div>
+                            <Button size="sm" leadingIcon={<PlusIcon />} onClick={() => setComposing(true)}>
+                                Nouvelle actu
+                            </Button>
+                        </CardBody>
+                    )}
                 </Card>
             )}
 
@@ -333,46 +344,198 @@ function NewsCard({ post }: { post: NewsPost }) {
                     </p>
                 </div>
             </div>
-            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink-700 dark:text-ink-200">{post.body}</p>
+            <div className="mt-3">{renderSafeMarkdown(post.body)}</div>
         </article>
     );
 }
 
-function DocsTab({ documents }: { documents: Document[] }) {
-    if (documents.length === 0) {
-        return (
-            <Card>
-                <EmptyState icon={<FileIcon />} title="Aucun document" description="Partagez les protocoles, procédures et documents de référence ici." />
-            </Card>
-        );
-    }
+function NewsComposer({ onClose }: { onClose: () => void }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        title: '',
+        body: '',
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/communication/news', {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('title', 'body');
+                onClose();
+            },
+        });
+    };
+
     return (
-        <Card>
+        <form onSubmit={submit} className="p-5">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="text-sm font-semibold text-ink-900 dark:text-white">Nouvelle actualité</h3>
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                        Markdown autorisé : <code className="font-mono text-[11px]">**gras**</code>,{' '}
+                        <code className="font-mono text-[11px]">_italique_</code>, listes, liens https.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-full p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-500 dark:hover:bg-ink-700"
+                    aria-label="Fermer"
+                >
+                    <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </div>
+
+            <label className="mt-4 block">
+                <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                    Titre <span className="text-danger-500">*</span>
+                </span>
+                <input
+                    type="text"
+                    value={data.title}
+                    onChange={(e) => setData('title', e.target.value)}
+                    required
+                    maxLength={200}
+                    placeholder="Ex. « Visite HAS — préparation »"
+                    className="mt-1 block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                />
+                {errors.title && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.title}</p>}
+            </label>
+
+            <div className="mt-4">
+                <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                    Contenu <span className="text-danger-500">*</span>
+                </span>
+                <div className="mt-1">
+                    <RichTextEditor
+                        value={data.body}
+                        onChange={(v) => setData('body', v)}
+                        rows={10}
+                        placeholder="## Rappel important&#10;&#10;La visite HAS aura lieu les **18-19 juin**.&#10;&#10;- Réunion préparatoire vendredi&#10;- Classeur de preuves à jour pour mardi"
+                        disabled={processing}
+                    />
+                </div>
+                {errors.body && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.body}</p>}
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <Button type="button" variant="secondary" onClick={onClose} disabled={processing}>
+                    Annuler
+                </Button>
+                <Button type="submit" disabled={processing || data.title.trim() === '' || data.body.trim() === ''}>
+                    {processing ? 'Publication…' : 'Publier'}
+                </Button>
+            </div>
+        </form>
+    );
+}
+
+function DocsTab({ documents }: { documents: Document[] }) {
+    const [showUploader, setShowUploader] = useState(false);
+
+    const uploader = (
+        <Card className={documents.length === 0 ? '' : 'mb-4'}>
             <CardHeader
-                title="Bibliothèque documentaire"
-                subtitle={`${documents.length} document(s)`}
-                action={<Button size="sm" leadingIcon={<UploadIcon />}>Téléverser</Button>}
+                title="Téléverser un document"
+                subtitle="Protocole, procédure, fiche pratique — visible par toute la structure."
+                action={
+                    showUploader ? (
+                        <Button size="sm" variant="secondary" onClick={() => setShowUploader(false)}>
+                            Fermer
+                        </Button>
+                    ) : undefined
+                }
             />
-            <CardBody className="px-2 py-2">
-                <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                    {documents.map((d) => (
-                        <li key={d.id} className="flex items-center gap-3 px-3 py-3">
-                            <FileTypeBadge type={d.type} />
-                            <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{d.title}</p>
-                                <p className="text-[11px] text-ink-500 dark:text-ink-400">
-                                    {d.uploaded_by} · {d.uploaded_at}
-                                    {d.size_kb !== undefined && ` · ${formatSize(d.size_kb)}`}
-                                </p>
-                            </div>
-                            <Button size="sm" variant="secondary">
-                                Télécharger
-                            </Button>
-                        </li>
-                    ))}
-                </ul>
+            <CardBody>
+                <DropzoneUploader
+                    endpoint="/communication/documents"
+                    accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,image/jpeg,image/png,image/webp"
+                    acceptLabel="PDF, Word, Excel, JPG/PNG"
+                    maxBytes={25 * 1024 * 1024}
+                    multiple={false}
+                    fields={[
+                        {
+                            name: 'title',
+                            label: 'Titre du document',
+                            help: 'Ex. « Protocole transmission v2 ». Une nouvelle version est créée automatiquement si le titre existe déjà.',
+                            required: true,
+                        },
+                        {
+                            name: 'description',
+                            label: 'Description (optionnelle)',
+                            help: 'Quelques mots pour aider vos collègues à comprendre quand consulter ce document.',
+                        },
+                    ]}
+                    onAllSettled={() => {
+                        // Refresh the documents tab so the new file appears.
+                        router.reload({ only: ['documents'] });
+                        setShowUploader(false);
+                    }}
+                />
             </CardBody>
         </Card>
+    );
+
+    if (documents.length === 0) {
+        return (
+            <>
+                {showUploader ? (
+                    uploader
+                ) : (
+                    <Card>
+                        <EmptyState
+                            icon={<FileIcon />}
+                            title="Aucun document"
+                            description="Partagez les protocoles, procédures et documents de référence ici."
+                            action={<Button onClick={() => setShowUploader(true)}>Téléverser un document</Button>}
+                        />
+                    </Card>
+                )}
+            </>
+        );
+    }
+
+    return (
+        <>
+            {showUploader && uploader}
+            <Card>
+                <CardHeader
+                    title="Bibliothèque documentaire"
+                    subtitle={`${documents.length} document(s)`}
+                    action={
+                        showUploader ? undefined : (
+                            <Button size="sm" leadingIcon={<UploadIcon />} onClick={() => setShowUploader(true)}>
+                                Téléverser
+                            </Button>
+                        )
+                    }
+                />
+                <CardBody className="px-2 py-2">
+                    <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                        {documents.map((d) => (
+                            <li key={d.id} className="flex items-center gap-3 px-3 py-3">
+                                <FileTypeBadge type={d.type} />
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-ink-900 dark:text-white">{d.title}</p>
+                                    <p className="text-[11px] text-ink-500 dark:text-ink-400">
+                                        {d.uploaded_by} · {d.uploaded_at}
+                                        {d.size_kb !== undefined && ` · ${formatSize(d.size_kb)}`}
+                                    </p>
+                                </div>
+                                <a
+                                    href={`/communication/documents/${d.id}/download`}
+                                    className="inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3 py-1.5 text-xs font-semibold text-ink-700 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200"
+                                >
+                                    Télécharger
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </CardBody>
+            </Card>
+        </>
     );
 }
 
@@ -397,66 +560,167 @@ function formatSize(kb: number): string {
 }
 
 function QaTab({ questions }: { questions: QaQuestion[] }) {
-    if (questions.length === 0) {
-        return (
-            <Card>
-                <EmptyState icon={<HelpIcon />} title="Aucune question" description="Posez vos questions à toute l'équipe et bénéficiez de leur expertise." />
-            </Card>
-        );
-    }
+    const [composing, setComposing] = useState(false);
+
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
-                <p className="text-xs text-ink-500 dark:text-ink-400">{questions.length} question(s)</p>
-                <Button size="sm" leadingIcon={<PlusIcon />}>Poser une question</Button>
+                <p className="text-xs text-ink-500 dark:text-ink-400">
+                    {questions.length} question{questions.length > 1 ? 's' : ''}
+                </p>
+                {!composing && (
+                    <Button size="sm" leadingIcon={<PlusIcon />} onClick={() => setComposing(true)}>
+                        Poser une question
+                    </Button>
+                )}
             </div>
-            <ul className="space-y-3">
-                {questions.map((q) => (
-                    <li key={q.id}>
-                        <Card>
-                            <CardBody>
-                                <div className="flex gap-4">
-                                    {/* Vote column */}
-                                    <div className="flex w-12 shrink-0 flex-col items-center gap-1.5 text-center">
-                                        <button
-                                            type="button"
-                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-brand-400 hover:text-brand-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
-                                            aria-label="Voter pour"
-                                        >
-                                            <ChevronUpIcon />
-                                        </button>
-                                        <span className="font-mono text-sm font-bold tabular-nums text-ink-900 dark:text-white">{q.votes}</span>
-                                        <button
-                                            type="button"
-                                            className="flex size-7 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-500 hover:border-danger-400 hover:text-danger-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-400"
-                                            aria-label="Voter contre"
-                                        >
-                                            <ChevronDownIcon />
-                                        </button>
-                                    </div>
 
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{q.title}</h3>
-                                            {q.accepted && (
-                                                <Badge tone="sage" size="xs">
-                                                    ✓ Réponse acceptée
-                                                </Badge>
-                                            )}
+            {composing && <QuestionComposer onClose={() => setComposing(false)} />}
+
+            {questions.length === 0 ? (
+                <Card>
+                    <EmptyState
+                        icon={<HelpIcon />}
+                        title="Aucune question"
+                        description="Posez vos questions à toute l'équipe et bénéficiez de leur expertise."
+                    />
+                </Card>
+            ) : (
+                <ul className="space-y-3">
+                    {questions.map((q) => (
+                        <li key={q.id}>
+                            <Link href={`/communication/qa/${q.id}`} className="block">
+                                <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                                    <CardBody>
+                                        <div className="flex gap-4">
+                                            <div className="flex w-12 shrink-0 flex-col items-center gap-1 text-center">
+                                                <span className="font-mono text-lg font-bold tabular-nums text-ink-900 dark:text-white">
+                                                    {q.votes}
+                                                </span>
+                                                <span className="text-[10px] uppercase tracking-wider text-ink-400 dark:text-ink-500">
+                                                    votes
+                                                </span>
+                                            </div>
+
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{q.title}</h3>
+                                                    {q.accepted && (
+                                                        <Badge tone="sage" size="xs">
+                                                            ✓ Réponse acceptée
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <p className="mt-1 line-clamp-2 text-xs text-ink-600 dark:text-ink-300">{q.preview}</p>
+                                                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
+                                                    <span>
+                                                        <span className="font-medium text-ink-700 dark:text-ink-200">{q.asker}</span> ·{' '}
+                                                        {q.created_at}
+                                                    </span>
+                                                    <span className="font-mono">
+                                                        {q.answers_count} réponse{q.answers_count > 1 ? 's' : ''}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <span className="self-center text-sm font-medium text-brand-600 dark:text-brand-400">
+                                                Voir →
+                                            </span>
                                         </div>
-                                        <p className="mt-1 line-clamp-2 text-xs text-ink-600 dark:text-ink-300">{q.preview}</p>
-                                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
-                                            <span><span className="font-medium text-ink-700 dark:text-ink-200">{q.asker}</span> · {q.created_at}</span>
-                                            <span className="font-mono">{q.answers_count} réponse{q.answers_count > 1 ? 's' : ''}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardBody>
-                        </Card>
-                    </li>
-                ))}
-            </ul>
+                                    </CardBody>
+                                </Card>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
+    );
+}
+
+function QuestionComposer({ onClose }: { onClose: () => void }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        title: '',
+        body: '',
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/communication/qa', {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset('title', 'body');
+                onClose();
+            },
+        });
+    };
+
+    return (
+        <Card>
+            <CardBody>
+                <form onSubmit={submit}>
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">Poser une question</h3>
+                            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                                Visible par toute la structure. Markdown supporté dans le corps.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="rounded-full p-1.5 text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-700 dark:text-ink-500 dark:hover:bg-ink-700"
+                            aria-label="Fermer"
+                        >
+                            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <label className="mt-4 block">
+                        <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                            Titre <span className="text-danger-500">*</span>
+                        </span>
+                        <input
+                            type="text"
+                            value={data.title}
+                            onChange={(e) => setData('title', e.target.value)}
+                            required
+                            maxLength={200}
+                            placeholder="Ex. « Que faire en cas de refus médicamenteux ? »"
+                            className="mt-1 block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        {errors.title && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.title}</p>}
+                    </label>
+
+                    <label className="mt-4 block">
+                        <span className="block text-xs font-medium text-ink-700 dark:text-ink-300">
+                            Détail <span className="text-danger-500">*</span>
+                        </span>
+                        <textarea
+                            value={data.body}
+                            onChange={(e) => setData('body', e.target.value)}
+                            rows={6}
+                            required
+                            maxLength={20000}
+                            placeholder="Décrivez le contexte et précisez votre question…"
+                            className="mt-1 block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        {errors.body && <p className="mt-1 text-xs text-danger-600 dark:text-danger-400">{errors.body}</p>}
+                    </label>
+
+                    <div className="mt-4 flex justify-end gap-2">
+                        <Button type="button" variant="secondary" onClick={onClose} disabled={processing}>
+                            Annuler
+                        </Button>
+                        <Button type="submit" disabled={processing || data.title.trim() === '' || data.body.trim() === ''}>
+                            {processing ? 'Publication…' : 'Poser la question'}
+                        </Button>
+                    </div>
+                </form>
+            </CardBody>
+        </Card>
     );
 }
 
@@ -513,20 +777,6 @@ function UploadIcon() {
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-    );
-}
-function ChevronUpIcon() {
-    return (
-        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <polyline points="18 15 12 9 6 15" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-    );
-}
-function ChevronDownIcon() {
-    return (
-        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }

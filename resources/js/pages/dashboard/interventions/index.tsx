@@ -209,12 +209,20 @@ export default function Interventions({
                                         ariaLabel="Tout sélectionner"
                                     />
                                 </Th>
-                                <Th>Intervenant</Th>
-                                <Th>Bénéficiaire</Th>
-                                <Th>Date & heure</Th>
-                                <Th>Durée</Th>
-                                <Th>Statut</Th>
-                                <Th>CR</Th>
+                                <Th hint="Personnel terrain (aide à domicile, AVS, AES) qui réalise la visite. Affecté via l'écran Bénéficiaires → Affectations.">
+                                    Intervenant
+                                </Th>
+                                <Th hint="Personne accompagnée à son domicile lors de cette intervention.">Bénéficiaire</Th>
+                                <Th hint="Horaires planifiés de l'intervention. Le check-in réel (mobile) peut différer ; tout écart est tracé.">
+                                    Date & heure
+                                </Th>
+                                <Th hint="Durée prévue de l'intervention en minutes. Comparée à la durée effective (check-out − check-in).">Durée</Th>
+                                <Th hint="Cycle de vie : Planifié → En cours (check-in) → Terminé (check-out) ou Manqué / Annulé. Mis à jour en temps réel via WebSocket Reverb.">
+                                    Statut
+                                </Th>
+                                <Th hint="Compte-Rendu d'intervention : indique si l'intervenant a complété son rapport (tâches cochées, observations, photos, signature) en sortie de visite.">
+                                    CR
+                                </Th>
                                 <Th></Th>
                             </Tr>
                         </THead>
