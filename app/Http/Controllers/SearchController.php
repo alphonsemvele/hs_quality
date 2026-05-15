@@ -182,17 +182,20 @@ class SearchController extends Controller
         }
 
         if (($abilities['plans_amelioration.view'] ?? false) === true) {
+            // Column is `titre` (French), not `title` — fix carried over from
+            // the previous LIKE-only version which referenced a non-existent
+            // column and silently returned zero rows.
             $rows = PlanAmelioration::query()
                 ->where(function ($q) use ($like, $ilike, $isPg, $query) {
-                    $q->where('title', $ilike, $like);
+                    $q->where('titre', $ilike, $like);
                     if ($isPg) {
-                        $q->orWhereRaw('title % ?', [$query]);
+                        $q->orWhereRaw('titre % ?', [$query]);
                     }
                 })
-                ->when($isPg, fn ($q) => $q->orderByRaw('similarity(title, ?) DESC', [$query]))
+                ->when($isPg, fn ($q) => $q->orderByRaw('similarity(titre, ?) DESC', [$query]))
                 ->latest()
                 ->limit(5)
-                ->get(['id', 'title', 'status']);
+                ->get(['id', 'titre', 'statut']);
 
             if ($rows->isNotEmpty()) {
                 $groups[] = [
@@ -201,8 +204,8 @@ class SearchController extends Controller
                     'items' => $rows
                         ->map(fn (PlanAmelioration $p) => [
                             'id' => $p->id,
-                            'title' => $p->title,
-                            'subtitle' => (string) ($p->status?->value ?? '—'),
+                            'title' => $p->titre,
+                            'subtitle' => (string) ($p->statut?->value ?? '—'),
                             'href' => "/plans-amelioration/{$p->id}",
                         ])
                         ->all(),
