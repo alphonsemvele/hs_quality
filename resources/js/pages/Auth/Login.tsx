@@ -9,16 +9,83 @@ export default function Login({ status }: { status?: string }) {
     });
 
     const [showPass, setShowPass] = useState(false);
+    const [showDemoPicker, setShowDemoPicker] = useState(false);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/login');
     };
 
-    const fillDemo = () => {
-        setData('email', 'alphonsemvele95@gmail.com');
-        setData('password', 'aaaaaaaaaa');
+    const fillDemo = (email: string) => {
+        setData('email', email);
+        setData('password', 'password');
+        setShowDemoPicker(false);
     };
+
+    const demoProfiles: Array<{
+        email: string;
+        role: string;
+        name: string;
+        tagline: string;
+        accent: 'brand' | 'sage' | 'warning' | 'ink';
+    }> = [
+        {
+            email: 'admin@platform.fr',
+            role: 'Super-admin',
+            name: 'Plateforme',
+            tagline: 'Console /admin · feature flags · santé système',
+            accent: 'ink',
+        },
+        {
+            email: 'dirigeant@demo.fr',
+            role: 'Dirigeante',
+            name: 'Sophie Martin',
+            tagline: 'Accès complet + facturation',
+            accent: 'brand',
+        },
+        {
+            email: 'coordinateur@demo.fr',
+            role: 'Coordinateur',
+            name: 'Thomas Dupont',
+            tagline: 'Planning, CRUD bénéficiaires — principal',
+            accent: 'sage',
+        },
+        {
+            email: 'qualite@demo.fr',
+            role: 'Référente qualité',
+            name: 'Claire Bernard',
+            tagline: "Audits, plans d'amélioration, journal QVCT",
+            accent: 'warning',
+        },
+        {
+            email: 'intervenant@demo.fr',
+            role: 'Intervenante',
+            name: 'Marie Leclerc',
+            tagline: 'Mobile + planning · accès limité',
+            accent: 'sage',
+        },
+    ];
+
+    const accentClass = (a: 'brand' | 'sage' | 'warning' | 'ink'): string => {
+        switch (a) {
+            case 'brand':
+                return 'bg-brand-50 text-brand-700 ring-brand-100';
+            case 'sage':
+                return 'bg-sage-50 text-sage-700 ring-sage-100';
+            case 'warning':
+                return 'bg-warning-50 text-warning-700 ring-warning-100';
+            case 'ink':
+                return 'bg-ink-100 text-ink-700 ring-ink-200';
+        }
+    };
+
+    const initials = (name: string): string =>
+        name
+            .split(' ')
+            .map((part) => part[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase();
 
     return (
         <>
@@ -66,17 +133,72 @@ export default function Login({ status }: { status?: string }) {
                                 </div>
                             )}
 
-                            {/* Demo button */}
-                            <button
-                                type="button"
-                                onClick={fillDemo}
-                                className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand-200 bg-brand-50/50 px-4 py-3 text-sm font-medium text-brand-600 transition-all hover:border-brand-300 hover:bg-brand-50"
-                            >
-                                <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-                                </svg>
-                                Remplir avec les identifiants démo
-                            </button>
+                            {/* Demo profile picker */}
+                            <div className="mb-6">
+                                {!showDemoPicker ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowDemoPicker(true)}
+                                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-brand-200 bg-brand-50/50 px-4 py-3 text-sm font-medium text-brand-600 transition-all hover:border-brand-300 hover:bg-brand-50"
+                                    >
+                                        <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                                        </svg>
+                                        Remplir avec les identifiants démo
+                                    </button>
+                                ) : (
+                                    <div className="rounded-xl border border-brand-200 bg-brand-50/30 p-3">
+                                        <div className="mb-2 flex items-center justify-between px-1">
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-brand-700">
+                                                Choisir un profil de démo
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowDemoPicker(false)}
+                                                aria-label="Fermer la liste"
+                                                className="rounded-full p-1 text-ink-400 transition-colors hover:bg-white hover:text-ink-700"
+                                            >
+                                                <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <ul className="space-y-1.5">
+                                            {demoProfiles.map((profile) => (
+                                                <li key={profile.email}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fillDemo(profile.email)}
+                                                        className="group flex w-full items-center gap-3 rounded-lg border border-transparent bg-white px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:border-ink-200 hover:shadow-sm"
+                                                    >
+                                                        <span className={'flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold ring-1 ring-inset ' + accentClass(profile.accent)}>
+                                                            {initials(profile.name)}
+                                                        </span>
+                                                        <span className="min-w-0 flex-1">
+                                                            <span className="flex items-baseline gap-2">
+                                                                <span className="text-sm font-semibold text-ink-900">{profile.name}</span>
+                                                                <span className="text-[11px] font-medium uppercase tracking-wider text-ink-400">
+                                                                    {profile.role}
+                                                                </span>
+                                                            </span>
+                                                            <span className="block truncate text-[11px] text-ink-500">{profile.tagline}</span>
+                                                            <span className="block truncate font-mono text-[10px] text-ink-400 group-hover:text-brand-600">
+                                                                {profile.email}
+                                                            </span>
+                                                        </span>
+                                                        <svg className="size-4 shrink-0 text-ink-300 transition-colors group-hover:text-brand-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                        </svg>
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <p className="mt-2 px-1 text-[10px] text-ink-400">
+                                            Tous comptes — mot de passe <code className="font-mono">password</code>
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Divider */}
                             <div className="mb-6 flex items-center gap-3">
