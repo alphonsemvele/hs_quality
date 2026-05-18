@@ -102,6 +102,74 @@ const HELP_BY_PATH: Array<{ match: RegExp; help: ContextualHelp }> = [
         },
     },
     {
+        match: /^\/plans-amelioration/,
+        help: {
+            title: "Plans d'amélioration continue",
+            description: "Plans d'actions correctifs (PAC) — pilotés en mode kanban ou liste, avec courbe d'épuisement (burndown).",
+            quickTips: [
+                "Chaque écart d'audit grave/critique génère automatiquement un PAC",
+                "Filtrez par responsable pour voir uniquement vos actions",
+                "La clôture demande un commentaire — exigence traçabilité qualité",
+                "Le burndown projette la date d'atteinte du 100% au rythme actuel",
+            ],
+            relatedActions: [
+                { label: 'Audits liés', href: '/audits' },
+                { label: 'Indicateurs qualité', href: '/indicateurs' },
+            ],
+        },
+    },
+    {
+        match: /^\/care-plans/,
+        help: {
+            title: "Plans d'accompagnement",
+            description: "Plans de soins individualisés : objectifs, tâches planifiées, suivi des intervenants — accessible et auditable.",
+            quickTips: [
+                "Cocher une tâche déclenche un suivi tracé dans le journal du bénéficiaire",
+                "L'archivage demande un motif et conserve l'historique",
+                "Le sticky TOC à droite permet de naviguer rapidement sur un plan long",
+            ],
+        },
+    },
+    {
+        match: /^\/formations/,
+        help: {
+            title: 'Formations & habilitations',
+            description: 'Suivi des certifications obligatoires (gestes & postures, AFGSU, RGPD…) et des plans de formation annuels.',
+            quickTips: [
+                "Un mail d'alerte est envoyé 60j et 30j avant l'échéance d'une certification",
+                "La matrice de compétences croise intervenants × formations obligatoires",
+                "Les sessions présentielles ou e-learning émettent un certificat horodaté",
+            ],
+            relatedActions: [
+                { label: 'Mes compétences', href: '/formations/competencies/mine' },
+            ],
+        },
+    },
+    {
+        match: /^\/communication/,
+        help: {
+            title: "Fil d'actualité & messages",
+            description: "Diffusion d'annonces, célébrations QVCT et notes épinglées à l'échelle de la structure.",
+            quickTips: [
+                "Les pièces jointes sont stockées HDS et chiffrées au repos",
+                "Une publication peut être ciblée sur un groupe (équipe / secteur)",
+                "Les notes épinglées restent visibles en haut du fil tant qu'elles ne sont pas détachées",
+            ],
+        },
+    },
+    {
+        match: /^\/indicateurs/,
+        help: {
+            title: 'Indicateurs qualité',
+            description: "Vue agrégée des KPIs réglementaires HAS / AFNOR et de la conformité de votre structure.",
+            quickTips: [
+                "Les seuils sont configurables par votre référent qualité",
+                "L'export CSV est disponible sur chaque bloc d'indicateurs",
+                "Les valeurs anonymisées (n<5) sont marquées d'un cadenas",
+            ],
+        },
+    },
+    {
         match: /^\/audit-log/,
         help: {
             title: 'Registre d\'audit',

@@ -1,6 +1,6 @@
 import { PacBurndown } from '@/components/PacBurndown';
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, PageHeader, RelativeTime } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -121,7 +121,18 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
         <DashboardLayout title={plan.titre} subtitle="">
             <PageHeader
                 title={plan.titre}
-                subtitle={`${plan.source_label} · Échéance : ${plan.echeance ?? 'Non définie'}`}
+                subtitle={
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                        {plan.source_label} · Échéance : {plan.echeance ?? 'Non définie'}
+                        <CopyButton
+                            value={plan.id}
+                            label="Copier l'identifiant du plan"
+                            size="xs"
+                        >
+                            ID
+                        </CopyButton>
+                    </span>
+                }
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: "Plans d'amélioration", href: '/plans-amelioration' },
@@ -223,7 +234,7 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
                             <Row label="Responsable" value={plan.responsable ?? '—'} />
                             <Row label="Échéance" value={plan.echeance ?? '—'} />
                             <Row label="Actions" value={`${plan.actions.length}`} />
-                            {plan.closed_at && <Row label="Clôturé" value={plan.closed_at} />}
+                            {plan.closed_at && <Row label="Clôturé" value={<RelativeTime value={plan.closed_at} />} />}
                         </dl>
                     </CardBody>
                 </Card>

@@ -1,5 +1,5 @@
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, RelativeTime } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -158,7 +158,7 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                             {b.admitted_at && (
                                 <Row
                                     label="Admis le"
-                                    value={<span className="font-mono text-xs">{b.admitted_at}</span>}
+                                    value={<RelativeTime value={b.admitted_at} className="font-mono text-xs" />}
                                 />
                             )}
                             <Row label="Contact d'urgence" value={b.emergency_contact_name ?? '—'} />

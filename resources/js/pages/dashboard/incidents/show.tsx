@@ -5,6 +5,7 @@ import {
     CardBody,
     CardHeader,
     ConfirmDialog,
+    CopyButton,
     EmptyState,
     IncidentGraviteBadge,
     IncidentStatusBadge,
@@ -85,7 +86,18 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
         <DashboardLayout title={incident.categorie} subtitle="Détail incident">
             <PageHeader
                 title={incident.categorie}
-                subtitle={`Déclaré par ${incident.declarant.name} · ${incident.occurred_at}`}
+                subtitle={
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                        Déclaré par {incident.declarant.name} · {incident.occurred_at}
+                        <CopyButton
+                            value={incident.id}
+                            label="Copier l'identifiant de l'incident"
+                            size="xs"
+                        >
+                            ID
+                        </CopyButton>
+                    </span>
+                }
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: 'Incidents', href: '/incidents' },

@@ -1,3 +1,4 @@
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, KpiCard, PageHeader } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
@@ -43,6 +44,17 @@ const STATUS_TONE: Record<Attendee['status'], 'sage' | 'brand' | 'warning' | 'da
 };
 
 export default function SessionShow({ session, attendees = [] }: Partial<Props>) {
+    useTrackRecent(
+        session
+            ? {
+                kind: 'formation',
+                id: session.id,
+                label: `${session.title} · ${session.date}`,
+                href: `/formations/sessions/${session.id}`,
+            }
+            : null,
+    );
+
     if (!session) {
         return (
             <DashboardLayout title="Session de formation" subtitle="">

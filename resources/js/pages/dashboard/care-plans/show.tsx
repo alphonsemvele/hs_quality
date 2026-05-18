@@ -1,3 +1,4 @@
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { moveItem, useReorderable } from '@/lib/reorderable';
 import {
     Badge,
@@ -73,6 +74,13 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
         setTasks(initialTasks);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [signature]);
+
+    useTrackRecent({
+        kind: 'care-plan',
+        id: p.id,
+        label: `${p.title}${b.full_name ? ` · ${b.full_name}` : ''}`,
+        href: `/care-plans/${p.id}`,
+    });
 
     const persistOrder = (orderedIds: number[]) => {
         router.post(

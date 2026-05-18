@@ -1,5 +1,5 @@
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, InlineHelp, PageHeader, PageToc, RelativeTime } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, InlineHelp, PageHeader, PageToc, RelativeTime } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -125,7 +125,18 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
         <DashboardLayout title={audit.titre} subtitle="">
             <PageHeader
                 title={audit.titre}
-                subtitle={`${audit.referentiel_label} · ${audit.date_audit ?? 'Non planifié'}`}
+                subtitle={
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                        {audit.referentiel_label} · {audit.date_audit ?? 'Non planifié'}
+                        <CopyButton
+                            value={audit.id}
+                            label="Copier l'identifiant de l'audit"
+                            size="xs"
+                        >
+                            ID
+                        </CopyButton>
+                    </span>
+                }
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: 'Audits', href: '/audits' },

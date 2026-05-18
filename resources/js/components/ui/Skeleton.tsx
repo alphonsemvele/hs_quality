@@ -60,6 +60,41 @@ export function SkeletonLines({ count = 3, className }: { count?: number; classN
     );
 }
 
+/**
+ * Placeholder shaped like a `KpiCard` (icon block, label, value, optional
+ * progress bar). Pair with Inertia deferred props so the dashboard's KPI
+ * row keeps its dimensions while the real numbers are loading.
+ */
+export function KpiSkeleton({ count = 1, showProgress = false }: { count?: number; showProgress?: boolean }) {
+    if (count === 1) {
+        return <KpiSkeletonOne showProgress={showProgress} />;
+    }
+    return (
+        <>
+            {Array.from({ length: count }, (_, i) => (
+                <KpiSkeletonOne key={i} showProgress={showProgress} />
+            ))}
+        </>
+    );
+}
+
+function KpiSkeletonOne({ showProgress }: { showProgress: boolean }) {
+    return (
+        <div
+            data-component="kpi"
+            aria-hidden="true"
+            className="rounded-2xl border border-ink-100 bg-white p-5 dark:border-ink-700/60 dark:bg-ink-800"
+        >
+            <Skeleton w="size-10" h="" className="rounded-xl" />
+            <Skeleton shape="text" w="w-24" className="mt-3" />
+            <Skeleton w="w-16" h="h-7" className="mt-1 rounded-md" />
+            {showProgress && (
+                <Skeleton w="w-full" h="h-1.5" className="mt-3 rounded-full" />
+            )}
+        </div>
+    );
+}
+
 interface TableSkeletonProps {
     /** Number of skeleton rows. Default 5. */
     rows?: number;

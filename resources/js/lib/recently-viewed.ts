@@ -16,6 +16,7 @@ export type RecentKind =
     | 'incident'
     | 'audit'
     | 'plan-amelioration'
+    | 'care-plan'
     | 'formation'
     | 'qvct-campaign';
 
@@ -36,6 +37,7 @@ export const RECENT_KIND_LABEL: Record<RecentKind, string> = {
     incident: 'Incident',
     audit: 'Audit',
     'plan-amelioration': "Plan d'amélioration",
+    'care-plan': "Plan d'accompagnement",
     formation: 'Formation',
     'qvct-campaign': 'Campagne QVCT',
 };

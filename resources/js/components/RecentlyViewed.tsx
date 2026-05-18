@@ -10,6 +10,7 @@ const KIND_TONE: Record<RecentKind, 'brand' | 'sage' | 'warning' | 'neutral' | '
     incident: 'danger',
     audit: 'warning',
     'plan-amelioration': 'warning',
+    'care-plan': 'brand',
     formation: 'brand',
     'qvct-campaign': 'sage',
 };

@@ -24,7 +24,7 @@ export { PageToc, type TocItem } from './PageToc';
 export { RelativeTime } from './RelativeTime';
 export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
-export { Skeleton, SkeletonLines, TableSkeleton } from './Skeleton';
+export { KpiSkeleton, Skeleton, SkeletonLines, TableSkeleton } from './Skeleton';
 export { StickySaveBar } from './StickySaveBar';
 export {
     CarePlanStatusBadge,
