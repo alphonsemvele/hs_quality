@@ -255,19 +255,57 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
                                                 <Td className="text-right font-mono text-sm text-ink-700 dark:text-ink-300">
                                                     {s.beneficiaries_count}
                                                 </Td>
-                                                <Td className="text-right font-mono text-sm text-ink-700 dark:text-ink-300">
-                                                    {s.interventions_this_month}
+                                                <Td className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span className="font-mono text-sm text-ink-700 dark:text-ink-300">
+                                                            {s.interventions_this_month}
+                                                        </span>
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className="block h-1.5 w-16 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700"
+                                                        >
+                                                            <span
+                                                                className="block h-full rounded-full bg-brand-500 dark:bg-brand-400"
+                                                                style={{
+                                                                    width:
+                                                                        relativeWidth(
+                                                                            s.interventions_this_month,
+                                                                            structures_activity.map((x) => x.interventions_this_month),
+                                                                        ) + '%',
+                                                                }}
+                                                            />
+                                                        </span>
+                                                    </div>
                                                 </Td>
                                                 <Td className="text-right">
-                                                    <span
-                                                        className={
-                                                            s.critical_incidents_open > 0
-                                                                ? 'font-mono text-sm font-semibold text-danger-600 dark:text-danger-400'
-                                                                : 'font-mono text-sm text-ink-500 dark:text-ink-400'
-                                                        }
-                                                    >
-                                                        {s.critical_incidents_open}
-                                                    </span>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span
+                                                            className={
+                                                                s.critical_incidents_open > 0
+                                                                    ? 'font-mono text-sm font-semibold text-danger-600 dark:text-danger-400'
+                                                                    : 'font-mono text-sm text-ink-500 dark:text-ink-400'
+                                                            }
+                                                        >
+                                                            {s.critical_incidents_open}
+                                                        </span>
+                                                        {s.critical_incidents_open > 0 && (
+                                                            <span
+                                                                aria-hidden="true"
+                                                                className="block h-1.5 w-16 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700"
+                                                            >
+                                                                <span
+                                                                    className="block h-full rounded-full bg-danger-500 dark:bg-danger-400"
+                                                                    style={{
+                                                                        width:
+                                                                            relativeWidth(
+                                                                                s.critical_incidents_open,
+                                                                                structures_activity.map((x) => x.critical_incidents_open),
+                                                                            ) + '%',
+                                                                    }}
+                                                                />
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </Td>
                                             </Tr>
                                         ))}
@@ -359,6 +397,17 @@ export default function AdminDashboard({ kpis, recent_structures, structures_act
             </div>
         </DashboardLayout>
     );
+}
+
+/**
+ * Bar width (0-100) relative to the maximum value in the column.
+ * Returns 0 when all values are zero so the column stays empty visually.
+ */
+function relativeWidth(value: number, values: number[]): number {
+    if (value === 0) return 0;
+    const max = Math.max(...values, 0);
+    if (max === 0) return 0;
+    return Math.max(8, Math.round((value / max) * 100));
 }
 
 function tierTone(tier: string): 'brand' | 'sage' | 'neutral' {

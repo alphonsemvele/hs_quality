@@ -159,6 +159,17 @@ function TabButton({
 }
 
 function MessagesTab({ channels, channel }: { channels: Channel[]; channel: CurrentChannel | null }) {
+    const [messageQuery, setMessageQuery] = useState('');
+    const filteredMessages = channel
+        ? channel.messages.filter((m) => {
+              const needle = messageQuery.trim().toLowerCase();
+              if (!needle) return true;
+              return (
+                  m.content.toLowerCase().includes(needle) ||
+                  m.author.toLowerCase().includes(needle)
+              );
+          })
+        : [];
     return (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-4">
             {/* Channels sidebar */}
@@ -211,10 +222,33 @@ function MessagesTab({ channels, channel }: { channels: Channel[]; channel: Curr
                                 </span>
                             }
                         />
+                        <div className="border-b border-ink-100 px-4 py-2 dark:border-ink-700/60">
+                            <div className="relative">
+                                <input
+                                    type="search"
+                                    value={messageQuery}
+                                    onChange={(e) => setMessageQuery(e.target.value)}
+                                    placeholder="Filtrer les messages du salon…"
+                                    className="block w-full rounded-lg border border-ink-200 bg-white pl-9 pr-3 py-1.5 text-xs text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                                />
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
+                                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
                         <CardBody className="flex h-[28rem] flex-col gap-3 overflow-y-auto p-4">
-                            {channel.messages.map((m) => (
-                                <MessageBubble key={m.id} m={m} />
-                            ))}
+                            {filteredMessages.length === 0 ? (
+                                <p className="my-auto text-center text-xs text-ink-400 dark:text-ink-500">
+                                    {messageQuery
+                                        ? 'Aucun message ne correspond.'
+                                        : 'Aucun message dans ce salon pour le moment.'}
+                                </p>
+                            ) : (
+                                filteredMessages.map((m) => <MessageBubble key={m.id} m={m} />)
+                            )}
                         </CardBody>
                         <div className="border-t border-ink-100 p-3 dark:border-ink-700/60">
                             <div className="flex items-center gap-2">
