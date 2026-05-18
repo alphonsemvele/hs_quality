@@ -1,5 +1,5 @@
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, InlineHelp, PageHeader, PageToc } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, InlineHelp, PageHeader, PageToc, RelativeTime } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -210,7 +210,7 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                             <Row label="Auditeur" value={audit.auditeur ?? '—'} />
                             <Row label="Score" value={audit.score !== null ? `${audit.score} %` : '—'} />
                             <Row label="Écarts" value={`${audit.ecarts.length}`} />
-                            {audit.finalized_at && <Row label="Finalisé" value={audit.finalized_at} />}
+                            {audit.finalized_at && <Row label="Finalisé" value={<RelativeTime value={audit.finalized_at} />} />}
                         </dl>
                     </CardBody>
                 </Card>

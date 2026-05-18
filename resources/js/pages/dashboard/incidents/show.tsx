@@ -9,6 +9,7 @@ import {
     IncidentGraviteBadge,
     IncidentStatusBadge,
     PageHeader,
+    RelativeTime,
     WorkflowStepper,
     type WorkflowStep,
 } from '@/components/ui';
@@ -154,12 +155,12 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     <CardHeader title="Synthèse" />
                     <CardBody>
                         <dl className="space-y-3.5">
-                            <Row label="Survenu le" value={incident.occurred_at} />
+                            <Row label="Survenu le" value={<RelativeTime value={incident.occurred_at} />} />
                             <Row label="Lieu" value={incident.lieu ?? '—'} />
                             <Row label="Bénéficiaire" value={incident.beneficiaire?.name ?? '—'} />
                             <Row label="Déclaré par" value={incident.declarant.name} />
                             <Row label="Assigné à" value={incident.assignee?.name ?? 'Non assigné'} />
-                            {incident.closed_at && <Row label="Clôturé le" value={incident.closed_at} />}
+                            {incident.closed_at && <Row label="Clôturé le" value={<RelativeTime value={incident.closed_at} />} />}
                         </dl>
                     </CardBody>
                 </Card>

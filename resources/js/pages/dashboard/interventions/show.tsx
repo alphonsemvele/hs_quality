@@ -9,6 +9,7 @@ import {
     InterventionStatusBadge,
     PageHeader,
 } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { useCan } from '@/lib/can';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -70,6 +71,13 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
     const canAct = useCan('interventions.update');
 
     const [pending, setPending] = useState<PendingAction>(null);
+
+    useTrackRecent({
+        kind: 'intervention',
+        id: intervention.id,
+        label: `${intervention.beneficiaire.name}${intervention.planned_date ? ` · ${intervention.planned_date}` : ''}`,
+        href: `/interventions/${intervention.id}`,
+    });
 
     const checkIn = () => router.post(`/interventions/${intervention.id}/checkin`);
     const checkOut = () => setPending({ kind: 'checkout' });

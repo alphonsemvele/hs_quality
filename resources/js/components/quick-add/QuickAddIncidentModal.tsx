@@ -1,4 +1,5 @@
 import { Button, FormField, Input, Modal, Select, Textarea } from '@/components/ui';
+import { useModalSubmitShortcut } from '@/lib/use-modal-submit-shortcut';
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 
@@ -43,13 +44,15 @@ export function QuickAddIncidentModal({ open, onClose }: Props) {
         if (!open) reset();
     }, [open, reset]);
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const submit = (e?: React.FormEvent | Event) => {
+        e?.preventDefault();
         post('/incidents', {
             preserveScroll: true,
             onSuccess: () => onClose(),
         });
     };
+
+    useModalSubmitShortcut({ open, disabled: processing, onSubmit: () => submit() });
 
     const selectedGravite = GRAVITES.find((g) => g.value === data.gravite);
     const requiresARS = selectedGravite?.note === 'Notification ARS';

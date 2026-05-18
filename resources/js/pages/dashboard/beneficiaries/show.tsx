@@ -1,3 +1,4 @@
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
@@ -63,6 +64,13 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
 
     const [showAttach, setShowAttach] = useState(false);
     const [detachTarget, setDetachTarget] = useState<{ id: number | string; name: string } | null>(null);
+
+    useTrackRecent({
+        kind: 'beneficiary',
+        id: b.id,
+        label: b.is_erased ? 'Bénéficiaire anonymisé' : b.full_name,
+        href: `/beneficiaries/${b.id}`,
+    });
 
     const requestDetach = (id: number | string, name: string) => setDetachTarget({ id, name });
     const confirmDetach = () => {

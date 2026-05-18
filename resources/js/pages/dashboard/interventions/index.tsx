@@ -1,3 +1,4 @@
+import { FilterPresets } from '@/components/FilterPresets';
 import { BeneficiaryHoverCard, UserHoverCard } from '@/components/hover-cards';
 import { InterventionCalendar } from '@/components/InterventionCalendar';
 import { InterventionPreviewSheet, type InterventionPreview } from '@/components/preview-sheets';
@@ -214,6 +215,11 @@ export default function Interventions({
                     onRemove={removeFilter}
                     onOpenDrawer={() => setShowFilters(true)}
                     onResetAll={resetFilters}
+                />
+                <FilterPresets
+                    pageKey="interventions"
+                    basePath="/interventions"
+                    hasActiveFilter={chips.length > 0}
                 />
             </div>
 

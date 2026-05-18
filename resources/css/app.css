@@ -140,6 +140,22 @@ html[data-density='compact'] [class*='gap-6'] {
     gap: 1rem !important;
 }
 
+/* KPI cards: tighter padding + smaller value + drop the sub-line in compact mode */
+html[data-density='compact'] [data-component='kpi'] {
+    padding: 0.875rem !important;
+}
+
+html[data-density='compact'] [data-component='kpi'] p.text-2xl,
+html[data-density='compact'] [data-component='kpi'] p[class*='text-2xl'] {
+    font-size: 1.25rem !important;
+    line-height: 1.3 !important;
+}
+
+html[data-density='compact'] [data-component='kpi'] p:last-child[class*='text-xs'] {
+    /* Hide the optional sub line — the KPI label + value carry the meaning */
+    display: none !important;
+}
+
 @layer base {
     html {
         -webkit-font-smoothing: antialiased;

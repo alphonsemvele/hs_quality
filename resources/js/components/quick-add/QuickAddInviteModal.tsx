@@ -1,4 +1,5 @@
 import { Button, FormField, Input, Modal, Select } from '@/components/ui';
+import { useModalSubmitShortcut } from '@/lib/use-modal-submit-shortcut';
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 
@@ -27,13 +28,15 @@ export function QuickAddInviteModal({ open, onClose }: Props) {
         if (!open) reset();
     }, [open, reset]);
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const submit = (e?: React.FormEvent | Event) => {
+        e?.preventDefault();
         post('/users', {
             preserveScroll: true,
             onSuccess: () => onClose(),
         });
     };
+
+    useModalSubmitShortcut({ open, disabled: processing, onSubmit: () => submit() });
 
     const selectedRole = ROLES.find((r) => r.value === data.type);
     const requiresMfa = selectedRole && ['coordinateur', 'referent_qualite', 'rh', 'dirigeant'].includes(selectedRole.value);

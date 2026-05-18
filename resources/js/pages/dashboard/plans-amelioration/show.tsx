@@ -1,4 +1,5 @@
 import { PacBurndown } from '@/components/PacBurndown';
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -62,6 +63,10 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
     const [showCancelForm, setShowCancelForm] = useState(false);
     const [actionsView, setActionsView] = useState<ActionsView>('list');
     const [responsableFilter, setResponsableFilter] = useState<string | null>(null);
+
+    useTrackRecent(
+        plan ? { kind: 'plan-amelioration', id: plan.id, label: plan.titre, href: `/plans-amelioration/${plan.id}` } : null,
+    );
 
     if (!plan) {
         return (
