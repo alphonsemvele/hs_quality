@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, PageToc } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -176,8 +176,16 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                 </div>
             )}
 
+            <PageToc
+                items={[
+                    { id: 'audit-description', label: 'Description' },
+                    { id: 'audit-synthese', label: 'Synthèse' },
+                    { id: 'audit-ecarts', label: 'Écarts identifiés' },
+                ]}
+            />
+
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
+                <Card id="audit-description" className="scroll-mt-24 lg:col-span-2">
                     <CardHeader title="Description" />
                     <CardBody>
                         {audit.description ? (
@@ -188,7 +196,7 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                     </CardBody>
                 </Card>
 
-                <Card>
+                <Card id="audit-synthese" className="scroll-mt-24">
                     <CardHeader title="Synthèse" />
                     <CardBody>
                         <dl className="space-y-3.5">
@@ -202,7 +210,7 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                     </CardBody>
                 </Card>
 
-                <Card className="lg:col-span-3">
+                <Card id="audit-ecarts" className="scroll-mt-24 lg:col-span-3">
                     <CardHeader
                         title="Écarts identifiés"
                         subtitle={`${audit.ecarts.length} écart(s)`}

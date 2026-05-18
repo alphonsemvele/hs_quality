@@ -67,6 +67,38 @@
     --color-warning-700: #b45309;
 }
 
+/*
+ * Theme accent overrides (per-user preference, FE-only).
+ * Toggled by writing `data-accent="sage"` or `data-accent="mauve"` on
+ * the <html> element via `lib/theme-accent.ts`. Default (no attribute)
+ * keeps the steel-blue brand palette declared in `@theme`.
+ */
+html[data-accent='sage'] {
+    --color-brand-50: #f4faf6;
+    --color-brand-100: #e2f1e9;
+    --color-brand-200: #bfe0cc;
+    --color-brand-300: #95c9a9;
+    --color-brand-400: #62ab80;
+    --color-brand-500: #4a9568;
+    --color-brand-600: #3f9670;
+    --color-brand-700: #2f7b5c;
+    --color-brand-800: #245c45;
+    --color-brand-900: #163828;
+}
+
+html[data-accent='mauve'] {
+    --color-brand-50: #faf5ff;
+    --color-brand-100: #f3e8ff;
+    --color-brand-200: #e9d5ff;
+    --color-brand-300: #d8b4fe;
+    --color-brand-400: #c084fc;
+    --color-brand-500: #a855f7;
+    --color-brand-600: #9333ea;
+    --color-brand-700: #7e22ce;
+    --color-brand-800: #6b21a8;
+    --color-brand-900: #581c87;
+}
+
 @layer base {
     html {
         -webkit-font-smoothing: antialiased;

@@ -21,6 +21,7 @@ export { PageToc, type TocItem } from './PageToc';
 export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
 export { Skeleton, SkeletonLines } from './Skeleton';
+export { StickySaveBar } from './StickySaveBar';
 export {
     CarePlanStatusBadge,
     GirBadge,
