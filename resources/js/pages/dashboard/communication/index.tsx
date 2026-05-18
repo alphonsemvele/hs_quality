@@ -261,10 +261,14 @@ function MessageBubble({ m }: { m: ThreadMessage }) {
     );
 }
 
+type NewsSort = 'recent' | 'pinned' | 'all';
+
 function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean }) {
+    const [composing, setComposing] = useState(false);
+    const [sort, setSort] = useState<NewsSort>('pinned');
+
     const pinned = posts.filter((p) => p.pinned);
     const others = posts.filter((p) => !p.pinned);
-    const [composing, setComposing] = useState(false);
 
     return (
         <div className="space-y-5">
@@ -288,7 +292,36 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                 </Card>
             )}
 
-            {pinned.length > 0 && (
+            {posts.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                        Trier
+                    </span>
+                    {(
+                        [
+                            { key: 'pinned', label: `Épinglées d'abord (${pinned.length})` },
+                            { key: 'recent', label: `Récentes (${posts.length})` },
+                            { key: 'all', label: 'Tout afficher' },
+                        ] as const
+                    ).map((opt) => (
+                        <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => setSort(opt.key)}
+                            aria-pressed={sort === opt.key}
+                            className={
+                                sort === opt.key
+                                    ? 'inline-flex items-center rounded-full bg-ink-900 px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-ink-900'
+                                    : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-[11px] font-medium text-ink-600 transition-colors hover:border-ink-400 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-300'
+                            }
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {sort === 'pinned' && pinned.length > 0 && (
                 <section>
                     <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
                         <PinIcon /> Épinglées
@@ -303,7 +336,7 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                 </section>
             )}
 
-            {others.length > 0 && (
+            {sort === 'pinned' && others.length > 0 && (
                 <section>
                     {pinned.length > 0 && (
                         <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
@@ -312,6 +345,30 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                     )}
                     <ul className="space-y-3">
                         {others.map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {sort === 'recent' && (
+                <section>
+                    <ul className="space-y-3">
+                        {posts.map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {sort === 'all' && (
+                <section>
+                    <ul className="space-y-3">
+                        {[...pinned, ...others].map((p) => (
                             <li key={p.id}>
                                 <NewsCard post={p} />
                             </li>

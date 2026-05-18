@@ -60,6 +60,7 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
     const [showCloseForm, setShowCloseForm] = useState(false);
     const [showCancelForm, setShowCancelForm] = useState(false);
     const [actionsView, setActionsView] = useState<ActionsView>('list');
+    const [responsableFilter, setResponsableFilter] = useState<string | null>(null);
 
     if (!plan) {
         return (
@@ -269,20 +270,29 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
 
                         {plan.actions.length === 0 ? (
                             <EmptyState title="Aucune action définie" description="Ajoutez des actions correctives concrètes pour traiter l'écart identifié." />
-                        ) : actionsView === 'list' ? (
-                            <ActionsList
-                                actions={plan.actions}
-                                canMutate={!plan.is_terminal && can.update}
-                                onMarkDone={markActionDone}
-                                onDelete={deleteAction}
-                            />
                         ) : (
-                            <ActionsKanban
-                                actions={plan.actions}
-                                canMutate={!plan.is_terminal && can.update}
-                                onMarkDone={markActionDone}
-                                onDelete={deleteAction}
-                            />
+                            <>
+                                <ResponsableFilter
+                                    actions={plan.actions}
+                                    selected={responsableFilter}
+                                    onChange={setResponsableFilter}
+                                />
+                                {actionsView === 'list' ? (
+                                    <ActionsList
+                                        actions={filterByResponsable(plan.actions, responsableFilter)}
+                                        canMutate={!plan.is_terminal && can.update}
+                                        onMarkDone={markActionDone}
+                                        onDelete={deleteAction}
+                                    />
+                                ) : (
+                                    <ActionsKanban
+                                        actions={filterByResponsable(plan.actions, responsableFilter)}
+                                        canMutate={!plan.is_terminal && can.update}
+                                        onMarkDone={markActionDone}
+                                        onDelete={deleteAction}
+                                    />
+                                )}
+                            </>
                         )}
                     </CardBody>
                 </Card>
@@ -309,6 +319,69 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
             <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
             <dd className="text-sm font-medium text-ink-900 dark:text-white">{value}</dd>
         </div>
+    );
+}
+
+// ─── Responsable filter ─────────────────────────────────────────────────────
+function filterByResponsable(actions: Action[], responsable: string | null): Action[] {
+    if (responsable === null) return actions;
+    if (responsable === '__unassigned__') return actions.filter((a) => !a.responsable);
+    return actions.filter((a) => a.responsable === responsable);
+}
+
+function ResponsableFilter({
+    actions,
+    selected,
+    onChange,
+}: {
+    actions: Action[];
+    selected: string | null;
+    onChange: (value: string | null) => void;
+}) {
+    const owners = Array.from(new Set(actions.map((a) => a.responsable).filter((r): r is string => Boolean(r))));
+    const hasUnassigned = actions.some((a) => !a.responsable);
+
+    if (owners.length === 0 && !hasUnassigned) return null;
+
+    return (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Responsable
+            </span>
+            <FilterChip active={selected === null} onClick={() => onChange(null)} label={`Tous (${actions.length})`} />
+            {owners.map((owner) => (
+                <FilterChip
+                    key={owner}
+                    active={selected === owner}
+                    onClick={() => onChange(owner)}
+                    label={`${owner} (${actions.filter((a) => a.responsable === owner).length})`}
+                />
+            ))}
+            {hasUnassigned && (
+                <FilterChip
+                    active={selected === '__unassigned__'}
+                    onClick={() => onChange('__unassigned__')}
+                    label={`Sans responsable (${actions.filter((a) => !a.responsable).length})`}
+                />
+            )}
+        </div>
+    );
+}
+
+function FilterChip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            aria-pressed={active}
+            className={
+                active
+                    ? 'inline-flex items-center rounded-full bg-ink-900 px-3 py-1 text-xs font-semibold text-white dark:bg-white dark:text-ink-900'
+                    : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-xs font-medium text-ink-700 transition-colors hover:border-ink-400 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'
+            }
+        >
+            {label}
+        </button>
     );
 }
 
