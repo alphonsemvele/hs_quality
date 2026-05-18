@@ -1,3 +1,4 @@
+import { DensityToggle } from '@/components/DensityToggle';
 import { ThemeAccentToggle } from '@/components/ThemeAccentToggle';
 import { Badge, Button, Card, CardBody, CardHeader, PageHeader, StickySaveBar } from '@/components/ui';
 import { cn } from '@/lib/utils';
@@ -176,11 +177,22 @@ export default function NotificationsPreferences() {
                 </Card>
 
                 <Card className="mt-5">
-                    <CardHeader title="Apparence" subtitle="Personnalisez la couleur d'accent — préférence locale (par appareil)" />
-                    <CardBody>
-                        <ThemeAccentToggle />
-                        <p className="mt-3 text-[11px] text-ink-500 dark:text-ink-400">
-                            Le choix est mémorisé dans ce navigateur. Vous pouvez revenir au bleu par défaut à tout moment.
+                    <CardHeader title="Apparence" subtitle="Personnalisez l'interface — préférences locales (par appareil)" />
+                    <CardBody className="space-y-4">
+                        <div>
+                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                Couleur d'accent
+                            </p>
+                            <ThemeAccentToggle />
+                        </div>
+                        <div>
+                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                Densité d'affichage
+                            </p>
+                            <DensityToggle />
+                        </div>
+                        <p className="text-[11px] text-ink-500 dark:text-ink-400">
+                            Vos préférences sont mémorisées dans ce navigateur. Vous pouvez revenir aux réglages par défaut à tout moment.
                         </p>
                     </CardBody>
                 </Card>

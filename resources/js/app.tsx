@@ -5,9 +5,11 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { bootEcho } from './echo';
+import { applyDensity, getStoredDensity } from './lib/density';
 import { applyAccent, getStoredAccent } from './lib/theme-accent';
 
 applyAccent(getStoredAccent());
+applyDensity(getStoredDensity());
 bootEcho();
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

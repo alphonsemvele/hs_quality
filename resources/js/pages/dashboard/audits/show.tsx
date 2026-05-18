@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, PageToc } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, InlineHelp, PageHeader, PageToc } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -240,7 +240,10 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                                             </label>
                                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                 <label className="block">
-                                                    <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">Gravité *</span>
+                                                    <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">
+                                                        Gravité *
+                                                        <InlineHelp>Mineur : impact limité, non-conformité documentaire. Majeur : impact sur la qualité du service. Critique : risque pour la sécurité du bénéficiaire — déclaration ARS sous 24h.</InlineHelp>
+                                                    </span>
                                                     <select name="gravite" required defaultValue="mineur" className="mt-1.5 h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm dark:border-brand-700/50 dark:bg-ink-800 dark:text-ink-100">
                                                         {gravites.map((g) => (
                                                             <option key={g.value} value={g.value}>{g.label}</option>

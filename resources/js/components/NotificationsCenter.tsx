@@ -52,12 +52,18 @@ export default function NotificationsCenter() {
     };
     const [open, setOpen] = useState(false);
     const [filter, setFilter] = useState<LevelFilter>('all');
+    const [search, setSearch] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const filteredItems = useMemo(
-        () => (filter === 'all' ? payload.items : payload.items.filter((i) => i.level === filter)),
-        [filter, payload.items],
-    );
+    const filteredItems = useMemo(() => {
+        const byLevel = filter === 'all' ? payload.items : payload.items.filter((i) => i.level === filter);
+        const q = search.trim().toLowerCase();
+        if (!q) return byLevel;
+        return byLevel.filter((i) =>
+            i.title.toLowerCase().includes(q)
+            || (i.message?.toLowerCase().includes(q) ?? false),
+        );
+    }, [filter, payload.items, search]);
 
     const grouped = useMemo(() => {
         const buckets: Record<'today' | 'yesterday' | 'older', NotificationItem[]> = {
@@ -72,7 +78,10 @@ export default function NotificationsCenter() {
     }, [filteredItems]);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            setSearch('');
+            return;
+        }
         const handleClick = (e: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setOpen(false);
@@ -152,6 +161,19 @@ export default function NotificationsCenter() {
                         )}
                     </div>
 
+                    {payload.items.length > 5 && (
+                        <div className="border-b border-ink-100 bg-ink-50/40 px-3 py-2 dark:border-ink-700/60 dark:bg-ink-900/30">
+                            <input
+                                type="search"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Filtrer les notifications…"
+                                aria-label="Filtrer les notifications par texte"
+                                className="h-8 w-full rounded-md border border-ink-200 bg-white px-2.5 text-xs text-ink-900 placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400 dark:border-ink-700 dark:bg-ink-800 dark:text-white dark:placeholder:text-ink-500"
+                            />
+                        </div>
+                    )}
+
                     {payload.items.length > 0 && (
                         <div className="flex gap-1 overflow-x-auto border-b border-ink-100 bg-ink-50/40 px-3 py-2 dark:border-ink-700/60 dark:bg-ink-900/30">
                             {(['all', 'info', 'success', 'warning', 'danger'] as const).map((value) => (
@@ -180,10 +202,18 @@ export default function NotificationsCenter() {
                                     <BellIcon />
                                 </span>
                                 <p className="text-sm font-medium text-ink-700 dark:text-ink-200">
-                                    {payload.items.length === 0 ? 'Aucune notification' : 'Aucune notification dans ce filtre'}
+                                    {payload.items.length === 0
+                                        ? 'Aucune notification'
+                                        : search.trim()
+                                            ? 'Aucun résultat pour cette recherche'
+                                            : 'Aucune notification dans ce filtre'}
                                 </p>
                                 <p className="text-xs text-ink-500 dark:text-ink-400">
-                                    {payload.items.length === 0 ? 'Les alertes ARS, RPS et expirations apparaîtront ici.' : 'Essayez « Tout ».'}
+                                    {payload.items.length === 0
+                                        ? 'Les alertes ARS, RPS et expirations apparaîtront ici.'
+                                        : search.trim()
+                                            ? 'Essayez d\'élargir votre recherche ou de changer de filtre.'
+                                            : 'Essayez « Tout ».'}
                                 </p>
                             </div>
                         ) : (

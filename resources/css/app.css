@@ -99,6 +99,47 @@ html[data-accent='mauve'] {
     --color-brand-900: #581c87;
 }
 
+/*
+ * Density overrides (per-user preference, FE-only).
+ * `data-density="compact"` shrinks padding inside cards, tables and KPI
+ * cards without changing the component code. Default (no attribute) is
+ * the comfortable spacing baked into the components.
+ */
+html[data-density='compact'] {
+    /* Cards: trim header/body padding and gap between stacked cards */
+    --card-padding-y: 0.625rem;
+    --card-padding-x: 1rem;
+}
+
+html[data-density='compact'] table th,
+html[data-density='compact'] table td {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+html[data-density='compact'] [class*='py-4']:not(button):not(.no-compact) {
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+}
+
+html[data-density='compact'] [class*='py-5']:not(button):not(.no-compact) {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+html[data-density='compact'] [class*='py-6']:not(button):not(.no-compact) {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+html[data-density='compact'] [class*='gap-5'] {
+    gap: 0.875rem !important;
+}
+
+html[data-density='compact'] [class*='gap-6'] {
+    gap: 1rem !important;
+}
+
 @layer base {
     html {
         -webkit-font-smoothing: antialiased;

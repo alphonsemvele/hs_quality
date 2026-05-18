@@ -37,6 +37,20 @@ const GROUPS: ShortcutsGroup[] = [
             { keys: ['↵'], label: 'Ouvrir la sélection' },
         ],
     },
+    {
+        title: 'Aller à (g + touche)',
+        items: [
+            { keys: ['g', 'd'], label: 'Tableau de bord' },
+            { keys: ['g', 'i'], label: 'Interventions' },
+            { keys: ['g', 'b'], label: 'Bénéficiaires' },
+            { keys: ['g', 'a'], label: 'Audits' },
+            { keys: ['g', 'p'], label: "Plans d'amélioration" },
+            { keys: ['g', 'q'], label: 'QVCT' },
+            { keys: ['g', 'n'], label: 'Incidents' },
+            { keys: ['g', 'f'], label: 'Formations' },
+            { keys: ['g', 'c'], label: 'Communication' },
+        ],
+    },
 ];
 
 /**

@@ -5,7 +5,9 @@ import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import CommandPalette from '@/components/CommandPalette';
 import HelpDrawer from '@/components/HelpDrawer';
+import { GoToShortcuts } from '@/components/GoToShortcuts';
 import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
+import { Lightbox } from '@/components/Lightbox';
 import { OnboardingTour } from '@/components/OnboardingTour';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
@@ -147,6 +149,8 @@ export default function DashboardLayout({
             <ShortcutsCheatsheet />
             <OnboardingTour />
             <ScrollToTop />
+            <GoToShortcuts />
+            <Lightbox />
 
             <a
                 href="#dashboard-main"

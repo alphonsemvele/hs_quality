@@ -12,6 +12,7 @@ export { FilterChipsBar, FilterDrawer } from './FilterDrawer';
 export { G } from './Glossary';
 export { HoverCard } from './HoverCard';
 export { Modal } from './Modal';
+export { InlineHelp } from './InlineHelp';
 export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from './Input';
 export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
