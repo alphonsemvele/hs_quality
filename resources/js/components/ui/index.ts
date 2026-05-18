@@ -11,6 +11,7 @@ export { EmptyStateRich } from './EmptyStateRich';
 export { FilterChipsBar, FilterDrawer } from './FilterDrawer';
 export { G } from './Glossary';
 export { HoverCard } from './HoverCard';
+export { IconButton } from './IconButton';
 export { Modal } from './Modal';
 export { InlineHelp } from './InlineHelp';
 export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from './Input';
@@ -19,9 +20,10 @@ export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
 export { PasswordStrength } from './PasswordStrength';
 export { PageToc, type TocItem } from './PageToc';
+export { RelativeTime } from './RelativeTime';
 export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
-export { Skeleton, SkeletonLines } from './Skeleton';
+export { Skeleton, SkeletonLines, TableSkeleton } from './Skeleton';
 export { StickySaveBar } from './StickySaveBar';
 export {
     CarePlanStatusBadge,

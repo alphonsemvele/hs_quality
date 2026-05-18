@@ -8,17 +8,24 @@ import {
     EmptyState,
     IncidentGraviteBadge,
     IncidentStatusBadge,
+    InlineHelp,
     KpiCard,
     PageHeader,
     Pagination,
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { useUrlBoolFilter, useUrlFilter } from '@/lib/use-url-filter';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 type Gravite = 'mineur' | 'significatif' | 'grave' | 'critique';
 type Statut = 'declare' | 'en_analyse' | 'plan_actions' | 'clos';
+
+const GRAVITE_VALUES = ['all', 'mineur', 'significatif', 'grave', 'critique'] as const;
+const STATUT_VALUES = ['all', 'declare', 'en_analyse', 'plan_actions', 'clos'] as const;
+type GraviteFilter = (typeof GRAVITE_VALUES)[number];
+type StatutFilter = (typeof STATUT_VALUES)[number];
 
 interface Incident {
     id: number | string;
@@ -49,9 +56,9 @@ export default function Incidents({
 }: Partial<Props>) {
     const canDeclare = useCan('incidents.create');
     const [preview, setPreview] = useState<IncidentPreview | null>(null);
-    const [graviteFilter, setGraviteFilter] = useState<'all' | Gravite>('all');
-    const [statutFilter, setStatutFilter] = useState<'all' | Statut>('all');
-    const [arsOnly, setArsOnly] = useState(false);
+    const [graviteFilter, setGraviteFilter] = useUrlFilter<GraviteFilter>('gravite', 'all', GRAVITE_VALUES);
+    const [statutFilter, setStatutFilter] = useUrlFilter<StatutFilter>('statut', 'all', STATUT_VALUES);
+    const [arsOnly, setArsOnly] = useUrlBoolFilter('ars_only', false);
 
     const filteredIncidents = incidents.filter((inc) => {
         if (graviteFilter !== 'all' && inc.gravite !== graviteFilter) return false;
@@ -135,18 +142,21 @@ export default function Incidents({
                         { value: 'clos', label: 'Clos' },
                     ]}
                 />
-                <button
-                    type="button"
-                    onClick={() => setArsOnly((v) => !v)}
-                    aria-pressed={arsOnly}
-                    className={
-                        arsOnly
-                            ? 'inline-flex items-center rounded-full bg-danger-600 px-3 py-1 text-[11px] font-semibold text-white transition-colors'
-                            : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-[11px] font-medium text-ink-700 transition-colors hover:border-ink-400 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'
-                    }
-                >
-                    ARS notifiée
-                </button>
+                <div className="inline-flex items-center">
+                    <button
+                        type="button"
+                        onClick={() => setArsOnly(!arsOnly)}
+                        aria-pressed={arsOnly}
+                        className={
+                            arsOnly
+                                ? 'inline-flex items-center rounded-full bg-danger-600 px-3 py-1 text-[11px] font-semibold text-white transition-colors'
+                                : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-[11px] font-medium text-ink-700 transition-colors hover:border-ink-400 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'
+                        }
+                    >
+                        ARS notifiée
+                    </button>
+                    <InlineHelp>L'ARS (Agence Régionale de Santé) doit être notifiée sous 24h pour tout événement indésirable grave ou critique impliquant un bénéficiaire (loi 2002-2, art. L1413-14).</InlineHelp>
+                </div>
                 {hasActiveFilter && (
                     <button
                         type="button"

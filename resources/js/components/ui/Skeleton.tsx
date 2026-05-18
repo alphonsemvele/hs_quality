@@ -59,3 +59,56 @@ export function SkeletonLines({ count = 3, className }: { count?: number; classN
         </div>
     );
 }
+
+interface TableSkeletonProps {
+    /** Number of skeleton rows. Default 5. */
+    rows?: number;
+    /** Number of columns. Default 4. */
+    cols?: number;
+    /** Optional header labels. If provided, length must equal `cols`. */
+    headers?: string[];
+    className?: string;
+}
+
+/**
+ * Compose-friendly table placeholder used in deferred-prop empty states.
+ * Pairs with Inertia's `<Deferred>` / `<WhenVisible>` to keep the row
+ * height stable while data is loading, preventing layout shift.
+ */
+export function TableSkeleton({ rows = 5, cols = 4, headers, className }: TableSkeletonProps) {
+    return (
+        <div className={cn('overflow-hidden rounded-xl border border-ink-100 dark:border-ink-700/60', className)} aria-hidden="true">
+            <table className="w-full table-fixed">
+                <thead className="bg-ink-50/40 dark:bg-ink-900/30">
+                    <tr>
+                        {Array.from({ length: cols }, (_, i) => (
+                            <th key={i} className="px-4 py-2.5 text-left">
+                                {headers && headers[i] ? (
+                                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                        {headers[i]}
+                                    </span>
+                                ) : (
+                                    <Skeleton shape="text" w="w-24" />
+                                )}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                    {Array.from({ length: rows }, (_, r) => (
+                        <tr key={r}>
+                            {Array.from({ length: cols }, (_, c) => (
+                                <td key={c} className="px-4 py-3.5">
+                                    <Skeleton
+                                        shape="text"
+                                        w={c === 0 ? 'w-36' : c === cols - 1 ? 'w-16' : 'w-24'}
+                                    />
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}

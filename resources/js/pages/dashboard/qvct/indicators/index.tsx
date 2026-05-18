@@ -5,6 +5,7 @@ import {
     CardHeader,
     ChartSeriesPoint,
     EmptyState,
+    InlineHelp,
     KpiCard,
     LineChart,
     PageHeader,
@@ -134,7 +135,10 @@ export default function QvctIndicators({
                         {dimAverages.map((d) => (
                             <div key={d.key}>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="font-medium text-ink-700 dark:text-ink-200">{d.label}</span>
+                                    <span className="inline-flex items-center font-medium text-ink-700 dark:text-ink-200">
+                                        {d.label}
+                                        <InlineHelp>{d.description}</InlineHelp>
+                                    </span>
                                     <span className="font-mono text-[11px] text-ink-500 dark:text-ink-400">
                                         n = {d.n}
                                     </span>
