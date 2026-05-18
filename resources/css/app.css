@@ -150,3 +150,91 @@
         }
     }
 }
+
+/* ─── Print stylesheet ──────────────────────────────────────────────────────
+ *
+ * Goals: strip the dashboard chrome (sidebar, top bar, action buttons,
+ * modals), force a light high-contrast appearance regardless of dark mode,
+ * break pages at sensible logical units, and reveal underlying URLs after
+ * hyperlinks so paper copies keep the reference points.
+ *
+ * Targets `/beneficiaries/{id}/dossier`, `/care-plans/{id}` and
+ * `/audits/{id}` primarily — anything that benefits from being printed
+ * for a paper audit trail or filing.
+ */
+@media print {
+    html,
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .dark {
+        color-scheme: light;
+    }
+
+    aside,
+    nav,
+    header,
+    [role='navigation'],
+    [role='banner'],
+    .no-print,
+    button,
+    [role='dialog'],
+    .skip-link {
+        display: none !important;
+    }
+
+    main {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .rounded-2xl,
+    .rounded-xl,
+    .rounded-lg {
+        border-radius: 0 !important;
+    }
+
+    *[class*='shadow-'] {
+        box-shadow: none !important;
+    }
+
+    *[class*='border-'] {
+        border-color: #000 !important;
+    }
+
+    thead {
+        position: static !important;
+        background: #f3f3f3 !important;
+    }
+
+    h1,
+    h2,
+    h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    article,
+    section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    a[href^='http']::after,
+    a[href^='/']::after {
+        content: ' (' attr(href) ')';
+        font-size: 90%;
+        color: #555;
+    }
+    a[href^='#']::after {
+        content: '';
+    }
+
+    @page {
+        margin: 1.5cm 1.2cm;
+        size: A4 portrait;
+    }
+}
