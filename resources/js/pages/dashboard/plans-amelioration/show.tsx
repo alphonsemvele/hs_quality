@@ -53,10 +53,13 @@ const STATUT_TONE: Record<string, 'brand' | 'warning' | 'sage' | 'neutral'> = {
     annule: 'neutral',
 };
 
+type ActionsView = 'list' | 'kanban';
+
 export default function PlanAmeliorationShow({ plan, can = { update: false, close: false, cancel: false } }: Props) {
     const [showActionForm, setShowActionForm] = useState(false);
     const [showCloseForm, setShowCloseForm] = useState(false);
     const [showCancelForm, setShowCancelForm] = useState(false);
+    const [actionsView, setActionsView] = useState<ActionsView>('list');
 
     if (!plan) {
         return (
@@ -223,11 +226,14 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
                         title="Actions correctives"
                         subtitle={`${plan.actions.length} action(s)`}
                         action={
-                            !plan.is_terminal && can.update ? (
-                                <Button variant="secondary" size="sm" onClick={() => setShowActionForm(!showActionForm)}>
-                                    {showActionForm ? 'Annuler' : '+ Nouvelle action'}
-                                </Button>
-                            ) : undefined
+                            <div className="flex items-center gap-2">
+                                <ViewToggle view={actionsView} onChange={setActionsView} />
+                                {!plan.is_terminal && can.update && (
+                                    <Button variant="secondary" size="sm" onClick={() => setShowActionForm(!showActionForm)}>
+                                        {showActionForm ? 'Annuler' : '+ Nouvelle action'}
+                                    </Button>
+                                )}
+                            </div>
                         }
                     />
                     <CardBody>
@@ -261,40 +267,22 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
                             </div>
                         )}
 
-                        {plan.actions.length > 0 ? (
-                            <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                {plan.actions.map((a) => (
-                                    <li key={a.id} className="py-3">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-medium text-ink-900 dark:text-white">{a.description}</p>
-                                                <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
-                                                    {a.responsable && <>Resp. : <span className="text-ink-700 dark:text-ink-300">{a.responsable}</span></>}
-                                                    {a.echeance && <> · Échéance : <span className="font-mono">{a.echeance}</span></>}
-                                                    {a.realise_at && <> · Réalisée le <span className="font-mono">{a.realise_at}</span></>}
-                                                </p>
-                                            </div>
-                                            <div className="flex shrink-0 items-center gap-2">
-                                                <Badge tone={a.statut === 'realisee' ? 'sage' : a.statut === 'annulee' ? 'neutral' : 'warning'} size="sm">
-                                                    {a.statut_label}
-                                                </Badge>
-                                                {!plan.is_terminal && can.update && a.statut !== 'realisee' && a.statut !== 'annulee' && (
-                                                    <button type="button" onClick={() => markActionDone(a.id)} className="text-xs text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300">
-                                                        ✓ Marquer réalisée
-                                                    </button>
-                                                )}
-                                                {!plan.is_terminal && can.update && (
-                                                    <button type="button" onClick={() => deleteAction(a.id)} className="text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300">
-                                                        Supprimer
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
+                        {plan.actions.length === 0 ? (
                             <EmptyState title="Aucune action définie" description="Ajoutez des actions correctives concrètes pour traiter l'écart identifié." />
+                        ) : actionsView === 'list' ? (
+                            <ActionsList
+                                actions={plan.actions}
+                                canMutate={!plan.is_terminal && can.update}
+                                onMarkDone={markActionDone}
+                                onDelete={deleteAction}
+                            />
+                        ) : (
+                            <ActionsKanban
+                                actions={plan.actions}
+                                canMutate={!plan.is_terminal && can.update}
+                                onMarkDone={markActionDone}
+                                onDelete={deleteAction}
+                            />
                         )}
                     </CardBody>
                 </Card>
@@ -321,5 +309,252 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
             <dt className="text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">{label}</dt>
             <dd className="text-sm font-medium text-ink-900 dark:text-white">{value}</dd>
         </div>
+    );
+}
+
+// ─── Toggle Liste/Kanban ────────────────────────────────────────────────────
+function ViewToggle({ view, onChange }: { view: ActionsView; onChange: (v: ActionsView) => void }) {
+    return (
+        <div className="inline-flex rounded-full border border-ink-200 bg-white p-0.5 text-xs font-medium dark:border-ink-700 dark:bg-ink-800">
+            <button
+                type="button"
+                onClick={() => onChange('list')}
+                aria-pressed={view === 'list'}
+                className={
+                    view === 'list'
+                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                }
+            >
+                Liste
+            </button>
+            <button
+                type="button"
+                onClick={() => onChange('kanban')}
+                aria-pressed={view === 'kanban'}
+                className={
+                    view === 'kanban'
+                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                }
+            >
+                Kanban
+            </button>
+        </div>
+    );
+}
+
+// ─── Actions: vue liste (préservée) ─────────────────────────────────────────
+interface ActionsViewProps {
+    actions: Action[];
+    canMutate: boolean;
+    onMarkDone: (id: number) => void;
+    onDelete: (id: number) => void;
+}
+
+function ActionsList({ actions, canMutate, onMarkDone, onDelete }: ActionsViewProps) {
+    return (
+        <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
+            {actions.map((a) => (
+                <li key={a.id} className="py-3">
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-ink-900 dark:text-white">{a.description}</p>
+                            <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
+                                {a.responsable && (
+                                    <>
+                                        Resp. : <span className="text-ink-700 dark:text-ink-300">{a.responsable}</span>
+                                    </>
+                                )}
+                                {a.echeance && (
+                                    <>
+                                        {' · '}Échéance : <span className="font-mono">{a.echeance}</span>
+                                    </>
+                                )}
+                                {a.realise_at && (
+                                    <>
+                                        {' · '}Réalisée le <span className="font-mono">{a.realise_at}</span>
+                                    </>
+                                )}
+                            </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                            <Badge tone={a.statut === 'realisee' ? 'sage' : a.statut === 'annulee' ? 'neutral' : 'warning'} size="sm">
+                                {a.statut_label}
+                            </Badge>
+                            {canMutate && a.statut !== 'realisee' && a.statut !== 'annulee' && (
+                                <button
+                                    type="button"
+                                    onClick={() => onMarkDone(a.id)}
+                                    className="text-xs text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300"
+                                >
+                                    ✓ Marquer réalisée
+                                </button>
+                            )}
+                            {canMutate && (
+                                <button
+                                    type="button"
+                                    onClick={() => onDelete(a.id)}
+                                    className="text-xs text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300"
+                                >
+                                    Supprimer
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
+// ─── Actions: vue Kanban (visualisation par colonnes de statut) ──────────────
+const KANBAN_COLUMNS: Array<{ key: Action['statut']; label: string; accent: string; dot: string }> = [
+    {
+        key: 'planifiee',
+        label: 'Planifiée',
+        accent: 'border-brand-200 bg-brand-50/60 dark:border-brand-700/40 dark:bg-brand-900/20',
+        dot: 'bg-brand-500',
+    },
+    {
+        key: 'en_cours',
+        label: 'En cours',
+        accent: 'border-warning-200 bg-warning-50/60 dark:border-warning-700/40 dark:bg-warning-900/20',
+        dot: 'bg-warning-500',
+    },
+    {
+        key: 'realisee',
+        label: 'Réalisée',
+        accent: 'border-sage-200 bg-sage-50/60 dark:border-sage-700/40 dark:bg-sage-900/20',
+        dot: 'bg-sage-500',
+    },
+    {
+        key: 'annulee',
+        label: 'Annulée',
+        accent: 'border-ink-200 bg-ink-50/60 dark:border-ink-700/40 dark:bg-ink-800/40',
+        dot: 'bg-ink-400',
+    },
+];
+
+function ActionsKanban({ actions, canMutate, onMarkDone, onDelete }: ActionsViewProps) {
+    const grouped: Record<Action['statut'], Action[]> = {
+        planifiee: [],
+        en_cours: [],
+        realisee: [],
+        annulee: [],
+    };
+    for (const a of actions) {
+        grouped[a.statut].push(a);
+    }
+
+    return (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {KANBAN_COLUMNS.map((col) => (
+                <div
+                    key={col.key}
+                    className={
+                        'flex h-full flex-col gap-2 rounded-2xl border p-3 ' + col.accent
+                    }
+                >
+                    <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                            <span className={'size-2 rounded-full ' + col.dot} />
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-700 dark:text-ink-200">
+                                {col.label}
+                            </h4>
+                        </div>
+                        <span className="font-mono text-xs text-ink-500 dark:text-ink-400">
+                            {grouped[col.key].length}
+                        </span>
+                    </div>
+
+                    <ul className="flex flex-col gap-2">
+                        {grouped[col.key].length === 0 ? (
+                            <li className="rounded-xl border border-dashed border-ink-200 px-3 py-4 text-center text-[11px] text-ink-400 dark:border-ink-700 dark:text-ink-500">
+                                Aucune action
+                            </li>
+                        ) : (
+                            grouped[col.key].map((a) => (
+                                <KanbanCard
+                                    key={a.id}
+                                    action={a}
+                                    canMutate={canMutate}
+                                    onMarkDone={onMarkDone}
+                                    onDelete={onDelete}
+                                />
+                            ))
+                        )}
+                    </ul>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function urgencyClass(echeance: string | null, statut: Action['statut']): string {
+    if (!echeance || statut === 'realisee' || statut === 'annulee') return '';
+    const date = new Date(echeance);
+    if (Number.isNaN(date.getTime())) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysLeft = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysLeft < 0) return 'border-l-4 border-l-danger-500';
+    if (daysLeft <= 3) return 'border-l-4 border-l-danger-400';
+    if (daysLeft <= 7) return 'border-l-4 border-l-warning-400';
+    return '';
+}
+
+function KanbanCard({ action, canMutate, onMarkDone, onDelete }: { action: Action; canMutate: boolean; onMarkDone: (id: number) => void; onDelete: (id: number) => void }) {
+    return (
+        <li
+            className={
+                'rounded-xl border border-ink-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md dark:border-ink-700/60 dark:bg-ink-800 ' +
+                urgencyClass(action.echeance, action.statut)
+            }
+        >
+            <p className="text-sm font-medium leading-snug text-ink-900 dark:text-white">
+                {action.description}
+            </p>
+
+            <dl className="mt-2 space-y-1 text-[11px] text-ink-500 dark:text-ink-400">
+                {action.responsable && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-semibold uppercase tracking-wider">Resp.</span>
+                        <span className="text-ink-700 dark:text-ink-300">{action.responsable}</span>
+                    </div>
+                )}
+                {action.echeance && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-semibold uppercase tracking-wider">Éch.</span>
+                        <span className="font-mono text-ink-700 dark:text-ink-300">{action.echeance}</span>
+                    </div>
+                )}
+                {action.realise_at && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-semibold uppercase tracking-wider">Faite</span>
+                        <span className="font-mono text-ink-700 dark:text-ink-300">{action.realise_at}</span>
+                    </div>
+                )}
+            </dl>
+
+            {canMutate && (action.statut === 'planifiee' || action.statut === 'en_cours') && (
+                <div className="mt-3 flex items-center justify-end gap-3 border-t border-ink-100 pt-2 dark:border-ink-700/60">
+                    <button
+                        type="button"
+                        onClick={() => onMarkDone(action.id)}
+                        className="text-[11px] font-medium text-sage-600 hover:text-sage-700 dark:text-sage-400 dark:hover:text-sage-300"
+                    >
+                        ✓ Réalisée
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onDelete(action.id)}
+                        className="text-[11px] font-medium text-danger-500 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300"
+                    >
+                        Supprimer
+                    </button>
+                </div>
+            )}
+        </li>
     );
 }
