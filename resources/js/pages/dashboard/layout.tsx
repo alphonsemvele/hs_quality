@@ -140,6 +140,13 @@ export default function DashboardLayout({
             <Head title={`${title} — HS Quality`} />
             <FlashToasts />
 
+            <a
+                href="#dashboard-main"
+                className="sr-only z-[100] rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+            >
+                Aller au contenu principal
+            </a>
+
             <div className="flex min-h-dvh bg-ink-50 font-sans dark:bg-ink-900">
                 {/* Sidebar */}
                 <aside
@@ -178,8 +185,9 @@ export default function DashboardLayout({
                                                 <Link
                                                     href={link.href}
                                                     onClick={() => setSidebarOpen(false)}
+                                                    aria-current={active ? 'page' : undefined}
                                                     className={cn(
-                                                        'group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+                                                        'group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60',
                                                         active
                                                             ? 'bg-brand-600 text-white'
                                                             : 'text-white/60 hover:bg-white/5 hover:text-white',
@@ -295,7 +303,7 @@ export default function DashboardLayout({
                     <SystemBanners />
                     <MfaSetupBanner />
 
-                    <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+                    <main id="dashboard-main" className="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
                 </div>
             </div>
 
@@ -343,7 +351,10 @@ function UserMenu({
             <button
                 type="button"
                 onClick={onToggle}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-ink-200 bg-white px-2 py-1.5 transition-colors hover:border-ink-300 dark:border-ink-600 dark:bg-ink-700 dark:hover:border-ink-500"
+                aria-label={`Menu utilisateur (${user.name})`}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-ink-200 bg-white px-2 py-1.5 transition-colors hover:border-ink-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-ink-600 dark:bg-ink-700 dark:hover:border-ink-500"
             >
                 <Avatar name={user.name} />
                 <span className="hidden text-sm font-medium text-ink-900 md:block dark:text-white">{user.name}</span>
