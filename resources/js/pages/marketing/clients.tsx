@@ -157,6 +157,14 @@ export default function Clients() {
                     name="description"
                     content="47 structures médico-sociales d'aide et de soins à domicile témoignent : SAAD, SSIAD, SPASAD, CCAS — comment HS Quality a transformé leur pilotage qualité et leur QVCT."
                 />
+                <meta property="og:title" content="Témoignages clients · HS Quality" />
+                <meta
+                    property="og:description"
+                    content="Retours d'expérience de 47 structures pilotes : SAAD, SSIAD, SPASAD, CCAS. Mesures concrètes d'impact sur la qualité et la QVCT."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="fr_FR" />
+                <meta name="twitter:card" content="summary_large_image" />
             </Head>
 
             {/* ───── Hero ───── */}

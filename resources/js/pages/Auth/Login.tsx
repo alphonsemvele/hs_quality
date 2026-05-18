@@ -385,6 +385,8 @@ export default function Login({ status }: { status?: string }) {
                     <img
                         src="https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1200&auto=format&fit=crop&q=80"
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 size-full object-cover"
                     />
                     <div className="absolute inset-0" style={{

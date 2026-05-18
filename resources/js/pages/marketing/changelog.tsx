@@ -292,6 +292,13 @@ export default function Changelog() {
                     name="description"
                     content="Toutes les évolutions de la plateforme HS Quality — nouveautés, améliorations, correctifs et mises à jour de sécurité, classées par version."
                 />
+                <meta property="og:title" content="Changelog · HS Quality" />
+                <meta
+                    property="og:description"
+                    content="Toutes les évolutions produit : nouveautés, améliorations, correctifs et mises à jour de sécurité, classées par version."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="fr_FR" />
             </Head>
 
             {/* ───── Hero ───── */}

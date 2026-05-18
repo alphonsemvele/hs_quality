@@ -192,6 +192,14 @@ export default function Tarifs() {
                     name="description"
                     content="Tarifs simples et transparents — 8, 15 ou 25 € par utilisateur par mois. Sans engagement, hébergé HDS en France, pilote gratuit 3 mois."
                 />
+                <meta property="og:title" content="Tarifs · HS Quality" />
+                <meta
+                    property="og:description"
+                    content="Trois tiers, paiement par utilisateur, pilote 3 mois gratuit. Hébergement HDS en France, conformité HAS et RGPD."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="fr_FR" />
+                <meta name="twitter:card" content="summary_large_image" />
             </Head>
 
             {/* ───── Hero ───── */}
@@ -300,6 +308,9 @@ export default function Tarifs() {
                     })}
                 </div>
             </section>
+
+            {/* ───── Cost calculator ───── */}
+            <PricingCalculator annual={annual} />
 
             {/* ───── Trust strip ───── */}
             <section className="border-y border-ink-100 bg-ink-50/40 px-5 py-12 sm:px-8">
@@ -490,6 +501,145 @@ function ChevronIcon({ open }: { open: boolean }) {
         >
             <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+//  Cost calculator
+// ────────────────────────────────────────────────────────────────────────────
+
+function PricingCalculator({ annual }: { annual: boolean }) {
+    const [users, setUsers] = useState<number>(30);
+    const [tier, setTier] = useState<Tier>('pro');
+
+    const plan = PLANS.find((p) => p.id === tier) ?? PLANS[1];
+    const annualDiscount = annual ? 0.9 : 1;
+    const perUserPerMonth = plan.priceMonthly * annualDiscount;
+    const monthly = users * perUserPerMonth;
+    const yearly = monthly * 12;
+
+    const formatEuros = (value: number): string =>
+        new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'EUR',
+            maximumFractionDigits: 0,
+        }).format(value);
+
+    return (
+        <section id="calculateur" className="border-t border-ink-100 px-5 py-20 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-5xl">
+                <div className="mx-auto max-w-2xl text-center">
+                    <h2 className="text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+                        Estimez votre budget
+                    </h2>
+                    <p className="mt-4 text-base leading-relaxed text-ink-600">
+                        Glissez le curseur sur le nombre d'utilisateurs facturables de votre structure
+                        (dirigeants, coordinateurs, qualité, RH, intervenants). Les bénéficiaires ne sont
+                        jamais comptés.
+                    </p>
+                </div>
+
+                <div className="mt-12 grid items-center gap-8 lg:grid-cols-5">
+                    {/* Sliders + tier selector */}
+                    <div className="space-y-6 lg:col-span-3">
+                        {/* Tier selector */}
+                        <div>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-500">
+                                Niveau d'abonnement
+                            </label>
+                            <div className="mt-2 grid grid-cols-3 gap-2">
+                                {PLANS.map((p) => (
+                                    <button
+                                        key={p.id}
+                                        type="button"
+                                        onClick={() => setTier(p.id)}
+                                        aria-pressed={tier === p.id}
+                                        className={
+                                            tier === p.id
+                                                ? 'rounded-xl border-2 border-brand-500 bg-brand-50 px-4 py-3 text-left transition-all'
+                                                : 'rounded-xl border-2 border-ink-100 bg-white px-4 py-3 text-left transition-all hover:border-ink-200'
+                                        }
+                                    >
+                                        <p className="text-sm font-semibold text-ink-900">{p.name}</p>
+                                        <p className="mt-0.5 text-[11px] text-ink-500">{p.targetSize}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* User slider */}
+                        <div>
+                            <div className="flex items-baseline justify-between">
+                                <label htmlFor="user-count" className="block text-xs font-semibold uppercase tracking-wider text-ink-500">
+                                    Utilisateurs facturables
+                                </label>
+                                <span className="font-mono text-2xl font-bold tracking-tight text-ink-900">{users}</span>
+                            </div>
+                            <input
+                                id="user-count"
+                                type="range"
+                                min={5}
+                                max={300}
+                                step={5}
+                                value={users}
+                                onChange={(e) => setUsers(Number(e.target.value))}
+                                className="mt-3 w-full cursor-pointer accent-brand-600"
+                            />
+                            <div className="mt-1 flex justify-between text-[11px] font-mono text-ink-400">
+                                <span>5</span>
+                                <span>50</span>
+                                <span>100</span>
+                                <span>200</span>
+                                <span>300+</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Result card */}
+                    <div className="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 p-8 text-white shadow-lg lg:col-span-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
+                            Estimation {annual ? 'annuelle' : 'mensuelle'}
+                        </p>
+                        <p className="mt-3 font-mono text-4xl font-bold tracking-tight">
+                            {formatEuros(annual ? yearly : monthly)}
+                        </p>
+                        <p className="mt-1 text-xs text-white/70">
+                            {annual ? `≈ ${formatEuros(monthly)} / mois (facturé annuellement)` : `Soit ${formatEuros(yearly)} / an`}
+                        </p>
+
+                        <hr className="my-5 border-white/15" />
+
+                        <dl className="space-y-2 text-xs">
+                            <div className="flex justify-between text-white/75">
+                                <dt>Tier sélectionné</dt>
+                                <dd className="font-semibold text-white">{plan.name}</dd>
+                            </div>
+                            <div className="flex justify-between text-white/75">
+                                <dt>Prix unitaire</dt>
+                                <dd className="font-mono text-white">
+                                    {Number.isInteger(perUserPerMonth) ? perUserPerMonth : perUserPerMonth.toFixed(1)} € / user / mois
+                                </dd>
+                            </div>
+                            <div className="flex justify-between text-white/75">
+                                <dt>Cycle</dt>
+                                <dd className="font-semibold text-white">{annual ? 'Annuel (−10 %)' : 'Mensuel'}</dd>
+                            </div>
+                        </dl>
+
+                        <Link
+                            href={`/contact?tier=${plan.id}&users=${users}`}
+                            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-700 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                        >
+                            Demander un devis
+                        </Link>
+                    </div>
+                </div>
+
+                <p className="mt-6 text-center text-[11px] text-ink-400">
+                    Estimation indicative. Le tarif final dépend des modules retenus et des éventuelles remises (associatif, multi-sites, groupements).
+                </p>
+            </div>
+        </section>
     );
 }
 
