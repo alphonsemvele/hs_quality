@@ -1,4 +1,5 @@
 import { BeneficiaryHoverCard, UserHoverCard } from '@/components/hover-cards';
+import { InterventionCalendar } from '@/components/InterventionCalendar';
 import { InterventionPreviewSheet, type InterventionPreview } from '@/components/preview-sheets';
 import { QuickAddInterventionModal } from '@/components/quick-add';
 import {
@@ -91,6 +92,7 @@ export default function Interventions({
     const [showFilters, setShowFilters] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [bulkAction, setBulkAction] = useState<'cancel' | null>(null);
+    const [view, setView] = useState<'list' | 'calendar'>('list');
 
     const toggleSelect = (id: string) => {
         setSelectedIds((prev) => {
@@ -158,11 +160,39 @@ export default function Interventions({
                 subtitle={`${total} intervention(s) au total`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Interventions' }]}
                 actions={
-                    canCreate ? (
-                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
-                            Nouvelle intervention
-                        </Button>
-                    ) : null
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex rounded-full border border-ink-200 bg-white p-0.5 text-xs font-medium dark:border-ink-700 dark:bg-ink-800">
+                            <button
+                                type="button"
+                                onClick={() => setView('list')}
+                                aria-pressed={view === 'list'}
+                                className={
+                                    view === 'list'
+                                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                }
+                            >
+                                Liste
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setView('calendar')}
+                                aria-pressed={view === 'calendar'}
+                                className={
+                                    view === 'calendar'
+                                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                }
+                            >
+                                Calendrier
+                            </button>
+                        </div>
+                        {canCreate && (
+                            <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                                Nouvelle intervention
+                            </Button>
+                        )}
+                    </div>
                 }
             />
 
@@ -214,7 +244,14 @@ export default function Interventions({
             />
 
             <Card>
-                {interventions.length > 0 ? (
+                {view === 'calendar' ? (
+                    <div className="p-4">
+                        <InterventionCalendar
+                            interventions={interventions}
+                            onSelect={(i) => setPreview(i as InterventionPreview)}
+                        />
+                    </div>
+                ) : interventions.length > 0 ? (
                     <Table>
                         <THead>
                             <Tr>
