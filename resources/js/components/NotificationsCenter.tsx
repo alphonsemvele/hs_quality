@@ -1,6 +1,27 @@
 import { cn } from '@/lib/utils';
 import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+
+type LevelFilter = 'all' | 'info' | 'success' | 'warning' | 'danger';
+
+function dayBucketKey(iso: string | null): 'today' | 'yesterday' | 'older' {
+    if (!iso) return 'older';
+    const d = new Date(iso);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayStart = new Date(d);
+    dayStart.setHours(0, 0, 0, 0);
+    const diff = (today.getTime() - dayStart.getTime()) / (1000 * 60 * 60 * 24);
+    if (diff < 1) return 'today';
+    if (diff < 2) return 'yesterday';
+    return 'older';
+}
+
+const DAY_LABEL: Record<'today' | 'yesterday' | 'older', string> = {
+    today: "Aujourd'hui",
+    yesterday: 'Hier',
+    older: 'Plus tôt',
+};
 
 export interface NotificationItem {
     id: string;
@@ -30,7 +51,25 @@ export default function NotificationsCenter() {
         items: [],
     };
     const [open, setOpen] = useState(false);
+    const [filter, setFilter] = useState<LevelFilter>('all');
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const filteredItems = useMemo(
+        () => (filter === 'all' ? payload.items : payload.items.filter((i) => i.level === filter)),
+        [filter, payload.items],
+    );
+
+    const grouped = useMemo(() => {
+        const buckets: Record<'today' | 'yesterday' | 'older', NotificationItem[]> = {
+            today: [],
+            yesterday: [],
+            older: [],
+        };
+        for (const item of filteredItems) {
+            buckets[dayBucketKey(item.created_at)].push(item);
+        }
+        return buckets;
+    }, [filteredItems]);
 
     useEffect(() => {
         if (!open) return;
@@ -113,21 +152,62 @@ export default function NotificationsCenter() {
                         )}
                     </div>
 
-                    <ul className="max-h-[26rem] overflow-y-auto divide-y divide-ink-100 dark:divide-ink-700/60">
-                        {payload.items.length === 0 ? (
-                            <li className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
+                    {payload.items.length > 0 && (
+                        <div className="flex gap-1 overflow-x-auto border-b border-ink-100 bg-ink-50/40 px-3 py-2 dark:border-ink-700/60 dark:bg-ink-900/30">
+                            {(['all', 'info', 'success', 'warning', 'danger'] as const).map((value) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => setFilter(value)}
+                                    aria-pressed={filter === value}
+                                    className={cn(
+                                        'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors',
+                                        filter === value
+                                            ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-900'
+                                            : 'text-ink-500 hover:bg-white hover:text-ink-700 dark:text-ink-400 dark:hover:bg-ink-700 dark:hover:text-ink-200',
+                                    )}
+                                >
+                                    {value === 'all' ? 'Tout' : value === 'info' ? 'Info' : value === 'success' ? 'Succès' : value === 'warning' ? 'Vigilance' : 'Urgent'}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="max-h-[26rem] overflow-y-auto">
+                        {filteredItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
                                 <span className="flex size-10 items-center justify-center rounded-full bg-ink-100 text-ink-400 dark:bg-ink-700 dark:text-ink-500">
                                     <BellIcon />
                                 </span>
-                                <p className="text-sm font-medium text-ink-700 dark:text-ink-200">Aucune notification</p>
-                                <p className="text-xs text-ink-500 dark:text-ink-400">Les alertes ARS, RPS et expirations apparaîtront ici.</p>
-                            </li>
+                                <p className="text-sm font-medium text-ink-700 dark:text-ink-200">
+                                    {payload.items.length === 0 ? 'Aucune notification' : 'Aucune notification dans ce filtre'}
+                                </p>
+                                <p className="text-xs text-ink-500 dark:text-ink-400">
+                                    {payload.items.length === 0 ? 'Les alertes ARS, RPS et expirations apparaîtront ici.' : 'Essayez « Tout ».'}
+                                </p>
+                            </div>
                         ) : (
-                            payload.items.map((n) => (
-                                <NotificationRow key={n.id} item={n} onRead={() => markOne(n.id)} onClose={() => setOpen(false)} />
-                            ))
+                            (['today', 'yesterday', 'older'] as const)
+                                .filter((b) => grouped[b].length > 0)
+                                .map((bucket) => (
+                                    <div key={bucket}>
+                                        <p className="sticky top-0 z-10 bg-white/95 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-500 backdrop-blur dark:bg-ink-800/95 dark:text-ink-400">
+                                            {DAY_LABEL[bucket]} · {grouped[bucket].length}
+                                        </p>
+                                        <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                                            {grouped[bucket].map((n) => (
+                                                <NotificationRow
+                                                    key={n.id}
+                                                    item={n}
+                                                    onRead={() => markOne(n.id)}
+                                                    onClose={() => setOpen(false)}
+                                                />
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))
                         )}
-                    </ul>
+                    </div>
 
                     <div className="border-t border-ink-100 bg-ink-50/40 px-4 py-2.5 text-center dark:border-ink-700/60 dark:bg-ink-900/30">
                         <Link
