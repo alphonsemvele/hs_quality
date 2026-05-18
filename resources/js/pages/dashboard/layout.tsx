@@ -5,6 +5,7 @@ import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import CommandPalette from '@/components/CommandPalette';
 import HelpDrawer from '@/components/HelpDrawer';
+import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
 import SystemBanners from '@/components/SystemBanners';
@@ -139,6 +140,7 @@ export default function DashboardLayout({
         <>
             <Head title={`${title} — HS Quality`} />
             <FlashToasts />
+            <IdleTimeoutWatcher />
 
             <a
                 href="#dashboard-main"

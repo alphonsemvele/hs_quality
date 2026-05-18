@@ -1,4 +1,5 @@
 import { IncidentHoverCard } from '@/components/hover-cards';
+import { IncidentHeatmap } from '@/components/IncidentHeatmap';
 import { IncidentPreviewSheet, type IncidentPreview } from '@/components/preview-sheets';
 import {
     Badge,
@@ -73,6 +74,20 @@ export default function Incidents({
                 <KpiCard label="Clos" value={stats.clos} tone="neutral" />
                 <KpiCard label="Graves / critiques" value={stats.graves} tone="danger" />
             </div>
+
+            {incidents.length > 0 && (
+                <Card className="mb-6">
+                    <div className="space-y-3 p-5">
+                        <div>
+                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">Densité sur 12 semaines</h3>
+                            <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                                Survolez une cellule pour voir le détail journalier. La case d'aujourd'hui est cerclée.
+                            </p>
+                        </div>
+                        <IncidentHeatmap incidents={incidents} />
+                    </div>
+                </Card>
+            )}
 
             <h2 className="mb-3 text-sm font-semibold text-ink-900 dark:text-white">{total} incident(s)</h2>
 

@@ -16,6 +16,7 @@ export { FieldError, FieldHelp, FormField, Input, Label, Select, Textarea } from
 export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
+export { PasswordStrength } from './PasswordStrength';
 export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
 export { Skeleton, SkeletonLines } from './Skeleton';
