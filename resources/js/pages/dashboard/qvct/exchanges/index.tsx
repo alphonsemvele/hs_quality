@@ -1,7 +1,7 @@
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
 import { Form } from '@inertiajs/react';
-import { useState } from 'react';
 import DashboardLayout from '../../layout';
 
 type ExchangeStatus = 'requested' | 'accepted' | 'scheduled' | 'closed' | 'cancelled';
@@ -34,6 +34,8 @@ interface Props {
 
 type Tab = 'inbox' | 'outbox' | 'new';
 
+const EXCHANGES_TABS: readonly Tab[] = ['inbox', 'outbox', 'new'];
+
 const STATUS_TONE: Record<ExchangeStatus, 'warning' | 'brand' | 'sage' | 'neutral' | 'danger'> = {
     requested: 'warning',
     accepted: 'brand',
@@ -53,7 +55,7 @@ const REASONS = [
 ];
 
 export default function ExchangesIndex({ inbox = [], outbox = [] }: Partial<Props>) {
-    const [tab, setTab] = useState<Tab>('inbox');
+    const [tab, setTab] = useUrlTab<Tab>('inbox', EXCHANGES_TABS);
     const newCount = inbox.filter((i) => i.status === 'requested').length;
 
     return (

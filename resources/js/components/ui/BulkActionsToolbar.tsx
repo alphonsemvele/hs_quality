@@ -26,8 +26,10 @@ export function BulkActionsToolbar({
             role="region"
             aria-label={`${selectedCount} éléments sélectionnés`}
             className={cn(
-                'sticky top-16 z-30 mb-3 flex flex-wrap items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50/95 px-4 py-2.5 shadow-md backdrop-blur',
-                'dark:border-brand-700/50 dark:bg-brand-900/40',
+                // Floating action bar at the bottom of the viewport — never
+                // collides with the sticky table header.
+                'fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-3xl flex-wrap items-center gap-3 rounded-2xl border border-brand-200 bg-brand-50/95 px-4 py-2.5 shadow-xl backdrop-blur sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2',
+                'dark:border-brand-700/50 dark:bg-brand-900/70',
             )}
         >
             <div className="flex items-center gap-2">
