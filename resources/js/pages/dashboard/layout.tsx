@@ -7,6 +7,7 @@ import CommandPalette from '@/components/CommandPalette';
 import HelpDrawer from '@/components/HelpDrawer';
 import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
 import { OnboardingTour } from '@/components/OnboardingTour';
+import { ScrollToTop } from '@/components/ScrollToTop';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
 import { ShortcutsCheatsheet } from '@/components/ShortcutsCheatsheet';
@@ -145,6 +146,7 @@ export default function DashboardLayout({
             <IdleTimeoutWatcher />
             <ShortcutsCheatsheet />
             <OnboardingTour />
+            <ScrollToTop />
 
             <a
                 href="#dashboard-main"

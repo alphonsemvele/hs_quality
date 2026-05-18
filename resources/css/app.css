@@ -213,8 +213,32 @@ html[data-accent='mauve'] {
     .no-print,
     button,
     [role='dialog'],
-    .skip-link {
+    .skip-link,
+    /* Sticky / floating UI chrome that has no place on paper */
+    .fixed,
+    [data-print='hide'] {
         display: none !important;
+    }
+
+    /* Tab strips / filter pills should print as plain text labels */
+    [role='tablist'],
+    [role='radiogroup'] {
+        display: none !important;
+    }
+
+    /* Cards: flatten gradients / backgrounds so ink stays legible */
+    [class*='bg-gradient-'] {
+        background: transparent !important;
+    }
+
+    /* Charts / heatmaps can produce huge backgrounds — keep ink only */
+    svg {
+        max-width: 100% !important;
+    }
+
+    /* Anchor links to in-page sections don't need the URL suffix */
+    a[href^='/dashboard']::after {
+        content: '';
     }
 
     main {

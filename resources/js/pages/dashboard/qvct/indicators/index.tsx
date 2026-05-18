@@ -1,4 +1,4 @@
-import { RpsHeatmap } from '@/components/qvct';
+import { RpsHeatmap, VerbatimCloud } from '@/components/qvct';
 import {
     Card,
     CardBody,
@@ -33,12 +33,15 @@ interface Props {
     dimensions: Dimension[];
     matrix: Matrix;
     trend: ChartSeriesPoint[];
+    /** Free-text verbatim responses for the period (anonymous). Optional. */
+    verbatims?: string[];
 }
 
 export default function QvctIndicators({
     dimensions = [],
     matrix = { teams: [], cells: [] },
     trend = [],
+    verbatims = [],
 }: Partial<Props>) {
     const allScores = matrix.cells.map((c) => c.score);
     const overallAvg = allScores.length > 0 ? allScores.reduce((s, v) => s + v, 0) / allScores.length : null;
@@ -189,6 +192,20 @@ export default function QvctIndicators({
                         ) : (
                             <EmptyState title="Pas d'historique" description="Lancez plusieurs campagnes pour voir l'évolution." />
                         )}
+                    </CardBody>
+                </Card>
+
+                {/* Verbatim cloud */}
+                <Card className="lg:col-span-3">
+                    <CardHeader
+                        title="Verbatims"
+                        subtitle="Mots les plus cités dans les réponses libres — agrégés et anonymisés"
+                    />
+                    <CardBody>
+                        <VerbatimCloud
+                            verbatims={verbatims}
+                            ariaLabel="Nuage de mots issus des verbatims QVCT"
+                        />
                     </CardBody>
                 </Card>
             </div>

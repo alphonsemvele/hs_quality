@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, EmptyStateRich, PageHeader } from '@/components/ui';
 import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
 import { Form } from '@inertiajs/react';
@@ -131,7 +131,31 @@ function InboxTab({ items }: { items: InboxItem[] }) {
     if (items.length === 0) {
         return (
             <Card>
-                <EmptyState icon={<InboxIcon />} title="Pas de demande reçue" description="Aucun collaborateur ne vous a sollicité pour le moment." />
+                <EmptyStateRich
+                    icon={<InboxIcon />}
+                    title="Pas de demande reçue"
+                    description="Aucun collaborateur ne vous a sollicité pour le moment. Ce canal permet à votre équipe de demander un entretien confidentiel."
+                    suggestions={[
+                        {
+                            icon: '💬',
+                            title: 'À quoi ça sert ?',
+                            description: 'Le bouton « Demander un échange » apparaît dans la barre latérale de chaque intervenant·e.',
+                            tone: 'brand',
+                        },
+                        {
+                            icon: '🛡️',
+                            title: 'Confidentialité',
+                            description: 'Les motifs sont visibles uniquement par les destinataires explicites — pas de diffusion automatique.',
+                            tone: 'sage',
+                        },
+                        {
+                            icon: '⏱️',
+                            title: 'Délai de réponse',
+                            description: 'Engagez-vous sur un délai de 5 jours ouvrés pour traiter les demandes — un indicateur clé QVCT.',
+                            tone: 'warning',
+                        },
+                    ]}
+                />
             </Card>
         );
     }

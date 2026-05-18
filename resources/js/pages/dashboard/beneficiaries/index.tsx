@@ -3,9 +3,13 @@ import { QuickAddBeneficiaryModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyStateRich, GirBadge, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { downloadCsv } from '@/lib/csv';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+const BENEFICIARY_VIEWS = ['list', 'cards'] as const;
+type BeneficiaryView = (typeof BENEFICIARY_VIEWS)[number];
 
 interface Beneficiary {
     id: string;
@@ -29,7 +33,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
     const canCreate = useCan('beneficiaries.create');
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [preview, setPreview] = useState<BeneficiaryPreview | null>(null);
-    const [view, setView] = useState<'list' | 'cards'>('list');
+    const [view, setView] = useUrlTab<BeneficiaryView>('list', BENEFICIARY_VIEWS);
 
     return (
         <DashboardLayout title="Bénéficiaires" subtitle="Personnes accompagnées par votre structure">

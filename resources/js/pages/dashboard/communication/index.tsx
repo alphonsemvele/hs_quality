@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, PageHeader, RichTextEditor } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, EmptyStateRich, PageHeader, RichTextEditor } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { renderSafeMarkdown } from '@/lib/safe-markdown';
 import { useUrlTab } from '@/lib/use-url-tab';
@@ -413,7 +413,31 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
 
             {posts.length === 0 && (
                 <Card>
-                    <EmptyState icon={<NewsIcon />} title="Aucune actualité" description="Le fil d'actualité affichera les publications de votre structure." />
+                    <EmptyStateRich
+                        icon={<NewsIcon />}
+                        title="Aucune actualité"
+                        description="Le fil d'actualité affichera les publications de votre structure. Démarrez la conversation avec un message à toute l'équipe."
+                        suggestions={[
+                            {
+                                icon: '📣',
+                                title: 'Annonce d\'équipe',
+                                description: 'Partagez les décisions clés, rappels procédures, retours d\'audit avec toute la structure.',
+                                tone: 'brand',
+                            },
+                            {
+                                icon: '🎉',
+                                title: 'Moments QVCT',
+                                description: 'Célébrez les réussites, anniversaires, certifications obtenues — renforcer le collectif.',
+                                tone: 'sage',
+                            },
+                            {
+                                icon: '📌',
+                                title: 'Note épinglée',
+                                description: 'Pour les informations qui doivent rester visibles : protocole COVID, journée portes ouvertes.',
+                                tone: 'warning',
+                            },
+                        ]}
+                    />
                 </Card>
             )}
         </div>

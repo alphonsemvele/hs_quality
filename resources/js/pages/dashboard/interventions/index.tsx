@@ -26,9 +26,13 @@ import {
     Tr,
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+const INTERVENTION_VIEWS = ['list', 'calendar'] as const;
+type InterventionView = (typeof INTERVENTION_VIEWS)[number];
 
 interface QuickOption {
     id: number | string;
@@ -92,7 +96,7 @@ export default function Interventions({
     const [showFilters, setShowFilters] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [bulkAction, setBulkAction] = useState<'cancel' | null>(null);
-    const [view, setView] = useState<'list' | 'calendar'>('list');
+    const [view, setView] = useUrlTab<InterventionView>('list', INTERVENTION_VIEWS);
 
     const toggleSelect = (id: string) => {
         setSelectedIds((prev) => {
