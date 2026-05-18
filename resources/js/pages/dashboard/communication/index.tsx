@@ -1,8 +1,9 @@
 import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, PageHeader, RichTextEditor } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { renderSafeMarkdown } from '@/lib/safe-markdown';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
-import { router, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
 
@@ -69,6 +70,8 @@ interface Props {
 
 type Tab = 'messages' | 'news' | 'docs' | 'qa';
 
+const COMMUNICATION_TABS: readonly Tab[] = ['messages', 'news', 'docs', 'qa'];
+
 export default function CommunicationIndex({
     channels = [],
     currentChannel = null,
@@ -76,7 +79,7 @@ export default function CommunicationIndex({
     documents = [],
     qaQuestions = [],
 }: Partial<Props>) {
-    const [tab, setTab] = useState<Tab>('messages');
+    const [tab, setTab] = useUrlTab<Tab>('messages', COMMUNICATION_TABS);
     const canPublish = useCan('communication.post');
 
     return (

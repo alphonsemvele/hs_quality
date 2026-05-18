@@ -29,3 +29,4 @@ export { TBody, THead, Table, Td, Th, Tr } from './Table';
 export { FlashToasts } from './Toast';
 export { Tooltip } from './Tooltip';
 export { Wizard, type WizardStep } from './Wizard';
+export { WorkflowStepper, type WorkflowStep } from './WorkflowStepper';

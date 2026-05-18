@@ -36,6 +36,23 @@ interface QuickOption {
 
 type Statut = 'planifiee' | 'en_cours' | 'realisee' | 'annulee' | 'non_realisee';
 
+/**
+ * Subtle left-edge marker so the row's statut is readable at a glance,
+ * even before the badge column comes into view. Matches the tone used
+ * by InterventionStatusBadge.
+ */
+const STATUT_BORDER: Record<Statut, string> = {
+    planifiee: 'border-l-4 border-l-brand-500/70',
+    en_cours: 'border-l-4 border-l-warning-500/80',
+    realisee: 'border-l-4 border-l-sage-500/70',
+    annulee: 'border-l-4 border-l-danger-500/70',
+    non_realisee: 'border-l-4 border-l-ink-400/60',
+};
+
+function statutBorderClass(statut: Statut): string {
+    return STATUT_BORDER[statut] ?? '';
+}
+
 interface Intervention {
     id: number | string;
     initials: string;
@@ -228,7 +245,7 @@ export default function Interventions({
                         </THead>
                         <TBody>
                             {interventions.map((i) => (
-                                <Tr key={i.id}>
+                                <Tr key={i.id} className={statutBorderClass(i.statut)}>
                                     <Td>
                                         <BulkSelectCheckbox
                                             checked={selectedIds.has(String(i.id))}

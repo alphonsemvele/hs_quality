@@ -14,8 +14,8 @@ import {
     Th,
     Tr,
 } from '@/components/ui';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface Formation {
@@ -82,6 +82,8 @@ interface Props {
 
 type Tab = 'overview' | 'plans' | 'sessions' | 'competencies';
 
+const FORMATIONS_TABS: readonly Tab[] = ['overview', 'plans', 'sessions', 'competencies'];
+
 const STATUT_TONE: Record<string, 'sage' | 'warning' | 'danger'> = {
     valide: 'sage',
     expire_bientot: 'warning',
@@ -101,7 +103,7 @@ export default function FormationsIndex({
     sessions = [],
     expiringAlerts = [],
 }: Partial<Props>) {
-    const [tab, setTab] = useState<Tab>('overview');
+    const [tab, setTab] = useUrlTab<Tab>('overview', FORMATIONS_TABS);
 
     return (
         <DashboardLayout title="Formations" subtitle="Plans, sessions, habilitations & certifications">

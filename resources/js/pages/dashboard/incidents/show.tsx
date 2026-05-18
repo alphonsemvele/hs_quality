@@ -9,6 +9,8 @@ import {
     IncidentGraviteBadge,
     IncidentStatusBadge,
     PageHeader,
+    WorkflowStepper,
+    type WorkflowStep,
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
@@ -99,6 +101,16 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     </>
                 }
             />
+
+            <Card className="mb-5">
+                <CardBody>
+                    <WorkflowStepper
+                        steps={incidentWorkflowSteps(incident)}
+                        activeIndex={incidentActiveIndex(incident.statut)}
+                        tone={incident.statut === 'clos' ? 'sage' : 'brand'}
+                    />
+                </CardBody>
+            </Card>
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
@@ -325,6 +337,22 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
             />
         </DashboardLayout>
     );
+}
+
+function incidentWorkflowSteps(incident: Incident): WorkflowStep[] {
+    return [
+        { key: 'declare', label: 'Déclaré', caption: incident.occurred_at },
+        { key: 'en_analyse', label: 'Analyse' },
+        { key: 'plan_actions', label: "Plan d'actions" },
+        { key: 'clos', label: 'Clos' },
+    ];
+}
+
+function incidentActiveIndex(statut: Incident['statut']): number {
+    const order: Array<Incident['statut']> = ['declare', 'en_analyse', 'plan_actions', 'clos'];
+    const idx = order.indexOf(statut);
+
+    return idx >= 0 ? idx : 0;
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
