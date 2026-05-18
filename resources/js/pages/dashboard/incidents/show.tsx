@@ -12,6 +12,7 @@ import {
     WorkflowStepper,
     type WorkflowStep,
 } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -59,6 +60,13 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
     const [showAnalysisForm, setShowAnalysisForm] = useState(false);
     const [showActionForm, setShowActionForm] = useState(false);
     const canAnalyze = useCan('incidents.analyze');
+
+    useTrackRecent({
+        kind: 'incident',
+        id: incident.id,
+        label: `${incident.categorie}${incident.beneficiaire ? ` · ${incident.beneficiaire.name}` : ''}`,
+        href: `/incidents/${incident.id}`,
+    });
 
     const [showCloseDialog, setShowCloseDialog] = useState(false);
 

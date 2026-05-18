@@ -1,3 +1,4 @@
+import { FilterPresets } from '@/components/FilterPresets';
 import { IncidentHoverCard } from '@/components/hover-cards';
 import { IncidentHeatmap } from '@/components/IncidentHeatmap';
 import { IncidentPreviewSheet, type IncidentPreview } from '@/components/preview-sheets';
@@ -167,6 +168,13 @@ export default function Incidents({
                     </button>
                 )}
             </div>
+
+            <FilterPresets
+                pageKey="incidents"
+                basePath="/incidents"
+                hasActiveFilter={hasActiveFilter}
+                className="mb-4"
+            />
 
             <h2 className="mb-3 text-sm font-semibold text-ink-900 dark:text-white">
                 {filteredIncidents.length === total

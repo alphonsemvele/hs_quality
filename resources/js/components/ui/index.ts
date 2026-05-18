@@ -5,6 +5,7 @@ export { Card, CardBody, CardFooter, CardHeader } from './Card';
 export { BarChart, DonutChart, LineChart, Sparkline } from './Chart';
 export type { ChartTone, SeriesPoint as ChartSeriesPoint } from './Chart';
 export { ConfirmDialog } from './ConfirmDialog';
+export { CopyButton } from './CopyButton';
 export { DropzoneUploader, type DropzoneFieldDefinition } from './DropzoneUploader';
 export { EmptyState } from './EmptyState';
 export { EmptyStateRich } from './EmptyStateRich';

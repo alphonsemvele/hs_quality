@@ -1,3 +1,4 @@
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, InlineHelp, PageHeader, PageToc } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -67,6 +68,10 @@ const GRAVITE_TONE: Record<string, 'neutral' | 'warning' | 'danger'> = {
 export default function AuditShow({ audit, gravites = [], can = { execute: false, finalize: false, cancel: false } }: Props) {
     const [showEcartForm, setShowEcartForm] = useState(false);
     const [showCancelForm, setShowCancelForm] = useState(false);
+
+    useTrackRecent(
+        audit ? { kind: 'audit', id: audit.id, label: audit.titre, href: `/audits/${audit.id}` } : null,
+    );
 
     if (!audit) {
         return (

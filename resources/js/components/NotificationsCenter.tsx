@@ -1,3 +1,4 @@
+import { RelativeTime } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -53,7 +54,9 @@ export default function NotificationsCenter() {
     const [open, setOpen] = useState(false);
     const [filter, setFilter] = useState<LevelFilter>('all');
     const [search, setSearch] = useState('');
+    const [highlightIndex, setHighlightIndex] = useState(-1);
     const containerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
 
     const filteredItems = useMemo(() => {
         const byLevel = filter === 'all' ? payload.items : payload.items.filter((i) => i.level === filter);
@@ -80,6 +83,7 @@ export default function NotificationsCenter() {
     useEffect(() => {
         if (!open) {
             setSearch('');
+            setHighlightIndex(-1);
             return;
         }
         const handleClick = (e: MouseEvent) => {
@@ -88,7 +92,25 @@ export default function NotificationsCenter() {
             }
         };
         const handleKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'Escape') {
+                setOpen(false);
+                return;
+            }
+            const isTextInput = e.target instanceof HTMLInputElement && e.target.type === 'search';
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHighlightIndex((i) => Math.min((i < 0 ? -1 : i) + 1, filteredItems.length - 1));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHighlightIndex((i) => Math.max(i - 1, 0));
+            } else if (e.key === 'Enter' && !isTextInput && highlightIndex >= 0) {
+                const target = filteredItems[highlightIndex];
+                if (target?.href) {
+                    e.preventDefault();
+                    setOpen(false);
+                    router.visit(target.href);
+                }
+            }
         };
         document.addEventListener('mousedown', handleClick);
         document.addEventListener('keydown', handleKey);
@@ -96,7 +118,23 @@ export default function NotificationsCenter() {
             document.removeEventListener('mousedown', handleClick);
             document.removeEventListener('keydown', handleKey);
         };
-    }, [open]);
+    }, [open, filteredItems, highlightIndex]);
+
+    // Keep the highlighted row visible inside the scroll container.
+    useEffect(() => {
+        if (!open || highlightIndex < 0 || !listRef.current) return;
+        const target = listRef.current.querySelector<HTMLElement>(
+            `[data-notif-index='${highlightIndex}']`,
+        );
+        if (target) {
+            target.scrollIntoView({ block: 'nearest' });
+        }
+    }, [highlightIndex, open]);
+
+    // Reset highlight when the visible list changes (filter / search).
+    useEffect(() => {
+        setHighlightIndex(-1);
+    }, [filter, search]);
 
     const markOne = (id: string) => {
         router.post(`/notifications/${id}/read`, undefined, {
@@ -195,7 +233,7 @@ export default function NotificationsCenter() {
                         </div>
                     )}
 
-                    <div className="max-h-[26rem] overflow-y-auto">
+                    <div ref={listRef} className="max-h-[26rem] overflow-y-auto">
                         {filteredItems.length === 0 ? (
                             <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
                                 <span className="flex size-10 items-center justify-center rounded-full bg-ink-100 text-ink-400 dark:bg-ink-700 dark:text-ink-500">
@@ -225,14 +263,20 @@ export default function NotificationsCenter() {
                                             {DAY_LABEL[bucket]} · {grouped[bucket].length}
                                         </p>
                                         <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
-                                            {grouped[bucket].map((n) => (
-                                                <NotificationRow
-                                                    key={n.id}
-                                                    item={n}
-                                                    onRead={() => markOne(n.id)}
-                                                    onClose={() => setOpen(false)}
-                                                />
-                                            ))}
+                                            {grouped[bucket].map((n) => {
+                                                const flatIndex = filteredItems.indexOf(n);
+                                                return (
+                                                    <NotificationRow
+                                                        key={n.id}
+                                                        item={n}
+                                                        flatIndex={flatIndex}
+                                                        highlighted={flatIndex === highlightIndex}
+                                                        onRead={() => markOne(n.id)}
+                                                        onClose={() => setOpen(false)}
+                                                        onHover={() => setHighlightIndex(flatIndex)}
+                                                    />
+                                                );
+                                            })}
                                         </ul>
                                     </div>
                                 ))
@@ -256,12 +300,18 @@ export default function NotificationsCenter() {
 
 function NotificationRow({
     item,
+    flatIndex,
+    highlighted,
     onRead,
     onClose,
+    onHover,
 }: {
     item: NotificationItem;
+    flatIndex: number;
+    highlighted: boolean;
     onRead: () => void;
     onClose: () => void;
+    onHover: () => void;
 }) {
     const unread = !item.read_at;
     const Wrapper = item.href ? Link : 'div';
@@ -272,13 +322,14 @@ function NotificationRow({
     };
 
     return (
-        <li>
+        <li data-notif-index={flatIndex} onMouseEnter={onHover}>
             <Wrapper
                 {...(wrapperProps as { href: string; onClick: () => void })}
                 onClick={item.href ? () => { handleClick(); onClose(); } : handleClick}
                 className={cn(
                     'flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-700/40',
                     unread && 'bg-brand-50/30 dark:bg-brand-900/10',
+                    highlighted && 'bg-brand-50 ring-1 ring-inset ring-brand-300 dark:bg-brand-900/30 dark:ring-brand-500/40',
                 )}
             >
                 <LevelDot level={item.level} />
@@ -297,7 +348,7 @@ function NotificationRow({
                     {item.message && (
                         <p className="mt-0.5 line-clamp-2 text-xs text-ink-500 dark:text-ink-400">{item.message}</p>
                     )}
-                    <p className="mt-1 text-[11px] font-mono text-ink-400 dark:text-ink-500">{formatTime(item.created_at)}</p>
+                    <RelativeTime value={item.created_at} className="mt-1 block font-mono text-[11px] text-ink-400 dark:text-ink-500" />
                 </div>
             </Wrapper>
         </li>
@@ -333,18 +384,6 @@ function LevelDot({ level }: { level: NotificationItem['level'] }) {
             {c.icon}
         </span>
     );
-}
-
-function formatTime(iso: string | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const now = new Date();
-    const diff = (now.getTime() - d.getTime()) / 1000;
-    if (diff < 60) return 'à l\'instant';
-    if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
-    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
-    if (diff < 604800) return `il y a ${Math.floor(diff / 86400)} j`;
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 }
 
 function BellIcon() {
