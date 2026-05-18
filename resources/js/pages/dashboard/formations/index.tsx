@@ -15,6 +15,7 @@ import {
     Tr,
 } from '@/components/ui';
 import { useUrlTab } from '@/lib/use-url-tab';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import DashboardLayout from '../layout';
 
@@ -185,6 +186,16 @@ function OverviewTab({
                 />
             </div>
 
+            <Card className="mb-5">
+                <CardHeader
+                    title="Calendrier des expirations"
+                    subtitle="12 prochains mois — chaque marqueur = 1 certification à renouveler"
+                />
+                <CardBody>
+                    <ExpirationsTimeline alerts={expiringAlerts} />
+                </CardBody>
+            </Card>
+
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader
@@ -235,6 +246,103 @@ function OverviewTab({
                 </Card>
             </div>
         </>
+    );
+}
+
+function ExpirationsTimeline({ alerts }: { alerts: ExpiringAlert[] }) {
+    if (alerts.length === 0) {
+        return (
+            <p className="px-2 py-4 text-center text-xs text-ink-500 dark:text-ink-400">
+                Aucune certification à renouveler dans les 12 prochains mois.
+            </p>
+        );
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const windowDays = 365;
+
+    const months = Array.from({ length: 12 }, (_, i) => {
+        const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        return date;
+    });
+
+    const positioned = alerts
+        .map((a) => {
+            const fr = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(a.date_expiration);
+            const date = fr
+                ? new Date(Number(fr[3]), Number(fr[2]) - 1, Number(fr[1]))
+                : new Date(a.date_expiration);
+            if (Number.isNaN(date.getTime())) return null;
+            const diffDays = Math.floor((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            const pct = Math.max(0, Math.min(100, (diffDays / windowDays) * 100));
+            return {
+                alert: a,
+                diffDays,
+                pct,
+                date,
+            };
+        })
+        .filter((p): p is NonNullable<typeof p> => p !== null && p.diffDays <= windowDays);
+
+    const severityClass = (severity: ExpiringAlert['severity']): string => {
+        if (severity === 'expired') return 'bg-danger-500 ring-danger-100 dark:bg-danger-400 dark:ring-danger-900/40';
+        if (severity === 'urgent') return 'bg-warning-500 ring-warning-100 dark:bg-warning-400 dark:ring-warning-900/40';
+        return 'bg-brand-500 ring-brand-100 dark:bg-brand-400 dark:ring-brand-900/40';
+    };
+
+    return (
+        <div>
+            {/* Track */}
+            <div className="relative mt-2 h-12">
+                <div className="absolute inset-y-1/2 left-0 right-0 h-0.5 -translate-y-1/2 rounded-full bg-ink-200 dark:bg-ink-700" />
+                <div
+                    className="absolute inset-y-1/2 left-0 h-0.5 -translate-y-1/2 rounded-full bg-warning-300 dark:bg-warning-700/60"
+                    style={{ width: '17%' }}
+                    aria-hidden="true"
+                />
+                {positioned.map(({ alert, pct, date }) => (
+                    <span
+                        key={alert.id}
+                        title={`${alert.intervenant} — ${alert.intitule} (${date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })})`}
+                        className={
+                            'absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 transition-transform hover:scale-150 ' +
+                            severityClass(alert.severity)
+                        }
+                        style={{ left: pct + '%' }}
+                    />
+                ))}
+            </div>
+
+            {/* Month labels */}
+            <div className="mt-3 grid grid-cols-12 gap-0 text-[10px] font-mono text-ink-400 dark:text-ink-500">
+                {months.map((m, i) => (
+                    <span key={i} className={i === 0 ? 'font-semibold text-ink-700 dark:text-ink-200' : ''}>
+                        {m.toLocaleDateString('fr-FR', { month: 'short' })}
+                    </span>
+                ))}
+            </div>
+
+            {/* Legend */}
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
+                <span className="font-semibold uppercase tracking-wider">Légende</span>
+                <span className="flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-full bg-danger-500 ring-2 ring-danger-100 dark:bg-danger-400 dark:ring-danger-900/40" />
+                    Expirée
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-full bg-warning-500 ring-2 ring-warning-100 dark:bg-warning-400 dark:ring-warning-900/40" />
+                    Urgent (&lt; 60 j)
+                </span>
+                <span className="flex items-center gap-1.5">
+                    <span className="size-2.5 rounded-full bg-brand-500 ring-2 ring-brand-100 dark:bg-brand-400 dark:ring-brand-900/40" />
+                    À planifier
+                </span>
+                <span className="ml-auto font-mono">
+                    {positioned.length} marqueur{positioned.length > 1 ? 's' : ''} sur la frise
+                </span>
+            </div>
+        </div>
     );
 }
 
@@ -449,7 +557,11 @@ function SessionFullRow({ session }: { session: Session }) {
     );
 }
 
+type CompetenciesView = 'list' | 'matrix';
+
 function CompetenciesTab({ formations }: { formations: Formation[] }) {
+    const [view, setView] = useState<CompetenciesView>('list');
+
     if (formations.length === 0) {
         return (
             <Card>
@@ -459,6 +571,38 @@ function CompetenciesTab({ formations }: { formations: Formation[] }) {
     }
     return (
         <Card>
+            <div className="flex items-center justify-end border-b border-ink-100 px-4 py-2 dark:border-ink-700/60">
+                <div className="inline-flex rounded-full border border-ink-200 bg-white p-0.5 text-xs font-medium dark:border-ink-700 dark:bg-ink-800">
+                    <button
+                        type="button"
+                        onClick={() => setView('list')}
+                        aria-pressed={view === 'list'}
+                        className={
+                            view === 'list'
+                                ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                        }
+                    >
+                        Liste
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setView('matrix')}
+                        aria-pressed={view === 'matrix'}
+                        className={
+                            view === 'matrix'
+                                ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                        }
+                    >
+                        Matrice
+                    </button>
+                </div>
+            </div>
+
+            {view === 'matrix' ? (
+                <CompetenciesMatrix formations={formations} />
+            ) : (
             <Table>
                 <THead>
                     <Tr>
@@ -514,7 +658,94 @@ function CompetenciesTab({ formations }: { formations: Formation[] }) {
                     ))}
                 </TBody>
             </Table>
+            )}
         </Card>
+    );
+}
+
+function CompetenciesMatrix({ formations }: { formations: Formation[] }) {
+    const intervenants = Array.from(new Set(formations.map((f) => f.intervenant))).sort((a, b) => a.localeCompare(b, 'fr'));
+    const formationTypes = Array.from(new Set(formations.map((f) => f.intitule))).sort((a, b) => a.localeCompare(b, 'fr'));
+
+    const cellLookup = new Map<string, Formation>();
+    for (const f of formations) {
+        cellLookup.set(`${f.intervenant}::${f.intitule}`, f);
+    }
+
+    const statusGlyph = (status?: Formation['statut']): { tone: string; label: string; symbol: string } => {
+        if (!status) return { tone: 'bg-ink-100 text-ink-400 dark:bg-ink-700 dark:text-ink-500', label: 'non détenue', symbol: '—' };
+        if (status === 'valide') return { tone: 'bg-sage-100 text-sage-700 dark:bg-sage-900/40 dark:text-sage-300', label: 'valide', symbol: '✓' };
+        if (status === 'expire_bientot') return { tone: 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300', label: 'à renouveler', symbol: '⌛' };
+        return { tone: 'bg-danger-100 text-danger-700 dark:bg-danger-900/40 dark:text-danger-300', label: 'expirée', symbol: '✕' };
+    };
+
+    return (
+        <div className="overflow-x-auto p-4">
+            <table className="min-w-full border-collapse text-sm">
+                <thead>
+                    <tr>
+                        <th className="sticky left-0 z-10 bg-white px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-ink-500 dark:bg-ink-800 dark:text-ink-400">
+                            Intervenant
+                        </th>
+                        {formationTypes.map((title) => (
+                            <th
+                                key={title}
+                                className="min-w-[7rem] px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+                                title={title}
+                            >
+                                <span className="line-clamp-2">{title}</span>
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                    {intervenants.map((person) => (
+                        <tr key={person}>
+                            <th
+                                scope="row"
+                                className="sticky left-0 z-10 whitespace-nowrap bg-white px-2 py-2 text-left text-xs font-medium text-ink-700 dark:bg-ink-800 dark:text-ink-200"
+                            >
+                                {person}
+                            </th>
+                            {formationTypes.map((title) => {
+                                const cell = cellLookup.get(`${person}::${title}`);
+                                const glyph = statusGlyph(cell?.statut);
+                                return (
+                                    <td key={title} className="px-2 py-2 text-center">
+                                        <span
+                                            className={'inline-flex size-7 items-center justify-center rounded-full font-mono text-sm ' + glyph.tone}
+                                            title={cell ? `${title} — ${glyph.label}${cell.date_expiration ? ` (exp. ${cell.date_expiration})` : ''}` : `${title} — non détenue`}
+                                        >
+                                            {glyph.symbol}
+                                        </span>
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-ink-500 dark:text-ink-400">
+                <span className="font-semibold uppercase tracking-wider">Légende</span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-flex size-5 items-center justify-center rounded-full bg-sage-100 font-mono text-xs text-sage-700 dark:bg-sage-900/40 dark:text-sage-300">✓</span>
+                    Valide
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-flex size-5 items-center justify-center rounded-full bg-warning-100 font-mono text-xs text-warning-700 dark:bg-warning-900/40 dark:text-warning-300">⌛</span>
+                    À renouveler
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-flex size-5 items-center justify-center rounded-full bg-danger-100 font-mono text-xs text-danger-700 dark:bg-danger-900/40 dark:text-danger-300">✕</span>
+                    Expirée
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-flex size-5 items-center justify-center rounded-full bg-ink-100 font-mono text-xs text-ink-400 dark:bg-ink-700 dark:text-ink-500">—</span>
+                    Non détenue
+                </span>
+            </div>
+        </div>
     );
 }
 

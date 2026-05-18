@@ -1,3 +1,4 @@
+import { PacBurndown } from '@/components/PacBurndown';
 import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -221,6 +222,15 @@ export default function PlanAmeliorationShow({ plan, can = { update: false, clos
                         </dl>
                     </CardBody>
                 </Card>
+
+                {plan.actions.length > 0 && (
+                    <Card className="lg:col-span-3">
+                        <CardHeader title="Burndown 30 jours" subtitle="Évolution des actions ouvertes et clôturées" />
+                        <CardBody>
+                            <PacBurndown actions={plan.actions} />
+                        </CardBody>
+                    </Card>
+                )}
 
                 <Card className="lg:col-span-3">
                     <CardHeader
