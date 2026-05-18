@@ -8,6 +8,7 @@ import HelpDrawer from '@/components/HelpDrawer';
 import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
 import MfaSetupBanner from '@/components/MfaSetupBanner';
 import NotificationsCenter from '@/components/NotificationsCenter';
+import { ShortcutsCheatsheet } from '@/components/ShortcutsCheatsheet';
 import SystemBanners from '@/components/SystemBanners';
 import { QuickAddIncidentModal } from '@/components/quick-add';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -141,6 +142,7 @@ export default function DashboardLayout({
             <Head title={`${title} — HS Quality`} />
             <FlashToasts />
             <IdleTimeoutWatcher />
+            <ShortcutsCheatsheet />
 
             <a
                 href="#dashboard-main"

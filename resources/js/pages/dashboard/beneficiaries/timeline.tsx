@@ -93,6 +93,7 @@ function unwrap<T>(maybeWrapped: { data: T } | T): T {
 export default function BeneficiaryTimeline({ beneficiary, events, totals, range }: Props) {
     const b = unwrap(beneficiary);
     const [filter, setFilter] = useState<EventKind | 'all'>('all');
+    const [search, setSearch] = useState('');
 
     const RANGE_OPTIONS: Array<{ months?: number; all?: boolean; label: string }> = [
         { months: 3, label: '3 mois' },
@@ -110,10 +111,17 @@ export default function BeneficiaryTimeline({ beneficiary, events, totals, range
     const isActiveRange = (opt: { months?: number; all?: boolean }): boolean =>
         opt.all ? range.unbounded : !range.unbounded && opt.months === range.months;
 
-    const filtered = useMemo(
-        () => (filter === 'all' ? events : events.filter((e) => e.kind === filter)),
-        [filter, events],
-    );
+    const filtered = useMemo(() => {
+        const needle = search.trim().toLowerCase();
+        return events.filter((e) => {
+            if (filter !== 'all' && e.kind !== filter) return false;
+            if (!needle) return true;
+            return (
+                e.title.toLowerCase().includes(needle) ||
+                e.description.toLowerCase().includes(needle)
+            );
+        });
+    }, [filter, events, search]);
 
     const grouped = useMemo(() => {
         const map = new Map<string, TimelineEvent[]>();
@@ -207,6 +215,25 @@ export default function BeneficiaryTimeline({ beneficiary, events, totals, range
                             </button>
                         );
                     })}
+                </div>
+
+                {/* Search */}
+                <div className="border-b border-ink-100 p-4 dark:border-ink-700/60">
+                    <div className="relative">
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Rechercher dans les événements (titre, description)…"
+                            className="block w-full rounded-lg border border-ink-200 bg-white pl-9 pr-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
+                            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                            </svg>
+                        </span>
+                    </div>
                 </div>
 
                 {/* Filter chips */}
