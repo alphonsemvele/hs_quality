@@ -1,5 +1,6 @@
-import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui';
 import { useAbilities, type Ability } from '@/lib/can';
+import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -265,8 +266,16 @@ export default function CommandPalette() {
                     )}
 
                     {loading && (
-                        <div className="px-6 py-4 text-center text-xs text-ink-400 dark:text-ink-500">
-                            Recherche…
+                        <div className="space-y-2 px-4 py-3" aria-label="Recherche en cours">
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} className="flex items-center gap-3 px-2 py-1.5">
+                                    <Skeleton shape="circle" w="size-7" />
+                                    <div className="flex-1 space-y-1.5">
+                                        <Skeleton shape="text" w={i === 0 ? 'w-3/4' : i === 1 ? 'w-1/2' : 'w-2/3'} />
+                                        <Skeleton shape="text" w={i === 0 ? 'w-1/2' : 'w-1/3'} className="h-3" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>

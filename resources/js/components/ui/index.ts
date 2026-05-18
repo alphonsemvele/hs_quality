@@ -18,6 +18,7 @@ export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
 export { RichTextEditor } from './RichTextEditor';
 export { Sheet } from './Sheet';
+export { Skeleton, SkeletonLines } from './Skeleton';
 export {
     CarePlanStatusBadge,
     GirBadge,
