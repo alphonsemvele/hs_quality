@@ -1,4 +1,5 @@
 import { Badge, Button, Card, EmptyState, KpiCard, PageHeader, Pagination, Sheet, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -69,6 +70,31 @@ export default function AuditLogIndex({
                 title="Registre d'audit"
                 subtitle="Journal immuable de toutes les actions sur les données — exigence RGPD & ANSSI"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Audit log' }]}
+                actions={
+                    rows.length > 0 ? (
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                downloadCsv(
+                                    `audit-log-${new Date().toISOString().slice(0, 10)}.csv`,
+                                    rows,
+                                    [
+                                        { header: 'Horodatage', accessor: 'created_at' },
+                                        { header: 'Événement', accessor: 'event' },
+                                        { header: 'Ressource', accessor: 'auditable_type' },
+                                        { header: 'ID ressource', accessor: 'auditable_id' },
+                                        { header: 'Utilisateur', accessor: (r) => r.user_name ?? 'Système' },
+                                        { header: 'Email', accessor: 'user_email' },
+                                        { header: 'IP', accessor: 'ip_address' },
+                                        { header: 'Champs modifiés', accessor: (r) => r.changed_keys.join(' | ') },
+                                    ],
+                                )
+                            }
+                        >
+                            Exporter CSV
+                        </Button>
+                    ) : undefined
+                }
             />
 
             <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -2,6 +2,7 @@ import { BeneficiaryPreviewSheet, type BeneficiaryPreview } from '@/components/p
 import { QuickAddBeneficiaryModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyStateRich, GirBadge, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { downloadCsv } from '@/lib/csv';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -36,11 +37,33 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                 subtitle={`${meta?.total ?? list.length} bénéficiaire(s) — page ${meta?.current_page ?? 1} sur ${meta?.last_page ?? 1}`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Bénéficiaires' }]}
                 actions={
-                    canCreate ? (
-                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
-                            Nouveau bénéficiaire
-                        </Button>
-                    ) : null
+                    <div className="flex items-center gap-2">
+                        {list.length > 0 && (
+                            <Button
+                                variant="secondary"
+                                onClick={() =>
+                                    downloadCsv(
+                                        `beneficiaires-${new Date().toISOString().slice(0, 10)}.csv`,
+                                        list,
+                                        [
+                                            { header: 'Nom complet', accessor: 'full_name' },
+                                            { header: 'Âge', accessor: (b) => b.age ?? '' },
+                                            { header: 'GIR', accessor: (b) => b.gir ?? '' },
+                                            { header: 'Ville', accessor: (b) => b.city ?? '' },
+                                            { header: 'Statut', accessor: (b) => b.status_label ?? b.status ?? '' },
+                                        ],
+                                    )
+                                }
+                            >
+                                Exporter CSV
+                            </Button>
+                        )}
+                        {canCreate && (
+                            <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                                Nouveau bénéficiaire
+                            </Button>
+                        )}
+                    </div>
                 }
             />
 
