@@ -22,6 +22,7 @@ export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
 export { PasswordStrength } from './PasswordStrength';
 export { ProgressRing } from './ProgressRing';
+export { RatingScale } from './RatingScale';
 export { PageToc, type TocItem } from './PageToc';
 export { RelativeTime } from './RelativeTime';
 export { RichTextEditor } from './RichTextEditor';

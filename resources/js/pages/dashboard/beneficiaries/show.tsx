@@ -1,5 +1,5 @@
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, RelativeTime } from '@/components/ui';
+import { AvatarStack, Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, RelativeTime } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -180,11 +180,25 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                         title="Intervenants assignés"
                         subtitle={`${assignmentsList.filter((a) => a.is_active).length} actif(s) · ${assignmentsList.length} historiquement`}
                         action={
-                            can_assign && (
-                                <Button variant="secondary" size="sm" onClick={() => setShowAttach(!showAttach)}>
-                                    {showAttach ? 'Annuler' : '+ Affecter'}
-                                </Button>
-                            )
+                            <div className="flex items-center gap-3">
+                                {assignmentsList.filter((a) => a.is_active && a.intervenant).length > 0 && (
+                                    <AvatarStack
+                                        size="sm"
+                                        items={assignmentsList
+                                            .filter((a) => a.is_active && a.intervenant)
+                                            .map((a) => ({
+                                                id: String(a.id),
+                                                initials: initials(a.intervenant!.full_name),
+                                                name: a.intervenant!.full_name,
+                                            }))}
+                                    />
+                                )}
+                                {can_assign && (
+                                    <Button variant="secondary" size="sm" onClick={() => setShowAttach(!showAttach)}>
+                                        {showAttach ? 'Annuler' : '+ Affecter'}
+                                    </Button>
+                                )}
+                            </div>
                         }
                     />
                     <CardBody>
@@ -302,4 +316,13 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
             <dd className="text-sm font-medium text-ink-900 dark:text-white">{value}</dd>
         </div>
     );
+}
+
+function initials(fullName: string): string {
+    return fullName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0]?.toUpperCase() ?? '')
+        .join('');
 }

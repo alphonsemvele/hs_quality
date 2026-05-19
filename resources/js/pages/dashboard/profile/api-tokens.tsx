@@ -220,6 +220,7 @@ export default function ApiTokens() {
                 description="Les intégrations utilisant ce token cesseront immédiatement de fonctionner. Cette action est irréversible."
                 confirmLabel="Révoquer"
                 tone="danger"
+                requireTyped={revokeTarget?.name}
             />
         </DashboardLayout>
     );

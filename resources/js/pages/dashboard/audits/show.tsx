@@ -1,5 +1,5 @@
 import { useTrackRecent } from '@/components/RecentlyViewed';
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, InlineHelp, PageHeader, PageToc, RelativeTime } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, InlineHelp, PageHeader, PageToc, ProgressRing, RelativeTime } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -215,11 +215,34 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                 <Card id="audit-synthese" className="scroll-mt-24">
                     <CardHeader title="Synthèse" />
                     <CardBody>
+                        {audit.score !== null && (
+                            <div className="mb-4 flex items-center gap-4 border-b border-ink-100 pb-4 dark:border-ink-700/60">
+                                <ProgressRing
+                                    value={audit.score}
+                                    size="lg"
+                                    tone={audit.score >= 80 ? 'sage' : audit.score >= 60 ? 'brand' : audit.score >= 40 ? 'warning' : 'danger'}
+                                    label={`Score d'audit : ${audit.score} %`}
+                                />
+                                <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                        Score global
+                                    </p>
+                                    <p className="text-sm text-ink-700 dark:text-ink-200">
+                                        {audit.score >= 80
+                                            ? 'Conformité satisfaisante'
+                                            : audit.score >= 60
+                                                ? 'Conformité partielle — actions à prévoir'
+                                                : audit.score >= 40
+                                                    ? "Conformité faible — plan d'actions prioritaire"
+                                                    : 'Non-conformité majeure — action immédiate'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                         <dl className="space-y-3.5">
                             <Row label="Référentiel" value={audit.referentiel_label} />
                             <Row label="Date" value={audit.date_audit ?? '—'} />
                             <Row label="Auditeur" value={audit.auditeur ?? '—'} />
-                            <Row label="Score" value={audit.score !== null ? `${audit.score} %` : '—'} />
                             <Row label="Écarts" value={`${audit.ecarts.length}`} />
                             {audit.finalized_at && <Row label="Finalisé" value={<RelativeTime value={audit.finalized_at} />} />}
                         </dl>
