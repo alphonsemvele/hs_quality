@@ -1,9 +1,28 @@
+import { AuditCompareModal } from '@/components/AuditCompareModal';
+import { FilterPresets } from '@/components/FilterPresets';
 import { AuditHoverCard } from '@/components/hover-cards';
 import { Badge, Button, Card, CardBody, EmptyStateRich, KpiCard, PageHeader } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DashboardLayout from '../layout';
+
+function readFilterFromUrl(key: string): string | null {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key);
+}
+
+function writeFilterToUrl(key: string, value: string | null): void {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (value === null || value === '') {
+        url.searchParams.delete(key);
+    } else {
+        url.searchParams.set(key, value);
+    }
+    window.history.replaceState(null, '', url.toString());
+}
 
 interface AuditSummary {
     id: string;
@@ -39,8 +58,12 @@ const STATUT_TONE: Record<string, 'brand' | 'warning' | 'sage' | 'neutral' | 'da
 
 export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours: 0, termines: 0, score_moyen: null } }: Partial<Props>) {
     const canManage = useCan('audits.manage');
-    const [referentielFilter, setReferentielFilter] = useState<string | null>(null);
-    const [statutFilter, setStatutFilter] = useState<string | null>(null);
+    const [referentielFilter, setReferentielFilter] = useState<string | null>(() => readFilterFromUrl('referentiel'));
+    const [statutFilter, setStatutFilter] = useState<string | null>(() => readFilterFromUrl('statut'));
+    const [showCompare, setShowCompare] = useState(false);
+
+    useEffect(() => writeFilterToUrl('referentiel', referentielFilter), [referentielFilter]);
+    useEffect(() => writeFilterToUrl('statut', statutFilter), [statutFilter]);
 
     const referentielOptions = useMemo(() => {
         const seen = new Map<string, string>();
@@ -79,11 +102,18 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                 subtitle="Grilles d'évaluation, scoring et plans d'actions correctifs"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Audits' }]}
                 actions={
-                    canManage ? (
-                        <Link href="/audits/create">
-                            <Button leadingIcon={<PlusIcon />}>Nouvel audit</Button>
-                        </Link>
-                    ) : null
+                    <div className="flex items-center gap-2">
+                        {audits.length >= 2 && (
+                            <Button variant="secondary" onClick={() => setShowCompare(true)}>
+                                Comparer 2 audits
+                            </Button>
+                        )}
+                        {canManage && (
+                            <Link href="/audits/create">
+                                <Button leadingIcon={<PlusIcon />}>Nouvel audit</Button>
+                            </Link>
+                        )}
+                    </div>
                 }
             />
 
@@ -138,6 +168,15 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                         </button>
                     )}
                 </div>
+            )}
+
+            {audits.length > 0 && (
+                <FilterPresets
+                    pageKey="audits"
+                    basePath="/audits"
+                    hasActiveFilter={!!referentielFilter || !!statutFilter}
+                    className="mb-4"
+                />
             )}
 
             {filteredAudits.length > 0 ? (
@@ -223,6 +262,20 @@ export default function AuditsIndex({ audits = [], stats = { total: 0, en_cours:
                     />
                 </Card>
             )}
+
+            <AuditCompareModal
+                open={showCompare}
+                onClose={() => setShowCompare(false)}
+                audits={audits.map((a) => ({
+                    id: a.id,
+                    titre: a.titre,
+                    referentiel_label: a.referentiel_label,
+                    statut_label: a.statut_label,
+                    date_audit: a.date_audit,
+                    score: a.score,
+                    nb_ecarts: a.nb_ecarts,
+                }))}
+            />
         </DashboardLayout>
     );
 }

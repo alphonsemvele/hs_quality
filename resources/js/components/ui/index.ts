@@ -1,3 +1,4 @@
+export { AvatarStack, type AvatarStackItem } from './AvatarStack';
 export { Badge } from './Badge';
 export { BulkActionsToolbar, BulkSelectCheckbox } from './BulkActionsToolbar';
 export { Button } from './Button';
@@ -20,6 +21,7 @@ export { KpiCard } from './KpiCard';
 export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
 export { PasswordStrength } from './PasswordStrength';
+export { ProgressRing } from './ProgressRing';
 export { PageToc, type TocItem } from './PageToc';
 export { RelativeTime } from './RelativeTime';
 export { RichTextEditor } from './RichTextEditor';
@@ -36,5 +38,6 @@ export {
 export { TBody, THead, Table, Td, Th, Tr } from './Table';
 export { FlashToasts } from './Toast';
 export { Tooltip } from './Tooltip';
+export { ValidationSummary } from './ValidationSummary';
 export { Wizard, type WizardStep } from './Wizard';
 export { WorkflowStepper, type WorkflowStep } from './WorkflowStepper';
