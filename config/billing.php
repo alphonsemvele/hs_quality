@@ -36,6 +36,14 @@ return [
     'default_tier' => env('BILLING_DEFAULT_TIER', 'essential'),
 
     /*
+    | Stripe automatic tax collection. Requires a verified head-office address
+    | at dashboard.stripe.com/settings/tax. Keep false (default) until the
+    | Stripe account is fully tax-configured; enabling it without the address
+    | raises an InvalidRequestException on subscription creation.
+    */
+    'automatic_tax' => (bool) env('STRIPE_AUTOMATIC_TAX', false),
+
+    /*
     | Stripe price IDs per tier. Set per environment via env vars so test
     | (sk_test) and production (sk_live) Stripe accounts each map to their
     | own price IDs. Leaving these null is OK in test mode where the
