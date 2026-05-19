@@ -9,15 +9,23 @@ use App\Enums\EcartGravite;
 use App\Enums\GraviteIncident;
 use App\Enums\PacSource;
 use App\Enums\PlanAmeliorationStatus;
+use App\Enums\QvctCampaignStatus;
+use App\Enums\QvctExchangeAddresseeRole;
+use App\Enums\QvctExchangeStatus;
+use App\Enums\QvctMood;
+use App\Enums\QvctWeakSignalType;
 use App\Enums\Referentiel;
 use App\Enums\StructureStatus;
 use App\Enums\StructureTier;
 use App\Enums\StructureType;
+use App\Enums\TrainingPlanStatus;
 use App\Enums\UserType;
 use App\Models\ActionAmelioration;
 use App\Models\AuditEcart;
 use App\Models\Beneficiary;
 use App\Models\CarePlan;
+use App\Models\Certification;
+use App\Models\Habilitation;
 use App\Models\Incident;
 use App\Models\IncidentActionCorrective;
 use App\Models\IncidentSuivi;
@@ -26,7 +34,14 @@ use App\Models\Intervention;
 use App\Models\PlanAmelioration;
 use App\Models\PlannedTask;
 use App\Models\QualityAudit;
+use App\Models\QvctCampaign;
+use App\Models\QvctExchangeRequest;
+use App\Models\QvctJournalEntry;
+use App\Models\QvctQuestionnaire;
+use App\Models\QvctWeakSignal;
 use App\Models\Structure;
+use App\Models\TrainingPlan;
+use App\Models\TrainingSession;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -496,7 +511,158 @@ class DevSeeder extends Seeder
             'description' => 'Formation des intervenants à l\'usage du cahier numérique.',
         ]);
 
-        $this->command->info('  ✓ 8 beneficiaries, 28+ interventions, 5 care plans, 8+ incidents, 3 audits, 3 PAC seeded');
+        // ── QVCT — questionnaire, campaign, signals, journal, exchange ────────
+        $this->call(QvctSeeder::class);
+
+        $questionnaire = QvctQuestionnaire::where('structure_id', $structure->id)->first();
+
+        if ($questionnaire) {
+            // Closed campaign from 2 months ago with responses
+            $closedCampaign = QvctCampaign::firstOrCreate(
+                ['structure_id' => $structure->id, 'title' => 'Baromètre QVCT — Avril 2026'],
+                [
+                    'structure_id' => $structure->id,
+                    'questionnaire_id' => $questionnaire->id,
+                    'title' => 'Baromètre QVCT — Avril 2026',
+                    'status' => QvctCampaignStatus::Closed->value,
+                    'opens_at' => now()->subMonths(2)->startOfMonth(),
+                    'closes_at' => now()->subMonths(2)->endOfMonth(),
+                    'launched_by' => $rh->id,
+                ]
+            );
+
+            // Active campaign for this month
+            $activeCampaign = QvctCampaign::firstOrCreate(
+                ['structure_id' => $structure->id, 'title' => 'Baromètre QVCT — Mai 2026'],
+                [
+                    'structure_id' => $structure->id,
+                    'questionnaire_id' => $questionnaire->id,
+                    'title' => 'Baromètre QVCT — Mai 2026',
+                    'status' => QvctCampaignStatus::Active->value,
+                    'opens_at' => now()->startOfMonth(),
+                    'closes_at' => now()->endOfMonth(),
+                    'launched_by' => $rh->id,
+                ]
+            );
+
+            // Weak signals from the closed campaign
+            if ($closedCampaign && QvctWeakSignal::where('campaign_id', $closedCampaign->id)->doesntExist()) {
+                QvctWeakSignal::create([
+                    'structure_id' => $structure->id,
+                    'campaign_id' => $closedCampaign->id,
+                    'team_tag' => 'Secteur Nord',
+                    'signal_type' => QvctWeakSignalType::Surcharge,
+                    'severity' => 8,
+                    'details' => ['category' => 'surcharge', 'mean_score' => 3.2],
+                ]);
+
+                QvctWeakSignal::create([
+                    'structure_id' => $structure->id,
+                    'campaign_id' => $closedCampaign->id,
+                    'team_tag' => 'Secteur Sud',
+                    'signal_type' => QvctWeakSignalType::BaisseMorale,
+                    'severity' => 6,
+                    'details' => ['category' => 'baisse_morale', 'mean_score' => 3.8],
+                    'acknowledged_at' => now()->subWeeks(3),
+                    'acknowledged_by' => $rh->id,
+                ]);
+            }
+
+            // Journal entries for the two intervenants
+            if (QvctJournalEntry::where('user_id', $intervenant1->id)->doesntExist()) {
+                QvctJournalEntry::create([
+                    'structure_id' => $structure->id,
+                    'user_id' => $intervenant1->id,
+                    'body' => 'Bonne semaine — bénéficiaires en forme, planning respecté.',
+                    'mood' => QvctMood::Positif,
+                    'mood_score' => 4,
+                    'shared_with_rh' => false,
+                ]);
+
+                QvctJournalEntry::create([
+                    'structure_id' => $structure->id,
+                    'user_id' => $intervenant1->id,
+                    'body' => 'Charge importante cette semaine, 3 visites supplémentaires. Besoin de souffler.',
+                    'mood' => QvctMood::Neutre,
+                    'mood_score' => 3,
+                    'shared_with_rh' => true,
+                ]);
+            }
+
+            // Exchange request from Marie to RH
+            if (QvctExchangeRequest::where('requester_id', $intervenant1->id)->doesntExist()) {
+                QvctExchangeRequest::create([
+                    'structure_id' => $structure->id,
+                    'requester_id' => $intervenant1->id,
+                    'addressee_role' => QvctExchangeAddresseeRole::Rh,
+                    'status' => QvctExchangeStatus::Pending,
+                    'message' => 'Je souhaiterais parler de ma charge de travail avec vous.',
+                ]);
+            }
+        }
+
+        // ── M5 — Certifications & Habilitations ──────────────────────────────
+        foreach ([$intervenant1, $intervenant2] as $intervenant) {
+            if (Habilitation::where('user_id', $intervenant->id)->doesntExist()) {
+                Habilitation::create([
+                    'structure_id' => $structure->id,
+                    'user_id' => $intervenant->id,
+                    'type' => 'DEAS — Diplôme d\'État d\'Accompagnant Éducatif et Social',
+                    'reference_number' => 'DEAS-'.strtoupper(substr($intervenant->last_name, 0, 3)).'-2021',
+                    'valid_from' => '2021-06-01',
+                    'valid_until' => null,
+                    'recorded_by' => $rh->id,
+                ]);
+            }
+
+            if (Certification::where('user_id', $intervenant->id)->doesntExist()) {
+                // One valid certification
+                Certification::create([
+                    'structure_id' => $structure->id,
+                    'user_id' => $intervenant->id,
+                    'type' => 'Gestes et soins d\'urgence (GSU)',
+                    'issued_on' => now()->subYear()->toDateString(),
+                    'expires_at' => now()->addYear()->toDateString(),
+                    'recorded_by' => $rh->id,
+                ]);
+
+                // One expiring-soon certification
+                Certification::create([
+                    'structure_id' => $structure->id,
+                    'user_id' => $intervenant->id,
+                    'type' => 'Prévention et Secours Civiques (PSC1)',
+                    'issued_on' => now()->subYears(2)->toDateString(),
+                    'expires_at' => now()->addDays(20)->toDateString(),
+                    'recorded_by' => $rh->id,
+                ]);
+            }
+        }
+
+        // ── M5 — Training plan with an upcoming session ───────────────────────
+        if (TrainingPlan::where('structure_id', $structure->id)->doesntExist()) {
+            $plan = TrainingPlan::create([
+                'structure_id' => $structure->id,
+                'year' => (int) now()->format('Y'),
+                'theme' => 'Bientraitance et prévention de la maltraitance',
+                'target_audience' => 'Tous les intervenants à domicile',
+                'status' => TrainingPlanStatus::Published->value,
+                'created_by' => $rh->id,
+                'published_at' => now()->subMonth(),
+            ]);
+
+            TrainingSession::create([
+                'structure_id' => $structure->id,
+                'training_plan_id' => $plan->id,
+                'title' => 'Module 1 — Identifier les situations à risque',
+                'trainer_name' => 'Formateur IRFSS',
+                'starts_at' => now()->addDays(14)->setTime(9, 0),
+                'ends_at' => now()->addDays(14)->setTime(17, 0),
+                'capacity' => 12,
+                'location' => 'Salle de formation, 12 rue du Moulin',
+            ]);
+        }
+
+        $this->command->info('  ✓ 8 beneficiaries, 28+ interventions, 5 care plans, 8+ incidents, 3 audits, 3 PAC, QVCT campaigns, certs, training plan seeded');
 
         $this->seedSecondaryStructures();
 

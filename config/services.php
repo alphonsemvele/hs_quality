@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | ML Prediction Microservice (Phase 3 / M9)
+    |--------------------------------------------------------------------------
+    |
+    | Python microservice (scikit-learn + transformers) that runs burnout-risk,
+    | autonomy-loss, and intervention-report-analysis inference jobs. Laravel
+    | dispatches jobs to this service and polls for results asynchronously.
+    | The service is optional: if it is down the circuit breaker catches the
+    | failure and requests remain in 'en_attente' state (shown as "en calcul"
+    | in the UI) until the circuit recovers.
+    |
+    */
+    'ml_service' => [
+        'base_url' => env('ML_SERVICE_URL', 'http://localhost:8001'),
+        'secret' => env('ML_SERVICE_SECRET', ''),
+        'timeout' => (int) env('ML_SERVICE_TIMEOUT', 10),
+    ],
+
 ];

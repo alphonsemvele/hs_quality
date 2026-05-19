@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Qvct\LaunchQvctCampaignRequest;
 use App\Models\QvctCampaign;
 use App\Models\QvctQuestionnaire;
+use App\Models\QvctResponse;
+use App\Models\QvctWeakSignal;
 use App\Services\QvctService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -47,23 +49,37 @@ class QvctCampaignController extends Controller
                 'question_count' => is_array($q->questions) ? count($q->questions) : 0,
                 'campaigns_count' => $q->campaigns_count ?? 0,
             ])->all(),
-            'teams' => $this->demoTeams(),
+            'teams' => $this->knownTeams(),
         ]);
     }
 
     /**
-     * @return list<array{value: string, label: string, members: int}>
+     * Distinct team tags seen in past responses + weak signals.
+     * "Toute la structure" (empty value) is always the first option.
+     *
+     * @return list<array{value: string, label: string}>
      */
-    private function demoTeams(): array
+    private function knownTeams(): array
     {
-        return [
-            ['value' => '', 'label' => 'Toute la structure', 'members' => 0],
-            ['value' => 'secteur_nord', 'label' => 'Secteur Nord', 'members' => 6],
-            ['value' => 'secteur_sud', 'label' => 'Secteur Sud', 'members' => 5],
-            ['value' => 'secteur_est', 'label' => 'Secteur Est', 'members' => 4],
-            ['value' => 'secteur_ouest', 'label' => 'Secteur Ouest', 'members' => 4],
-            ['value' => 'coordination', 'label' => 'Coordination', 'members' => 3],
-        ];
+        $fromResponses = QvctResponse::query()
+            ->whereNotNull('team_tag')
+            ->distinct()
+            ->pluck('team_tag');
+
+        $fromSignals = QvctWeakSignal::query()
+            ->whereNotNull('team_tag')
+            ->distinct()
+            ->pluck('team_tag');
+
+        $tags = $fromResponses->merge($fromSignals)->unique()->sort()->values();
+
+        $teams = [['value' => '', 'label' => 'Toute la structure']];
+
+        foreach ($tags as $tag) {
+            $teams[] = ['value' => $tag, 'label' => $tag];
+        }
+
+        return $teams;
     }
 
     public function show(QvctCampaign $campaign): Response

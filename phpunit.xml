@@ -45,5 +45,12 @@
              mid-test is too late because bootAuditable runs once per
              process at first class load. -->
         <env name="AUDITING_CONSOLE" value="true"/>
+        <!-- Phase 3 — Spectator contract testing against the exported OpenAPI spec. -->
+        <env name="SPEC_SOURCE" value="local"/>
+        <!-- Base directory that Spectator prepends to the filename passed to using(). -->
+        <env name="SPEC_PATH" value="tests"/>
+        <!-- Strip /api prefix when matching request paths to spec paths.
+             Scramble generates paths as /v1/... (no /api prefix). -->
+        <env name="SPEC_PATH_PREFIX" value="api"/>
     </php>
 </phpunit>

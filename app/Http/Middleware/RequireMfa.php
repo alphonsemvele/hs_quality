@@ -77,9 +77,12 @@ class RequireMfa
             ], 423);
         }
 
+        // 200 — Inertia's client has no handler for 423 on soft navigations
+        // (post-login redirect), causing a blank page. The page content
+        // communicates the MFA requirement; the HTTP status is irrelevant here.
         return Inertia::render('Auth/mfa-required', [
             'role' => $user->type instanceof \BackedEnum ? $user->type->value : (string) $user->type,
-        ])->toResponse($request)->setStatusCode(423);
+        ])->toResponse($request);
     }
 
     private function isExemptUri(Request $request): bool

@@ -34,8 +34,8 @@ return new class extends Migration
             DB::statement('CREATE INDEX IF NOT EXISTS audit_runs_title_trgm_idx ON audit_runs USING gin (title gin_trgm_ops)');
         }
 
-        if (Schema::hasTable('plans_amelioration')) {
-            DB::statement('CREATE INDEX IF NOT EXISTS plans_amelioration_title_trgm_idx ON plans_amelioration USING gin (title gin_trgm_ops)');
+        if (Schema::hasTable('plans_amelioration') && Schema::hasColumn('plans_amelioration', 'titre')) {
+            DB::statement('CREATE INDEX IF NOT EXISTS plans_amelioration_titre_trgm_idx ON plans_amelioration USING gin (titre gin_trgm_ops)');
         }
 
         if (Schema::hasTable('users')) {
@@ -53,7 +53,8 @@ return new class extends Migration
         DB::statement('DROP INDEX IF EXISTS beneficiaries_first_name_trgm_idx');
         DB::statement('DROP INDEX IF EXISTS beneficiaries_last_name_trgm_idx');
         DB::statement('DROP INDEX IF EXISTS audit_runs_title_trgm_idx');
-        DB::statement('DROP INDEX IF EXISTS plans_amelioration_title_trgm_idx');
+        DB::statement('DROP INDEX IF EXISTS plans_amelioration_titre_trgm_idx');
+        DB::statement('DROP INDEX IF EXISTS plans_amelioration_title_trgm_idx'); // legacy name
         DB::statement('DROP INDEX IF EXISTS users_first_name_trgm_idx');
         DB::statement('DROP INDEX IF EXISTS users_last_name_trgm_idx');
 

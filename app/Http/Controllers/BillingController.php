@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\StructureTier;
+use App\Models\User;
+use App\Services\BillingService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,32 +23,84 @@ class BillingController extends Controller
     public function show(): Response
     {
         $structure = currentStructure();
-        $demo = config('app.env') === 'local';
-
         $currentTier = $structure?->tier ?? StructureTier::Essential;
-        $userCount = $demo ? 12 : 0;
+        $userCount = $structure ? User::query()->where('structure_id', $structure->id)->count() : 0;
+
+        // Cashier subscription — null when Stripe isn't configured locally.
+        $subscription = $structure?->subscription(BillingService::SUBSCRIPTION_TYPE);
+        $paymentMethod = null;
+        $nextInvoiceDate = null;
+        $invoices = [];
+        $trialEndsAt = null;
+
+        if ($subscription !== null) {
+            $trialEndsAt = $subscription->trial_ends_at?->toDateString();
+
+            try {
+                $pm = $structure->defaultPaymentMethod();
+                if ($pm) {
+                    $paymentMethod = [
+                        'brand' => $pm->card?->brand ?? '—',
+                        'last4' => $pm->card?->last4 ?? '—',
+                        'expires' => sprintf('%02d/%d', $pm->card?->exp_month ?? 0, $pm->card?->exp_year ?? 0),
+                    ];
+                }
+
+                $invoices = $structure->invoices()->map(fn ($inv) => [
+                    'id' => $inv->id,
+                    'number' => $inv->number ?? $inv->id,
+                    'date' => $inv->date()->toDateString(),
+                    'amount' => $inv->rawTotal() / 100,
+                    'status' => $inv->paid ? 'paid' : 'open',
+                    'status_label' => $inv->paid ? 'Payée' : 'En attente',
+                    'pdf_url' => $inv->invoice_pdf ?? '#',
+                ])->values()->all();
+
+                $upcomingInvoice = $structure->upcomingInvoice();
+                $nextInvoiceDate = $upcomingInvoice?->date()->toDateString();
+            } catch (\Exception) {
+                // Stripe not reachable in this environment — invoices stay empty.
+            }
+        }
 
         return Inertia::render('dashboard/billing/index', [
             'currentTier' => $currentTier->value,
             'currentTierLabel' => $currentTier->label(),
             'userCount' => $userCount,
             'nextInvoiceAmount' => $userCount * $currentTier->monthlyPricePerUser(),
-            'nextInvoiceDate' => $demo ? '2026-06-01' : null,
-            'paymentMethod' => $demo ? ['brand' => 'Visa', 'last4' => '4242', 'expires' => '12/2027'] : null,
+            'nextInvoiceDate' => $nextInvoiceDate,
+            'paymentMethod' => $paymentMethod,
             'tiers' => $this->tiers($currentTier),
-            'invoices' => $demo ? $this->demoInvoices() : [],
-            'trialEndsAt' => null,
+            'invoices' => $invoices,
+            'trialEndsAt' => $trialEndsAt,
         ]);
     }
 
-    public function changePlan(): RedirectResponse
+    public function changePlan(BillingService $service): RedirectResponse
     {
-        return back()->with('info', 'Changement de plan en cours de développement — utilisez l\'API Stripe.');
+        // Full plan-change flow requires a Stripe payment-method on the
+        // structure (handled in the mobile API SubscriptionController).
+        // Web surface shows the billing page; actual subscribe call goes
+        // through POST /api/v1/billing/subscribe with a Stripe token.
+        return back()->with('info', 'Pour changer de plan, contactez votre référent ou utilisez l\'API Stripe.');
     }
 
-    public function cancel(): RedirectResponse
+    public function cancel(BillingService $service): RedirectResponse
     {
-        return back()->with('success', 'Abonnement programmé pour résiliation à la fin de la période (demo).');
+        $structure = currentStructure();
+        $subscription = $structure?->subscription(BillingService::SUBSCRIPTION_TYPE);
+
+        if ($subscription === null || $subscription->canceled()) {
+            return back()->with('info', 'Aucun abonnement actif à résilier.');
+        }
+
+        try {
+            $service->cancel($structure);
+
+            return back()->with('success', 'Abonnement programmé pour résiliation à la fin de la période.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Impossible d\'annuler l\'abonnement : '.$e->getMessage());
+        }
     }
 
     /**
@@ -100,20 +154,6 @@ class BillingController extends Controller
                     'Support dédié + SLA 99,9 %',
                 ],
             ],
-        ];
-    }
-
-    /**
-     * @return list<array<string, mixed>>
-     */
-    private function demoInvoices(): array
-    {
-        return [
-            ['id' => 'in_2026_05', 'number' => 'FAC-2026-05-001', 'date' => '2026-05-01', 'amount' => 180, 'status' => 'paid', 'status_label' => 'Payée', 'pdf_url' => '#'],
-            ['id' => 'in_2026_04', 'number' => 'FAC-2026-04-001', 'date' => '2026-04-01', 'amount' => 180, 'status' => 'paid', 'status_label' => 'Payée', 'pdf_url' => '#'],
-            ['id' => 'in_2026_03', 'number' => 'FAC-2026-03-001', 'date' => '2026-03-01', 'amount' => 165, 'status' => 'paid', 'status_label' => 'Payée', 'pdf_url' => '#'],
-            ['id' => 'in_2026_02', 'number' => 'FAC-2026-02-001', 'date' => '2026-02-01', 'amount' => 165, 'status' => 'paid', 'status_label' => 'Payée', 'pdf_url' => '#'],
-            ['id' => 'in_2026_01', 'number' => 'FAC-2026-01-001', 'date' => '2026-01-01', 'amount' => 150, 'status' => 'paid', 'status_label' => 'Payée', 'pdf_url' => '#'],
         ];
     }
 }

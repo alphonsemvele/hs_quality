@@ -51,6 +51,17 @@ Schedule::command('certifications:expiry-sweep')
     ->runInBackground()
     ->name('certifications.expiry-sweep');
 
+// Phase 3 / Benchmark — monthly cross-tenant sector benchmark snapshot.
+// Runs on the 2nd of each month at 02:00 (after qvct:indicators:snapshot
+// on the 1st) so the benchmark captures the freshest per-structure data.
+Schedule::command('benchmark:generate --sync')
+    ->monthlyOn(2, '02:00')
+    ->timezone('Europe/Paris')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->runInBackground()
+    ->name('benchmark.generate');
+
 // Phase 2 / E4 — quarterly access review CSV export. Runs on the 1st
 // of each quarter (Jan / Apr / Jul / Oct) at 04:00 Europe/Paris.
 // Output to storage/app/compliance/access-review-{date}.csv.

@@ -25,6 +25,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'structure_id',
+        'beneficiary_id',
         'first_name',
         'last_name',
         'email',
@@ -71,6 +72,12 @@ class User extends Authenticatable
     public function structure(): BelongsTo
     {
         return $this->belongsTo(Structure::class);
+    }
+
+    /** Only populated for UserType::BeneficiairePortal accounts. */
+    public function beneficiary(): BelongsTo
+    {
+        return $this->belongsTo(Beneficiary::class);
     }
 
     public function fullName(): string

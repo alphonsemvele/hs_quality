@@ -115,7 +115,8 @@ class RoleSeeder extends Seeder
 
         // Cross-tenant benchmark — service account only, never assigned to
         // human roles (listed here so it exists as a permission to reference)
-        'cross_tenant_benchmark.read',
+        'cross_tenant_benchmark.read',   // platform admin only — executes live cross-tenant queries
+        'benchmark.sector.view',         // structure dirigeant — reads pre-generated snapshot
 
         // Administration
         'users.manage.structure',
@@ -230,6 +231,7 @@ class RoleSeeder extends Seeder
             'reports.annual_quality.generate',
             'ai.burnout_risk.view.team_aggregate',
             'ai.autonomy_loss.view',
+            'benchmark.sector.view',
             'users.manage.structure',
             'roles.assign.structure',
             'structure.configure',
