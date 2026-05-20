@@ -26,6 +26,7 @@ use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
 use App\Http\Controllers\QvctQuestionnaireController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Settings\CustomOptionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -113,6 +114,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/settings/structure', [SettingsController::class, 'structure'])->name('settings.structure');
         Route::put('/settings/contact', [SettingsController::class, 'updateContact'])->name('settings.contact.update');
+
+        // Tenant-managed custom dropdown options (dirigeant + référent qualité).
+        Route::prefix('settings/options')->name('settings.options.')->group(function (): void {
+            Route::get('/{fieldKey}', [CustomOptionController::class, 'index'])->name('index');
+            Route::post('/', [CustomOptionController::class, 'store'])->name('store');
+            Route::put('/{option}', [CustomOptionController::class, 'update'])->name('update');
+            Route::delete('/{option}', [CustomOptionController::class, 'destroy'])->name('destroy');
+        });
     });
 
     Route::middleware(['tenant'])->group(function () {

@@ -10,7 +10,6 @@ use OwenIt\Auditing\Models\Audit;
  * denial, validation failure, cross-tenant isolation, and sensitive-read
  * audit logging on the dossier endpoint.
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });
@@ -151,7 +150,7 @@ it('creates a beneficiary and auto-assigns structure_id', function () {
     expect($beneficiary)->not->toBeNull()
         ->and($beneficiary->structure_id)->toBe($user->structure_id)
         ->and($beneficiary->first_name)->toBe('Marie')
-        ->and($beneficiary->gir)->toBe(3);
+        ->and($beneficiary->gir)->toBe('3'); // gir is now varchar(20) — stored as string
 });
 
 it('rejects creating a beneficiary without a last_name', function () {
@@ -193,7 +192,7 @@ it('updates a beneficiary via PUT', function () {
     ]);
 
     $response->assertRedirect();
-    expect($beneficiary->fresh()->gir)->toBe(3);
+    expect($beneficiary->fresh()->gir)->toBe('3');
 });
 
 it('blocks updating a beneficiary from another structure', function () {
@@ -204,7 +203,7 @@ it('blocks updating a beneficiary from another structure', function () {
     $response = $this->put("/beneficiaries/{$foreign->id}", ['gir' => 3]);
 
     $response->assertNotFound();
-    expect($foreign->fresh()->gir)->toBe(5);
+    expect($foreign->fresh()->gir)->toBe('5');
 });
 
 // --------------------------------------------------------------------------------------

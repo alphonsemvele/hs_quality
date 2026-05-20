@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Gender;
 use App\Enums\UserType;
 use App\Http\Requests\Beneficiaries\StoreBeneficiaryRequest;
 use App\Http\Requests\Beneficiaries\StoreSatisfactionRatingRequest;
@@ -18,6 +19,7 @@ use App\Models\IntervenantAssignment;
 use App\Models\Intervention;
 use App\Models\User;
 use App\Services\BeneficiaryService;
+use App\Services\CustomOptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -39,6 +41,7 @@ class BeneficiaryController extends Controller
 {
     public function __construct(
         private readonly BeneficiaryService $service,
+        private readonly CustomOptionService $options,
     ) {}
 
     public function index(): Response
@@ -377,7 +380,20 @@ class BeneficiaryController extends Controller
     {
         $this->authorize('create', Beneficiary::class);
 
-        return Inertia::render('dashboard/beneficiaries/create');
+        $girEnum = collect(['1', '2', '3', '4', '5', '6'])
+            ->map(fn (string $v) => ['value' => $v, 'label' => "GIR $v"])
+            ->all();
+
+        $genderEnum = collect(Gender::cases())
+            ->map(fn (Gender $g) => ['value' => $g->value, 'label' => $g->label()])
+            ->all();
+
+        return Inertia::render('dashboard/beneficiaries/create', [
+            'options' => [
+                'gir' => $this->options->mergeWithEnum($girEnum, 'gir'),
+                'gender' => $genderEnum,
+            ],
+        ]);
     }
 
     public function store(StoreBeneficiaryRequest $request): RedirectResponse

@@ -127,6 +127,9 @@ class RoleSeeder extends Seeder
         'rgpd.erasure.request',
         'rgpd.erasure.execute',
 
+        // Custom dropdown options — tenant-specific extensions to enums
+        'options.manage',
+
     ];
 
     /** @var array<string, list<string>> */
@@ -238,6 +241,7 @@ class RoleSeeder extends Seeder
             'audit_logs.view.structure',
             'rgpd.erasure.request',
             'rgpd.erasure.execute',
+            'options.manage',
         ],
 
         'referent_qualite' => [
@@ -268,6 +272,7 @@ class RoleSeeder extends Seeder
             'reports.annual_quality.generate',
             'audit_logs.view.own',
             'rgpd.erasure.request',
+            'options.manage',
         ],
 
         'rh' => [

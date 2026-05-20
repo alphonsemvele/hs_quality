@@ -55,6 +55,7 @@ final class UserAbilities
             'formations.view',
             'formations.manage',
             'users.manage',
+            'options.manage',
             'admin.structures',
         ];
     }
@@ -165,6 +166,7 @@ final class UserAbilities
             'formations.view' => true,
             'formations.manage' => true,
             'users.manage' => true,
+            'options.manage' => true,
         ];
     }
 
@@ -186,6 +188,7 @@ final class UserAbilities
             'qvct.view' => true,
             'communication.view' => true,
             'communication.post' => true,
+            'options.manage' => true,
         ];
     }
 

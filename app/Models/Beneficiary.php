@@ -9,6 +9,7 @@ use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -71,7 +72,7 @@ class Beneficiary extends Model implements AuditableContract
             'erased_at' => 'datetime',
             'gender' => Gender::class,
             'status' => BeneficiaryStatus::class,
-            'gir' => 'integer',
+            'gir' => 'string',
 
             // Health data — RGPD Art 9 — encrypted at rest per
             // references/compliance/encrypted-fields.md
@@ -147,7 +148,7 @@ class Beneficiary extends Model implements AuditableContract
     /**
      * All intervenants ever assigned (active + historical).
      */
-    public function allAssignedIntervenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function allAssignedIntervenants(): BelongsToMany
     {
         return $this->belongsToMany(
             User::class,
@@ -160,7 +161,7 @@ class Beneficiary extends Model implements AuditableContract
     /**
      * Currently-assigned intervenants (active assignments only).
      */
-    public function assignedIntervenants(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function assignedIntervenants(): BelongsToMany
     {
         return $this->allAssignedIntervenants()->wherePivotNull('unassigned_at');
     }
