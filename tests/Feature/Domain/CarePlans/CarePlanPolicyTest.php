@@ -58,13 +58,15 @@ it('lets an intervenant view but not modify a care plan', function () {
         ->and($user->can('archive', $plan))->toBeFalse();
 });
 
-it('lets a dirigeant delete a care plan but not create one', function () {
+it('lets a dirigeant create, update and delete a care plan', function () {
     $user = actingAsRole('dirigeant');
     $beneficiary = Beneficiary::factory()->forStructure($user->structure)->create();
     $plan = CarePlan::factory()->forBeneficiary($beneficiary)->create();
 
-    // Per the matrix: dirigeant has U (update) + D (delete) but no create.
-    expect($user->can('create', CarePlan::class))->toBeFalse()
+    // The dirigeant is the structure's top admin: granting U + D without C was
+    // an asymmetric oversight that surfaced as a 403 on the "Nouveau plan"
+    // button. The dirigeant is now a superset of the coordinateur on plans.
+    expect($user->can('create', CarePlan::class))->toBeTrue()
         ->and($user->can('update', $plan))->toBeTrue()
         ->and($user->can('delete', $plan))->toBeTrue();
 });

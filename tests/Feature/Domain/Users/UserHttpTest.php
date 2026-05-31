@@ -32,6 +32,23 @@ it('lists tenant users for a dirigeant', function (): void {
         );
 });
 
+it('does not leak foreign-tenant users or platform admins into the directory', function (): void {
+    $dirigeant = actingAsRole('dirigeant');
+    User::factory()->forStructure($dirigeant->structure)->count(2)->create();
+
+    // Noise that must NOT appear in this structure's directory.
+    User::factory()->forStructure(Structure::factory()->create())->count(3)->create();
+    User::factory()->create(['structure_id' => null, 'is_platform_admin' => true]);
+
+    $this->get('/users')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard/users/index')
+            // only dirigeant + 2 in-structure users; foreign + platform admin excluded
+            ->has('users.data', 3),
+        );
+});
+
 it('refuses index to a coordinateur (no users.manage.structure permission)', function (): void {
     actingAsRole('coordinateur');
 

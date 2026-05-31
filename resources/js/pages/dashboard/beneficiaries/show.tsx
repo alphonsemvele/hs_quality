@@ -212,7 +212,7 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                                                     Intervenant à affecter
                                                 </label>
                                                 <select
-                                                    name="user_id"
+                                                    name="intervenant_id"
                                                     required
                                                     defaultValue=""
                                                     className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-ink-900 dark:border-brand-700/50 dark:bg-ink-800 dark:text-ink-100"

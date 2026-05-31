@@ -31,9 +31,15 @@ interface Attendee {
     last_psc1: string | null;
 }
 
+interface EligibleUser {
+    id: number;
+    full_name: string;
+}
+
 interface Props {
     session: SessionDetail | null;
     attendees: Attendee[];
+    eligible_users: EligibleUser[];
 }
 
 const STATUS_TONE: Record<Attendee['status'], 'sage' | 'brand' | 'warning' | 'danger'> = {
@@ -43,7 +49,7 @@ const STATUS_TONE: Record<Attendee['status'], 'sage' | 'brand' | 'warning' | 'da
     absent: 'danger',
 };
 
-export default function SessionShow({ session, attendees = [] }: Partial<Props>) {
+export default function SessionShow({ session, attendees = [], eligible_users = [] }: Partial<Props>) {
     useTrackRecent(
         session
             ? {
@@ -134,6 +140,43 @@ export default function SessionShow({ session, attendees = [] }: Partial<Props>)
                         <CardHeader
                             title="Émargement"
                             subtitle={`${activeAttendees.length} participant${activeAttendees.length > 1 ? 's' : ''} actif${activeAttendees.length > 1 ? 's' : ''}`}
+                            action={
+                                eligible_users.length > 0 ? (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const fd = new FormData(e.currentTarget);
+                                            const userId = fd.get('user_id');
+                                            if (!userId) return;
+                                            router.post(
+                                                `/formations/sessions/${session.id}/attendances`,
+                                                { user_id: Number(userId) },
+                                                { preserveScroll: true, onSuccess: () => e.currentTarget?.reset() },
+                                            );
+                                        }}
+                                        className="flex items-end gap-2"
+                                    >
+                                        <select
+                                            name="user_id"
+                                            defaultValue=""
+                                            required
+                                            className="h-9 rounded-lg border border-ink-200 bg-white px-2 text-xs text-ink-900 focus:border-brand-400 focus:outline-none dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                                        >
+                                            <option value="" disabled>
+                                                Sélectionner
+                                            </option>
+                                            {eligible_users.map((u) => (
+                                                <option key={u.id} value={u.id}>
+                                                    {u.full_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <Button type="submit" size="sm">
+                                            Inscrire
+                                        </Button>
+                                    </form>
+                                ) : undefined
+                            }
                         />
                         <CardBody className="px-0">
                             <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">

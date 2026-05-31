@@ -51,6 +51,24 @@ class TrainingPlanService
         ]);
     }
 
+    /**
+     * Update a plan's metadata (year, theme, target_audience). Lifecycle
+     * fields (status, published_at, archived_at) are NOT touched here —
+     * use publish() / archive() for those transitions.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function update(TrainingPlan $plan, array $data): TrainingPlan
+    {
+        if ($plan->status === TrainingPlanStatus::Archived) {
+            throw new HttpException(409, 'Impossible de modifier un plan archivé.');
+        }
+
+        $plan->update(array_intersect_key($data, array_flip(['year', 'theme', 'target_audience'])));
+
+        return $plan->fresh();
+    }
+
     public function publish(TrainingPlan $plan): TrainingPlan
     {
         if ($plan->status === TrainingPlanStatus::Archived) {

@@ -143,7 +143,7 @@ class SearchController extends Controller
                     'items' => $rows
                         ->map(fn (Incident $i) => [
                             'id' => $i->id,
-                            'title' => ucfirst((string) ($i->categorie?->value ?? 'incident')).' · '.($i->gravite?->value ?? '—'),
+                            'title' => ($i->categorie?->label() ?? 'Incident').' · '.($i->gravite?->value ?? '—'),
                             'subtitle' => trim(($i->occurred_at?->format('d/m/Y') ?? '—').' · '.($i->statut?->value ?? '—')),
                             'href' => "/incidents/{$i->id}",
                         ])

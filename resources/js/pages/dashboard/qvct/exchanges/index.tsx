@@ -44,16 +44,6 @@ const STATUS_TONE: Record<ExchangeStatus, 'warning' | 'brand' | 'sage' | 'neutra
     cancelled: 'danger',
 };
 
-const REASONS = [
-    'Charge de travail',
-    'Organisation',
-    'Conflit collègue',
-    'Conflit hiérarchique',
-    'Évolution / carrière',
-    'Santé / fatigue',
-    'Autre',
-];
-
 export default function ExchangesIndex({ inbox = [], outbox = [] }: Partial<Props>) {
     const [tab, setTab] = useUrlTab<Tab>('inbox', EXCHANGES_TABS);
     const newCount = inbox.filter((i) => i.status === 'requested').length;
@@ -265,26 +255,7 @@ function NewTab() {
                                     className="h-10 w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 focus:border-brand-400 focus:outline-none dark:border-ink-700 dark:bg-ink-800 dark:text-white"
                                 >
                                     <option value="rh">Mon référent·e RH</option>
-                                    <option value="coordinateur">Mon coordinateur·rice</option>
-                                    <option value="dirigeant">La direction</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label htmlFor="reason" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                                    Motif *
-                                </label>
-                                <select
-                                    id="reason"
-                                    name="reason"
-                                    required
-                                    className="h-10 w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 focus:border-brand-400 focus:outline-none dark:border-ink-700 dark:bg-ink-800 dark:text-white"
-                                >
-                                    {REASONS.map((r) => (
-                                        <option key={r} value={r}>
-                                            {r}
-                                        </option>
-                                    ))}
+                                    <option value="manager">Mon manager (coordinateur ou direction)</option>
                                 </select>
                             </div>
 

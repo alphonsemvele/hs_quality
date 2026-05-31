@@ -16,8 +16,9 @@ import {
 } from '@/components/ui';
 import { useTrackRecent } from '@/components/RecentlyViewed';
 import { useCan } from '@/lib/can';
-import { Form, Link, router } from '@inertiajs/react';
+import { Form, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import type { SharedData } from '@/types';
 import DashboardLayout from '../layout';
 
 interface ActionCorrective {
@@ -59,6 +60,7 @@ interface Incident {
 }
 
 export default function ShowIncident({ incident }: { incident: Incident }) {
+    const { auth } = usePage<SharedData>().props;
     const [showAnalysisForm, setShowAnalysisForm] = useState(false);
     const [showActionForm, setShowActionForm] = useState(false);
     const canAnalyze = useCan('incidents.analyze');
@@ -72,7 +74,8 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
 
     const [showCloseDialog, setShowCloseDialog] = useState(false);
 
-    const startAnalyse = () => router.post(`/incidents/${incident.id}/assign`, { assigned_to: incident.declarant.id });
+    const startAnalyse = () =>
+        router.post(`/incidents/${incident.id}/assign`, { coordinateur_id: auth.user.id }, { preserveScroll: true });
     const closeIncident = () => setShowCloseDialog(true);
     const confirmClose = () => {
         router.post(`/incidents/${incident.id}/close`, undefined, {

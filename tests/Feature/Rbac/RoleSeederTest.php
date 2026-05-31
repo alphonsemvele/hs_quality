@@ -73,12 +73,15 @@ it('gives a dirigeant executive + admin permissions including erasure', function
             'users.manage.structure',
             'structure.configure',
             // Dirigeant must be able to fully operate the structure: plan
-            // and delete interventions, declare incidents. Without these
-            // the UI shows the buttons (per the Inertia abilities matrix)
-            // but every click 403s.
+            // and delete interventions, declare incidents, create care
+            // plans. Without these the UI shows the buttons (per the Inertia
+            // abilities matrix) but every click 403s.
             'interventions.update.team',
             'interventions.delete',
             'incidents.declare',
+            'care_plans.create',
+            'care_plans.copy_template',
+            'trainings.plan',
         )
         ->not->toContain('cross_tenant_benchmark.read');
 });

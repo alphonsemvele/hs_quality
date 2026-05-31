@@ -68,6 +68,10 @@ const GRAVITE_TONE: Record<string, 'neutral' | 'warning' | 'danger'> = {
 export default function AuditShow({ audit, gravites = [], can = { execute: false, finalize: false, cancel: false } }: Props) {
     const [showEcartForm, setShowEcartForm] = useState(false);
     const [showCancelForm, setShowCancelForm] = useState(false);
+    // All hooks must run before the early `!audit` return below — otherwise the
+    // hook count changes between renders (Rules of Hooks) and the page crashes
+    // to a blank screen, especially under the React Compiler.
+    const [pending, setPending] = useState<AuditPending>(null);
 
     useTrackRecent(
         audit ? { kind: 'audit', id: audit.id, label: audit.titre, href: `/audits/${audit.id}` } : null,
@@ -91,7 +95,6 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
         );
     }
 
-    const [pending, setPending] = useState<AuditPending>(null);
     const finaliser = () => setPending({ kind: 'finaliser' });
     const deleteEcart = (ecartId: number) => setPending({ kind: 'deleteEcart', ecartId });
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\QvctMood;
 use Database\Seeders\RoleSeeder;
 
 beforeEach(function () {
@@ -67,8 +68,8 @@ it('accepts a journal entry submission and redirects', function () {
     actingAsRole('intervenant');
 
     $response = $this->post('/qvct/journal', [
-        'mood' => 4,
-        'content' => 'Bonne journée — tournée bien menée.',
+        'mood' => QvctMood::Positif->value,
+        'body' => 'Bonne journée — tournée bien menée.',
         'shared_with_rh' => false,
     ]);
 

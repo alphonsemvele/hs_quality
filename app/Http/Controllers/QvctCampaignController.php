@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Qvct\LaunchQvctCampaignRequest;
+use App\Http\Requests\Qvct\SubmitQvctResponseRequest;
 use App\Models\QvctCampaign;
 use App\Models\QvctQuestionnaire;
 use App\Services\QvctService;
@@ -102,5 +103,24 @@ class QvctCampaignController extends Controller
         $this->service->closeCampaign($campaign);
 
         return back()->with('success', 'Campagne clôturée — détection des signaux faibles déclenchée.');
+    }
+
+    /**
+     * Web-side anonymous response submission. Mirrors the API pattern
+     * (Api\V1\QvctCampaignController::submitResponse) so both surfaces
+     * share the same Form Request, policy gate and service call. The
+     * acting user's identity is intentionally NOT persisted — anonymity
+     * is enforced by the service layer.
+     */
+    public function submitResponse(SubmitQvctResponseRequest $request, QvctCampaign $campaign): RedirectResponse
+    {
+        $this->service->recordResponse(
+            $campaign,
+            $request->validated('answers'),
+            $request->validated('team_tag'),
+        );
+
+        return redirect()->route('qvct.index')
+            ->with('success', 'Merci pour votre réponse anonyme.');
     }
 }

@@ -34,7 +34,7 @@ class DashboardController extends Controller
                     mb_substr($incident->declarant?->last_name ?? '?', 0, 1)
                 ),
                 'declarant' => trim(($incident->declarant?->first_name ?? '').' '.($incident->declarant?->last_name ?? '')),
-                'categorie' => $incident->categorie->value,
+                'categorie' => $incident->categorie->label(),
                 'gravite' => $incident->gravite->value,
                 'statut' => $incident->statut->value,
                 'depuis' => $incident->occurred_at?->diffForHumans(),

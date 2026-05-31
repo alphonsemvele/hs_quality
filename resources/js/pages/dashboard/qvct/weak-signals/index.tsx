@@ -39,11 +39,10 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
 ];
 
 const TYPE_LABELS: Record<WeakSignalType, string> = {
-    burnout_risk: 'Burnout',
-    autonomy_loss: 'Autonomie',
-    rps_cluster: 'Cluster RPS',
-    engagement_drop: 'Engagement',
-    other: 'Autre',
+    baisse_morale: 'Baisse de morale',
+    surcharge: 'Surcharge',
+    conflit_relationnel: 'Conflit relationnel',
+    isolement_professionnel: 'Isolement',
 };
 
 export default function WeakSignalsIndex({
@@ -63,7 +62,7 @@ export default function WeakSignalsIndex({
         });
     }, [signals, filter, typeFilter]);
 
-    const types: WeakSignalType[] = ['burnout_risk', 'rps_cluster', 'autonomy_loss', 'engagement_drop', 'other'];
+    const types: WeakSignalType[] = ['baisse_morale', 'surcharge', 'conflit_relationnel', 'isolement_professionnel'];
 
     const acknowledge = (id: string) => {
         router.post(`/qvct/weak-signals/${id}/acknowledge`, undefined, { preserveScroll: true });
