@@ -1,4 +1,6 @@
+import { FilterPresets } from '@/components/FilterPresets';
 import { BeneficiaryHoverCard, UserHoverCard } from '@/components/hover-cards';
+import { InterventionCalendar } from '@/components/InterventionCalendar';
 import { InterventionPreviewSheet, type InterventionPreview } from '@/components/preview-sheets';
 import { QuickAddInterventionModal } from '@/components/quick-add';
 import {
@@ -25,9 +27,13 @@ import {
     Tr,
 } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+const INTERVENTION_VIEWS = ['list', 'calendar'] as const;
+type InterventionView = (typeof INTERVENTION_VIEWS)[number];
 
 interface QuickOption {
     id: number | string;
@@ -35,6 +41,23 @@ interface QuickOption {
 }
 
 type Statut = 'planifiee' | 'en_cours' | 'realisee' | 'annulee' | 'non_realisee';
+
+/**
+ * Subtle left-edge marker so the row's statut is readable at a glance,
+ * even before the badge column comes into view. Matches the tone used
+ * by InterventionStatusBadge.
+ */
+const STATUT_BORDER: Record<Statut, string> = {
+    planifiee: 'border-l-4 border-l-brand-500/70',
+    en_cours: 'border-l-4 border-l-warning-500/80',
+    realisee: 'border-l-4 border-l-sage-500/70',
+    annulee: 'border-l-4 border-l-danger-500/70',
+    non_realisee: 'border-l-4 border-l-ink-400/60',
+};
+
+function statutBorderClass(statut: Statut): string {
+    return STATUT_BORDER[statut] ?? '';
+}
 
 interface Intervention {
     id: number | string;
@@ -74,6 +97,7 @@ export default function Interventions({
     const [showFilters, setShowFilters] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [bulkAction, setBulkAction] = useState<'cancel' | null>(null);
+    const [view, setView] = useUrlTab<InterventionView>('list', INTERVENTION_VIEWS);
 
     const toggleSelect = (id: string) => {
         setSelectedIds((prev) => {
@@ -141,11 +165,39 @@ export default function Interventions({
                 subtitle={`${total} intervention(s) au total`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Interventions' }]}
                 actions={
-                    canCreate ? (
-                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
-                            Nouvelle intervention
-                        </Button>
-                    ) : null
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex rounded-full border border-ink-200 bg-white p-0.5 text-xs font-medium dark:border-ink-700 dark:bg-ink-800">
+                            <button
+                                type="button"
+                                onClick={() => setView('list')}
+                                aria-pressed={view === 'list'}
+                                className={
+                                    view === 'list'
+                                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                }
+                            >
+                                Liste
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setView('calendar')}
+                                aria-pressed={view === 'calendar'}
+                                className={
+                                    view === 'calendar'
+                                        ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                        : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                }
+                            >
+                                Calendrier
+                            </button>
+                        </div>
+                        {canCreate && (
+                            <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                                Nouvelle intervention
+                            </Button>
+                        )}
+                    </div>
                 }
             />
 
@@ -163,6 +215,11 @@ export default function Interventions({
                     onRemove={removeFilter}
                     onOpenDrawer={() => setShowFilters(true)}
                     onResetAll={resetFilters}
+                />
+                <FilterPresets
+                    pageKey="interventions"
+                    basePath="/interventions"
+                    hasActiveFilter={chips.length > 0}
                 />
             </div>
 
@@ -197,7 +254,14 @@ export default function Interventions({
             />
 
             <Card>
-                {interventions.length > 0 ? (
+                {view === 'calendar' ? (
+                    <div className="p-4">
+                        <InterventionCalendar
+                            interventions={interventions}
+                            onSelect={(i) => setPreview(i as InterventionPreview)}
+                        />
+                    </div>
+                ) : interventions.length > 0 ? (
                     <Table>
                         <THead>
                             <Tr>
@@ -228,7 +292,7 @@ export default function Interventions({
                         </THead>
                         <TBody>
                             {interventions.map((i) => (
-                                <Tr key={i.id}>
+                                <Tr key={i.id} className={statutBorderClass(i.statut)}>
                                     <Td>
                                         <BulkSelectCheckbox
                                             checked={selectedIds.has(String(i.id))}

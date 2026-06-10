@@ -2,9 +2,14 @@ import { BeneficiaryPreviewSheet, type BeneficiaryPreview } from '@/components/p
 import { QuickAddBeneficiaryModal } from '@/components/quick-add';
 import { Badge, Button, Card, EmptyStateRich, GirBadge, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
+import { downloadCsv } from '@/lib/csv';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { Link } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
+
+const BENEFICIARY_VIEWS = ['list', 'cards'] as const;
+type BeneficiaryView = (typeof BENEFICIARY_VIEWS)[number];
 
 interface Beneficiary {
     id: string;
@@ -28,6 +33,7 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
     const canCreate = useCan('beneficiaries.create');
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [preview, setPreview] = useState<BeneficiaryPreview | null>(null);
+    const [view, setView] = useUrlTab<BeneficiaryView>('list', BENEFICIARY_VIEWS);
 
     return (
         <DashboardLayout title="Bénéficiaires" subtitle="Personnes accompagnées par votre structure">
@@ -36,16 +42,109 @@ export default function BeneficiariesIndex({ beneficiaries, meta }: Props) {
                 subtitle={`${meta?.total ?? list.length} bénéficiaire(s) — page ${meta?.current_page ?? 1} sur ${meta?.last_page ?? 1}`}
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Bénéficiaires' }]}
                 actions={
-                    canCreate ? (
-                        <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
-                            Nouveau bénéficiaire
-                        </Button>
-                    ) : null
+                    <div className="flex items-center gap-2">
+                        {list.length > 0 && (
+                            <div className="inline-flex rounded-full border border-ink-200 bg-white p-0.5 text-xs font-medium dark:border-ink-700 dark:bg-ink-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setView('list')}
+                                    aria-pressed={view === 'list'}
+                                    className={
+                                        view === 'list'
+                                            ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                            : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                    }
+                                >
+                                    Liste
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setView('cards')}
+                                    aria-pressed={view === 'cards'}
+                                    className={
+                                        view === 'cards'
+                                            ? 'rounded-full bg-ink-900 px-3 py-1 text-white dark:bg-white dark:text-ink-900'
+                                            : 'rounded-full px-3 py-1 text-ink-600 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-white'
+                                    }
+                                >
+                                    Cartes
+                                </button>
+                            </div>
+                        )}
+                        {list.length > 0 && (
+                            <Button
+                                variant="secondary"
+                                onClick={() =>
+                                    downloadCsv(
+                                        `beneficiaires-${new Date().toISOString().slice(0, 10)}.csv`,
+                                        list,
+                                        [
+                                            { header: 'Nom complet', accessor: 'full_name' },
+                                            { header: 'Âge', accessor: (b) => b.age ?? '' },
+                                            { header: 'GIR', accessor: (b) => b.gir ?? '' },
+                                            { header: 'Ville', accessor: (b) => b.city ?? '' },
+                                            { header: 'Statut', accessor: (b) => b.status_label ?? b.status ?? '' },
+                                        ],
+                                    )
+                                }
+                            >
+                                Exporter CSV
+                            </Button>
+                        )}
+                        {canCreate && (
+                            <Button leadingIcon={<PlusIcon />} onClick={() => setShowQuickAdd(true)}>
+                                Nouveau bénéficiaire
+                            </Button>
+                        )}
+                    </div>
                 }
             />
 
             <Card>
-                {list.length > 0 ? (
+                {list.length > 0 && view === 'cards' ? (
+                    <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {list.map((b) => (
+                            <button
+                                type="button"
+                                key={b.id}
+                                onClick={() => setPreview(b)}
+                                className="group flex items-start gap-3 rounded-xl border border-ink-100 bg-white p-4 text-left transition-shadow hover:border-sage-200 hover:shadow-md dark:border-ink-700/60 dark:bg-ink-800 dark:hover:border-sage-700/60"
+                            >
+                                <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-sage-50 text-sm font-semibold text-sage-700 dark:bg-sage-900/30 dark:text-sage-300">
+                                    {b.initials || '?'}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <p className="truncate text-sm font-semibold text-ink-900 dark:text-white">
+                                            {b.full_name}
+                                        </p>
+                                        {b.is_erased && (
+                                            <Badge tone="warning" size="xs">
+                                                Anonymisé
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">
+                                        {b.age !== null ? `${b.age} ans` : 'Âge ?'} · {b.city ?? '—'}
+                                    </p>
+                                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                                        {b.gir && <GirBadge gir={b.gir} />}
+                                        <Badge tone={b.status === 'active' ? 'sage' : 'neutral'} size="xs" dot={b.status === 'active'}>
+                                            {b.status_label ?? b.status ?? '—'}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <Link
+                                    href={`/beneficiaries/${b.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="shrink-0 text-[11px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-brand-400"
+                                >
+                                    Détail →
+                                </Link>
+                            </button>
+                        ))}
+                    </div>
+                ) : list.length > 0 ? (
                     <Table>
                         <THead>
                             <Tr>

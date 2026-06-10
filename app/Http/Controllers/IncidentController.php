@@ -49,15 +49,6 @@ class IncidentController extends Controller
             $query->where('declared_by', $user->id);
         }
 
-        $categorieLabels = [
-            CategorieIncident::Chute->value => 'Chute',
-            CategorieIncident::Agression->value => 'Agression',
-            CategorieIncident::ErreurMedicamenteuse->value => 'Erreur médicamenteuse',
-            CategorieIncident::MaltraitanceSuspecte->value => 'Maltraitance suspectée',
-            CategorieIncident::SituationDanger->value => 'Situation de danger',
-            CategorieIncident::Autre->value => 'Autre',
-        ];
-
         $paginator = $query->paginate(20)->through(fn (Incident $i): array => [
             'id' => $i->id,
             'initials' => mb_strtoupper(
@@ -65,7 +56,7 @@ class IncidentController extends Controller
                 .mb_substr($i->declarant?->last_name ?? '', 0, 1),
             ),
             'declarant' => trim(($i->declarant?->first_name ?? '').' '.($i->declarant?->last_name ?? '')),
-            'categorie' => $categorieLabels[$i->categorie->value] ?? $i->categorie->value,
+            'categorie' => $i->categorie->label(),
             'gravite' => $i->gravite->value,
             'statut' => $i->statut->value,
             'structure' => $i->structure?->name ?? '',
@@ -131,14 +122,7 @@ class IncidentController extends Controller
 
         $categoriesEnum = collect(CategorieIncident::cases())->map(fn (CategorieIncident $c) => [
             'value' => $c->value,
-            'label' => match ($c) {
-                CategorieIncident::Chute => 'Chute',
-                CategorieIncident::Agression => 'Agression',
-                CategorieIncident::ErreurMedicamenteuse => 'Erreur médicamenteuse',
-                CategorieIncident::MaltraitanceSuspecte => 'Maltraitance suspectée',
-                CategorieIncident::SituationDanger => 'Situation de danger',
-                CategorieIncident::Autre => 'Autre',
-            },
+            'label' => $c->label(),
         ])->all();
 
         return Inertia::render('dashboard/incidents/create', [
@@ -170,15 +154,6 @@ class IncidentController extends Controller
             'suivis.author:id,first_name,last_name',
         ]);
 
-        $categorieLabels = [
-            CategorieIncident::Chute->value => 'Chute',
-            CategorieIncident::Agression->value => 'Agression',
-            CategorieIncident::ErreurMedicamenteuse->value => 'Erreur médicamenteuse',
-            CategorieIncident::MaltraitanceSuspecte->value => 'Maltraitance suspectée',
-            CategorieIncident::SituationDanger->value => 'Situation de danger',
-            CategorieIncident::Autre->value => 'Autre',
-        ];
-
         return Inertia::render('dashboard/incidents/show', [
             'incident' => [
                 'id' => $incident->id,
@@ -198,7 +173,7 @@ class IncidentController extends Controller
                         'name' => trim($incident->beneficiary->first_name.' '.$incident->beneficiary->last_name),
                     ]
                     : null,
-                'categorie' => $categorieLabels[$incident->categorie->value] ?? $incident->categorie->value,
+                'categorie' => $incident->categorie->label(),
                 'gravite' => $incident->gravite->value,
                 'statut' => $incident->statut->value,
                 'description' => (string) $incident->description,

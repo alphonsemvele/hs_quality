@@ -11,9 +11,21 @@ export function Table({ className, children, ...rest }: HTMLAttributes<HTMLTable
     );
 }
 
+/**
+ * Sticky table header — stays visible when scrolling long lists.
+ * The background is opaque so body rows scrolling underneath remain
+ * legible. Owners of nested overflow containers can opt out by passing
+ * a non-sticky utility (e.g. `static`) in className.
+ */
 export function THead({ className, children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
     return (
-        <thead className={cn('border-b border-ink-100 bg-ink-50/60 dark:border-ink-700/60 dark:bg-ink-800/60', className)} {...rest}>
+        <thead
+            className={cn(
+                'sticky top-0 z-10 border-b border-ink-100 bg-ink-50 backdrop-blur supports-[backdrop-filter]:bg-ink-50/85 dark:border-ink-700/60 dark:bg-ink-800 dark:supports-[backdrop-filter]:bg-ink-800/85',
+                className,
+            )}
+            {...rest}
+        >
             {children}
         </thead>
     );

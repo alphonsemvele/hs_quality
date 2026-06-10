@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, FormField, Input, PageHeader, Select, Textarea } from '@/components/ui';
+import { Button, Card, CardBody, CardFooter, CardHeader, FormField, Input, PageHeader, Select, Textarea, ValidationSummary } from '@/components/ui';
 import { Form, Link } from '@inertiajs/react';
 import DashboardLayout from '../layout';
 
@@ -35,6 +35,22 @@ export default function CreateIncident({ options }: Props) {
             <Form action="/incidents" method="post" resetOnSuccess>
                 {({ errors, processing }) => (
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                        {Object.keys(errors).length > 0 && (
+                            <div className="lg:col-span-3">
+                                <ValidationSummary
+                                    errors={errors as Record<string, string>}
+                                    labels={{
+                                        categorie: 'Catégorie',
+                                        description: 'Description du fait',
+                                        lieu: 'Lieu',
+                                        gravite: 'Gravité',
+                                        occurred_at: 'Date & heure',
+                                        beneficiary_id: 'Bénéficiaire',
+                                        intervention_id: 'Intervention liée',
+                                    }}
+                                />
+                            </div>
+                        )}
                         <Card className="lg:col-span-2">
                             <CardHeader title="Que s'est-il passé ?" subtitle="Soyez factuel — pas d'opinion ni de jugement." />
                             <CardBody className="space-y-4">

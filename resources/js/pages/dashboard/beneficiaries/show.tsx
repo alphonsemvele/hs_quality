@@ -1,4 +1,5 @@
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
+import { AvatarStack, Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader, RelativeTime } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -63,6 +64,13 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
 
     const [showAttach, setShowAttach] = useState(false);
     const [detachTarget, setDetachTarget] = useState<{ id: number | string; name: string } | null>(null);
+
+    useTrackRecent({
+        kind: 'beneficiary',
+        id: b.id,
+        label: b.is_erased ? 'Bénéficiaire anonymisé' : b.full_name,
+        href: `/beneficiaries/${b.id}`,
+    });
 
     const requestDetach = (id: number | string, name: string) => setDetachTarget({ id, name });
     const confirmDetach = () => {
@@ -150,7 +158,7 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                             {b.admitted_at && (
                                 <Row
                                     label="Admis le"
-                                    value={<span className="font-mono text-xs">{b.admitted_at}</span>}
+                                    value={<RelativeTime value={b.admitted_at} className="font-mono text-xs" />}
                                 />
                             )}
                             <Row label="Contact d'urgence" value={b.emergency_contact_name ?? '—'} />
@@ -172,11 +180,25 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                         title="Intervenants assignés"
                         subtitle={`${assignmentsList.filter((a) => a.is_active).length} actif(s) · ${assignmentsList.length} historiquement`}
                         action={
-                            can_assign && (
-                                <Button variant="secondary" size="sm" onClick={() => setShowAttach(!showAttach)}>
-                                    {showAttach ? 'Annuler' : '+ Affecter'}
-                                </Button>
-                            )
+                            <div className="flex items-center gap-3">
+                                {assignmentsList.filter((a) => a.is_active && a.intervenant).length > 0 && (
+                                    <AvatarStack
+                                        size="sm"
+                                        items={assignmentsList
+                                            .filter((a) => a.is_active && a.intervenant)
+                                            .map((a) => ({
+                                                id: String(a.id),
+                                                initials: initials(a.intervenant!.full_name),
+                                                name: a.intervenant!.full_name,
+                                            }))}
+                                    />
+                                )}
+                                {can_assign && (
+                                    <Button variant="secondary" size="sm" onClick={() => setShowAttach(!showAttach)}>
+                                        {showAttach ? 'Annuler' : '+ Affecter'}
+                                    </Button>
+                                )}
+                            </div>
                         }
                     />
                     <CardBody>
@@ -190,7 +212,7 @@ export default function BeneficiaryShow({ beneficiary, assignments, eligible_int
                                                     Intervenant à affecter
                                                 </label>
                                                 <select
-                                                    name="user_id"
+                                                    name="intervenant_id"
                                                     required
                                                     defaultValue=""
                                                     className="h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm text-ink-900 dark:border-brand-700/50 dark:bg-ink-800 dark:text-ink-100"
@@ -294,4 +316,13 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
             <dd className="text-sm font-medium text-ink-900 dark:text-white">{value}</dd>
         </div>
     );
+}
+
+function initials(fullName: string): string {
+    return fullName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0]?.toUpperCase() ?? '')
+        .join('');
 }

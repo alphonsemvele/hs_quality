@@ -1,53 +1,61 @@
-import { Badge, Button, Card, EmptyState, PageHeader, Pagination } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, PageHeader, Pagination, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { Link } from '@inertiajs/react';
 import DashboardLayout from '../../layout';
 
+interface Question {
+    key: string;
+    label: string;
+    scale: string;
+    category?: string | null;
+}
+
 interface Questionnaire {
     id: string;
     title: string;
-    frequency: string | null;
-    questions: unknown[] | null;
-    is_active: boolean;
     version: number;
-    created_at: string;
+    frequency: string;
+    questions: Question[] | null;
+    is_active: boolean;
+    created_at: string | null;
 }
 
-interface Paginated<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
+interface Paginated {
+    data: Questionnaire[];
+    current_page?: number;
+    last_page?: number;
+    total?: number;
 }
 
 interface Props {
-    questionnaires: Paginated<Questionnaire>;
+    questionnaires: Paginated;
 }
 
 const FREQUENCY_LABELS: Record<string, string> = {
     weekly: 'Hebdomadaire',
     monthly: 'Mensuelle',
     quarterly: 'Trimestrielle',
-    biannual: 'Semestrielle',
-    annual: 'Annuelle',
 };
 
+function frequencyLabel(value: string): string {
+    return FREQUENCY_LABELS[value] ?? value;
+}
+
+function formatDate(value: string | null): string {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString('fr-FR');
+}
+
 export default function QvctQuestionnairesIndex({ questionnaires }: Props) {
-    const canManage = useCan('qvct.manage');
     const list = questionnaires?.data ?? [];
-    const meta = questionnaires;
+    const canManage = useCan('qvct.manage');
 
     return (
-        <DashboardLayout title="Questionnaires QVCT" subtitle="Modèles de questionnaires bien-être">
+        <DashboardLayout title="Questionnaires QVCT" subtitle="Modèles de baromètre">
             <PageHeader
                 title="Questionnaires QVCT"
-                subtitle={`${meta?.total ?? list.length} questionnaire(s)`}
-                breadcrumb={[
-                    { label: 'Tableau de bord', href: '/dashboard' },
-                    { label: 'QVCT', href: '/qvct' },
-                    { label: 'Questionnaires' },
-                ]}
+                subtitle="Modèles de baromètre réutilisés pour lancer des campagnes auprès des équipes."
+                breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'QVCT', href: '/qvct' }, { label: 'Questionnaires' }]}
                 actions={
                     canManage ? (
                         <Link href="/qvct/questionnaires/create">
@@ -57,74 +65,81 @@ export default function QvctQuestionnairesIndex({ questionnaires }: Props) {
                 }
             />
 
-            {list.length > 0 ? (
-                <ul className="space-y-3">
-                    {list.map((q) => {
-                        const questionCount = Array.isArray(q.questions) ? q.questions.length : 0;
-                        return (
-                            <Card key={q.id} className="transition-shadow hover:shadow-md">
-                                <div className="flex items-start gap-4 p-5">
-                                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-sm font-semibold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-                                        {questionCount}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <Link
-                                                href={`/qvct/questionnaires/${q.id}`}
-                                                className="text-sm font-semibold text-ink-900 hover:text-brand-700 dark:text-white dark:hover:text-brand-300"
-                                            >
-                                                {q.title}
-                                            </Link>
-                                            {q.frequency && (
-                                                <Badge tone="brand" size="xs">
-                                                    {FREQUENCY_LABELS[q.frequency] ?? q.frequency}
-                                                </Badge>
-                                            )}
-                                            <Badge tone={q.is_active ? 'sage' : 'neutral'} size="xs">
-                                                {q.is_active ? 'Actif' : 'Archivé'}
+            <Card>
+                {list.length > 0 ? (
+                    <Table>
+                        <THead>
+                            <Tr>
+                                <Th>Titre</Th>
+                                <Th>Cadence</Th>
+                                <Th>Questions</Th>
+                                <Th>Statut</Th>
+                                <Th>Créé le</Th>
+                                <Th></Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {list.map((q) => (
+                                <Tr key={q.id}>
+                                    <Td>
+                                        <Link
+                                            href={`/qvct/questionnaires/${q.id}`}
+                                            className="font-medium text-ink-900 hover:text-brand-600 dark:text-white dark:hover:text-brand-400"
+                                        >
+                                            {q.title}
+                                        </Link>
+                                        <p className="mt-0.5 font-mono text-[11px] text-ink-400 dark:text-ink-500">v{q.version}</p>
+                                    </Td>
+                                    <Td className="text-sm text-ink-600 dark:text-ink-300">{frequencyLabel(q.frequency)}</Td>
+                                    <Td className="text-sm text-ink-600 dark:text-ink-300">{q.questions?.length ?? 0}</Td>
+                                    <Td>
+                                        {q.is_active ? (
+                                            <Badge tone="sage" size="sm" dot>
+                                                Actif
                                             </Badge>
-                                            <Badge tone="neutral" size="xs">
-                                                v{q.version}
+                                        ) : (
+                                            <Badge tone="neutral" size="sm">
+                                                Archivé
                                             </Badge>
-                                        </div>
-                                        <p className="mt-1 text-xs text-ink-500 dark:text-ink-400">
-                                            {questionCount} question{questionCount !== 1 ? 's' : ''} · Créé le{' '}
-                                            {new Date(q.created_at).toLocaleDateString('fr-FR', { dateStyle: 'medium' })}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={`/qvct/questionnaires/${q.id}`}
-                                        className="shrink-0 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-                                    >
-                                        Voir →
-                                    </Link>
-                                </div>
-                            </Card>
-                        );
-                    })}
-                </ul>
-            ) : (
-                <Card>
+                                        )}
+                                    </Td>
+                                    <Td className="font-mono text-xs text-ink-500 dark:text-ink-400">{formatDate(q.created_at)}</Td>
+                                    <Td className="text-right">
+                                        <Link
+                                            href={`/qvct/questionnaires/${q.id}`}
+                                            className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                                        >
+                                            Détail →
+                                        </Link>
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </TBody>
+                    </Table>
+                ) : (
                     <EmptyState
                         title="Aucun questionnaire"
-                        description="Créez votre premier questionnaire QVCT pour lancer des campagnes de bien-être."
+                        description="Créez un premier modèle de baromètre QVCT pour lancer des campagnes auprès de vos équipes."
                         action={
                             canManage ? (
                                 <Link href="/qvct/questionnaires/create">
-                                    <Button size="sm">Créer un questionnaire</Button>
+                                    <Button>Nouveau questionnaire</Button>
                                 </Link>
-                            ) : null
+                            ) : undefined
                         }
                     />
-                </Card>
-            )}
-
-            <Pagination
-                currentPage={meta?.current_page ?? 1}
-                lastPage={meta?.last_page ?? 1}
-                total={meta?.total ?? list.length}
-                perPage={meta?.per_page ?? 20}
-            />
+                )}
+                {list.length > 0 && (
+                    <div className="px-4 pb-4">
+                        <Pagination
+                            currentPage={questionnaires?.current_page ?? 1}
+                            lastPage={questionnaires?.last_page ?? 1}
+                            total={questionnaires?.total ?? list.length}
+                            perPage={20}
+                        />
+                    </div>
+                )}
+            </Card>
         </DashboardLayout>
     );
 }

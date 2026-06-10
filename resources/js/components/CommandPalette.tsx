@@ -1,5 +1,6 @@
-import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui';
 import { useAbilities, type Ability } from '@/lib/can';
+import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -40,6 +41,39 @@ const QUICK_ACTIONS: QuickAction[] = [
     { id: 'profile', label: 'Mon profil', href: '/dashboard/profile', keywords: ['compte', 'mfa', '2fa'] },
 ];
 
+const HISTORY_KEY = 'hsq.cmdk.history';
+const HISTORY_MAX = 5;
+
+interface HistoryEntry {
+    id: string;
+    title: string;
+    subtitle: string;
+    href: string;
+}
+
+function readHistory(): HistoryEntry[] {
+    if (typeof window === 'undefined') return [];
+    try {
+        const raw = window.localStorage.getItem(HISTORY_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw) as HistoryEntry[];
+        return Array.isArray(parsed) ? parsed.slice(0, HISTORY_MAX) : [];
+    } catch {
+        return [];
+    }
+}
+
+function pushHistory(entry: HistoryEntry): void {
+    if (typeof window === 'undefined') return;
+    try {
+        const current = readHistory().filter((e) => e.href !== entry.href);
+        const next = [entry, ...current].slice(0, HISTORY_MAX);
+        window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    } catch {
+        // localStorage disabled — silently skip.
+    }
+}
+
 export default function CommandPalette() {
     const abilities = useAbilities();
     const [open, setOpen] = useState(false);
@@ -47,6 +81,7 @@ export default function CommandPalette() {
     const [groups, setGroups] = useState<SearchGroup[]>([]);
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState(0);
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
     const abortRef = useRef<AbortController | null>(null);
@@ -72,11 +107,12 @@ export default function CommandPalette() {
         return () => document.removeEventListener('keydown', handler);
     }, [open]);
 
-    // ── Focus input on open ──────────────────────────────────────
+    // ── Focus input on open + refresh history ────────────────────
     useEffect(() => {
         if (open) {
             setTimeout(() => inputRef.current?.focus(), 30);
             setSelected(0);
+            setHistory(readHistory());
         } else {
             setQuery('');
             setGroups([]);
@@ -135,19 +171,25 @@ export default function CommandPalette() {
         );
     }, [query, abilities]);
 
+    const visibleHistory = useMemo(() => (query.trim() === '' ? history : []), [query, history]);
+
     const flatItems = useMemo(() => {
-        const items: Array<{ kind: 'action' | 'result'; href: string; danger?: boolean }> = [];
+        const items: Array<{ kind: 'history' | 'action' | 'result'; href: string; entry?: HistoryEntry; danger?: boolean }> = [];
+        visibleHistory.forEach((h) => items.push({ kind: 'history', href: h.href, entry: h }));
         visibleActions.forEach((a) => items.push({ kind: 'action', href: a.href, danger: a.danger }));
         groups.forEach((g) => g.items.forEach((i) => items.push({ kind: 'result', href: i.href })));
         return items;
-    }, [visibleActions, groups]);
+    }, [visibleActions, visibleHistory, groups]);
 
     // Clamp selected when list shrinks
     useEffect(() => {
         if (selected >= flatItems.length) setSelected(0);
     }, [flatItems.length, selected]);
 
-    const go = (href: string) => {
+    const go = (href: string, entry?: HistoryEntry) => {
+        if (entry) {
+            pushHistory(entry);
+        }
         setOpen(false);
         router.visit(href);
     };
@@ -162,7 +204,7 @@ export default function CommandPalette() {
         } else if (e.key === 'Enter') {
             e.preventDefault();
             const target = flatItems[selected];
-            if (target) go(target.href);
+            if (target) go(target.href, target.entry);
         } else if (e.key === 'Escape') {
             e.preventDefault();
             setOpen(false);
@@ -212,24 +254,48 @@ export default function CommandPalette() {
                 </div>
 
                 <div ref={listRef} className="max-h-[60vh] overflow-y-auto px-2 py-2">
-                    {visibleActions.length > 0 && (
-                        <Section label="Actions rapides">
-                            {visibleActions.map((a, i) => (
+                    {visibleHistory.length > 0 && (
+                        <Section label="Récents">
+                            {visibleHistory.map((h, i) => (
                                 <Row
-                                    key={a.id}
-                                    label={a.label}
-                                    icon={<BoltIcon />}
-                                    danger={a.danger}
+                                    key={`recent-${h.href}`}
+                                    label={h.title}
+                                    subtitle={h.subtitle}
+                                    icon={<ClockIcon />}
                                     active={selected === i}
                                     onMouseEnter={() => setSelected(i)}
-                                    onClick={() => go(a.href)}
+                                    onClick={() => go(h.href, h)}
                                 />
                             ))}
                         </Section>
                     )}
 
+                    {visibleActions.length > 0 && (
+                        <Section label="Actions rapides">
+                            {visibleActions.map((a, i) => {
+                                const idx = visibleHistory.length + i;
+                                return (
+                                    <Row
+                                        key={a.id}
+                                        label={a.label}
+                                        icon={<BoltIcon />}
+                                        danger={a.danger}
+                                        active={selected === idx}
+                                        onMouseEnter={() => setSelected(idx)}
+                                        onClick={() =>
+                                            go(a.href, { id: a.id, title: a.label, subtitle: 'Action rapide', href: a.href })
+                                        }
+                                    />
+                                );
+                            })}
+                        </Section>
+                    )}
+
                     {groups.map((group, gi) => {
-                        const offset = visibleActions.length + groups.slice(0, gi).reduce((s, g) => s + g.items.length, 0);
+                        const offset =
+                            visibleHistory.length +
+                            visibleActions.length +
+                            groups.slice(0, gi).reduce((s, g) => s + g.items.length, 0);
                         return (
                             <Section key={group.key} label={group.label}>
                                 {group.items.map((it, i) => {
@@ -242,7 +308,7 @@ export default function CommandPalette() {
                                             icon={iconForGroup(group.key)}
                                             active={selected === idx}
                                             onMouseEnter={() => setSelected(idx)}
-                                            onClick={() => go(it.href)}
+                                            onClick={() => go(it.href, { id: it.id, title: it.title, subtitle: it.subtitle, href: it.href })}
                                         />
                                     );
                                 })}
@@ -265,8 +331,16 @@ export default function CommandPalette() {
                     )}
 
                     {loading && (
-                        <div className="px-6 py-4 text-center text-xs text-ink-400 dark:text-ink-500">
-                            Recherche…
+                        <div className="space-y-2 px-4 py-3" aria-label="Recherche en cours">
+                            {[0, 1, 2].map((i) => (
+                                <div key={i} className="flex items-center gap-3 px-2 py-1.5">
+                                    <Skeleton shape="circle" w="size-7" />
+                                    <div className="flex-1 space-y-1.5">
+                                        <Skeleton shape="text" w={i === 0 ? 'w-3/4' : i === 1 ? 'w-1/2' : 'w-2/3'} />
+                                        <Skeleton shape="text" w={i === 0 ? 'w-1/2' : 'w-1/3'} className="h-3" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -379,6 +453,9 @@ function SearchIcon() {
 }
 function BoltIcon() {
     return <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function ClockIcon() {
+    return <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 function UserIcon() {
     return <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;

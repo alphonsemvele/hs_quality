@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\QvctActionPlanItemStatus;
 use App\Enums\QvctActionPlanStatus;
 use App\Enums\QvctCampaignStatus;
 use App\Enums\QvctExchangeAddresseeRole;
+use App\Enums\QvctExchangeStatus;
 use App\Enums\QvctMood;
 use App\Http\Requests\Qvct\StoreExchangeRequestRequest;
 use App\Http\Requests\Qvct\StoreJournalEntryRequest;
 use App\Models\QvctActionPlan;
 use App\Models\QvctCampaign;
-use App\Models\QvctQuestionnaire;
+use App\Models\QvctExchangeRequest;
+use App\Models\QvctJournalEntry;
 use App\Models\QvctWeakSignal;
 use App\Models\User;
 use App\Services\ExchangeRequestService;
 use App\Services\JournalEntryService;
+use App\Services\PsychosocialRiskCartographyService;
 use App\Services\QvctService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,6 +34,12 @@ use Inertia\Response;
  */
 class QvctController extends Controller
 {
+    public function __construct(
+        private readonly JournalEntryService $journals,
+        private readonly ExchangeRequestService $exchanges,
+        private readonly PsychosocialRiskCartographyService $cartography,
+    ) {}
+
     public function index(): Response
     {
         $user = request()->user();
@@ -77,7 +84,6 @@ class QvctController extends Controller
             'derniere_campagne' => $lastClosed?->closes_at?->toDateString(),
         ];
 
-        // Engagement trend: participation % per last 7 closed campaigns, ascending.
         $trend = $campaigns
             ->filter(fn (QvctCampaign $c) => $c->status === QvctCampaignStatus::Closed)
             ->sortByDesc('closes_at')
@@ -90,7 +96,6 @@ class QvctController extends Controller
             ->reverse()
             ->values();
 
-        // Top 5 outstanding weak signals for the hub summary card.
         $weakSignals = QvctWeakSignal::query()
             ->whereNull('acknowledged_at')
             ->orderByDesc('severity')
@@ -117,18 +122,23 @@ class QvctController extends Controller
     public function questionnaire(): Response
     {
         $campaign = QvctCampaign::query()
-            ->with(['questionnaire:id,title,questions'])
+            ->where('structure_id', currentStructure()?->id)
             ->where('status', QvctCampaignStatus::Active->value)
-            ->latest('opens_at')
+            ->with(['questionnaire:id,title,questions'])
+            ->orderByDesc('opens_at')
             ->first();
 
         $questions = collect($campaign?->questionnaire?->questions ?? [])
             ->map(fn (array $q) => [
-                'id' => $q['key'],
-                'type' => 'likert',
-                'label' => $q['label'],
-                'min_label' => 'Pas du tout',
-                'max_label' => 'Totalement',
+                'id' => (string) ($q['key'] ?? ''),
+                'type' => match ($q['scale'] ?? '1-5') {
+                    'yes_no' => 'open',
+                    default => 'likert',
+                },
+                'label' => (string) ($q['label'] ?? ''),
+                'help' => null,
+                'min_label' => 'Pas d\'accord',
+                'max_label' => 'Tout à fait d\'accord',
                 'required' => true,
             ])
             ->values();
@@ -181,7 +191,7 @@ class QvctController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $weekAgo = Carbon::now()->subWeek();
+        $weekAgo = now()->subWeek();
 
         $stats = [
             'total' => $signals->count(),
@@ -192,7 +202,7 @@ class QvctController extends Controller
 
         $mapped = $signals->map(fn (QvctWeakSignal $s) => [
             'id' => $s->id,
-            'type' => $s->signal_type->value,
+            'type' => $s->signal_type instanceof \BackedEnum ? $s->signal_type->value : (string) $s->signal_type,
             'team' => $s->team_tag,
             'score' => $s->severity,
             'detected_at' => $s->created_at?->diffForHumans() ?? '—',
@@ -225,45 +235,58 @@ class QvctController extends Controller
 
     public function indicators(): Response
     {
-        // Dimensions derived from the active questionnaire's question keys.
-        $questionnaire = QvctQuestionnaire::query()
-            ->where('is_active', true)
-            ->latest()
+        $campaign = QvctCampaign::query()
+            ->where('structure_id', currentStructure()?->id)
+            ->whereNotNull('questionnaire_id')
+            ->orderByDesc('opens_at')
             ->first();
 
-        $dimensions = collect($questionnaire?->questions ?? [])
-            ->map(fn (array $q) => [
-                'key' => $q['key'],
-                'label' => $q['label'],
+        $rows = $campaign
+            ? $this->cartography->cartographyFor($campaign->load('questionnaire'))
+            : collect();
+
+        $teams = $rows->map(fn (array $r): string => $r['team_tag'] ?? 'Toute la structure')->values()->all();
+
+        $cells = [];
+        foreach ($rows as $row) {
+            $teamLabel = $row['team_tag'] ?? 'Toute la structure';
+            foreach ($row['mean_scores'] as $dimensionKey => $meanScore) {
+                $cells[] = [
+                    'team' => $teamLabel,
+                    'dimension' => (string) $dimensionKey,
+                    'score' => (float) $meanScore,
+                ];
+            }
+        }
+
+        $dimensions = collect($rows->flatMap(fn (array $r): array => array_keys($r['mean_scores'])))
+            ->unique()
+            ->map(fn (string $k): array => [
+                'key' => $k,
+                'label' => ucfirst(str_replace('_', ' ', $k)),
                 'description' => '',
             ])
-            ->values();
+            ->values()
+            ->all();
 
-        // Trend: response count per last 7 closed campaigns (engagement proxy).
-        $trend = QvctCampaign::query()
-            ->where('status', QvctCampaignStatus::Closed->value)
-            ->withCount('responses')
-            ->orderBy('closes_at')
-            ->take(7)
-            ->get()
-            ->map(fn (QvctCampaign $c) => [
-                'label' => $c->closes_at?->format('M Y') ?? '—',
-                'value' => $c->responses_count,
-            ]);
+        $hasReal = ! empty($cells);
 
-        // Team×dimension heatmap requires the PsychosocialRiskCartographyService
-        // computing grouped response scores. Returning empty until that is wired.
         return Inertia::render('dashboard/qvct/indicators/index', [
-            'dimensions' => $dimensions,
-            'matrix' => ['teams' => [], 'cells' => []],
-            'trend' => $trend,
+            'dimensions' => $hasReal ? $dimensions : [],
+            'matrix' => $hasReal ? ['teams' => $teams, 'cells' => $cells] : ['teams' => [], 'cells' => []],
+            'trend' => [],
         ]);
     }
 
     public function actionPlans(): Response
     {
         $plans = QvctActionPlan::query()
-            ->with(['items', 'createdBy:id,first_name,last_name'])
+            ->with(['createdBy:id,first_name,last_name'])
+            ->withCount([
+                'items as items_total',
+                'items as items_done' => fn ($q) => $q->where('status', 'done'),
+                'items as items_in_progress' => fn ($q) => $q->where('status', 'in_progress'),
+            ])
             ->orderByDesc('created_at')
             ->get();
 
@@ -274,30 +297,27 @@ class QvctController extends Controller
                 QvctActionPlanStatus::Published,
             ]))->count(),
             'closed' => $plans->filter(fn ($p) => $p->status === QvctActionPlanStatus::Closed)->count(),
-            'items_in_progress' => $plans->sum(fn ($p) => $p->items
-                ->filter(fn ($i) => $i->status === QvctActionPlanItemStatus::InProgress)
-                ->count()
-            ),
+            'items_in_progress' => $plans->sum('items_in_progress'),
         ];
 
-        $mapped = $plans->map(fn (QvctActionPlan $p) => [
+        $mapped = $plans->map(fn (QvctActionPlan $p): array => [
             'id' => $p->id,
             'title' => $p->title,
             'status' => $p->status->value,
             'status_label' => $p->status->label(),
-            'published_at' => $p->published_at?->toDateString(),
-            'closed_at' => $p->closed_at?->toDateString(),
+            'published_at' => $p->published_at?->toIso8601String(),
+            'closed_at' => $p->closed_at?->toIso8601String(),
             'owner' => $p->createdBy
-                ? trim("{$p->createdBy->first_name} {$p->createdBy->last_name}")
+                ? trim($p->createdBy->first_name.' '.$p->createdBy->last_name)
                 : '—',
-            'items_total' => $p->items->count(),
-            'items_done' => $p->items->filter(fn ($i) => $i->status === QvctActionPlanItemStatus::Done)->count(),
-            'items_in_progress' => $p->items->filter(fn ($i) => $i->status === QvctActionPlanItemStatus::InProgress)->count(),
-            'impact_target' => null,
+            'items_total' => (int) $p->items_total,
+            'items_done' => (int) $p->items_done,
+            'items_in_progress' => (int) $p->items_in_progress,
+            'impact_target' => (string) ($p->target_quarter ?? ''),
             'tone' => match ($p->status) {
                 QvctActionPlanStatus::Published => 'sage',
                 QvctActionPlanStatus::Draft => 'warning',
-                QvctActionPlanStatus::Closed => 'neutral',
+                QvctActionPlanStatus::Closed => 'brand',
             },
         ]);
 
@@ -307,29 +327,35 @@ class QvctController extends Controller
         ]);
     }
 
-    public function journal(JournalEntryService $service): Response
+    public function journal(Request $request): Response
     {
-        $user = request()->user();
-        $entries = $service->listForUser($user);
+        $entries = $this->journals->listForUser($request->user())
+            ->map(fn (QvctJournalEntry $e): array => [
+                'id' => $e->id,
+                'date' => $e->created_at?->format('Y-m-d H:i') ?? '',
+                'mood' => (int) $e->mood_score,
+                'content' => (string) $e->body,
+                'shared_with_rh' => (bool) $e->shared_with_rh,
+                'shared_at' => $e->shared_with_rh && $e->updated_at
+                    ? $e->updated_at->format('Y-m-d H:i')
+                    : null,
+            ])
+            ->all();
 
-        $mapped = $entries->map(fn ($e) => [
-            'id' => $e->id,
-            'date' => $e->created_at?->toDateString() ?? '—',
-            'mood' => $e->mood_score ?? 3,
-            'content' => $e->body,
-            'shared_with_rh' => $e->shared_with_rh,
-            'shared_at' => $e->shared_with_rh ? $e->updated_at?->toDateString() : null,
-        ]);
+        $sharedCount = QvctJournalEntry::query()
+            ->where('user_id', $request->user()->id)
+            ->where('shared_with_rh', true)
+            ->count();
 
         return Inertia::render('dashboard/qvct/journal/index', [
-            'entries' => $mapped,
-            'shared_count' => $entries->where('shared_with_rh', true)->count(),
+            'entries' => $entries,
+            'shared_count' => $sharedCount,
         ]);
     }
 
-    public function storeJournalEntry(StoreJournalEntryRequest $request, JournalEntryService $service): RedirectResponse
+    public function storeJournalEntry(StoreJournalEntryRequest $request): RedirectResponse
     {
-        $service->write(
+        $this->journals->write(
             $request->user(),
             $request->validated('body'),
             QvctMood::from($request->validated('mood')),
@@ -339,30 +365,42 @@ class QvctController extends Controller
         return back()->with('success', 'Entrée enregistrée.');
     }
 
-    public function exchanges(ExchangeRequestService $service): Response
+    public function exchanges(Request $request): Response
     {
-        $user = request()->user();
+        $me = $request->user();
 
-        $inbox = $service->incomingFor($user)->map(fn ($e) => [
-            'id' => $e->id,
-            'from' => trim(($e->requester?->first_name ?? '').' '.($e->requester?->last_name ?? '')),
-            'subject' => 'Demande d\'échange',
-            'reason' => $e->message ?? '—',
-            'status' => $e->status->value,
-            'status_label' => $e->status->label(),
-            'requested_at' => $e->created_at?->diffForHumans() ?? '—',
-            'scheduled_at' => $e->scheduled_at?->isoFormat('dddd D MMM, HH[h]mm') ?? null,
-        ]);
+        $inbox = $this->exchanges->incomingFor($me)
+            ->map(fn (QvctExchangeRequest $e): array => [
+                'id' => $e->id,
+                'from' => $e->requester
+                    ? trim($e->requester->first_name.' '.$e->requester->last_name)
+                    : '—',
+                'subject' => 'Demande d\'échange',
+                'reason' => mb_substr((string) $e->message, 0, 80),
+                'status' => $e->status instanceof \BackedEnum ? $e->status->value : (string) $e->status,
+                'status_label' => $e->status instanceof QvctExchangeStatus
+                    ? $e->status->label()
+                    : (string) $e->status,
+                'requested_at' => $e->created_at?->format('Y-m-d H:i') ?? '',
+                'scheduled_at' => $e->scheduled_at?->format('Y-m-d H:i'),
+            ])
+            ->all();
 
-        $outbox = $service->outgoingFor($user)->map(fn ($e) => [
-            'id' => $e->id,
-            'to' => $e->addressee_role?->label() ?? '—',
-            'subject' => 'Demande d\'échange',
-            'status' => $e->status->value,
-            'status_label' => $e->status->label(),
-            'requested_at' => $e->created_at?->diffForHumans() ?? '—',
-            'scheduled_at' => $e->scheduled_at?->isoFormat('dddd D MMM, HH[h]mm') ?? null,
-        ]);
+        $outbox = $this->exchanges->outgoingFor($me)
+            ->map(fn (QvctExchangeRequest $e): array => [
+                'id' => $e->id,
+                'to' => $e->addressee_role instanceof QvctExchangeAddresseeRole
+                    ? $e->addressee_role->label()
+                    : (string) $e->addressee_role,
+                'subject' => 'Demande d\'échange',
+                'status' => $e->status instanceof \BackedEnum ? $e->status->value : (string) $e->status,
+                'status_label' => $e->status instanceof QvctExchangeStatus
+                    ? $e->status->label()
+                    : (string) $e->status,
+                'requested_at' => $e->created_at?->format('Y-m-d H:i') ?? '',
+                'scheduled_at' => $e->scheduled_at?->format('Y-m-d H:i'),
+            ])
+            ->all();
 
         return Inertia::render('dashboard/qvct/exchanges/index', [
             'inbox' => $inbox,
@@ -370,9 +408,9 @@ class QvctController extends Controller
         ]);
     }
 
-    public function storeExchange(StoreExchangeRequestRequest $request, ExchangeRequestService $service): RedirectResponse
+    public function storeExchange(StoreExchangeRequestRequest $request): RedirectResponse
     {
-        $service->create(
+        $this->exchanges->create(
             $request->user(),
             QvctExchangeAddresseeRole::from($request->validated('addressee_role')),
             $request->validated('message'),

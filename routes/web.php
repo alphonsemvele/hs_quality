@@ -22,6 +22,7 @@ use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\PlannedTaskController;
+use App\Http\Controllers\QvctActionPlanController;
 use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
 use App\Http\Controllers\QvctQuestionnaireController;
@@ -306,13 +307,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/campaigns/{campaign}', [QvctCampaignController::class, 'show'])->name('campaigns.show');
         Route::post('/questionnaires/{questionnaire}/campaigns', [QvctCampaignController::class, 'launch'])->name('campaigns.launch');
         Route::post('/campaigns/{campaign}/close', [QvctCampaignController::class, 'close'])->name('campaigns.close');
+        Route::post('/campaigns/{campaign}/respond', [QvctCampaignController::class, 'submitResponse'])->name('campaigns.respond');
+
+        Route::get('/action-plans/create', [QvctActionPlanController::class, 'create'])->name('action-plans.create');
+        Route::post('/action-plans', [QvctActionPlanController::class, 'store'])->name('action-plans.store');
+        Route::get('/action-plans/{plan}', [QvctActionPlanController::class, 'show'])->name('action-plans.show');
+        Route::post('/action-plans/{plan}/items', [QvctActionPlanController::class, 'storeItem'])->name('action-plans.items.store');
+        Route::post('/action-plans/{plan}/publish', [QvctActionPlanController::class, 'publish'])->name('action-plans.publish');
+        Route::post('/action-plans/{plan}/close', [QvctActionPlanController::class, 'close'])->name('action-plans.close');
+        Route::post('/action-plan-items/{item}/status', [QvctActionPlanController::class, 'updateItemStatus'])->name('action-plans.items.update-status');
     });
 
     Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+    Route::get('/formations/plans/create', [FormationController::class, 'createPlan'])->name('formations.plans.create');
+    Route::get('/formations/plans/{plan}/edit', [FormationController::class, 'editPlan'])->name('formations.plans.edit');
+    Route::get('/formations/plans/{plan}/sessions/create', [FormationController::class, 'createSession'])->name('formations.sessions.create');
+    Route::post('/formations/plans/{plan}/sessions', [FormationController::class, 'storeSession'])->name('formations.sessions.store');
     Route::get('/formations/competencies/mine', [FormationController::class, 'myCompetencies'])->name('formations.competencies.mine');
-    Route::get('/formations/sessions/{id}', [FormationController::class, 'showSession'])->name('formations.sessions.show');
+    Route::get('/formations/sessions/{session}', [FormationController::class, 'showSession'])->name('formations.sessions.show');
+    Route::post('/formations/sessions/{session}/attendances', [FormationController::class, 'registerAttendance'])->name('formations.attendances.register');
+    Route::post('/formations/attendances/{attendance}/mark-attended', [FormationController::class, 'markAttended'])->name('formations.attendances.mark-attended');
+    Route::post('/formations/attendances/{attendance}/cancel', [FormationController::class, 'cancelAttendance'])->name('formations.attendances.cancel');
+    Route::post('/formations/habilitations', [FormationController::class, 'storeHabilitation'])->name('formations.habilitations.store');
+    Route::post('/formations/certifications', [FormationController::class, 'storeCertification'])->name('formations.certifications.store');
     Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
-    Route::put('/formations/{id}', [FormationController::class, 'update'])->name('formations.update');
+    Route::put('/formations/{plan}', [FormationController::class, 'update'])->name('formations.update');
 
     Route::get('/communication', [CommunicationController::class, 'index'])->name('communication.index');
     Route::post('/communication/groups/{group}/messages', [CommunicationController::class, 'sendMessage'])

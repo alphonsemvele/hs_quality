@@ -1,4 +1,5 @@
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, InlineHelp, PageHeader, PageToc, ProgressRing, RelativeTime } from '@/components/ui';
 import { Form, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -67,6 +68,14 @@ const GRAVITE_TONE: Record<string, 'neutral' | 'warning' | 'danger'> = {
 export default function AuditShow({ audit, gravites = [], can = { execute: false, finalize: false, cancel: false } }: Props) {
     const [showEcartForm, setShowEcartForm] = useState(false);
     const [showCancelForm, setShowCancelForm] = useState(false);
+    // All hooks must run before the early `!audit` return below — otherwise the
+    // hook count changes between renders (Rules of Hooks) and the page crashes
+    // to a blank screen, especially under the React Compiler.
+    const [pending, setPending] = useState<AuditPending>(null);
+
+    useTrackRecent(
+        audit ? { kind: 'audit', id: audit.id, label: audit.titre, href: `/audits/${audit.id}` } : null,
+    );
 
     if (!audit) {
         return (
@@ -86,7 +95,6 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
         );
     }
 
-    const [pending, setPending] = useState<AuditPending>(null);
     const finaliser = () => setPending({ kind: 'finaliser' });
     const deleteEcart = (ecartId: number) => setPending({ kind: 'deleteEcart', ecartId });
 
@@ -120,7 +128,18 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
         <DashboardLayout title={audit.titre} subtitle="">
             <PageHeader
                 title={audit.titre}
-                subtitle={`${audit.referentiel_label} · ${audit.date_audit ?? 'Non planifié'}`}
+                subtitle={
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                        {audit.referentiel_label} · {audit.date_audit ?? 'Non planifié'}
+                        <CopyButton
+                            value={audit.id}
+                            label="Copier l'identifiant de l'audit"
+                            size="xs"
+                        >
+                            ID
+                        </CopyButton>
+                    </span>
+                }
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: 'Audits', href: '/audits' },
@@ -176,8 +195,16 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                 </div>
             )}
 
+            <PageToc
+                items={[
+                    { id: 'audit-description', label: 'Description' },
+                    { id: 'audit-synthese', label: 'Synthèse' },
+                    { id: 'audit-ecarts', label: 'Écarts identifiés' },
+                ]}
+            />
+
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
+                <Card id="audit-description" className="scroll-mt-24 lg:col-span-2">
                     <CardHeader title="Description" />
                     <CardBody>
                         {audit.description ? (
@@ -188,21 +215,44 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                     </CardBody>
                 </Card>
 
-                <Card>
+                <Card id="audit-synthese" className="scroll-mt-24">
                     <CardHeader title="Synthèse" />
                     <CardBody>
+                        {audit.score !== null && (
+                            <div className="mb-4 flex items-center gap-4 border-b border-ink-100 pb-4 dark:border-ink-700/60">
+                                <ProgressRing
+                                    value={audit.score}
+                                    size="lg"
+                                    tone={audit.score >= 80 ? 'sage' : audit.score >= 60 ? 'brand' : audit.score >= 40 ? 'warning' : 'danger'}
+                                    label={`Score d'audit : ${audit.score} %`}
+                                />
+                                <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                        Score global
+                                    </p>
+                                    <p className="text-sm text-ink-700 dark:text-ink-200">
+                                        {audit.score >= 80
+                                            ? 'Conformité satisfaisante'
+                                            : audit.score >= 60
+                                                ? 'Conformité partielle — actions à prévoir'
+                                                : audit.score >= 40
+                                                    ? "Conformité faible — plan d'actions prioritaire"
+                                                    : 'Non-conformité majeure — action immédiate'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                         <dl className="space-y-3.5">
                             <Row label="Référentiel" value={audit.referentiel_label} />
                             <Row label="Date" value={audit.date_audit ?? '—'} />
                             <Row label="Auditeur" value={audit.auditeur ?? '—'} />
-                            <Row label="Score" value={audit.score !== null ? `${audit.score} %` : '—'} />
                             <Row label="Écarts" value={`${audit.ecarts.length}`} />
-                            {audit.finalized_at && <Row label="Finalisé" value={audit.finalized_at} />}
+                            {audit.finalized_at && <Row label="Finalisé" value={<RelativeTime value={audit.finalized_at} />} />}
                         </dl>
                     </CardBody>
                 </Card>
 
-                <Card className="lg:col-span-3">
+                <Card id="audit-ecarts" className="scroll-mt-24 lg:col-span-3">
                     <CardHeader
                         title="Écarts identifiés"
                         subtitle={`${audit.ecarts.length} écart(s)`}
@@ -232,7 +282,10 @@ export default function AuditShow({ audit, gravites = [], can = { execute: false
                                             </label>
                                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                 <label className="block">
-                                                    <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">Gravité *</span>
+                                                    <span className="text-xs font-semibold uppercase tracking-wider text-brand-700 dark:text-brand-300">
+                                                        Gravité *
+                                                        <InlineHelp>Mineur : impact limité, non-conformité documentaire. Majeur : impact sur la qualité du service. Critique : risque pour la sécurité du bénéficiaire — déclaration ARS sous 24h.</InlineHelp>
+                                                    </span>
                                                     <select name="gravite" required defaultValue="mineur" className="mt-1.5 h-10 w-full rounded-lg border border-brand-200 bg-white px-3 text-sm dark:border-brand-700/50 dark:bg-ink-800 dark:text-ink-100">
                                                         {gravites.map((g) => (
                                                             <option key={g.value} value={g.value}>{g.label}</option>

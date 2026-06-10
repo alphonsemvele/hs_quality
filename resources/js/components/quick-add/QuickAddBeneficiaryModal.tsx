@@ -1,4 +1,5 @@
 import { Button, FormField, Input, Modal, Select } from '@/components/ui';
+import { useModalSubmitShortcut } from '@/lib/use-modal-submit-shortcut';
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 
@@ -20,13 +21,15 @@ export function QuickAddBeneficiaryModal({ open, onClose }: Props) {
         if (!open) reset();
     }, [open, reset]);
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const submit = (e?: React.FormEvent | Event) => {
+        e?.preventDefault();
         post('/beneficiaries', {
             preserveScroll: true,
             onSuccess: () => onClose(),
         });
     };
+
+    useModalSubmitShortcut({ open, disabled: processing, onSubmit: () => submit() });
 
     return (
         <Modal
@@ -58,6 +61,7 @@ export function QuickAddBeneficiaryModal({ open, onClose }: Props) {
                     <FormField label="Prénom" htmlFor="qa-fn" required error={errors.first_name}>
                         <Input
                             id="qa-fn"
+                            autoFocus
                             value={data.first_name}
                             onChange={(e) => setData('first_name', e.target.value)}
                             required

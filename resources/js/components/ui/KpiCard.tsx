@@ -38,7 +38,7 @@ export function KpiCard({
         : value;
 
     return (
-        <div className="group rounded-2xl border border-ink-100 bg-white p-5 transition-all duration-200 hover:border-ink-200 hover:shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:border-ink-700/60 dark:bg-ink-800 dark:hover:border-ink-600 dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+        <div data-component="kpi" className="group rounded-2xl border border-ink-100 bg-white p-5 transition-all duration-200 hover:border-ink-200 hover:shadow-[0_4px_24px_rgba(15,23,42,0.06)] dark:border-ink-700/60 dark:bg-ink-800 dark:hover:border-ink-600 dark:hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
             <div className="flex items-center justify-between">
                 {icon && (
                     <div className={cn('flex size-10 items-center justify-center rounded-xl transition-colors', t.iconBg, t.iconText, t.darkIconBg, t.darkIconText)}>

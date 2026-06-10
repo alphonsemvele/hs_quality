@@ -34,7 +34,14 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
+        // User does not carry the BelongsToStructure global scope (it is the
+        // auth subject the tenant resolver reads), so the structure filter is
+        // applied explicitly here. Platform admins belong to no tenant — they
+        // must never surface in a structure's directory (cross-tenant leak)
+        // and clicking their row would 403 in UserPolicy::before anyway.
         $users = User::query()
+            ->where('structure_id', currentStructure()->id)
+            ->where('is_platform_admin', false)
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(25)

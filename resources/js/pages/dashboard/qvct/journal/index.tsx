@@ -35,6 +35,16 @@ const MOOD_LABEL: Record<JournalEntry['mood'], string> = {
     5: 'Très bon',
 };
 
+// Map the numeric MoodSelector value to the canonical backend enum value
+// (App\Enums\QvctMood) so StoreJournalEntryRequest validation passes.
+const MOOD_TO_ENUM: Record<MoodValue, string> = {
+    1: 'tres_negatif',
+    2: 'negatif',
+    3: 'neutre',
+    4: 'positif',
+    5: 'tres_positif',
+};
+
 export default function JournalIndex({ entries = [], shared_count = 0 }: Partial<Props>) {
     const [mood, setMood] = useState<MoodValue | null>(null);
     const [share, setShare] = useState(false);
@@ -65,16 +75,16 @@ export default function JournalIndex({ entries = [], shared_count = 0 }: Partial
                                                 Mon humeur
                                             </label>
                                             <MoodSelector value={mood} onChange={setMood} name="mood" disabled={processing} />
-                                            <input type="hidden" name="mood" value={mood ?? ''} />
+                                            <input type="hidden" name="mood" value={mood ? MOOD_TO_ENUM[mood] : ''} />
                                         </div>
 
                                         <div>
-                                            <label htmlFor="content" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                            <label htmlFor="body" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
                                                 Notes (optionnel)
                                             </label>
                                             <textarea
-                                                id="content"
-                                                name="content"
+                                                id="body"
+                                                name="body"
                                                 rows={5}
                                                 maxLength={3000}
                                                 disabled={processing}

@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, EmptyState, FormField, Input, Modal, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, ConfirmDialog, CopyButton, EmptyState, FormField, Input, Modal, PageHeader } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
@@ -40,7 +40,6 @@ export default function ApiTokens() {
     const [selectedAbilities, setSelectedAbilities] = useState<string[]>([]);
     const [revokeTarget, setRevokeTarget] = useState<Token | null>(null);
     const [createdToken, setCreatedToken] = useState<NewTokenResult | null>(null);
-    const [copied, setCopied] = useState(false);
 
     const toggleAbility = (a: string) => {
         setSelectedAbilities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
@@ -68,17 +67,6 @@ export default function ApiTokens() {
         if (!revokeTarget) return;
         setTokens((prev) => prev.filter((t) => t.id !== revokeTarget.id));
         setRevokeTarget(null);
-    };
-
-    const copyToken = async () => {
-        if (!createdToken) return;
-        try {
-            await navigator.clipboard.writeText(createdToken.plain_token);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2500);
-        } catch {
-            // ignore
-        }
     };
 
     return (
@@ -192,13 +180,13 @@ export default function ApiTokens() {
             {/* Show created token */}
             <Modal
                 open={createdToken !== null}
-                onClose={() => { setCreatedToken(null); setCopied(false); }}
+                onClose={() => setCreatedToken(null)}
                 title="Token créé"
                 size="md"
                 iconTone="sage"
                 icon={<KeyIcon />}
                 footer={
-                    <Button onClick={() => { setCreatedToken(null); setCopied(false); }}>
+                    <Button onClick={() => setCreatedToken(null)}>
                         J'ai sauvegardé mon token
                     </Button>
                 }
@@ -213,9 +201,12 @@ export default function ApiTokens() {
                             <code className="flex-1 select-all break-all font-mono text-xs text-ink-900 dark:text-white">
                                 {createdToken.plain_token}
                             </code>
-                            <Button variant="secondary" size="sm" onClick={copyToken}>
-                                {copied ? '✓ Copié' : 'Copier'}
-                            </Button>
+                            <CopyButton
+                                value={createdToken.plain_token}
+                                label="Copier le jeton d'API"
+                            >
+                                Copier
+                            </CopyButton>
                         </div>
                     </div>
                 )}
@@ -229,6 +220,7 @@ export default function ApiTokens() {
                 description="Les intégrations utilisant ce token cesseront immédiatement de fonctionner. Cette action est irréversible."
                 confirmLabel="Révoquer"
                 tone="danger"
+                requireTyped={revokeTarget?.name}
             />
         </DashboardLayout>
     );

@@ -1,4 +1,5 @@
 import { Badge, Button, Card, EmptyState, KpiCard, PageHeader, Pagination, Sheet, TBody, THead, Table, Td, Th, Tr } from '@/components/ui';
+import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -48,6 +49,18 @@ export default function AuditLogIndex({
     auditableTypes = [],
 }: Partial<Props>) {
     const [selected, setSelected] = useState<AuditRow | null>(null);
+    const [actorQuery, setActorQuery] = useState('');
+
+    const visibleRows = actorQuery.trim()
+        ? rows.filter((r) => {
+              const needle = actorQuery.trim().toLowerCase();
+              return (
+                  (r.user_name ?? '').toLowerCase().includes(needle) ||
+                  (r.user_email ?? '').toLowerCase().includes(needle) ||
+                  r.auditable_id.toLowerCase().includes(needle)
+              );
+          })
+        : rows;
 
     const applyFilter = (patch: Partial<Filters>) => {
         const next: Record<string, string> = {};
@@ -69,6 +82,31 @@ export default function AuditLogIndex({
                 title="Registre d'audit"
                 subtitle="Journal immuable de toutes les actions sur les données — exigence RGPD & ANSSI"
                 breadcrumb={[{ label: 'Tableau de bord', href: '/dashboard' }, { label: 'Audit log' }]}
+                actions={
+                    rows.length > 0 ? (
+                        <Button
+                            variant="secondary"
+                            onClick={() =>
+                                downloadCsv(
+                                    `audit-log-${new Date().toISOString().slice(0, 10)}.csv`,
+                                    rows,
+                                    [
+                                        { header: 'Horodatage', accessor: 'created_at' },
+                                        { header: 'Événement', accessor: 'event' },
+                                        { header: 'Ressource', accessor: 'auditable_type' },
+                                        { header: 'ID ressource', accessor: 'auditable_id' },
+                                        { header: 'Utilisateur', accessor: (r) => r.user_name ?? 'Système' },
+                                        { header: 'Email', accessor: 'user_email' },
+                                        { header: 'IP', accessor: 'ip_address' },
+                                        { header: 'Champs modifiés', accessor: (r) => r.changed_keys.join(' | ') },
+                                    ],
+                                )
+                            }
+                        >
+                            Exporter CSV
+                        </Button>
+                    ) : undefined
+                }
             />
 
             <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -152,7 +190,31 @@ export default function AuditLogIndex({
             </Card>
 
             <Card>
-                {rows.length > 0 ? (
+                {rows.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-3 border-b border-ink-100 p-4 dark:border-ink-700/60">
+                        <div className="relative flex-1 min-w-[16rem]">
+                            <input
+                                type="search"
+                                value={actorQuery}
+                                onChange={(e) => setActorQuery(e.target.value)}
+                                placeholder="Filtrer par utilisateur, e-mail ou ID de ressource…"
+                                className="block w-full rounded-lg border border-ink-200 bg-white pl-9 pr-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                            />
+                            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
+                                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                                </svg>
+                            </span>
+                        </div>
+                        {actorQuery && (
+                            <p className="text-xs text-ink-500 dark:text-ink-400">
+                                {visibleRows.length} sur {rows.length}
+                            </p>
+                        )}
+                    </div>
+                )}
+                {visibleRows.length > 0 ? (
                     <Table>
                         <THead>
                             <Tr>
@@ -173,7 +235,7 @@ export default function AuditLogIndex({
                             </Tr>
                         </THead>
                         <TBody>
-                            {rows.map((r) => (
+                            {visibleRows.map((r) => (
                                 <Tr key={r.id}>
                                     <Td>
                                         <span className="font-mono text-xs">{r.created_at_human ?? '—'}</span>

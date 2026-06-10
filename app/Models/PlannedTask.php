@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Concerns\BelongsToStructure;
 use App\Enums\TaskFrequency;
+use App\Scopes\StructureScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -72,7 +73,7 @@ class PlannedTask extends Model implements AuditableContract
         static::creating(function (self $task): void {
             if ($task->care_plan_id) {
                 $parentStructureId = CarePlan::query()
-                    ->withoutGlobalScope(\App\Scopes\StructureScope::class)
+                    ->withoutGlobalScope(StructureScope::class)
                     ->whereKey($task->care_plan_id)
                     ->value('structure_id');
 

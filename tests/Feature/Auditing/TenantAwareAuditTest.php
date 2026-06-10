@@ -8,7 +8,6 @@ use App\Models\User;
  * Verifies the TenantAwareAudit model auto-populates structure_id from the
  * current tenant context and that audit entries are queryable per tenant.
  */
-
 it('auto-populates structure_id from current tenant on create', function () {
     $structure = Structure::factory()->create();
     app()->instance('current_structure', $structure);

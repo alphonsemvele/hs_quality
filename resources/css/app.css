@@ -67,6 +67,95 @@
     --color-warning-700: #b45309;
 }
 
+/*
+ * Theme accent overrides (per-user preference, FE-only).
+ * Toggled by writing `data-accent="sage"` or `data-accent="mauve"` on
+ * the <html> element via `lib/theme-accent.ts`. Default (no attribute)
+ * keeps the steel-blue brand palette declared in `@theme`.
+ */
+html[data-accent='sage'] {
+    --color-brand-50: #f4faf6;
+    --color-brand-100: #e2f1e9;
+    --color-brand-200: #bfe0cc;
+    --color-brand-300: #95c9a9;
+    --color-brand-400: #62ab80;
+    --color-brand-500: #4a9568;
+    --color-brand-600: #3f9670;
+    --color-brand-700: #2f7b5c;
+    --color-brand-800: #245c45;
+    --color-brand-900: #163828;
+}
+
+html[data-accent='mauve'] {
+    --color-brand-50: #faf5ff;
+    --color-brand-100: #f3e8ff;
+    --color-brand-200: #e9d5ff;
+    --color-brand-300: #d8b4fe;
+    --color-brand-400: #c084fc;
+    --color-brand-500: #a855f7;
+    --color-brand-600: #9333ea;
+    --color-brand-700: #7e22ce;
+    --color-brand-800: #6b21a8;
+    --color-brand-900: #581c87;
+}
+
+/*
+ * Density overrides (per-user preference, FE-only).
+ * `data-density="compact"` shrinks padding inside cards, tables and KPI
+ * cards without changing the component code. Default (no attribute) is
+ * the comfortable spacing baked into the components.
+ */
+html[data-density='compact'] {
+    /* Cards: trim header/body padding and gap between stacked cards */
+    --card-padding-y: 0.625rem;
+    --card-padding-x: 1rem;
+}
+
+html[data-density='compact'] table th,
+html[data-density='compact'] table td {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+html[data-density='compact'] [class*='py-4']:not(button):not(.no-compact) {
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+}
+
+html[data-density='compact'] [class*='py-5']:not(button):not(.no-compact) {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+html[data-density='compact'] [class*='py-6']:not(button):not(.no-compact) {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+html[data-density='compact'] [class*='gap-5'] {
+    gap: 0.875rem !important;
+}
+
+html[data-density='compact'] [class*='gap-6'] {
+    gap: 1rem !important;
+}
+
+/* KPI cards: tighter padding + smaller value + drop the sub-line in compact mode */
+html[data-density='compact'] [data-component='kpi'] {
+    padding: 0.875rem !important;
+}
+
+html[data-density='compact'] [data-component='kpi'] p.text-2xl,
+html[data-density='compact'] [data-component='kpi'] p[class*='text-2xl'] {
+    font-size: 1.25rem !important;
+    line-height: 1.3 !important;
+}
+
+html[data-density='compact'] [data-component='kpi'] p:last-child[class*='text-xs'] {
+    /* Hide the optional sub line — the KPI label + value carry the meaning */
+    display: none !important;
+}
+
 @layer base {
     html {
         -webkit-font-smoothing: antialiased;
@@ -148,5 +237,117 @@
             transition-duration: 0.01ms !important;
             scroll-behavior: auto !important;
         }
+    }
+}
+
+/* ─── Print stylesheet ──────────────────────────────────────────────────────
+ *
+ * Goals: strip the dashboard chrome (sidebar, top bar, action buttons,
+ * modals), force a light high-contrast appearance regardless of dark mode,
+ * break pages at sensible logical units, and reveal underlying URLs after
+ * hyperlinks so paper copies keep the reference points.
+ *
+ * Targets `/beneficiaries/{id}/dossier`, `/care-plans/{id}` and
+ * `/audits/{id}` primarily — anything that benefits from being printed
+ * for a paper audit trail or filing.
+ */
+@media print {
+    html,
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .dark {
+        color-scheme: light;
+    }
+
+    aside,
+    nav,
+    header,
+    [role='navigation'],
+    [role='banner'],
+    .no-print,
+    button,
+    [role='dialog'],
+    .skip-link,
+    /* Sticky / floating UI chrome that has no place on paper */
+    .fixed,
+    [data-print='hide'] {
+        display: none !important;
+    }
+
+    /* Tab strips / filter pills should print as plain text labels */
+    [role='tablist'],
+    [role='radiogroup'] {
+        display: none !important;
+    }
+
+    /* Cards: flatten gradients / backgrounds so ink stays legible */
+    [class*='bg-gradient-'] {
+        background: transparent !important;
+    }
+
+    /* Charts / heatmaps can produce huge backgrounds — keep ink only */
+    svg {
+        max-width: 100% !important;
+    }
+
+    /* Anchor links to in-page sections don't need the URL suffix */
+    a[href^='/dashboard']::after {
+        content: '';
+    }
+
+    main {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .rounded-2xl,
+    .rounded-xl,
+    .rounded-lg {
+        border-radius: 0 !important;
+    }
+
+    *[class*='shadow-'] {
+        box-shadow: none !important;
+    }
+
+    *[class*='border-'] {
+        border-color: #000 !important;
+    }
+
+    thead {
+        position: static !important;
+        background: #f3f3f3 !important;
+    }
+
+    h1,
+    h2,
+    h3 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+
+    article,
+    section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    a[href^='http']::after,
+    a[href^='/']::after {
+        content: ' (' attr(href) ')';
+        font-size: 90%;
+        color: #555;
+    }
+    a[href^='#']::after {
+        content: '';
+    }
+
+    @page {
+        margin: 1.5cm 1.2cm;
+        size: A4 portrait;
     }
 }

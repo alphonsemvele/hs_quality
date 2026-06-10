@@ -1,14 +1,16 @@
-import { RpsHeatmap } from '@/components/qvct';
+import { RpsHeatmap, VerbatimCloud } from '@/components/qvct';
 import {
     Card,
     CardBody,
     CardHeader,
     ChartSeriesPoint,
     EmptyState,
+    InlineHelp,
     KpiCard,
     LineChart,
     PageHeader,
 } from '@/components/ui';
+import { cn } from '@/lib/utils';
 import DashboardLayout from '../../layout';
 
 interface Dimension {
@@ -32,21 +34,29 @@ interface Props {
     dimensions: Dimension[];
     matrix: Matrix;
     trend: ChartSeriesPoint[];
+    /** Free-text verbatim responses for the period (anonymous). Optional. */
+    verbatims?: string[];
 }
 
 export default function QvctIndicators({
     dimensions = [],
     matrix = { teams: [], cells: [] },
     trend = [],
+    verbatims = [],
 }: Partial<Props>) {
     const allScores = matrix.cells.map((c) => c.score);
     const overallAvg = allScores.length > 0 ? allScores.reduce((s, v) => s + v, 0) / allScores.length : null;
     const minScore = allScores.length > 0 ? Math.min(...allScores) : null;
     const lowestCell = matrix.cells.find((c) => c.score === minScore);
+    const ANON_THRESHOLD = 5;
     const dimAverages = dimensions.map((d) => {
         const ds = matrix.cells.filter((c) => c.dimension === d.key).map((c) => c.score);
-        const avg = ds.length > 0 ? ds.reduce((s, v) => s + v, 0) / ds.length : null;
-        return { ...d, avg };
+        const n = ds.length;
+        const masked = n > 0 && n < ANON_THRESHOLD;
+        const avg = n > 0 ? ds.reduce((s, v) => s + v, 0) / n : null;
+        const min = n > 0 ? Math.min(...ds) : null;
+        const max = n > 0 ? Math.max(...ds) : null;
+        return { ...d, avg, min, max, n, masked };
     });
 
     return (
@@ -115,24 +125,62 @@ export default function QvctIndicators({
                     </CardBody>
                 </Card>
 
-                {/* Dimension averages */}
+                {/* Dimension distribution (min/avg/max, anonymisé si n<5) */}
                 <Card className="lg:col-span-1">
-                    <CardHeader title="Moyenne par dimension" subtitle="Tous secteurs confondus" />
-                    <CardBody className="space-y-3">
+                    <CardHeader
+                        title="Distribution par dimension"
+                        subtitle={`Min · Moyenne · Max sur les équipes (n≥${ANON_THRESHOLD} requis)`}
+                    />
+                    <CardBody className="space-y-4">
                         {dimAverages.map((d) => (
                             <div key={d.key}>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="font-medium text-ink-700 dark:text-ink-200">{d.label}</span>
-                                    <span className="font-mono text-xs font-semibold tabular-nums text-ink-900 dark:text-white">
-                                        {d.avg !== null ? d.avg.toFixed(1) : '—'}
+                                    <span className="inline-flex items-center font-medium text-ink-700 dark:text-ink-200">
+                                        {d.label}
+                                        <InlineHelp>{d.description}</InlineHelp>
+                                    </span>
+                                    <span className="font-mono text-[11px] text-ink-500 dark:text-ink-400">
+                                        n = {d.n}
                                     </span>
                                 </div>
-                                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">
-                                    <div
-                                        className={barColor(d.avg ?? 0)}
-                                        style={{ width: `${((d.avg ?? 0) / 10) * 100}%`, height: '100%' }}
-                                    />
-                                </div>
+                                {d.masked ? (
+                                    <p className="mt-1 text-[11px] italic text-ink-500 dark:text-ink-400">
+                                        Données masquées (anonymat : moins de {ANON_THRESHOLD} équipes ont répondu).
+                                    </p>
+                                ) : d.avg === null ? (
+                                    <p className="mt-1 text-[11px] italic text-ink-500 dark:text-ink-400">
+                                        Aucune donnée pour cette dimension.
+                                    </p>
+                                ) : (
+                                    <>
+                                        <div className="relative mt-1.5 h-3 overflow-hidden rounded-full bg-ink-100 dark:bg-ink-700">
+                                            {d.min !== null && d.max !== null && (
+                                                <div
+                                                    className="absolute inset-y-0 rounded-full bg-ink-300/70 dark:bg-ink-600/80"
+                                                    style={{
+                                                        left: `${(d.min / 10) * 100}%`,
+                                                        width: `${((d.max - d.min) / 10) * 100}%`,
+                                                    }}
+                                                    aria-hidden
+                                                />
+                                            )}
+                                            {d.avg !== null && (
+                                                <div
+                                                    className={cn('absolute top-0 h-full w-0.5', avgMarkerColor(d.avg))}
+                                                    style={{ left: `calc(${(d.avg / 10) * 100}% - 1px)` }}
+                                                    aria-hidden
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-500 dark:text-ink-400">
+                                            <span>min {d.min?.toFixed(1) ?? '—'}</span>
+                                            <span className="font-semibold text-ink-700 dark:text-ink-200">
+                                                moy {d.avg.toFixed(1)}
+                                            </span>
+                                            <span>max {d.max?.toFixed(1) ?? '—'}</span>
+                                        </div>
+                                    </>
+                                )}
                                 <p className="mt-1 text-[11px] text-ink-500 dark:text-ink-400">{d.description}</p>
                             </div>
                         ))}
@@ -150,16 +198,30 @@ export default function QvctIndicators({
                         )}
                     </CardBody>
                 </Card>
+
+                {/* Verbatim cloud */}
+                <Card className="lg:col-span-3">
+                    <CardHeader
+                        title="Verbatims"
+                        subtitle="Mots les plus cités dans les réponses libres — agrégés et anonymisés"
+                    />
+                    <CardBody>
+                        <VerbatimCloud
+                            verbatims={verbatims}
+                            ariaLabel="Nuage de mots issus des verbatims QVCT"
+                        />
+                    </CardBody>
+                </Card>
             </div>
         </DashboardLayout>
     );
 }
 
-function barColor(score: number): string {
-    if (score < 5) return 'bg-danger-500 h-full rounded-full';
-    if (score < 6.5) return 'bg-warning-500 h-full rounded-full';
-    if (score < 8) return 'bg-brand-500 h-full rounded-full';
-    return 'bg-sage-500 h-full rounded-full';
+function avgMarkerColor(score: number): string {
+    if (score < 5) return 'bg-danger-500';
+    if (score < 6.5) return 'bg-warning-500';
+    if (score < 8) return 'bg-brand-500';
+    return 'bg-sage-500';
 }
 
 function HeartIcon() {

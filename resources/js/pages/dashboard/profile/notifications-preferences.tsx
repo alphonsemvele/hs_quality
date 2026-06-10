@@ -1,6 +1,8 @@
-import { Badge, Button, Card, CardBody, CardHeader, PageHeader } from '@/components/ui';
+import { DensityToggle } from '@/components/DensityToggle';
+import { ThemeAccentToggle } from '@/components/ThemeAccentToggle';
+import { Badge, Button, Card, CardBody, CardHeader, PageHeader, StickySaveBar } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import DashboardLayout from '../layout';
 
 interface ChannelPref {
@@ -80,10 +82,22 @@ const NOTIFS: NotifConfig[] = [
 ];
 
 export default function NotificationsPreferences() {
-    const [prefs, setPrefs] = useState<Record<string, ChannelPref>>(() =>
-        Object.fromEntries(NOTIFS.map((n) => [n.key, { ...n.defaults }])),
+    const initialPrefs = useMemo<Record<string, ChannelPref>>(
+        () => Object.fromEntries(NOTIFS.map((n) => [n.key, { ...n.defaults }])),
+        [],
     );
+    const [prefs, setPrefs] = useState<Record<string, ChannelPref>>(initialPrefs);
     const [saved, setSaved] = useState(false);
+
+    const dirtyCount = useMemo(() => {
+        let count = 0;
+        for (const key of Object.keys(initialPrefs)) {
+            const init = initialPrefs[key];
+            const cur = prefs[key];
+            if (init.inApp !== cur.inApp || init.email !== cur.email) count++;
+        }
+        return count;
+    }, [prefs, initialPrefs]);
 
     const toggle = (key: string, channel: keyof ChannelPref) => {
         const notif = NOTIFS.find((n) => n.key === key);
@@ -162,6 +176,27 @@ export default function NotificationsPreferences() {
                     </CardBody>
                 </Card>
 
+                <Card className="mt-5">
+                    <CardHeader title="Apparence" subtitle="Personnalisez l'interface — préférences locales (par appareil)" />
+                    <CardBody className="space-y-4">
+                        <div>
+                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                Couleur d'accent
+                            </p>
+                            <ThemeAccentToggle />
+                        </div>
+                        <div>
+                            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                                Densité d'affichage
+                            </p>
+                            <DensityToggle />
+                        </div>
+                        <p className="text-[11px] text-ink-500 dark:text-ink-400">
+                            Vos préférences sont mémorisées dans ce navigateur. Vous pouvez revenir aux réglages par défaut à tout moment.
+                        </p>
+                    </CardBody>
+                </Card>
+
                 <div className="mt-5 rounded-xl border border-brand-200 bg-brand-50/40 p-4 text-xs dark:border-brand-700/40 dark:bg-brand-900/20">
                     <p className="font-semibold text-brand-900 dark:text-brand-200">💡 À savoir</p>
                     <ul className="mt-1.5 space-y-1 text-brand-900/80 dark:text-brand-200/80">
@@ -171,6 +206,17 @@ export default function NotificationsPreferences() {
                     </ul>
                 </div>
             </div>
+
+            <StickySaveBar
+                visible={dirtyCount > 0}
+                onSave={save}
+                onCancel={() => setPrefs(initialPrefs)}
+                summary={
+                    saved
+                        ? '✓ Préférences enregistrées'
+                        : `${dirtyCount} modification${dirtyCount > 1 ? 's' : ''} non sauvegardée${dirtyCount > 1 ? 's' : ''}`
+                }
+            />
         </DashboardLayout>
     );
 }

@@ -105,6 +105,32 @@ it('coordinator can record 5-whys analysis', function () {
     expect($incident->fresh()->statut)->toBe(StatutIncident::PlanActions);
 });
 
+it('supports the show-page flow: declare → assign self → analyse', function () {
+    // Mirrors the "Démarrer l'analyse" button which assigns the incident to
+    // the acting coordinateur (declare → en_analyse) before the 5-whys form
+    // is posted. Regression guard for the assigned_to/coordinateur_id field
+    // mismatch that left the incident stuck in `declare` (HTTP 409).
+    $coord = actingAsRole('coordinateur');
+    $incident = Incident::factory()
+        ->forStructure($coord->structure)
+        ->declaredBy($coord)
+        ->create();
+
+    expect($incident->statut)->toBe(StatutIncident::Declare);
+
+    $this->post("/incidents/{$incident->id}/assign", [
+        'coordinateur_id' => $coord->id,
+    ])->assertRedirect();
+
+    expect($incident->fresh()->statut)->toBe(StatutIncident::EnAnalyse);
+
+    $this->post("/incidents/{$incident->id}/analyse", [
+        'analyse_causes' => 'Pourquoi 1: sol mouillé. Pourquoi 2: absence de signalisation.',
+    ])->assertRedirect();
+
+    expect($incident->fresh()->statut)->toBe(StatutIncident::PlanActions);
+});
+
 it('rejects analysis with fewer than 20 characters', function () {
     $coord = actingAsRole('coordinateur');
     $incident = Incident::factory()

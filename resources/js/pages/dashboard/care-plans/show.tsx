@@ -1,3 +1,4 @@
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { moveItem, useReorderable } from '@/lib/reorderable';
 import {
     Badge,
@@ -9,6 +10,7 @@ import {
     ConfirmDialog,
     EmptyState,
     PageHeader,
+    PageToc,
 } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -72,6 +74,13 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
         setTasks(initialTasks);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [signature]);
+
+    useTrackRecent({
+        kind: 'care-plan',
+        id: p.id,
+        label: `${p.title}${b.full_name ? ` · ${b.full_name}` : ''}`,
+        href: `/care-plans/${p.id}`,
+    });
 
     const persistOrder = (orderedIds: number[]) => {
         router.post(
@@ -212,8 +221,16 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                 </div>
             )}
 
+            <PageToc
+                items={[
+                    { id: 'plan-objectifs', label: 'Objectifs' },
+                    { id: 'plan-metadonnees', label: 'Métadonnées' },
+                    { id: 'plan-taches', label: 'Tâches planifiées' },
+                ]}
+            />
+
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                <Card className="lg:col-span-2">
+                <Card id="plan-objectifs" className="scroll-mt-24 lg:col-span-2">
                     <CardHeader title="Objectifs" subtitle="Donnée chiffrée — accès tracé" />
                     <CardBody>
                         {p.objectives ? (
@@ -224,7 +241,7 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                     </CardBody>
                 </Card>
 
-                <Card>
+                <Card id="plan-metadonnees" className="scroll-mt-24">
                     <CardHeader title="Métadonnées" />
                     <CardBody>
                         <dl className="space-y-3.5">
@@ -243,7 +260,7 @@ export default function CarePlanShow({ plan, beneficiary }: { plan: { data: Plan
                     </CardBody>
                 </Card>
 
-                <Card className="lg:col-span-3">
+                <Card id="plan-taches" className="scroll-mt-24 lg:col-span-3">
                     <CardHeader
                         title="Tâches planifiées"
                         subtitle={`${tasks.length} tâche(s)`}

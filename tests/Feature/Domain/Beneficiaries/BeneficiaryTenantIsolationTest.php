@@ -7,7 +7,6 @@ use App\Models\Structure;
  * Mandatory cross-tenant leak test for the Beneficiary domain model.
  * See: references/tenancy/testing.md
  */
-
 beforeEach(function () {
     if (app()->bound('current_structure')) {
         app()->forgetInstance('current_structure');

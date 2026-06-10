@@ -5,14 +5,20 @@ import {
     CardBody,
     CardHeader,
     ConfirmDialog,
+    CopyButton,
     EmptyState,
     IncidentGraviteBadge,
     IncidentStatusBadge,
     PageHeader,
+    RelativeTime,
+    WorkflowStepper,
+    type WorkflowStep,
 } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { useCan } from '@/lib/can';
-import { Form, Link, router } from '@inertiajs/react';
+import { Form, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import type { SharedData } from '@/types';
 import DashboardLayout from '../layout';
 
 interface ActionCorrective {
@@ -54,13 +60,22 @@ interface Incident {
 }
 
 export default function ShowIncident({ incident }: { incident: Incident }) {
+    const { auth } = usePage<SharedData>().props;
     const [showAnalysisForm, setShowAnalysisForm] = useState(false);
     const [showActionForm, setShowActionForm] = useState(false);
     const canAnalyze = useCan('incidents.analyze');
 
+    useTrackRecent({
+        kind: 'incident',
+        id: incident.id,
+        label: `${incident.categorie}${incident.beneficiaire ? ` · ${incident.beneficiaire.name}` : ''}`,
+        href: `/incidents/${incident.id}`,
+    });
+
     const [showCloseDialog, setShowCloseDialog] = useState(false);
 
-    const startAnalyse = () => router.post(`/incidents/${incident.id}/assign`, { assigned_to: incident.declarant.id });
+    const startAnalyse = () =>
+        router.post(`/incidents/${incident.id}/assign`, { coordinateur_id: auth.user.id }, { preserveScroll: true });
     const closeIncident = () => setShowCloseDialog(true);
     const confirmClose = () => {
         router.post(`/incidents/${incident.id}/close`, undefined, {
@@ -74,7 +89,18 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
         <DashboardLayout title={incident.categorie} subtitle="Détail incident">
             <PageHeader
                 title={incident.categorie}
-                subtitle={`Déclaré par ${incident.declarant.name} · ${incident.occurred_at}`}
+                subtitle={
+                    <span className="inline-flex flex-wrap items-center gap-1.5">
+                        Déclaré par {incident.declarant.name} · {incident.occurred_at}
+                        <CopyButton
+                            value={incident.id}
+                            label="Copier l'identifiant de l'incident"
+                            size="xs"
+                        >
+                            ID
+                        </CopyButton>
+                    </span>
+                }
                 breadcrumb={[
                     { label: 'Tableau de bord', href: '/dashboard' },
                     { label: 'Incidents', href: '/incidents' },
@@ -99,6 +125,16 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     </>
                 }
             />
+
+            <Card className="mb-5">
+                <CardBody>
+                    <WorkflowStepper
+                        steps={incidentWorkflowSteps(incident)}
+                        activeIndex={incidentActiveIndex(incident.statut)}
+                        tone={incident.statut === 'clos' ? 'sage' : 'brand'}
+                    />
+                </CardBody>
+            </Card>
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
@@ -134,12 +170,12 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
                     <CardHeader title="Synthèse" />
                     <CardBody>
                         <dl className="space-y-3.5">
-                            <Row label="Survenu le" value={incident.occurred_at} />
+                            <Row label="Survenu le" value={<RelativeTime value={incident.occurred_at} />} />
                             <Row label="Lieu" value={incident.lieu ?? '—'} />
                             <Row label="Bénéficiaire" value={incident.beneficiaire?.name ?? '—'} />
                             <Row label="Déclaré par" value={incident.declarant.name} />
                             <Row label="Assigné à" value={incident.assignee?.name ?? 'Non assigné'} />
-                            {incident.closed_at && <Row label="Clôturé le" value={incident.closed_at} />}
+                            {incident.closed_at && <Row label="Clôturé le" value={<RelativeTime value={incident.closed_at} />} />}
                         </dl>
                     </CardBody>
                 </Card>
@@ -325,6 +361,22 @@ export default function ShowIncident({ incident }: { incident: Incident }) {
             />
         </DashboardLayout>
     );
+}
+
+function incidentWorkflowSteps(incident: Incident): WorkflowStep[] {
+    return [
+        { key: 'declare', label: 'Déclaré', caption: incident.occurred_at },
+        { key: 'en_analyse', label: 'Analyse' },
+        { key: 'plan_actions', label: "Plan d'actions" },
+        { key: 'clos', label: 'Clos' },
+    ];
+}
+
+function incidentActiveIndex(statut: Incident['statut']): number {
+    const order: Array<Incident['statut']> = ['declare', 'en_analyse', 'plan_actions', 'clos'];
+    const idx = order.indexOf(statut);
+
+    return idx >= 0 ? idx : 0;
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {

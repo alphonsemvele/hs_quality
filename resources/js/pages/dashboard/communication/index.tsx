@@ -1,8 +1,9 @@
-import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, PageHeader, RichTextEditor } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, DropzoneUploader, EmptyState, EmptyStateRich, PageHeader, RichTextEditor } from '@/components/ui';
 import { useCan } from '@/lib/can';
 import { renderSafeMarkdown } from '@/lib/safe-markdown';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
-import { router, useForm } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../layout';
 
@@ -69,6 +70,8 @@ interface Props {
 
 type Tab = 'messages' | 'news' | 'docs' | 'qa';
 
+const COMMUNICATION_TABS: readonly Tab[] = ['messages', 'news', 'docs', 'qa'];
+
 export default function CommunicationIndex({
     channels = [],
     currentChannel = null,
@@ -76,7 +79,7 @@ export default function CommunicationIndex({
     documents = [],
     qaQuestions = [],
 }: Partial<Props>) {
-    const [tab, setTab] = useState<Tab>('messages');
+    const [tab, setTab] = useUrlTab<Tab>('messages', COMMUNICATION_TABS);
     const canPublish = useCan('communication.post');
 
     return (
@@ -156,6 +159,17 @@ function TabButton({
 }
 
 function MessagesTab({ channels, channel }: { channels: Channel[]; channel: CurrentChannel | null }) {
+    const [messageQuery, setMessageQuery] = useState('');
+    const filteredMessages = channel
+        ? channel.messages.filter((m) => {
+              const needle = messageQuery.trim().toLowerCase();
+              if (!needle) return true;
+              return (
+                  m.content.toLowerCase().includes(needle) ||
+                  m.author.toLowerCase().includes(needle)
+              );
+          })
+        : [];
     return (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-4">
             {/* Channels sidebar */}
@@ -208,10 +222,33 @@ function MessagesTab({ channels, channel }: { channels: Channel[]; channel: Curr
                                 </span>
                             }
                         />
+                        <div className="border-b border-ink-100 px-4 py-2 dark:border-ink-700/60">
+                            <div className="relative">
+                                <input
+                                    type="search"
+                                    value={messageQuery}
+                                    onChange={(e) => setMessageQuery(e.target.value)}
+                                    placeholder="Filtrer les messages du salon…"
+                                    className="block w-full rounded-lg border border-ink-200 bg-white pl-9 pr-3 py-1.5 text-xs text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                                />
+                                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
+                                    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
                         <CardBody className="flex h-[28rem] flex-col gap-3 overflow-y-auto p-4">
-                            {channel.messages.map((m) => (
-                                <MessageBubble key={m.id} m={m} />
-                            ))}
+                            {filteredMessages.length === 0 ? (
+                                <p className="my-auto text-center text-xs text-ink-400 dark:text-ink-500">
+                                    {messageQuery
+                                        ? 'Aucun message ne correspond.'
+                                        : 'Aucun message dans ce salon pour le moment.'}
+                                </p>
+                            ) : (
+                                filteredMessages.map((m) => <MessageBubble key={m.id} m={m} />)
+                            )}
                         </CardBody>
                         <div className="border-t border-ink-100 p-3 dark:border-ink-700/60">
                             <div className="flex items-center gap-2">
@@ -258,10 +295,14 @@ function MessageBubble({ m }: { m: ThreadMessage }) {
     );
 }
 
+type NewsSort = 'recent' | 'pinned' | 'all';
+
 function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean }) {
+    const [composing, setComposing] = useState(false);
+    const [sort, setSort] = useState<NewsSort>('pinned');
+
     const pinned = posts.filter((p) => p.pinned);
     const others = posts.filter((p) => !p.pinned);
-    const [composing, setComposing] = useState(false);
 
     return (
         <div className="space-y-5">
@@ -285,7 +326,36 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                 </Card>
             )}
 
-            {pinned.length > 0 && (
+            {posts.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                        Trier
+                    </span>
+                    {(
+                        [
+                            { key: 'pinned', label: `Épinglées d'abord (${pinned.length})` },
+                            { key: 'recent', label: `Récentes (${posts.length})` },
+                            { key: 'all', label: 'Tout afficher' },
+                        ] as const
+                    ).map((opt) => (
+                        <button
+                            key={opt.key}
+                            type="button"
+                            onClick={() => setSort(opt.key)}
+                            aria-pressed={sort === opt.key}
+                            className={
+                                sort === opt.key
+                                    ? 'inline-flex items-center rounded-full bg-ink-900 px-3 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-ink-900'
+                                    : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-[11px] font-medium text-ink-600 transition-colors hover:border-ink-400 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-300'
+                            }
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {sort === 'pinned' && pinned.length > 0 && (
                 <section>
                     <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
                         <PinIcon /> Épinglées
@@ -300,7 +370,7 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                 </section>
             )}
 
-            {others.length > 0 && (
+            {sort === 'pinned' && others.length > 0 && (
                 <section>
                     {pinned.length > 0 && (
                         <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
@@ -317,9 +387,57 @@ function NewsTab({ posts, canPublish }: { posts: NewsPost[]; canPublish: boolean
                 </section>
             )}
 
+            {sort === 'recent' && (
+                <section>
+                    <ul className="space-y-3">
+                        {posts.map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {sort === 'all' && (
+                <section>
+                    <ul className="space-y-3">
+                        {[...pinned, ...others].map((p) => (
+                            <li key={p.id}>
+                                <NewsCard post={p} />
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
             {posts.length === 0 && (
                 <Card>
-                    <EmptyState icon={<NewsIcon />} title="Aucune actualité" description="Le fil d'actualité affichera les publications de votre structure." />
+                    <EmptyStateRich
+                        icon={<NewsIcon />}
+                        title="Aucune actualité"
+                        description="Le fil d'actualité affichera les publications de votre structure. Démarrez la conversation avec un message à toute l'équipe."
+                        suggestions={[
+                            {
+                                icon: '📣',
+                                title: 'Annonce d\'équipe',
+                                description: 'Partagez les décisions clés, rappels procédures, retours d\'audit avec toute la structure.',
+                                tone: 'brand',
+                            },
+                            {
+                                icon: '🎉',
+                                title: 'Moments QVCT',
+                                description: 'Célébrez les réussites, anniversaires, certifications obtenues — renforcer le collectif.',
+                                tone: 'sage',
+                            },
+                            {
+                                icon: '📌',
+                                title: 'Note épinglée',
+                                description: 'Pour les informations qui doivent rester visibles : protocole COVID, journée portes ouvertes.',
+                                tone: 'warning',
+                            },
+                        ]}
+                    />
                 </Card>
             )}
         </div>

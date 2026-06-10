@@ -11,7 +11,6 @@ use Database\Seeders\RoleSeeder;
  * "intervenant sees NO beneficiaries" as a stub; now the reality is
  * "intervenant sees beneficiaries they have an ACTIVE assignment to".
  */
-
 beforeEach(function () {
     $this->seed(RoleSeeder::class);
 });

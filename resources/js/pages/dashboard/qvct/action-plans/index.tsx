@@ -74,7 +74,7 @@ export default function ActionPlansIndex({
                 ]}
                 actions={
                     canManage ? (
-                        <Link href="/qvct/action-plans">
+                        <Link href="/qvct/action-plans/create">
                             <Button leadingIcon={<PlusIcon />}>Nouveau plan</Button>
                         </Link>
                     ) : null
@@ -162,12 +162,13 @@ export default function ActionPlansIndex({
 function PlanRow({ plan }: { plan: Plan }) {
     const progress = plan.items_total > 0 ? (plan.items_done / plan.items_total) * 100 : 0;
     return (
-        <Card>
-            <CardBody>
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{plan.title}</h3>
+        <Link href={`/qvct/action-plans/${plan.id}`} className="block transition-shadow hover:shadow-md">
+            <Card>
+                <CardBody>
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{plan.title}</h3>
                             <Badge tone={STATUS_TONE[plan.status]} size="sm" dot>
                                 {plan.status_label}
                             </Badge>
@@ -209,8 +210,9 @@ function PlanRow({ plan }: { plan: Plan }) {
                         </p>
                     </div>
                 </div>
-            </CardBody>
-        </Card>
+                </CardBody>
+            </Card>
+        </Link>
     );
 }
 

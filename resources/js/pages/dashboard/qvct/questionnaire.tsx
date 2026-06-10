@@ -1,7 +1,7 @@
 import { AnonymityBanner, LikertScale, MoodSelector, type LikertValue, type MoodValue } from '@/components/qvct';
 import { Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { Form } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import DashboardLayout from '../layout';
 
@@ -106,52 +106,81 @@ export default function QvctQuestionnaire({ campagne, questions = [], threshold 
                     </div>
                 </div>
 
-                <Form action="/qvct" method="post" disableWhileProcessing>
-                    {({ processing }) => (
-                        <>
-                            <ul className="space-y-4">
-                                {questions.map((q, i) => (
-                                    <li key={q.id}>
-                                        <Card>
-                                            <CardHeader
-                                                title={`Q${i + 1}. ${q.label}`}
-                                                subtitle={q.help ?? undefined}
-                                                action={
-                                                    q.required && (
-                                                        <span className="rounded-full bg-danger-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
-                                                            Requis
-                                                        </span>
-                                                    )
-                                                }
-                                            />
-                                            <CardBody>
-                                                <QuestionField
-                                                    q={q}
-                                                    value={answers[q.id]}
-                                                    onChange={(v) => setAnswer(q.id, v)}
-                                                    disabled={processing}
-                                                />
-                                            </CardBody>
-                                        </Card>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <div className="flex flex-col items-stretch gap-3 rounded-2xl border border-ink-100 bg-ink-50/40 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-ink-700/60 dark:bg-ink-900/30">
-                                <p className="text-xs text-ink-600 dark:text-ink-300">
-                                    En envoyant ce questionnaire, vous confirmez que vos réponses sont anonymes et
-                                    qu'aucune donnée identifiante n'est conservée.
-                                </p>
-                                <Button type="submit" disabled={!canSubmit} loading={processing}>
-                                    Envoyer mes réponses
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </Form>
+                <QuestionnaireForm
+                    campaignId={campagne.id}
+                    questions={questions}
+                    answers={answers}
+                    onChange={setAnswer}
+                    canSubmit={canSubmit}
+                />
             </div>
         </DashboardLayout>
     );
+}
+
+function QuestionnaireForm({
+    campaignId,
+    questions,
+    answers,
+    onChange,
+    canSubmit,
+}: {
+    campaignId: string;
+    questions: Question[];
+    answers: Record<string, MoodValue | LikertValue | string | null>;
+    onChange: (id: string, v: MoodValue | LikertValue | string | null) => void;
+    canSubmit: boolean;
+}) {
+    const [processing, setProcessing] = useState(false);
+
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!canSubmit) return;
+        setProcessing(true);
+        // Strip unanswered (null/empty) entries so the `answers.*` required
+        // rule only sees the questions the user actually filled.
+        const cleanedAnswers = Object.fromEntries(Object.entries(answers).filter(([, v]) => v !== null && v !== ''));
+        router.post(
+            `/qvct/campaigns/${campaignId}/respond`,
+            { answers: cleanedAnswers },
+            { onFinish: () => setProcessing(false) },
+        );
+    };
+
+    return (
+        <form onSubmit={submit}>
+            <ul className="space-y-4">
+                {questions.map((q, i) => (
+                    <li key={q.id}>
+                        <Card>
+                            <CardHeader
+                                title={`Q${i + 1}. ${q.label}`}
+                                subtitle={q.help ?? undefined}
+                                action={
+                                    q.required && (
+                                        <span className="rounded-full bg-danger-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                                            Requis
+                                        </span>
+                                    )
+                                }
+                            />
+                            <CardBody>
+                                <QuestionField q={q} value={answers[q.id]} onChange={(v) => onChange(q.id, v)} disabled={processing} />
+                            </CardBody>
+                        </Card>
+                    </li>
+                ))}
+            </ul>
+
+            <div className="mt-4 flex flex-col items-stretch gap-3 rounded-2xl border border-ink-100 bg-ink-50/40 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-ink-700/60 dark:bg-ink-900/30">
+                <p className="text-xs text-ink-600 dark:text-ink-300">
+                    En envoyant ce questionnaire, vous confirmez que vos réponses sont anonymes et qu'aucune donnée identifiante n'est conservée.
+                </p>
+                <Button type="submit" disabled={!canSubmit || processing} loading={processing}>
+                    Envoyer mes réponses
+                </Button>
+            </div>
+        </form>);
 }
 
 function QuestionField({

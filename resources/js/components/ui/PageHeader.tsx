@@ -8,7 +8,7 @@ export function PageHeader({
     actions,
 }: {
     title: string;
-    subtitle?: string;
+    subtitle?: ReactNode;
     breadcrumb?: { label: string; href?: string }[];
     actions?: ReactNode;
 }) {

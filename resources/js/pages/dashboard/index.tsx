@@ -1,3 +1,4 @@
+import { RecentlyViewed } from '@/components/RecentlyViewed';
 import {
     Card,
     CardBody,
@@ -144,6 +145,9 @@ export default function Dashboard({
                     </Link>
                 )}
             </div>
+
+            {/* ──── Recently viewed (FE-only, localStorage) ──── */}
+            <RecentlyViewed />
 
             {/* ──── Critical alert banner ──── */}
             {incidentsGraves.length > 0 && canViewIncidents && (

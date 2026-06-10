@@ -14,7 +14,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Sentry\Laravel\Integration;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -59,4 +62,34 @@ return Application::configure(basePath: dirname(__DIR__))
         // Safe to call unconditionally — Sentry's integration is a no-op when
         // SENTRY_LARAVEL_DSN is empty.
         Integration::handles($exceptions);
+
+        // Branded Inertia error pages for the web app. The mobile/API surface
+        // (/api/*) and any JSON client keep machine-readable responses.
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request): Response {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return $response;
+            }
+
+            $status = $response->getStatusCode();
+
+            // CSRF / session expiry: bounce back with a friendly flash rather
+            // than a dead-end error screen.
+            if ($status === 419) {
+                return back()->with('error', 'Votre session a expiré, merci de réessayer.');
+            }
+
+            // Keep the framework's detailed debug page for server errors while
+            // developing locally so stack traces remain available.
+            if ($status >= 500 && app()->hasDebugModeEnabled()) {
+                return $response;
+            }
+
+            if (in_array($status, [403, 404, 429, 500, 503], true)) {
+                return Inertia::render('Error', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            return $response;
+        });
     })->create();

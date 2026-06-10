@@ -1,6 +1,28 @@
+import { RelativeTime } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+
+type LevelFilter = 'all' | 'info' | 'success' | 'warning' | 'danger';
+
+function dayBucketKey(iso: string | null): 'today' | 'yesterday' | 'older' {
+    if (!iso) return 'older';
+    const d = new Date(iso);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayStart = new Date(d);
+    dayStart.setHours(0, 0, 0, 0);
+    const diff = (today.getTime() - dayStart.getTime()) / (1000 * 60 * 60 * 24);
+    if (diff < 1) return 'today';
+    if (diff < 2) return 'yesterday';
+    return 'older';
+}
+
+const DAY_LABEL: Record<'today' | 'yesterday' | 'older', string> = {
+    today: "Aujourd'hui",
+    yesterday: 'Hier',
+    older: 'Plus tôt',
+};
 
 export interface NotificationItem {
     id: string;
@@ -30,17 +52,65 @@ export default function NotificationsCenter() {
         items: [],
     };
     const [open, setOpen] = useState(false);
+    const [filter, setFilter] = useState<LevelFilter>('all');
+    const [search, setSearch] = useState('');
+    const [highlightIndex, setHighlightIndex] = useState(-1);
     const containerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLDivElement>(null);
+
+    const filteredItems = useMemo(() => {
+        const byLevel = filter === 'all' ? payload.items : payload.items.filter((i) => i.level === filter);
+        const q = search.trim().toLowerCase();
+        if (!q) return byLevel;
+        return byLevel.filter((i) =>
+            i.title.toLowerCase().includes(q)
+            || (i.message?.toLowerCase().includes(q) ?? false),
+        );
+    }, [filter, payload.items, search]);
+
+    const grouped = useMemo(() => {
+        const buckets: Record<'today' | 'yesterday' | 'older', NotificationItem[]> = {
+            today: [],
+            yesterday: [],
+            older: [],
+        };
+        for (const item of filteredItems) {
+            buckets[dayBucketKey(item.created_at)].push(item);
+        }
+        return buckets;
+    }, [filteredItems]);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            setSearch('');
+            setHighlightIndex(-1);
+            return;
+        }
         const handleClick = (e: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setOpen(false);
             }
         };
         const handleKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'Escape') {
+                setOpen(false);
+                return;
+            }
+            const isTextInput = e.target instanceof HTMLInputElement && e.target.type === 'search';
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setHighlightIndex((i) => Math.min((i < 0 ? -1 : i) + 1, filteredItems.length - 1));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setHighlightIndex((i) => Math.max(i - 1, 0));
+            } else if (e.key === 'Enter' && !isTextInput && highlightIndex >= 0) {
+                const target = filteredItems[highlightIndex];
+                if (target?.href) {
+                    e.preventDefault();
+                    setOpen(false);
+                    router.visit(target.href);
+                }
+            }
         };
         document.addEventListener('mousedown', handleClick);
         document.addEventListener('keydown', handleKey);
@@ -48,7 +118,23 @@ export default function NotificationsCenter() {
             document.removeEventListener('mousedown', handleClick);
             document.removeEventListener('keydown', handleKey);
         };
-    }, [open]);
+    }, [open, filteredItems, highlightIndex]);
+
+    // Keep the highlighted row visible inside the scroll container.
+    useEffect(() => {
+        if (!open || highlightIndex < 0 || !listRef.current) return;
+        const target = listRef.current.querySelector<HTMLElement>(
+            `[data-notif-index='${highlightIndex}']`,
+        );
+        if (target) {
+            target.scrollIntoView({ block: 'nearest' });
+        }
+    }, [highlightIndex, open]);
+
+    // Reset highlight when the visible list changes (filter / search).
+    useEffect(() => {
+        setHighlightIndex(-1);
+    }, [filter, search]);
 
     const markOne = (id: string) => {
         router.post(`/notifications/${id}/read`, undefined, {
@@ -113,21 +199,89 @@ export default function NotificationsCenter() {
                         )}
                     </div>
 
-                    <ul className="max-h-[26rem] overflow-y-auto divide-y divide-ink-100 dark:divide-ink-700/60">
-                        {payload.items.length === 0 ? (
-                            <li className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
+                    {payload.items.length > 5 && (
+                        <div className="border-b border-ink-100 bg-ink-50/40 px-3 py-2 dark:border-ink-700/60 dark:bg-ink-900/30">
+                            <input
+                                type="search"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Filtrer les notifications…"
+                                aria-label="Filtrer les notifications par texte"
+                                className="h-8 w-full rounded-md border border-ink-200 bg-white px-2.5 text-xs text-ink-900 placeholder:text-ink-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400 dark:border-ink-700 dark:bg-ink-800 dark:text-white dark:placeholder:text-ink-500"
+                            />
+                        </div>
+                    )}
+
+                    {payload.items.length > 0 && (
+                        <div className="flex gap-1 overflow-x-auto border-b border-ink-100 bg-ink-50/40 px-3 py-2 dark:border-ink-700/60 dark:bg-ink-900/30">
+                            {(['all', 'info', 'success', 'warning', 'danger'] as const).map((value) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => setFilter(value)}
+                                    aria-pressed={filter === value}
+                                    className={cn(
+                                        'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider transition-colors',
+                                        filter === value
+                                            ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-900'
+                                            : 'text-ink-500 hover:bg-white hover:text-ink-700 dark:text-ink-400 dark:hover:bg-ink-700 dark:hover:text-ink-200',
+                                    )}
+                                >
+                                    {value === 'all' ? 'Tout' : value === 'info' ? 'Info' : value === 'success' ? 'Succès' : value === 'warning' ? 'Vigilance' : 'Urgent'}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div ref={listRef} className="max-h-[26rem] overflow-y-auto">
+                        {filteredItems.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
                                 <span className="flex size-10 items-center justify-center rounded-full bg-ink-100 text-ink-400 dark:bg-ink-700 dark:text-ink-500">
                                     <BellIcon />
                                 </span>
-                                <p className="text-sm font-medium text-ink-700 dark:text-ink-200">Aucune notification</p>
-                                <p className="text-xs text-ink-500 dark:text-ink-400">Les alertes ARS, RPS et expirations apparaîtront ici.</p>
-                            </li>
+                                <p className="text-sm font-medium text-ink-700 dark:text-ink-200">
+                                    {payload.items.length === 0
+                                        ? 'Aucune notification'
+                                        : search.trim()
+                                            ? 'Aucun résultat pour cette recherche'
+                                            : 'Aucune notification dans ce filtre'}
+                                </p>
+                                <p className="text-xs text-ink-500 dark:text-ink-400">
+                                    {payload.items.length === 0
+                                        ? 'Les alertes ARS, RPS et expirations apparaîtront ici.'
+                                        : search.trim()
+                                            ? 'Essayez d\'élargir votre recherche ou de changer de filtre.'
+                                            : 'Essayez « Tout ».'}
+                                </p>
+                            </div>
                         ) : (
-                            payload.items.map((n) => (
-                                <NotificationRow key={n.id} item={n} onRead={() => markOne(n.id)} onClose={() => setOpen(false)} />
-                            ))
+                            (['today', 'yesterday', 'older'] as const)
+                                .filter((b) => grouped[b].length > 0)
+                                .map((bucket) => (
+                                    <div key={bucket}>
+                                        <p className="sticky top-0 z-10 bg-white/95 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-500 backdrop-blur dark:bg-ink-800/95 dark:text-ink-400">
+                                            {DAY_LABEL[bucket]} · {grouped[bucket].length}
+                                        </p>
+                                        <ul className="divide-y divide-ink-100 dark:divide-ink-700/60">
+                                            {grouped[bucket].map((n) => {
+                                                const flatIndex = filteredItems.indexOf(n);
+                                                return (
+                                                    <NotificationRow
+                                                        key={n.id}
+                                                        item={n}
+                                                        flatIndex={flatIndex}
+                                                        highlighted={flatIndex === highlightIndex}
+                                                        onRead={() => markOne(n.id)}
+                                                        onClose={() => setOpen(false)}
+                                                        onHover={() => setHighlightIndex(flatIndex)}
+                                                    />
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                ))
                         )}
-                    </ul>
+                    </div>
 
                     <div className="border-t border-ink-100 bg-ink-50/40 px-4 py-2.5 text-center dark:border-ink-700/60 dark:bg-ink-900/30">
                         <Link
@@ -146,12 +300,18 @@ export default function NotificationsCenter() {
 
 function NotificationRow({
     item,
+    flatIndex,
+    highlighted,
     onRead,
     onClose,
+    onHover,
 }: {
     item: NotificationItem;
+    flatIndex: number;
+    highlighted: boolean;
     onRead: () => void;
     onClose: () => void;
+    onHover: () => void;
 }) {
     const unread = !item.read_at;
     const Wrapper = item.href ? Link : 'div';
@@ -162,13 +322,14 @@ function NotificationRow({
     };
 
     return (
-        <li>
+        <li data-notif-index={flatIndex} onMouseEnter={onHover}>
             <Wrapper
                 {...(wrapperProps as { href: string; onClick: () => void })}
                 onClick={item.href ? () => { handleClick(); onClose(); } : handleClick}
                 className={cn(
                     'flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-ink-50 dark:hover:bg-ink-700/40',
                     unread && 'bg-brand-50/30 dark:bg-brand-900/10',
+                    highlighted && 'bg-brand-50 ring-1 ring-inset ring-brand-300 dark:bg-brand-900/30 dark:ring-brand-500/40',
                 )}
             >
                 <LevelDot level={item.level} />
@@ -187,7 +348,7 @@ function NotificationRow({
                     {item.message && (
                         <p className="mt-0.5 line-clamp-2 text-xs text-ink-500 dark:text-ink-400">{item.message}</p>
                     )}
-                    <p className="mt-1 text-[11px] font-mono text-ink-400 dark:text-ink-500">{formatTime(item.created_at)}</p>
+                    <RelativeTime value={item.created_at} className="mt-1 block font-mono text-[11px] text-ink-400 dark:text-ink-500" />
                 </div>
             </Wrapper>
         </li>
@@ -223,18 +384,6 @@ function LevelDot({ level }: { level: NotificationItem['level'] }) {
             {c.icon}
         </span>
     );
-}
-
-function formatTime(iso: string | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const now = new Date();
-    const diff = (now.getTime() - d.getTime()) / 1000;
-    if (diff < 60) return 'à l\'instant';
-    if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
-    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
-    if (diff < 604800) return `il y a ${Math.floor(diff / 86400)} j`;
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 }
 
 function BellIcon() {

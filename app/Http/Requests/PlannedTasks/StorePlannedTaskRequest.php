@@ -5,6 +5,8 @@ namespace App\Http\Requests\PlannedTasks;
 use App\Enums\TaskFrequency;
 use App\Http\Requests\BaseFormRequest;
 use App\Models\CarePlan;
+use App\Support\PlannedTaskFrequencyValidator;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class StorePlannedTaskRequest extends BaseFormRequest
@@ -28,6 +30,18 @@ class StorePlannedTaskRequest extends BaseFormRequest
             'task_order' => ['nullable', 'integer', 'min:0'],
             'mandatory' => ['nullable', 'boolean'],
         ];
+    }
+
+    /**
+     * frequency_details schema is conditional on `frequency`. The validator
+     * lives in PlannedTaskFrequencyValidator so the same rules apply to
+     * the Update request.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $v): void {
+            PlannedTaskFrequencyValidator::validate($v, $this->all());
+        });
     }
 
     public function messages(): array

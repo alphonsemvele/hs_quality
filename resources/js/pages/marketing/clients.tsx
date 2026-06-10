@@ -1,5 +1,6 @@
 import { MarketingPage } from '@/components/marketing/MarketingShell';
 import { Head, Link } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 // ────────────────────────────────────────────────────────────────────────────
 //  Data — testimonials & case-study highlights
@@ -157,6 +158,14 @@ export default function Clients() {
                     name="description"
                     content="47 structures médico-sociales d'aide et de soins à domicile témoignent : SAAD, SSIAD, SPASAD, CCAS — comment HS Quality a transformé leur pilotage qualité et leur QVCT."
                 />
+                <meta property="og:title" content="Témoignages clients · HS Quality" />
+                <meta
+                    property="og:description"
+                    content="Retours d'expérience de 47 structures pilotes : SAAD, SSIAD, SPASAD, CCAS. Mesures concrètes d'impact sur la qualité et la QVCT."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="fr_FR" />
+                <meta name="twitter:card" content="summary_large_image" />
             </Head>
 
             {/* ───── Hero ───── */}
@@ -190,7 +199,7 @@ export default function Clients() {
                 </div>
             </section>
 
-            {/* ───── Testimonials grid ───── */}
+            {/* ───── Testimonials carousel + grid ───── */}
             <section className="px-5 py-20 sm:px-8 sm:py-24">
                 <div className="mx-auto max-w-6xl">
                     <div className="mx-auto max-w-2xl text-center">
@@ -203,7 +212,13 @@ export default function Clients() {
                         </p>
                     </div>
 
-                    <div className="mt-12 grid gap-6 lg:grid-cols-2">
+                    <TestimonialsCarousel testimonials={TESTIMONIALS} />
+
+                    <h3 className="mt-16 text-center text-sm font-semibold uppercase tracking-wider text-ink-500">
+                        Tous les témoignages
+                    </h3>
+
+                    <div className="mt-6 grid gap-6 lg:grid-cols-2">
                         {TESTIMONIALS.map((t) => {
                             const tone = TONE_CLASSES[t.tone];
                             return (
@@ -301,6 +316,121 @@ export default function Clients() {
                 </div>
             </section>
         </MarketingPage>
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+//  Carousel
+// ────────────────────────────────────────────────────────────────────────────
+
+function TestimonialsCarousel({ testimonials }: { testimonials: Testimonial[] }) {
+    const [index, setIndex] = useState(0);
+    const [paused, setPaused] = useState(false);
+
+    useEffect(() => {
+        if (paused || testimonials.length <= 1) return;
+        const id = setInterval(() => {
+            setIndex((i) => (i + 1) % testimonials.length);
+        }, 6000);
+        return () => clearInterval(id);
+    }, [paused, testimonials.length]);
+
+    const active = testimonials[index];
+    const tone = TONE_CLASSES[active.tone];
+
+    return (
+        <div
+            className="mx-auto mt-12 max-w-3xl"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onFocus={() => setPaused(true)}
+            onBlur={() => setPaused(false)}
+        >
+            <article
+                key={active.author}
+                className={'fade-in flex flex-col rounded-2xl border border-ink-100 p-7 shadow-sm ' + tone.bg + ' ' + tone.ring}
+                aria-live="polite"
+            >
+                <span
+                    className={
+                        'inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ' +
+                        tone.badge
+                    }
+                >
+                    <span className="size-1.5 rounded-full bg-current" />
+                    {active.badge}
+                </span>
+
+                <blockquote className="mt-5 text-lg leading-relaxed text-ink-800 sm:text-xl">
+                    <QuoteIcon />
+                    <p className="mt-1.5">« {active.quote} »</p>
+                </blockquote>
+
+                <div className="mt-6 grid grid-cols-3 gap-3 border-t border-ink-100 pt-5">
+                    {active.metrics.map((m) => (
+                        <div key={m.label} className="text-center">
+                            <p className={'font-mono text-xl font-bold tracking-tight ' + tone.metricLabel}>{m.value}</p>
+                            <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-500">
+                                {m.label}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-6 flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-white text-sm font-bold text-ink-700 shadow-sm">
+                        {initials(active.author)}
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-ink-900">{active.author}</p>
+                        <p className="text-xs text-ink-500">
+                            {active.role} · {active.organization}
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <div className="mt-5 flex items-center justify-center gap-2">
+                <button
+                    type="button"
+                    onClick={() => setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)}
+                    aria-label="Témoignage précédent"
+                    className="rounded-full border border-ink-200 bg-white p-2 text-ink-600 transition-colors hover:border-ink-400 hover:text-ink-900"
+                >
+                    <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                    {testimonials.map((_, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => setIndex(i)}
+                            aria-label={`Aller au témoignage ${i + 1}`}
+                            aria-current={i === index ? 'true' : undefined}
+                            className={
+                                i === index
+                                    ? 'h-2 w-6 rounded-full bg-brand-600 transition-all'
+                                    : 'size-2 rounded-full bg-ink-300 transition-all hover:bg-ink-500'
+                            }
+                        />
+                    ))}
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => setIndex((i) => (i + 1) % testimonials.length)}
+                    aria-label="Témoignage suivant"
+                    className="rounded-full border border-ink-200 bg-white p-2 text-ink-600 transition-colors hover:border-ink-400 hover:text-ink-900"
+                >
+                    <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </div>
+        </div>
     );
 }
 

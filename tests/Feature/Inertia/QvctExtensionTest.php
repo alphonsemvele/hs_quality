@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\QvctMood;
 use App\Enums\QvctWeakSignalType;
 use App\Models\QvctWeakSignal;
 use Database\Seeders\RoleSeeder;
@@ -71,8 +72,8 @@ it('accepts a journal entry submission and redirects', function () {
     // StoreJournalEntryRequest validates 'body' (not 'content') and expects
     // a QvctMood string value (not an integer).
     $response = $this->post('/qvct/journal', [
+        'mood' => QvctMood::Positif->value,
         'body' => 'Bonne journée — tournée bien menée.',
-        'mood' => 'positif',
         'shared_with_rh' => false,
     ]);
 

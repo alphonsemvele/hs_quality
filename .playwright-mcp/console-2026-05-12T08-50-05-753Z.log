@@ -1,2 +1,0 @@
-[     123ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:8765/beneficiaries/019dfc2d-24c9-72a2-bdb3-365d281e0c2d/care-plans/create:0
-[     127ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://127.0.0.1:8765/_boost/browser-logs @ http://127.0.0.1:8765/beneficiaries/019dfc2d-24c9-72a2-bdb3-365d281e0c2d/care-plans/create:23

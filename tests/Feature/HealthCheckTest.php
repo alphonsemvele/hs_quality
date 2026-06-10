@@ -4,7 +4,6 @@
  * Health endpoints for ALB/ECS probes. /live = process alive,
  * /ready = dependencies reachable. Unauthenticated, no tenant.
  */
-
 it('liveness endpoint returns ok', function () {
     $response = $this->getJson('/health/live');
 

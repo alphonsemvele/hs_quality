@@ -9,6 +9,7 @@ import {
     InterventionStatusBadge,
     PageHeader,
 } from '@/components/ui';
+import { useTrackRecent } from '@/components/RecentlyViewed';
 import { useCan } from '@/lib/can';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -70,6 +71,13 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
     const canAct = useCan('interventions.update');
 
     const [pending, setPending] = useState<PendingAction>(null);
+
+    useTrackRecent({
+        kind: 'intervention',
+        id: intervention.id,
+        label: `${intervention.beneficiaire.name}${intervention.planned_date ? ` · ${intervention.planned_date}` : ''}`,
+        href: `/interventions/${intervention.id}`,
+    });
 
     const checkIn = () => router.post(`/interventions/${intervention.id}/checkin`);
     const checkOut = () => setPending({ kind: 'checkout' });
@@ -228,8 +236,12 @@ export default function ShowIntervention({ intervention }: { intervention: Inter
                                 encType="multipart/form-data"
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    const formData = new FormData(e.currentTarget);
-                                    router.post(`/interventions/${intervention.id}/photos`, Object.fromEntries(formData));
+                                    const formEl = e.currentTarget;
+                                    router.post(`/interventions/${intervention.id}/photos`, new FormData(formEl), {
+                                        forceFormData: true,
+                                        preserveScroll: true,
+                                        onSuccess: () => formEl.reset(),
+                                    });
                                 }}
                                 className="mb-4 flex items-center gap-3 rounded-xl border border-dashed border-ink-200 bg-ink-50/50 p-4 dark:border-ink-600 dark:bg-ink-800/50"
                             >

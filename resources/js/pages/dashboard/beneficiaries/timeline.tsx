@@ -1,5 +1,5 @@
 import { Badge, Card, EmptyState, KpiCard, PageHeader } from '@/components/ui';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import DashboardLayout from '../layout';
 
@@ -35,6 +35,11 @@ interface Props {
         incidents: number;
         care_plans: number;
         assignments: number;
+    };
+    range: {
+        months: number;
+        unbounded: boolean;
+        since: string | null;
     };
 }
 
@@ -85,14 +90,38 @@ function unwrap<T>(maybeWrapped: { data: T } | T): T {
     return maybeWrapped as T;
 }
 
-export default function BeneficiaryTimeline({ beneficiary, events, totals }: Props) {
+export default function BeneficiaryTimeline({ beneficiary, events, totals, range }: Props) {
     const b = unwrap(beneficiary);
     const [filter, setFilter] = useState<EventKind | 'all'>('all');
+    const [search, setSearch] = useState('');
 
-    const filtered = useMemo(
-        () => (filter === 'all' ? events : events.filter((e) => e.kind === filter)),
-        [filter, events],
-    );
+    const RANGE_OPTIONS: Array<{ months?: number; all?: boolean; label: string }> = [
+        { months: 3, label: '3 mois' },
+        { months: 6, label: '6 mois' },
+        { months: 12, label: '12 mois' },
+        { months: 24, label: '24 mois' },
+        { all: true, label: 'Tout l\'historique' },
+    ];
+
+    const setRange = (opt: { months?: number; all?: boolean }) => {
+        const url = `/beneficiaries/${b.id}/timeline?` + (opt.all ? 'all=1' : `months=${opt.months}`);
+        router.visit(url, { preserveScroll: true });
+    };
+
+    const isActiveRange = (opt: { months?: number; all?: boolean }): boolean =>
+        opt.all ? range.unbounded : !range.unbounded && opt.months === range.months;
+
+    const filtered = useMemo(() => {
+        const needle = search.trim().toLowerCase();
+        return events.filter((e) => {
+            if (filter !== 'all' && e.kind !== filter) return false;
+            if (!needle) return true;
+            return (
+                e.title.toLowerCase().includes(needle) ||
+                e.description.toLowerCase().includes(needle)
+            );
+        });
+    }, [filter, events, search]);
 
     const grouped = useMemo(() => {
         const map = new Map<string, TimelineEvent[]>();
@@ -163,8 +192,51 @@ export default function BeneficiaryTimeline({ beneficiary, events, totals }: Pro
                 />
             </div>
 
-            {/* Filter chips */}
+            {/* Range picker */}
             <Card className="mt-6">
+                <div className="flex flex-wrap items-center gap-2 border-b border-ink-100 p-4 dark:border-ink-700/60">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                        Période
+                    </span>
+                    {RANGE_OPTIONS.map((opt) => {
+                        const active = isActiveRange(opt);
+                        return (
+                            <button
+                                key={opt.label}
+                                type="button"
+                                onClick={() => setRange(opt)}
+                                className={
+                                    active
+                                        ? 'inline-flex items-center rounded-full bg-ink-900 px-3 py-1 text-xs font-semibold text-white transition-colors dark:bg-white dark:text-ink-900'
+                                        : 'inline-flex items-center rounded-full border border-ink-200 bg-white px-3 py-1 text-xs font-medium text-ink-700 transition-colors hover:border-ink-400 hover:bg-ink-50 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-200'
+                                }
+                            >
+                                {opt.label}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Search */}
+                <div className="border-b border-ink-100 p-4 dark:border-ink-700/60">
+                    <div className="relative">
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Rechercher dans les événements (titre, description)…"
+                            className="block w-full rounded-lg border border-ink-200 bg-white pl-9 pr-3 py-2 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-ink-700 dark:bg-ink-800 dark:text-white"
+                        />
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">
+                            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                <circle cx="11" cy="11" r="8" />
+                                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+
+                {/* Filter chips */}
                 <div className="flex flex-wrap items-center gap-2 p-4">
                     {FILTERS.map((opt) => {
                         const count = opt.key === 'all' ? events.length : events.filter((e) => e.kind === opt.key).length;

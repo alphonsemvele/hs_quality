@@ -85,9 +85,13 @@ export default function UsersIndex({ users }: Props) {
                                         </div>
                                     </Td>
                                     <Td>
-                                        <Badge tone="brand" size="sm">
-                                            {u.type_label || u.type}
-                                        </Badge>
+                                        {u.type_label || u.type ? (
+                                            <Badge tone="brand" size="sm">
+                                                {u.type_label || u.type}
+                                            </Badge>
+                                        ) : (
+                                            <span className="text-ink-400 dark:text-ink-500">—</span>
+                                        )}
                                     </Td>
                                     <Td className="font-mono text-xs text-ink-500 dark:text-ink-400">{u.email}</Td>
                                     <Td>

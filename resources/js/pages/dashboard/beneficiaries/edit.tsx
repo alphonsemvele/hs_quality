@@ -22,7 +22,15 @@ interface Beneficiary {
     emergency_contact_relationship: string | null;
 }
 
-export default function BeneficiaryEdit({ beneficiary }: { beneficiary: Beneficiary }) {
+function unwrap<T>(value: { data: T } | T): T {
+    if (value && typeof value === 'object' && 'data' in (value as object)) {
+        return (value as { data: T }).data;
+    }
+    return value as T;
+}
+
+export default function BeneficiaryEdit({ beneficiary: beneficiaryProp }: { beneficiary: { data: Beneficiary } | Beneficiary }) {
+    const beneficiary = unwrap<Beneficiary>(beneficiaryProp);
     return (
         <DashboardLayout title={`Modifier ${beneficiary.full_name}`} subtitle="">
             <PageHeader

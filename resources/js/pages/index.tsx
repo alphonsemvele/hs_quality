@@ -302,7 +302,21 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="HS Quality — Pilotez la qualité de votre service à domicile" />
+            <Head title="HS Quality — Pilotez la qualité de votre service à domicile">
+                <meta
+                    name="description"
+                    content="Plateforme SaaS dédiée aux SAAD, SSIAD, SPASAD, ESAD et CCAS pour piloter la démarche qualité, la QVCT et la conformité HAS. Pilote gratuit 3 mois, hébergement HDS en France."
+                />
+                <meta property="og:title" content="HS Quality — Qualité et QVCT pour l'aide à domicile" />
+                <meta
+                    property="og:description"
+                    content="Du terrain à la direction : déclarations d'incidents, plans de soins, audits HAS, baromètre QVCT. Hébergement HDS France, conformité RGPD."
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:locale" content="fr_FR" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <link rel="canonical" href="https://hsquality.fr/" />
+            </Head>
             <MarketingStyles />
 
             <div className="min-h-screen bg-white">

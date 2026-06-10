@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 
-export type WeakSignalType = 'burnout_risk' | 'autonomy_loss' | 'rps_cluster' | 'engagement_drop' | 'other';
+// Canonical source: App\Enums\QvctWeakSignalType (backend detector).
+export type WeakSignalType = 'baisse_morale' | 'surcharge' | 'conflit_relationnel' | 'isolement_professionnel';
 
 interface Props {
     type: WeakSignalType;
@@ -16,36 +17,37 @@ const TYPE_META: Record<
     WeakSignalType,
     { label: string; tone: 'danger' | 'warning' | 'brand'; emoji: string; description: string }
 > = {
-    burnout_risk: {
-        label: 'Risque de burnout',
+    baisse_morale: {
+        label: 'Baisse de morale',
         tone: 'danger',
-        emoji: '🔥',
-        description: 'Plusieurs réponses indiquent une fatigue inhabituelle et une perte de sens.',
-    },
-    autonomy_loss: {
-        label: "Perte d'autonomie perçue",
-        tone: 'warning',
-        emoji: '⚠️',
-        description: 'Les répondants signalent un sentiment de contrôle réduit sur leur travail.',
-    },
-    rps_cluster: {
-        label: 'Cluster RPS détecté',
-        tone: 'danger',
-        emoji: '📍',
-        description: 'Concentration de réponses négatives sur une équipe ou un horaire.',
-    },
-    engagement_drop: {
-        label: "Baisse d'engagement",
-        tone: 'warning',
         emoji: '📉',
-        description: 'Diminution significative des indicateurs d\'engagement sur la période.',
+        description: 'Le score moyen du baromètre a baissé de plus que le seuil par rapport à la période précédente.',
     },
-    other: {
-        label: 'Signal faible',
-        tone: 'brand',
-        emoji: '🔔',
-        description: 'Le détecteur a identifié un pattern qui mérite une attention.',
+    surcharge: {
+        label: 'Surcharge de travail',
+        tone: 'warning',
+        emoji: '🔥',
+        description: 'Les questions liées à la charge de travail tendent vers le négatif.',
     },
+    conflit_relationnel: {
+        label: 'Conflit relationnel',
+        tone: 'danger',
+        emoji: '⚠️',
+        description: 'Les réponses sur les relations professionnelles indiquent des tensions.',
+    },
+    isolement_professionnel: {
+        label: 'Isolement professionnel',
+        tone: 'warning',
+        emoji: '🪟',
+        description: "Indicateur d'isolement détecté — point de vigilance prioritaire pour le SAAD.",
+    },
+};
+
+const FALLBACK_META = {
+    label: 'Signal faible',
+    tone: 'brand' as const,
+    emoji: '🔔',
+    description: 'Le détecteur a identifié un pattern qui mérite une attention.',
 };
 
 const TONE_CLASSES = {
@@ -70,7 +72,7 @@ const TONE_CLASSES = {
 };
 
 export function WeakSignalCard({ type, team, score, detectedAt, acknowledged, onAcknowledge, onOpen }: Props) {
-    const meta = TYPE_META[type];
+    const meta = TYPE_META[type] ?? FALLBACK_META;
     const t = TONE_CLASSES[meta.tone];
 
     return (

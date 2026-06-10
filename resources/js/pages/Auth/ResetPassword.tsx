@@ -1,3 +1,4 @@
+import { PasswordStrength } from '@/components/ui';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 
@@ -74,6 +75,7 @@ export default function ResetPassword({ email, token }: Props) {
                                     </button>
                                 </div>
                                 {errors.password && <p className="mt-1.5 text-xs text-danger-600 dark:text-danger-400">{errors.password}</p>}
+                                <PasswordStrength password={data.password} />
                             </div>
 
                             <div>

@@ -1,7 +1,7 @@
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, PageHeader } from '@/components/ui';
+import { Badge, Button, Card, CardBody, CardHeader, EmptyState, EmptyStateRich, PageHeader } from '@/components/ui';
+import { useUrlTab } from '@/lib/use-url-tab';
 import { cn } from '@/lib/utils';
 import { Form } from '@inertiajs/react';
-import { useState } from 'react';
 import DashboardLayout from '../../layout';
 
 type ExchangeStatus = 'requested' | 'accepted' | 'scheduled' | 'closed' | 'cancelled';
@@ -34,6 +34,8 @@ interface Props {
 
 type Tab = 'inbox' | 'outbox' | 'new';
 
+const EXCHANGES_TABS: readonly Tab[] = ['inbox', 'outbox', 'new'];
+
 const STATUS_TONE: Record<ExchangeStatus, 'warning' | 'brand' | 'sage' | 'neutral' | 'danger'> = {
     requested: 'warning',
     accepted: 'brand',
@@ -42,18 +44,8 @@ const STATUS_TONE: Record<ExchangeStatus, 'warning' | 'brand' | 'sage' | 'neutra
     cancelled: 'danger',
 };
 
-const REASONS = [
-    'Charge de travail',
-    'Organisation',
-    'Conflit collègue',
-    'Conflit hiérarchique',
-    'Évolution / carrière',
-    'Santé / fatigue',
-    'Autre',
-];
-
 export default function ExchangesIndex({ inbox = [], outbox = [] }: Partial<Props>) {
-    const [tab, setTab] = useState<Tab>('inbox');
+    const [tab, setTab] = useUrlTab<Tab>('inbox', EXCHANGES_TABS);
     const newCount = inbox.filter((i) => i.status === 'requested').length;
 
     return (
@@ -129,7 +121,31 @@ function InboxTab({ items }: { items: InboxItem[] }) {
     if (items.length === 0) {
         return (
             <Card>
-                <EmptyState icon={<InboxIcon />} title="Pas de demande reçue" description="Aucun collaborateur ne vous a sollicité pour le moment." />
+                <EmptyStateRich
+                    icon={<InboxIcon />}
+                    title="Pas de demande reçue"
+                    description="Aucun collaborateur ne vous a sollicité pour le moment. Ce canal permet à votre équipe de demander un entretien confidentiel."
+                    suggestions={[
+                        {
+                            icon: '💬',
+                            title: 'À quoi ça sert ?',
+                            description: 'Le bouton « Demander un échange » apparaît dans la barre latérale de chaque intervenant·e.',
+                            tone: 'brand',
+                        },
+                        {
+                            icon: '🛡️',
+                            title: 'Confidentialité',
+                            description: 'Les motifs sont visibles uniquement par les destinataires explicites — pas de diffusion automatique.',
+                            tone: 'sage',
+                        },
+                        {
+                            icon: '⏱️',
+                            title: 'Délai de réponse',
+                            description: 'Engagez-vous sur un délai de 5 jours ouvrés pour traiter les demandes — un indicateur clé QVCT.',
+                            tone: 'warning',
+                        },
+                    ]}
+                />
             </Card>
         );
     }
@@ -239,26 +255,7 @@ function NewTab() {
                                     className="h-10 w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 focus:border-brand-400 focus:outline-none dark:border-ink-700 dark:bg-ink-800 dark:text-white"
                                 >
                                     <option value="rh">Mon référent·e RH</option>
-                                    <option value="coordinateur">Mon coordinateur·rice</option>
-                                    <option value="dirigeant">La direction</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label htmlFor="reason" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                                    Motif *
-                                </label>
-                                <select
-                                    id="reason"
-                                    name="reason"
-                                    required
-                                    className="h-10 w-full rounded-lg border border-ink-200 bg-white px-3 text-sm text-ink-900 focus:border-brand-400 focus:outline-none dark:border-ink-700 dark:bg-ink-800 dark:text-white"
-                                >
-                                    {REASONS.map((r) => (
-                                        <option key={r} value={r}>
-                                            {r}
-                                        </option>
-                                    ))}
+                                    <option value="manager">Mon manager (coordinateur ou direction)</option>
                                 </select>
                             </div>
 

@@ -133,30 +133,44 @@ class BeneficiaryController extends Controller
             'missed' => 'non_realisee',
         ];
 
+        // Date range — defaults to the last 12 months. `all=1` lifts the
+        // filter for the rare full-history view. Hard safety caps stay in
+        // place per source so a 10-year dossier with thousands of rows
+        // still returns a bounded payload.
+        $allowedRanges = [3, 6, 12, 24];
+        $requestedMonths = (int) request()->query('months', 12);
+        $months = in_array($requestedMonths, $allowedRanges, true) ? $requestedMonths : 12;
+        $unbounded = request()->boolean('all');
+        $since = $unbounded ? null : now()->subMonths($months)->startOfDay();
+
         $interventions = Intervention::query()
             ->where('beneficiary_id', $beneficiary->id)
+            ->when($since, fn ($q) => $q->where('planned_date', '>=', $since))
             ->with('intervenant:id,first_name,last_name')
             ->orderByDesc('planned_date')
-            ->limit(120)
+            ->limit(300)
             ->get();
 
         $incidents = Incident::query()
             ->where('beneficiary_id', $beneficiary->id)
+            ->when($since, fn ($q) => $q->where('occurred_at', '>=', $since))
             ->orderByDesc('occurred_at')
-            ->limit(60)
+            ->limit(150)
             ->get();
 
         $carePlans = CarePlan::query()
             ->where('beneficiary_id', $beneficiary->id)
+            ->when($since, fn ($q) => $q->where('start_date', '>=', $since->toDateString()))
             ->orderByDesc('start_date')
-            ->limit(40)
+            ->limit(60)
             ->get();
 
         $assignments = IntervenantAssignment::query()
             ->where('beneficiary_id', $beneficiary->id)
+            ->when($since, fn ($q) => $q->where('assigned_at', '>=', $since))
             ->with('intervenant:id,first_name,last_name')
             ->orderByDesc('assigned_at')
-            ->limit(80)
+            ->limit(150)
             ->get();
 
         $events = collect();
@@ -254,6 +268,11 @@ class BeneficiaryController extends Controller
                 'incidents' => $incidents->count(),
                 'care_plans' => $carePlans->count(),
                 'assignments' => $assignments->count(),
+            ],
+            'range' => [
+                'months' => $months,
+                'unbounded' => $unbounded,
+                'since' => $since?->toIso8601String(),
             ],
         ]);
     }
