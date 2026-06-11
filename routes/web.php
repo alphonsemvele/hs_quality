@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\FeatureFlagController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
 use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\AssignmentController;
@@ -372,6 +373,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/feature-flags/toggle', [FeatureFlagController::class, 'toggle'])->name('feature-flags.toggle');
 
             Route::get('/system-health', [SystemHealthController::class, 'index'])->name('system-health.index');
+
+            // Impersonation — stop before {user} so the literal "stop" segment
+            // is never swallowed by the route parameter.
+            Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
+            Route::post('/impersonate/{user}', [ImpersonationController::class, 'start'])->name('impersonate.start');
         });
 
     Route::middleware(['super_admin'])
