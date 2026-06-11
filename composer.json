@@ -52,6 +52,7 @@
         "symfony/yaml": "^7.4"
     },
     "require-dev": {
+        "hotmeteor/spectator": "*",
         "larastan/larastan": "^3.0",
         "laravel/boost": "^1.1",
         "laravel/pail": "^1.2.2",
