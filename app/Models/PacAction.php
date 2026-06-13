@@ -29,6 +29,7 @@ class PacAction extends Model implements AuditableContract
         'responsible_user_id',
         'due_date',
         'status',
+        'priority',
         'evidence_url',
     ];
 

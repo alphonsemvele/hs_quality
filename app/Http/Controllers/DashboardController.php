@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DashboardStatsService;
+use App\Services\SuperAdminImpersonationService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,11 +19,18 @@ class DashboardController extends Controller
         // Platform operators have no tenant — send them to /admin where the
         // cross-tenant KPI surface lives. The /dashboard tenant view would be
         // empty for them (StructureScope returns 1=0 with no tenant context).
-        if ($user->is_platform_admin === true) {
+        // EXCEPT when they're inside a "view as dirigeant" session: in that
+        // case currentStructure() resolves to the impersonated tenant and the
+        // dashboard renders as if they were the dirigeant.
+        $impersonation = app(SuperAdminImpersonationService::class);
+
+        if ($user->is_platform_admin === true && ! $impersonation->isActive()) {
             return redirect()->route('admin.dashboard');
         }
 
-        $structureId = (int) $user->structure_id;
+        $structureId = $user->is_platform_admin
+            ? (string) ($impersonation->structure()?->getKey() ?? '')
+            : (int) $user->structure_id;
 
         $stats = $this->statsService->stats($structureId);
 

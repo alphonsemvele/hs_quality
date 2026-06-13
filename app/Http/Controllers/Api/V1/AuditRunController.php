@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\AuditItemScale;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Audits\RecordAuditResponseRequest;
 use App\Http\Requests\Audits\StartAuditRunRequest;
@@ -69,13 +70,27 @@ class AuditRunController extends Controller
     {
         $item = AuditGridItem::query()->findOrFail($request->validated('audit_grid_item_id'));
 
+        $cotation = $request->validated('cotation');
+
+        // For HAS-cotation items, derive the numeric score from the
+        // letter so SUM(score) aggregations keep working unchanged. NA
+        // leaves score null so the scoring service can exclude the item.
+        $score = $request->validated('score') !== null
+            ? (float) $request->validated('score')
+            : null;
+
+        if ($item->scale === AuditItemScale::HasCotation && $cotation !== null) {
+            $score = AuditItemScale::scoreForCotation($cotation);
+        }
+
         $response = $this->execution->recordResponse(
             $auditRun,
             $item,
-            $request->validated('score') !== null ? (float) $request->validated('score') : null,
+            $score,
             $request->validated('comment'),
             $request->validated('evidence_url'),
             $request->user(),
+            $cotation,
         );
 
         return response()->json($response, 201);

@@ -48,6 +48,7 @@ use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
 use App\Policies\StructurePolicy;
 use App\Policies\UserPolicy;
+use App\Services\SuperAdminImpersonationService;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -87,7 +88,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        // The impersonation service holds per-request state (the active
+        // structure id is read from the web session) — scope it to the
+        // current request so Octane / queue workers don't carry stale
+        // state between jobs.
+        $this->app->scoped(SuperAdminImpersonationService::class, function ($app) {
+            return new SuperAdminImpersonationService($app['session.store']);
+        });
     }
 
     public function boot(): void

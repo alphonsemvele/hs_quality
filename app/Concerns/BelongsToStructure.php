@@ -4,6 +4,7 @@ namespace App\Concerns;
 
 use App\Models\Structure;
 use App\Scopes\StructureScope;
+use App\Services\SuperAdminImpersonationService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -49,6 +50,19 @@ trait BelongsToStructure
 
         if ($user !== null && ! empty($user->structure_id)) {
             $query->where($this->qualifyColumn('structure_id'), $user->structure_id);
+        } elseif ($user !== null && $user->is_platform_admin === true) {
+            // A platform admin reaches tenant route bindings only inside an
+            // active "view as dirigeant" session. Filter to the impersonated
+            // structure so the 404-on-cross-tenant invariant still holds.
+            // Outside an active session, the query intentionally returns null
+            // so the route 404s — admins must enter a structure first.
+            $impersonatedId = app(SuperAdminImpersonationService::class)->structureId();
+
+            if ($impersonatedId === null) {
+                return null;
+            }
+
+            $query->where($this->qualifyColumn('structure_id'), $impersonatedId);
         }
 
         return $query->first();

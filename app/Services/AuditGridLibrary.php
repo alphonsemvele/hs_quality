@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\AuditGridSource;
 use App\Models\AuditGrid;
+use App\Models\AuditGridAxis;
 use App\Models\AuditGridItem;
 use App\Models\Structure;
 use Illuminate\Support\Facades\DB;
@@ -95,6 +96,7 @@ class AuditGridLibrary
             ->where('structure_id', $structure->id)
             ->where('source', $source->value)
             ->where('title', $payload['title'])
+            ->whereNull('deleted_at')
             ->first();
 
         if ($existing !== null) {
@@ -111,12 +113,29 @@ class AuditGridLibrary
                 'is_active' => true,
             ]);
 
+            // Axes thématiques (grilles structurées comme SAP unifiée).
+            $axisIdByCode = [];
+            foreach ($payload['axes'] ?? [] as $axisPayload) {
+                $axis = AuditGridAxis::create([
+                    'structure_id' => $structure->id,
+                    'audit_grid_id' => $grid->id,
+                    'code' => $axisPayload['code'],
+                    'title' => $axisPayload['title'],
+                    'description' => $axisPayload['description'] ?? null,
+                    'position' => $axisPayload['position'] ?? 0,
+                ]);
+                $axisIdByCode[$axisPayload['code']] = $axis->id;
+            }
+
             foreach ($payload['items'] as $position => $item) {
                 AuditGridItem::create([
                     'structure_id' => $structure->id,
                     'audit_grid_id' => $grid->id,
+                    'axis_id' => isset($item['axis_code']) ? ($axisIdByCode[$item['axis_code']] ?? null) : null,
                     'title' => $item['title'],
                     'description' => $item['description'] ?? null,
+                    'sources' => $item['sources'] ?? null,
+                    'level' => $item['level'] ?? null,
                     'scale' => $item['scale'],
                     'max_points' => $item['max_points'] ?? 1,
                     'evidence_required' => $item['evidence_required'] ?? false,
@@ -125,6 +144,27 @@ class AuditGridLibrary
             }
 
             return $grid;
+        });
+    }
+
+    /**
+     * Soft-delete every existing grid for (structure, source) then
+     * re-provision from the current fixture. Used when a reference
+     * fixture is updated (e.g. HAS unified SAP rollout) and operators
+     * want each tenant onto the new content without touching historical
+     * AuditRuns (which keep their FK to the soft-deleted grid items).
+     */
+    public function replaceForStructure(Structure $structure, AuditGridSource $source): AuditGrid
+    {
+        return DB::transaction(function () use ($structure, $source): AuditGrid {
+            AuditGrid::withoutGlobalScopes()
+                ->where('structure_id', $structure->id)
+                ->where('source', $source->value)
+                ->whereNull('deleted_at')
+                ->get()
+                ->each(fn (AuditGrid $g) => $g->delete());
+
+            return $this->provisionForStructure($structure, $source);
         });
     }
 

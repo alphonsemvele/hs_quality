@@ -1,17 +1,992 @@
 {
-    "title": "Grille HAS — Évaluation interne",
-    "description": "Grille de référence basée sur les recommandations de la Haute Autorité de Santé pour l'évaluation interne des SAAD/SSIAD/SPASAD. Adaptable par chaque structure selon ses besoins.",
-    "weight_scheme": { "type": "equal" },
-    "items": [
-        { "title": "Le projet de service est-il documenté et accessible ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 1 },
-        { "title": "Le projet personnalisé d'accompagnement est-il co-construit avec le bénéficiaire ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 2 },
-        { "title": "Les évaluations des besoins sont-elles révisées au moins annuellement ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 3 },
-        { "title": "La traçabilité des interventions est-elle assurée pour 100% des visites ?", "scale": "percentage", "max_points": 100, "evidence_required": false, "position": 4 },
-        { "title": "Les incidents graves sont-ils déclarés à l'ARS dans les 24h ?", "scale": "1_to_5", "max_points": 5, "evidence_required": true, "position": 5 },
-        { "title": "Les habilitations et certifications des intervenants sont-elles à jour ?", "scale": "percentage", "max_points": 100, "evidence_required": true, "position": 6 },
-        { "title": "Existe-t-il un dispositif de signalement de la maltraitance ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 7 },
-        { "title": "La continuité des interventions est-elle assurée en cas d'absence ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 8 },
-        { "title": "Le plan d'amélioration continue intègre-t-il les retours d'évaluation ?", "scale": "binary", "max_points": 1, "evidence_required": true, "position": 9 },
-        { "title": "Les bénéficiaires participent-ils à l'évaluation de la qualité du service ?", "scale": "1_to_5", "max_points": 5, "evidence_required": false, "position": 10 }
-    ]
+  "title": "HAS — Référentiel unifié SAP (HAS + AFNOR + Cap'Handéo)",
+  "description": "Grille d'auto-évaluation croisant 75 exigences sur 10 axes thématiques, fondée sur le référentiel HAS (mars 2022, obligatoire), la norme AFNOR NF X50-056 / NF 311 et le référentiel Cap'Handéo SAP V3. Cotation A (Atteint à un niveau avancé, 4 pts) / B (Atteint, 3 pts) / C (Partiellement atteint, 2 pts) / D (Non atteint, 1 pt) / NA (Non applicable, exclu).",
+  "weight_scheme": {
+    "type": "equal"
+  },
+  "axes": [
+    {
+      "code": "axe_1",
+      "position": 1,
+      "title": "DROITS, BIENTRAITANCE ET ÉTHIQUE"
+    },
+    {
+      "code": "axe_2",
+      "position": 2,
+      "title": "EXPRESSION, PARTICIPATION ET CITOYENNETÉ"
+    },
+    {
+      "code": "axe_3",
+      "position": 3,
+      "title": "COCONSTRUCTION ET PERSONNALISATION DU PROJET"
+    },
+    {
+      "code": "axe_4",
+      "position": 4,
+      "title": "ACCOMPAGNEMENT À L'AUTONOMIE"
+    },
+    {
+      "code": "axe_5",
+      "position": 5,
+      "title": "ACCOMPAGNEMENT À LA SANTÉ"
+    },
+    {
+      "code": "axe_6",
+      "position": 6,
+      "title": "CONTINUITÉ ET FLUIDITÉ DES PARCOURS"
+    },
+    {
+      "code": "axe_7",
+      "position": 7,
+      "title": "RELATION CLIENT ET PRESTATION À DOMICILE"
+    },
+    {
+      "code": "axe_8",
+      "position": 8,
+      "title": "POLITIQUE RH, COMPÉTENCES ET QVCT"
+    },
+    {
+      "code": "axe_9",
+      "position": 9,
+      "title": "DÉMARCHE QUALITÉ ET GESTION DES RISQUES"
+    },
+    {
+      "code": "axe_10",
+      "position": 10,
+      "title": "SPÉCIFICITÉS HANDICAP ET LIEN AVEC LES ACTEURS"
+    }
+  ],
+  "items": [
+    {
+      "axis_code": "axe_1",
+      "position": 1,
+      "title": "1.1 — La personne accompagnée exprime sa perception de la bientraitance ; un dispositif d'écoute est en place.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 2,
+      "title": "1.2 — La structure définit, formalise et déploie une stratégie de bientraitance partagée par l'ensemble des acteurs.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 3,
+      "title": "1.3 — Les professionnels sont régulièrement sensibilisés et/ou formés à la bientraitance.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 4,
+      "title": "1.4 — La personne est informée de ses droits et devoirs (livret d'accueil, règlement de fonctionnement, charte) de façon claire et adaptée.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 5,
+      "title": "1.5 — La personne est systématiquement informée de la possibilité de désigner une personne de confiance.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 6,
+      "title": "1.6 — Les professionnels respectent la dignité, l'intégrité, la vie privée et l'intimité de la personne accompagnée.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 7,
+      "title": "1.7 — Les professionnels respectent la liberté d'opinion, les croyances, la vie spirituelle, le droit à l'image et la liberté d'aller et venir.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 8,
+      "title": "1.8 — L'ESSMS garantit la confidentialité et la protection des données (RGPD, sécurisation des accès, dossier individuel).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 9,
+      "title": "1.9 — Les professionnels identifient en équipe les questionnements éthiques et associent la personne et son entourage.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 10,
+      "title": "1.10 — L'ESSMS définit un plan de prévention et de gestion des risques de maltraitance et de violence ; les signalements sont traités.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_1",
+      "position": 11,
+      "title": "1.11 — La personne en situation de handicap ou de fragilité bénéficie d'un accompagnement supra-réglementaire respectant son autodétermination et son projet de vie.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 12,
+      "title": "2.1 — La personne participe aux instances collectives (CVS, groupes d'expression) ou à toute autre forme de participation.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 13,
+      "title": "2.2 — La personne est informée de la suite donnée aux demandes formulées dans les instances ; la traçabilité des échanges est assurée.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 14,
+      "title": "2.3 — L'expression de la personne est recueillie tout au long de son accompagnement avec des moyens et outils adaptés (y compris communication alternative).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 15,
+      "title": "2.4 — La personne exprime un consentement éclairé (ou un refus) ; sa traçabilité est assurée ; le refus est régulièrement réinterrogé.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 16,
+      "title": "2.5 — La personne peut maintenir et créer des liens sociaux ; elle participe à la vie sociale, sportive, culturelle et de loisirs.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 17,
+      "title": "2.6 — La personne est accompagnée dans sa participation à la vie citoyenne ; une éducation à la citoyenneté est proposée si nécessaire.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 18,
+      "title": "2.7 — L'ESSMS met à disposition des espaces de rencontre, de socialisation, d'apaisement et de bien-être.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_2",
+      "position": 19,
+      "title": "2.8 — Le service mesure régulièrement la satisfaction de la personne, à titre individuel ET collectif, et exploite les résultats.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 20,
+      "title": "3.1 — La personne exprime ses attentes ; le projet d'accompagnement est coconstruit avec elle, son entourage et les professionnels en équipe.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 21,
+      "title": "3.2 — Les besoins sont évalués à l'aide d'outils validés ; les ressources internes et externes sont mobilisées.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 22,
+      "title": "3.3 — Le projet d'accompagnement est tracé et réévalué chaque fois que nécessaire, et au minimum une fois par an.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 23,
+      "title": "3.4 — L'entourage est associé à l'accompagnement ; il est orienté vers les dispositifs de prévention, soutien et répit.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 24,
+      "title": "3.5 — Le projet est adapté aux risques (fugue, addictions, chutes, dénutrition, sexualité, harcèlement, radicalisation, etc.).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 25,
+      "title": "3.6 — Pour les personnes en situation de handicap : projet de vie et rythme pris en compte ; l'accompagnement s'appuie sur les RBPP de la HAS.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_3",
+      "position": 26,
+      "title": "3.7 — L'ESSMS coconstruit sa stratégie d'accompagnement dans une approche inclusive et s'inscrit dans des partenariats territoriaux.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_4",
+      "position": 27,
+      "title": "4.1 — Les besoins en matière d'autonomie sont évalués régulièrement ; les attentes de la personne sont recueillies.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_4",
+      "position": 28,
+      "title": "4.2 — Les risques de perte d'autonomie et d'isolement social sont repérés de manière précoce ; les personnes-ressources alertées.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_4",
+      "position": 29,
+      "title": "4.3 — La personne est accompagnée pour accéder ou se maintenir dans son logement (y compris habitat inclusif).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_4",
+      "position": 30,
+      "title": "4.4 — Les professionnels soutiennent la personne dans son parcours scolaire et/ou professionnel, en lien avec les partenaires.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_4",
+      "position": 31,
+      "title": "4.5 — L'ESSMS définit et déploie une stratégie de préservation de l'autonomie et de prévention de l'isolement.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 32,
+      "title": "5.1 — La personne participe à la définition de ses besoins en prévention et éducation à la santé ; un programme adapté est mis en œuvre ou proposé.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 33,
+      "title": "5.2 — La personne est informée des soins proposés selon des modalités adaptées ; un temps d'échange et de soutien est organisé.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 34,
+      "title": "5.3 — La personne est associée à la gestion de son traitement médicamenteux pour favoriser sa compréhension, son adhésion et la continuité.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 35,
+      "title": "5.4 — L'ESSMS définit et déploie sa stratégie de gestion du risque médicamenteux (circuit du médicament, iatrogénie).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 36,
+      "title": "5.5 — L'ESSMS définit et déploie sa stratégie de prévention et de maîtrise du risque infectieux.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 37,
+      "title": "5.6 — La douleur est repérée, évaluée régulièrement et tracée ; une stratégie de prise en charge est coconstruite avec la personne.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 38,
+      "title": "5.7 — Les besoins d'accompagnement en santé mentale sont repérés, évalués et tracés ; un projet d'accompagnement spécifique est coconstruit.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 39,
+      "title": "5.8 — Les volontés relatives à la fin de vie et directives anticipées sont recueillies, tracées et respectées ; le deuil est accompagné.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_5",
+      "position": 40,
+      "title": "5.9 — Les professionnels mobilisent les expertises et partenariats du territoire (intégration soin/aide).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_6",
+      "position": 41,
+      "title": "6.1 — Les situations de transition ou de rupture sont anticipées ; la personne est accompagnée pour les prévenir.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_6",
+      "position": 42,
+      "title": "6.2 — Les professionnels se coordonnent avec les partenaires du territoire et partagent les informations nécessaires.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_6",
+      "position": 43,
+      "title": "6.3 — Les informations utiles à la continuité de l'accompagnement sont partagées entre professionnels dans le respect de la sécurisation des données.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_6",
+      "position": 44,
+      "title": "6.4 — En cas d'absence ou d'indisponibilité de l'intervenant, un remplacement est organisé dans des délais brefs (Cap'Handéo : dans l'heure).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_6",
+      "position": 45,
+      "title": "6.5 — La personne (et son entourage) est informée des alternatives ; des transmissions sont organisées en cas de relais.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 46,
+      "title": "7.1 — L'accueil (physique, téléphonique, numérique) est qualitatif : disponibilité, écoute, délais maîtrisés, traçabilité des demandes.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 47,
+      "title": "7.2 — L'information communiquée au prospect / client est claire, complète, sincère et non trompeuse.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 48,
+      "title": "7.3 — Un diagnostic des besoins est réalisé au domicile préalablement à la mise en place du service ; un devis personnalisé est remis.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 49,
+      "title": "7.4 — Un document contractuel (contrat / DIPC) est établi, conforme aux exigences réglementaires, signé par les deux parties.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 50,
+      "title": "7.5 — L'offre couvre une amplitude horaire adaptée (Cap'Handéo : minimum 6h–23h, voire 24h/24, 7j/7 selon les besoins).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 51,
+      "title": "7.6 — Une fiche de mission / cahier de liaison est mis en place au domicile ; les interventions sont tracées (horodatage, transmissions).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 52,
+      "title": "7.7 — Les réclamations sont recueillies, tracées, traitées dans des délais maîtrisés et analysées pour mettre en place des actions correctives.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_7",
+      "position": 53,
+      "title": "7.8 — La facturation est claire, conforme au contrat et au devis ; les modalités de règlement sont transparentes.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 54,
+      "title": "8.1 — Le recrutement est encadré : vérifications réglementaires (B3, diplômes), entretiens structurés, prise de références.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 55,
+      "title": "8.2 — Tout nouveau professionnel bénéficie d'un processus d'accueil et d'intégration (parcours, tutorat, doublures).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 56,
+      "title": "8.3 — Une équipe de professionnels formés et qualifiés est mise au service des accompagnements ; un plan annuel de formation est mis en œuvre.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 57,
+      "title": "8.4 — Les intervenants sont spécifiquement formés aux différents handicaps et aux besoins de la perte d'autonomie.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 58,
+      "title": "8.5 — Les encadrants sont compétents ; un ratio d'au moins 1 encadrant pour 30 intervenants est respecté (Cap'Handéo).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 59,
+      "title": "8.6 — L'ESSMS adapte sa GEPP aux évolutions du secteur et de sa stratégie.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 60,
+      "title": "8.7 — L'ESSMS met en œuvre une démarche de prévention des risques professionnels (DUERP, RPS, TMS, usure).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 61,
+      "title": "8.8 — Une politique QVCT est promue : environnement de travail, espaces de discussion, soutien psychologique et éthique.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_8",
+      "position": 62,
+      "title": "8.9 — Des modalités de travail garantissent la sécurité, la continuité et la qualité (astreintes, permanence, planning).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 63,
+      "title": "9.1 — L'ESSMS définit sa politique qualité et gestion des risques ; les processus clés sont formalisés.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 64,
+      "title": "9.2 — Un système de recueil, traitement et analyse des événements indésirables (EI/EIG) est en place ; actions correctives suivies.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 65,
+      "title": "9.3 — Un système de recueil et traitement des plaintes et réclamations est en place ; parties prenantes informées des suites.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 66,
+      "title": "9.4 — Les professionnels sont sensibilisés et/ou formés à la gestion des événements indésirables.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 67,
+      "title": "9.5 — L'ESSMS est doté d'un plan de gestion de crise et de continuité d'activité, communiqué et réactualisé ; exercices et REX organisés.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "I",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 68,
+      "title": "9.6 — Des audits internes et externes sont planifiés ; les écarts donnent lieu à des plans d'action mesurés.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS",
+        "AFNOR"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 69,
+      "title": "9.7 — L'ESSMS s'inscrit dans une dynamique d'innovation, déploie une stratégie numérique et de développement durable.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_9",
+      "position": 70,
+      "title": "9.8 — Les professionnels sont régulièrement sensibilisés et/ou formés aux outils numériques.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "S",
+      "sources": [
+        "HAS"
+      ]
+    },
+    {
+      "axis_code": "axe_10",
+      "position": 71,
+      "title": "10.1 — La structure établit des liens formalisés et durables avec les acteurs du handicap (MDPH, associations, centres ressources).",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_10",
+      "position": 72,
+      "title": "10.2 — La sous-traitance éventuelle est encadrée : sous-traitant Cap'Handéo de préférence, ou titulaire d'une autorisation/agrément.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_10",
+      "position": 73,
+      "title": "10.3 — Les proches aidants sont identifiés, informés, soutenus ; un référent aidant et des dispositifs de répit sont accessibles.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_10",
+      "position": 74,
+      "title": "10.4 — Une relation régulière est entretenue avec Handéo Services ; un recours est prévu en cas de difficultés.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    },
+    {
+      "axis_code": "axe_10",
+      "position": 75,
+      "title": "10.5 — La structure participe à la remontée d'observations terrain pour faire évoluer l'offre et le référentiel.",
+      "scale": "has_cotation",
+      "max_points": 4,
+      "evidence_required": true,
+      "level": "+",
+      "sources": [
+        "CAP_HANDEO"
+      ]
+    }
+  ]
 }

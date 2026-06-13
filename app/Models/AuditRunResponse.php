@@ -24,11 +24,17 @@ class AuditRunResponse extends Model implements AuditableContract
         'audit_run_id',
         'audit_grid_item_id',
         'score',
+        'cotation',
         'comment',
         'evidence_url',
         'recorded_by',
         'recorded_at',
     ];
+
+    public function isNonApplicable(): bool
+    {
+        return $this->cotation === 'NA';
+    }
 
     protected function casts(): array
     {
