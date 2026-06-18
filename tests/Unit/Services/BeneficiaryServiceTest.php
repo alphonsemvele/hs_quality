@@ -24,7 +24,7 @@ it('creates a beneficiary in the current tenant', function () {
     expect($beneficiary)->toBeInstanceOf(Beneficiary::class)
         ->and($beneficiary->first_name)->toBe('Marie')
         ->and($beneficiary->last_name)->toBe('ESSOMBA')
-        ->and($beneficiary->gir)->toBe(3)
+        ->and($beneficiary->gir)->toBe('3') // gir is varchar(20) — stored as string
         ->and($beneficiary->structure_id)->toBe($this->structure->id);
 });
 
@@ -35,7 +35,7 @@ it('updates a beneficiary and returns a fresh instance', function () {
 
     $updated = $this->service->update($beneficiary, ['gir' => 3]);
 
-    expect($updated->gir)->toBe(3);
+    expect($updated->gir)->toBe('3'); // gir is varchar(20) — stored as string
 });
 
 it('anonymizes a beneficiary and preserves the row', function () {

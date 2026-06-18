@@ -18,7 +18,7 @@ it('blocks a coordinateur from listing PAC (only quality+executive view)', funct
     actingAsRole('coordinateur');
 
     $this->get('/plans-amelioration')->assertSuccessful();
-})->skip('coordinateur has pac.generate/pac.update via RoleSeeder; viewAny returns true');
+});
 
 it('lets a referent_qualite list PAC', function () {
     actingAsRole('referent_qualite');

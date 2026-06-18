@@ -45,7 +45,15 @@ class BillingService
             $builder->trialDays($trialDays);
         }
 
-        $subscription = $builder->create($paymentMethodId);
+        // Always set automatic_tax explicitly to override the Stripe account
+        // default. Requires a verified head-office address when enabled;
+        // set STRIPE_AUTOMATIC_TAX=true once dashboard.stripe.com/settings/tax
+        // is configured.
+        $subscriptionOptions = [
+            'automatic_tax' => ['enabled' => config('billing.automatic_tax', false)],
+        ];
+
+        $subscription = $builder->create($paymentMethodId, [], $subscriptionOptions);
 
         // Mirror the tier on the structure so hasFeature() reflects the
         // new gate immediately. Cashier doesn't know about our tier

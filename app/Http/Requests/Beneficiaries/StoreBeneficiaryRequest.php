@@ -5,6 +5,7 @@ namespace App\Http\Requests\Beneficiaries;
 use App\Enums\Gender;
 use App\Http\Requests\BaseFormRequest;
 use App\Models\Beneficiary;
+use App\Rules\ValidOptionValue;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreBeneficiaryRequest extends BaseFormRequest
@@ -29,7 +30,7 @@ class StoreBeneficiaryRequest extends BaseFormRequest
             'email' => ['nullable', 'email', 'max:150'],
 
             'marital_status' => ['nullable', 'string', 'max:50'],
-            'gir' => ['nullable', 'integer', 'between:1,6'],
+            'gir' => ['nullable', new ValidOptionValue('gir', ['1', '2', '3', '4', '5', '6'])],
 
             'primary_doctor' => ['nullable', 'string', 'max:150'],
             'primary_doctor_phone' => ['nullable', 'string', 'max:30'],
@@ -65,8 +66,7 @@ class StoreBeneficiaryRequest extends BaseFormRequest
 
             'email.email' => 'L\'adresse email saisie n\'est pas valide.',
 
-            'gir.integer' => 'Le GIR doit être un nombre entier.',
-            'gir.between' => 'Le GIR doit être compris entre 1 et 6.',
+            'gir.max' => 'La valeur GIR est trop longue.',
 
             'medical_notes.max' => 'Les notes médicales ne peuvent pas dépasser :max caractères.',
 

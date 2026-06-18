@@ -45,65 +45,72 @@ class FormationController extends Controller
 
     public function index(): Response
     {
-        $demo = config('app.env') === 'local';
+        $today = Carbon::today();
+        $soon = Carbon::today()->addDays(30);
 
-        $realPlans = TrainingPlan::query()
-            ->withCount('sessions')
-            ->orderByDesc('year')
-            ->orderByDesc('created_at')
+        $certifications = Certification::query()
+            ->with(['user:id,first_name,last_name'])
+            ->orderBy('expires_at')
             ->get()
-            ->map(fn (TrainingPlan $p): array => [
+            ->map(fn (Certification $c) => $this->mapCertification($c, $today, $soon));
+
+        $habilitations = Habilitation::query()
+            ->with(['user:id,first_name,last_name'])
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (Habilitation $h) => $this->mapHabilitation($h, $today, $soon));
+
+        $formations = $certifications->concat($habilitations)->sortBy('date_expiration')->values();
+
+        $stats = [
+            'total' => $formations->count(),
+            'a_jour' => $formations->filter(fn ($f) => $f['statut'] === 'valide')->count(),
+            'expirant_bientot' => $formations->filter(fn ($f) => $f['statut'] === 'expire_bientot')->count(),
+            'expirees' => $formations->filter(fn ($f) => $f['statut'] === 'expiree')->count(),
+        ];
+
+        $plans = TrainingPlan::query()
+            ->withCount('sessions')
+            ->with(['sessions' => fn ($q) => $q->withCount('attendances')])
+            ->orderByDesc('year')
+            ->get()
+            ->map(fn (TrainingPlan $p) => [
                 'id' => $p->id,
                 'year' => $p->year,
                 'theme' => $p->theme,
                 'target_audience' => $p->target_audience ?? '',
                 'status' => $p->status->value,
                 'status_label' => $this->planStatusLabel($p->status),
-                'sessions_total' => (int) $p->sessions_count,
+                'sessions_total' => $p->sessions_count,
                 'sessions_done' => 0,
-                'participants_total' => 0,
+                'participants_total' => $p->sessions->sum('attendances_count'),
                 'participants_done' => 0,
-            ])
-            ->all();
+            ]);
 
-        // Fall back to demo plans only when there is no real data yet — once
-        // the structure has created its first plan, the demo content steps
-        // aside so the UI reflects the real state.
-        $plans = (! empty($realPlans) || ! $demo) ? $realPlans : $this->demoTrainingPlans();
-
-        $realSessions = TrainingSession::query()
-            ->with('attendances:id,training_session_id,status')
+        $sessions = TrainingSession::query()
+            ->with(['plan:id,theme'])
+            ->withCount('attendances')
+            ->where('starts_at', '>=', $today)
             ->orderBy('starts_at')
-            ->limit(50)
+            ->limit(10)
             ->get()
-            ->map(function (TrainingSession $s): array {
-                $registered = $s->attendances
-                    ->filter(fn ($a): bool => ($a->status instanceof \BackedEnum ? $a->status->value : (string) $a->status) === 'registered')
-                    ->count();
-
-                return [
-                    'id' => $s->id,
-                    'date' => $s->starts_at?->toDateString() ?? '',
-                    'time' => $s->starts_at?->format('H:i') ?? '',
-                    'title' => $s->title,
-                    'location' => $s->location ?? '',
-                    'capacity' => (int) $s->capacity,
-                    'registered' => $registered,
-                    'status' => $registered >= (int) $s->capacity ? 'full' : 'scheduled',
-                ];
-            })
-            ->all();
-
-        $sessions = (! empty($realSessions) || ! $demo) ? $realSessions : $this->demoSessions();
+            ->map(fn (TrainingSession $s) => [
+                'id' => $s->id,
+                'date' => $s->starts_at?->toDateString() ?? '—',
+                'time' => $s->starts_at?->format('H:i') ?? '—',
+                'title' => $s->title,
+                'location' => $s->location ?? '—',
+                'capacity' => $s->capacity,
+                'registered' => $s->attendances_count,
+                'status' => $s->attendances_count >= $s->capacity ? 'full' : 'scheduled',
+            ]);
 
         return Inertia::render('dashboard/formations/index', [
-            'formations' => $demo ? $this->demoFormations() : [],
-            'stats' => $demo
-                ? ['total' => 8, 'a_jour' => 5, 'expirant_bientot' => 2, 'expirees' => 1]
-                : ['total' => 0, 'a_jour' => 0, 'expirant_bientot' => 0, 'expirees' => 0],
+            'formations' => $formations,
+            'stats' => $stats,
             'plans' => $plans,
             'sessions' => $sessions,
-            'expiringAlerts' => $this->buildExpiringAlerts() ?: ($demo ? $this->demoExpiringAlerts() : []),
+            'expiringAlerts' => $this->buildExpiringAlerts(),
         ]);
     }
 
@@ -152,21 +159,6 @@ class FormationController extends Controller
             ->with('success', 'Plan de formation mis à jour.');
     }
 
-    private function planStatusLabel(TrainingPlanStatus $status): string
-    {
-        return match ($status) {
-            TrainingPlanStatus::Draft => 'Brouillon',
-            TrainingPlanStatus::Published => 'Publié',
-            TrainingPlanStatus::Archived => 'Archivé',
-        };
-    }
-
-    /**
-     * Demo session detail with attendance roster. Backend session model
-     * (TrainingSession + TrainingAttendance) exists but the Inertia wiring
-     * here serves demo data until the dedicated controller writes are
-     * exposed to the web layer.
-     */
     public function createSession(TrainingPlan $plan): Response
     {
         $this->authorize('update', $plan);
@@ -294,7 +286,6 @@ class FormationController extends Controller
     public function cancelAttendance(Request $request, TrainingAttendance $attendance): RedirectResponse
     {
         $user = $request->user();
-        // Self-cancel allowed; otherwise needs trainings.record.
         if ($attendance->user_id !== $user->id && ! $user->hasPermissionTo('trainings.record')) {
             abort(403);
         }
@@ -304,17 +295,11 @@ class FormationController extends Controller
         return back()->with('success', 'Inscription annulée.');
     }
 
-    /**
-     * "Mes compétences" — vue intervenant centrée sur ses habilitations
-     * et certifications personnelles. Persona-aware: filters by the
-     * current user's identity.
-     */
     public function myCompetencies(Request $request): Response
     {
-        $demo = config('app.env') === 'local';
         $me = $request->user();
 
-        $realHabilitations = Habilitation::query()
+        $habilitations = Habilitation::query()
             ->where('user_id', $me->id)
             ->orderByDesc('valid_until')
             ->get()
@@ -327,7 +312,7 @@ class FormationController extends Controller
             ))
             ->all();
 
-        $realCertifications = Certification::query()
+        $certifications = Certification::query()
             ->where('user_id', $me->id)
             ->orderByDesc('expires_at')
             ->get()
@@ -340,7 +325,7 @@ class FormationController extends Controller
             ))
             ->all();
 
-        $realEnrollments = TrainingAttendance::query()
+        $enrollments = TrainingAttendance::query()
             ->where('user_id', $me->id)
             ->whereHas('session', fn ($q) => $q->where('starts_at', '>=', now()))
             ->with('session:id,title,location,starts_at')
@@ -362,16 +347,14 @@ class FormationController extends Controller
             ])
             ->all();
 
-        $hasReal = ! empty($realHabilitations) || ! empty($realCertifications) || ! empty($realEnrollments);
-
         return Inertia::render('dashboard/formations/competencies/mine', [
             'me' => [
                 'name' => $me->fullName(),
                 'role' => $me->type instanceof \BackedEnum ? $me->type->value : (string) $me->type,
             ],
-            'habilitations' => $hasReal || ! $demo ? $realHabilitations : $this->demoMyHabilitations(),
-            'certifications' => $hasReal || ! $demo ? $realCertifications : $this->demoMyCertifications(),
-            'enrollments' => $hasReal || ! $demo ? $realEnrollments : $this->demoMyEnrollments(),
+            'habilitations' => $habilitations,
+            'certifications' => $certifications,
+            'enrollments' => $enrollments,
         ]);
     }
 
@@ -411,10 +394,6 @@ class FormationController extends Controller
     }
 
     /**
-     * Build a unified expirations calendar from real habilitations +
-     * certifications (joined to their user). Severity reflects how urgent
-     * the renewal is: < 0 → expirée, ≤ 60 → urgent, ≤ 180 → warning.
-     *
      * @return list<array<string, mixed>>
      */
     private function buildExpiringAlerts(): array
@@ -478,9 +457,6 @@ class FormationController extends Controller
     }
 
     /**
-     * Compute the shared (id,intitule,organisme,dates,status) shape both
-     * habilitations and certifications expose to the competencies page.
-     *
      * @return array<string, mixed>
      */
     private function mapCompetency(string $id, string $type, ?string $referenceNumber, ?string $obtained, ?string $expiry): array
@@ -504,166 +480,75 @@ class FormationController extends Controller
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function demoSessionDetail(string $id): array
+    private function planStatusLabel(TrainingPlanStatus $status): string
+    {
+        return match ($status) {
+            TrainingPlanStatus::Draft => 'Brouillon',
+            TrainingPlanStatus::Published => 'Publié',
+            TrainingPlanStatus::Archived => 'Archivé',
+        };
+    }
+
+    /** @return array<string, mixed> */
+    private function mapCertification(Certification $c, Carbon $today, Carbon $soon): array
     {
         return [
-            'id' => $id,
-            'title' => 'PSC1 — Session de rappel',
-            'plan_title' => 'Renouvellement PSC1 — Année 2026',
-            'date' => '2026-05-14',
-            'time' => '09:00',
-            'duration_minutes' => 240,
-            'location' => 'Croix-Rouge Paris 11e',
-            'capacity' => 8,
-            'registered' => 6,
-            'attended' => 0,
-            'status' => 'scheduled',
-            'organisme' => 'Croix-Rouge française',
-            'description' => 'Rappel des gestes de premiers secours — réanimation, position latérale de sécurité, malaise cardiaque, étouffement. Examen blanc en fin de session.',
+            'id' => $c->id,
+            'intervenant' => trim(($c->user?->first_name ?? '').' '.($c->user?->last_name ?? '')),
+            'initials' => mb_strtoupper(
+                mb_substr($c->user?->first_name ?? '?', 0, 1).
+                mb_substr($c->user?->last_name ?? '?', 0, 1)
+            ),
+            'intitule' => $c->type,
+            'organisme' => null,
+            'date_obtention' => $c->issued_on?->toDateString(),
+            'date_expiration' => $c->expires_at?->toDateString(),
+            'days_to_expiry' => $c->daysUntilExpiry($today),
+            'statut' => match (true) {
+                $c->expires_at < $today => 'expiree',
+                $c->expires_at <= $soon => 'expire_bientot',
+                default => 'valide',
+            },
+            'statut_label' => match (true) {
+                $c->expires_at < $today => 'Expirée',
+                $c->expires_at <= $soon => 'Expire bientôt',
+                default => 'Valide',
+            },
+            'type' => 'certification',
         ];
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
-    private function demoAttendees(): array
+    /** @return array<string, mixed> */
+    private function mapHabilitation(Habilitation $h, Carbon $today, Carbon $soon): array
     {
-        return [
-            ['id' => 'att-1', 'user_id' => 'u-1', 'name' => 'Marie Leclerc', 'initials' => 'ML', 'role' => 'Intervenante', 'status' => 'registered', 'status_label' => 'Inscrite', 'last_psc1' => '2024-06-10'],
-            ['id' => 'att-2', 'user_id' => 'u-2', 'name' => 'Luc Moreau', 'initials' => 'LM', 'role' => 'Intervenant', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2024-06-10'],
-            ['id' => 'att-3', 'user_id' => 'u-3', 'name' => 'Sophie Bernard', 'initials' => 'SB', 'role' => 'Intervenante', 'status' => 'registered', 'status_label' => 'Inscrite', 'last_psc1' => null],
-            ['id' => 'att-4', 'user_id' => 'u-4', 'name' => 'Karim Benali', 'initials' => 'KB', 'role' => 'Intervenant', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2023-09-15'],
-            ['id' => 'att-5', 'user_id' => 'u-5', 'name' => 'Claire Bernard', 'initials' => 'CB', 'role' => 'Référente qualité', 'status' => 'cancelled', 'status_label' => 'Annulée', 'last_psc1' => '2024-06-10'],
-            ['id' => 'att-6', 'user_id' => 'u-6', 'name' => 'Thomas Dupont', 'initials' => 'TD', 'role' => 'Coordinateur', 'status' => 'registered', 'status_label' => 'Inscrit', 'last_psc1' => '2024-06-10'],
-        ];
-    }
+        $expireSoon = $h->valid_until !== null && $h->valid_until <= $soon;
+        $expired = $h->valid_until !== null && $h->valid_until < $today;
 
-    /**
-     * @return list<array<string, mixed>>
-     */
-    private function demoMyHabilitations(): array
-    {
         return [
-            ['id' => 'h-1', 'intitule' => 'Aide à la toilette et soins d\'hygiène', 'organisme' => 'INRS', 'date_obtention' => '2025-03-15', 'date_expiration' => '2027-03-15', 'days_to_expiry' => 670, 'statut' => 'valide'],
-            ['id' => 'h-2', 'intitule' => 'Aide à la prise médicamenteuse', 'organisme' => 'ARS IDF', 'date_obtention' => '2025-02-01', 'date_expiration' => '2026-08-01', 'days_to_expiry' => 82, 'statut' => 'expire_bientot'],
-        ];
-    }
-
-    /**
-     * @return list<array<string, mixed>>
-     */
-    private function demoMyCertifications(): array
-    {
-        return [
-            ['id' => 'c-1', 'intitule' => 'PSC1 — Premiers secours', 'organisme' => 'Croix-Rouge', 'date_obtention' => '2024-06-10', 'date_expiration' => '2026-06-10', 'days_to_expiry' => 30, 'statut' => 'expire_bientot'],
-            ['id' => 'c-2', 'intitule' => 'Gestes et postures — Manutention', 'organisme' => 'PRAP', 'date_obtention' => '2024-11-20', 'date_expiration' => '2026-11-20', 'days_to_expiry' => 193, 'statut' => 'valide'],
-            ['id' => 'c-3', 'intitule' => 'Accompagnement Alzheimer', 'organisme' => 'France Alzheimer', 'date_obtention' => '2025-09-01', 'date_expiration' => '2027-09-01', 'days_to_expiry' => 843, 'statut' => 'valide'],
-        ];
-    }
-
-    /**
-     * @return list<array<string, mixed>>
-     */
-    private function demoMyEnrollments(): array
-    {
-        return [
-            ['id' => 'e-1', 'session_id' => 's-001', 'title' => 'PSC1 — Session de rappel', 'date' => '2026-05-14', 'location' => 'Croix-Rouge Paris 11e', 'status' => 'registered', 'status_label' => 'Inscrit'],
-            ['id' => 'e-2', 'session_id' => 's-002', 'title' => 'Bientraitance — Module 1', 'date' => '2026-05-22', 'location' => 'Visioconférence', 'status' => 'registered', 'status_label' => 'Inscrit'],
-        ];
-    }
-
-    /** @return list<array<string, mixed>> */
-    private function demoFormations(): array
-    {
-        return [
-            ['id' => 'f1', 'intervenant' => 'Marie Leclerc', 'initials' => 'ML', 'intitule' => 'Aide à la toilette et soins d\'hygiène', 'organisme' => 'INRS', 'date_obtention' => '2025-03-15', 'date_expiration' => '2027-03-15', 'days_to_expiry' => 670, 'statut' => 'valide', 'statut_label' => 'Valide', 'type' => 'Habilitation'],
-            ['id' => 'f2', 'intervenant' => 'Marie Leclerc', 'initials' => 'ML', 'intitule' => 'Gestes et postures — Manutention', 'organisme' => 'PRAP', 'date_obtention' => '2024-11-20', 'date_expiration' => '2026-11-20', 'days_to_expiry' => 193, 'statut' => 'valide', 'statut_label' => 'Valide', 'type' => 'Certification'],
-            ['id' => 'f3', 'intervenant' => 'Luc Moreau', 'initials' => 'LM', 'intitule' => 'PSC1 — Premiers secours', 'organisme' => 'Croix-Rouge', 'date_obtention' => '2024-06-10', 'date_expiration' => '2026-06-10', 'days_to_expiry' => 30, 'statut' => 'expire_bientot', 'statut_label' => 'Expire bientôt', 'type' => 'Certification'],
-            ['id' => 'f4', 'intervenant' => 'Luc Moreau', 'initials' => 'LM', 'intitule' => 'Accompagnement Alzheimer', 'organisme' => 'France Alzheimer', 'date_obtention' => '2025-09-01', 'date_expiration' => '2027-09-01', 'days_to_expiry' => 843, 'statut' => 'valide', 'statut_label' => 'Valide', 'type' => 'Formation continue'],
-            ['id' => 'f5', 'intervenant' => 'Marie Leclerc', 'initials' => 'ML', 'intitule' => 'PSC1 — Premiers secours', 'organisme' => 'Croix-Rouge', 'date_obtention' => '2023-09-15', 'date_expiration' => '2025-09-15', 'days_to_expiry' => -238, 'statut' => 'expiree', 'statut_label' => 'Expirée', 'type' => 'Certification'],
-            ['id' => 'f6', 'intervenant' => 'Luc Moreau', 'initials' => 'LM', 'intitule' => 'Gestes et postures — Manutention', 'organisme' => 'PRAP', 'date_obtention' => '2025-01-10', 'date_expiration' => '2027-01-10', 'days_to_expiry' => 609, 'statut' => 'valide', 'statut_label' => 'Valide', 'type' => 'Certification'],
-            ['id' => 'f7', 'intervenant' => 'Marie Leclerc', 'initials' => 'ML', 'intitule' => 'Bientraitance et prévention maltraitance', 'organisme' => 'ANESM', 'date_obtention' => '2025-06-20', 'date_expiration' => '2028-06-20', 'days_to_expiry' => 1135, 'statut' => 'valide', 'statut_label' => 'Valide', 'type' => 'Formation continue'],
-            ['id' => 'f8', 'intervenant' => 'Luc Moreau', 'initials' => 'LM', 'intitule' => 'Aide à la prise médicamenteuse', 'organisme' => 'ARS IDF', 'date_obtention' => '2025-02-01', 'date_expiration' => '2026-08-01', 'days_to_expiry' => 82, 'statut' => 'expire_bientot', 'statut_label' => 'Expire bientôt', 'type' => 'Habilitation'],
-        ];
-    }
-
-    /** @return list<array<string, mixed>> */
-    private function demoTrainingPlans(): array
-    {
-        return [
-            [
-                'id' => 'tp-001',
-                'year' => 2026,
-                'theme' => 'Bientraitance et prévention RPS',
-                'target_audience' => 'Tous intervenants',
-                'status' => 'published',
-                'status_label' => 'Publié',
-                'sessions_total' => 4,
-                'sessions_done' => 2,
-                'participants_total' => 24,
-                'participants_done' => 14,
-            ],
-            [
-                'id' => 'tp-002',
-                'year' => 2026,
-                'theme' => 'Renouvellement PSC1',
-                'target_audience' => 'Intervenants dont certif < 6 mois',
-                'status' => 'published',
-                'status_label' => 'Publié',
-                'sessions_total' => 3,
-                'sessions_done' => 1,
-                'participants_total' => 12,
-                'participants_done' => 4,
-            ],
-            [
-                'id' => 'tp-003',
-                'year' => 2026,
-                'theme' => 'Accompagnement fin de vie',
-                'target_audience' => 'Volontaires + référent qualité',
-                'status' => 'draft',
-                'status_label' => 'Brouillon',
-                'sessions_total' => 0,
-                'sessions_done' => 0,
-                'participants_total' => 0,
-                'participants_done' => 0,
-            ],
-            [
-                'id' => 'tp-004',
-                'year' => 2025,
-                'theme' => 'Hygiène et soins de base',
-                'target_audience' => 'Tous intervenants',
-                'status' => 'archived',
-                'status_label' => 'Archivé',
-                'sessions_total' => 4,
-                'sessions_done' => 4,
-                'participants_total' => 22,
-                'participants_done' => 22,
-            ],
-        ];
-    }
-
-    /** @return list<array<string, mixed>> */
-    private function demoSessions(): array
-    {
-        return [
-            ['id' => 's-001', 'date' => '2026-05-14', 'time' => '09:00', 'title' => 'PSC1 — Session de rappel', 'location' => 'Croix-Rouge Paris 11e', 'capacity' => 8, 'registered' => 6, 'status' => 'scheduled'],
-            ['id' => 's-002', 'date' => '2026-05-22', 'time' => '14:00', 'title' => 'Bientraitance — Module 1', 'location' => 'Visioconférence', 'capacity' => 15, 'registered' => 12, 'status' => 'scheduled'],
-            ['id' => 's-003', 'date' => '2026-05-28', 'time' => '10:00', 'title' => 'Manutention — Atelier pratique', 'location' => 'INRS', 'capacity' => 6, 'registered' => 6, 'status' => 'full'],
-            ['id' => 's-004', 'date' => '2026-06-04', 'time' => '09:00', 'title' => 'Bientraitance — Module 2', 'location' => 'Visioconférence', 'capacity' => 15, 'registered' => 8, 'status' => 'scheduled'],
-            ['id' => 's-005', 'date' => '2026-06-18', 'time' => '14:00', 'title' => 'PSC1 — Session de rappel', 'location' => 'Croix-Rouge Paris 11e', 'capacity' => 8, 'registered' => 3, 'status' => 'scheduled'],
-        ];
-    }
-
-    /** @return list<array<string, mixed>> */
-    private function demoExpiringAlerts(): array
-    {
-        return [
-            ['id' => 'f3', 'intervenant' => 'Luc Moreau', 'intitule' => 'PSC1 — Premiers secours', 'date_expiration' => '2026-06-10', 'days_to_expiry' => 30, 'severity' => 'urgent'],
-            ['id' => 'f8', 'intervenant' => 'Luc Moreau', 'intitule' => 'Aide à la prise médicamenteuse', 'date_expiration' => '2026-08-01', 'days_to_expiry' => 82, 'severity' => 'warning'],
-            ['id' => 'f5', 'intervenant' => 'Marie Leclerc', 'intitule' => 'PSC1 — Premiers secours', 'date_expiration' => '2025-09-15', 'days_to_expiry' => -238, 'severity' => 'expired'],
+            'id' => $h->id,
+            'intervenant' => trim(($h->user?->first_name ?? '').' '.($h->user?->last_name ?? '')),
+            'initials' => mb_strtoupper(
+                mb_substr($h->user?->first_name ?? '?', 0, 1).
+                mb_substr($h->user?->last_name ?? '?', 0, 1)
+            ),
+            'intitule' => $h->type,
+            'organisme' => null,
+            'date_obtention' => $h->valid_from?->toDateString(),
+            'date_expiration' => $h->valid_until?->toDateString(),
+            'days_to_expiry' => $h->valid_until
+                ? (int) $today->startOfDay()->diffInDays($h->valid_until, absolute: false)
+                : 9999,
+            'statut' => match (true) {
+                $expired => 'expiree',
+                $expireSoon => 'expire_bientot',
+                default => 'valide',
+            },
+            'statut_label' => match (true) {
+                $expired => 'Expirée',
+                $expireSoon => 'Expire bientôt',
+                default => 'Valide',
+            },
+            'type' => 'habilitation',
         ];
     }
 }

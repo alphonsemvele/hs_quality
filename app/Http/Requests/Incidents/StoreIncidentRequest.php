@@ -5,6 +5,7 @@ namespace App\Http\Requests\Incidents;
 use App\Enums\CategorieIncident;
 use App\Http\Requests\BaseFormRequest;
 use App\Models\Incident;
+use App\Rules\ValidOptionValue;
 use Illuminate\Validation\Rule;
 
 class StoreIncidentRequest extends BaseFormRequest
@@ -27,7 +28,11 @@ class StoreIncidentRequest extends BaseFormRequest
             // this id.
             'id' => ['nullable', 'uuid'],
             'occurred_at' => ['required', 'date', 'before_or_equal:now'],
-            'categorie' => ['required', Rule::enum(CategorieIncident::class)],
+            'categorie' => [
+                'required',
+                'string',
+                new ValidOptionValue('categorie_incident', array_column(CategorieIncident::cases(), 'value')),
+            ],
             'description' => ['required', 'string', 'max:5000'],
             'lieu' => ['nullable', 'string', 'max:255'],
             'avec_deces' => ['boolean'],

@@ -48,8 +48,7 @@ return new class extends Migration
             $this->safeIndex('audit_runs_title_trgm_idx', 'audit_runs', 'title');
         }
 
-        if (Schema::hasTable('plans_amelioration')) {
-            // Column is `titre` (French), not `title`.
+        if (Schema::hasTable('plans_amelioration') && Schema::hasColumn('plans_amelioration', 'titre')) {
             $this->safeIndex('plans_amelioration_titre_trgm_idx', 'plans_amelioration', 'titre');
         }
 
@@ -70,6 +69,7 @@ return new class extends Migration
             'beneficiaries_last_name_trgm_idx',
             'audit_runs_title_trgm_idx',
             'plans_amelioration_titre_trgm_idx',
+            'plans_amelioration_title_trgm_idx',
             'users_first_name_trgm_idx',
             'users_last_name_trgm_idx',
         ] as $index) {

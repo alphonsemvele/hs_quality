@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Listeners\Billing\SyncSubscriptionToStructure;
+use App\Models\AnnualReport;
 use App\Models\AuditGrid;
 use App\Models\AuditRun;
 use App\Models\AuditRunResponse;
 use App\Models\Beneficiary;
+use App\Models\BeneficiaryFamilyToken;
 use App\Models\BeneficiarySatisfactionRating;
 use App\Models\CarePlan;
 use App\Models\Certification;
@@ -19,9 +21,11 @@ use App\Models\Intervention;
 use App\Models\Pac;
 use App\Models\PacAction;
 use App\Models\PlannedTask;
+use App\Models\PredictionRequest;
 use App\Models\QvctCampaign;
 use App\Models\QvctResponse;
 use App\Models\QvctWeakSignal;
+use App\Models\SectorBenchmarkSnapshot;
 use App\Models\Structure;
 use App\Models\User;
 use App\Observers\AuditRunObserver;
@@ -32,9 +36,11 @@ use App\Observers\PacObserver;
 use App\Observers\QvctCampaignObserver;
 use App\Observers\QvctResponseObserver;
 use App\Observers\QvctWeakSignalObserver;
+use App\Policies\AnnualReportPolicy;
 use App\Policies\AuditGridPolicy;
 use App\Policies\AuditRunPolicy;
 use App\Policies\AuditRunResponsePolicy;
+use App\Policies\BeneficiaryFamilyTokenPolicy;
 use App\Policies\BeneficiaryPolicy;
 use App\Policies\BeneficiarySatisfactionRatingPolicy;
 use App\Policies\CarePlanPolicy;
@@ -46,6 +52,8 @@ use App\Policies\IncidentPolicy;
 use App\Policies\IntervenantAssignmentPolicy;
 use App\Policies\InterventionPolicy;
 use App\Policies\PlannedTaskPolicy;
+use App\Policies\PredictionRequestPolicy;
+use App\Policies\SectorBenchmarkSnapshotPolicy;
 use App\Policies\StructurePolicy;
 use App\Policies\UserPolicy;
 use App\Services\SuperAdminImpersonationService;
@@ -71,7 +79,9 @@ class AppServiceProvider extends ServiceProvider
         AuditGrid::class => AuditGridPolicy::class,
         AuditRun::class => AuditRunPolicy::class,
         AuditRunResponse::class => AuditRunResponsePolicy::class,
+        AnnualReport::class => AnnualReportPolicy::class,
         Beneficiary::class => BeneficiaryPolicy::class,
+        BeneficiaryFamilyToken::class => BeneficiaryFamilyTokenPolicy::class,
         BeneficiarySatisfactionRating::class => BeneficiarySatisfactionRatingPolicy::class,
         CarePlan::class => CarePlanPolicy::class,
         Certification::class => CertificationPolicy::class,
@@ -82,6 +92,8 @@ class AppServiceProvider extends ServiceProvider
         Intervention::class => InterventionPolicy::class,
         IntervenantAssignment::class => IntervenantAssignmentPolicy::class,
         PlannedTask::class => PlannedTaskPolicy::class,
+        PredictionRequest::class => PredictionRequestPolicy::class,
+        SectorBenchmarkSnapshot::class => SectorBenchmarkSnapshotPolicy::class,
         Structure::class => StructurePolicy::class,
         User::class => UserPolicy::class,
     ];
@@ -260,6 +272,14 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(6)->by('ip:'.$request->ip()),
                 Limit::perMinute(6)->by('email:'.mb_strtolower((string) $request->input('email', ''))),
             ];
+        });
+
+        // Phase 3 — sector benchmark endpoint. Cross-tenant aggregate query,
+        // so we cap at 10 req/min per user to protect the DB replica. The
+        // 1-hour Redis cache on SectorBenchmarkService means legitimate UI
+        // loads never approach this limit.
+        RateLimiter::for('benchmark', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->getKey() ?: $request->ip());
         });
 
         // Public landing-page contact form. Tight per-IP limit to prevent

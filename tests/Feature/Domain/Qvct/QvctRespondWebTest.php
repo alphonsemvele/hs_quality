@@ -79,7 +79,7 @@ it('renders the questionnaire page with the latest open campaign for the tenant'
         ->assertOk()
         ->assertInertia(fn ($p) => $p
             ->component('dashboard/qvct/questionnaire')
-            ->where('campagne.titre', 'Baromètre — Mai 2026')
+            ->where('campagne.titre', 'Modèle test')
             ->where('questions.0.id', 'morale')
             ->where('questions.0.type', 'likert'));
 });

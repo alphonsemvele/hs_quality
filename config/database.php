@@ -97,6 +97,20 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            // Phase 3 — read replica for analytics / benchmark workloads.
+            // When DB_READ_HOST is set, Laravel routes SELECT queries to the
+            // replica automatically (sticky sessions respected). Falls back
+            // to the primary when the env var is absent (dev / test).
+            'read' => env('DB_READ_HOST') ? [
+                'host' => [env('DB_READ_HOST')],
+                'port' => env('DB_READ_PORT', env('DB_PORT', '5432')),
+                'username' => env('DB_READ_USERNAME', env('DB_USERNAME', 'root')),
+                'password' => env('DB_READ_PASSWORD', env('DB_PASSWORD', '')),
+            ] : null,
+            'write' => env('DB_READ_HOST') ? [
+                'host' => [env('DB_HOST', '127.0.0.1')],
+            ] : null,
+            'sticky' => true,
         ],
 
         'sqlsrv' => [

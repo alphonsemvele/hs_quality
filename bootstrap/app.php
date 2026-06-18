@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePortalUser;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\HandleIdempotency;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -8,6 +9,7 @@ use App\Http\Middleware\RequireMfa;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TenantResolver;
 use App\Http\Middleware\ThrottlePasswordEndpoints;
+use App\Http\Middleware\ValidateFamilyToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,6 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'log_sensitive_read' => LogSensitiveRead::class,
             'idempotent' => HandleIdempotency::class,
             'super_admin' => EnsureSuperAdmin::class,
+            'portal.user' => EnsurePortalUser::class,
+            'family.token' => ValidateFamilyToken::class,
         ]);
 
         // Security headers apply to every response (web, api, health check).

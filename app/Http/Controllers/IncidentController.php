@@ -15,6 +15,7 @@ use App\Models\Beneficiary;
 use App\Models\Incident;
 use App\Models\Intervention;
 use App\Models\User;
+use App\Services\CustomOptionService;
 use App\Services\IncidentService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -22,7 +23,10 @@ use Inertia\Response;
 
 class IncidentController extends Controller
 {
-    public function __construct(private readonly IncidentService $service) {}
+    public function __construct(
+        private readonly IncidentService $service,
+        private readonly CustomOptionService $options,
+    ) {}
 
     public function index(): Response
     {
@@ -116,7 +120,7 @@ class IncidentController extends Controller
             ])
             ->all();
 
-        $categories = collect(CategorieIncident::cases())->map(fn (CategorieIncident $c) => [
+        $categoriesEnum = collect(CategorieIncident::cases())->map(fn (CategorieIncident $c) => [
             'value' => $c->value,
             'label' => $c->label(),
         ])->all();
@@ -125,7 +129,7 @@ class IncidentController extends Controller
             'options' => [
                 'beneficiaries' => $beneficiaries,
                 'interventions' => $interventions,
-                'categories' => $categories,
+                'categories' => $this->options->mergeWithEnum($categoriesEnum, 'categorie_incident'),
             ],
         ]);
     }

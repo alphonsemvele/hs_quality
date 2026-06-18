@@ -34,5 +34,14 @@ return [
             'threshold' => 3,
             'cooldown_seconds' => 300,
         ],
+
+        // ML microservice — generous cooldown because inference is
+        // slow-starting; 5 failures then wait 2 min before probing again.
+        // Requests accumulate as 'en_attente' during the open window and
+        // are retried by the job queue once the circuit recovers.
+        'ml_service' => [
+            'threshold' => 5,
+            'cooldown_seconds' => 120,
+        ],
     ],
 ];

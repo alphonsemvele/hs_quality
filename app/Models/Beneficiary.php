@@ -72,7 +72,7 @@ class Beneficiary extends Model implements AuditableContract
             'erased_at' => 'datetime',
             'gender' => Gender::class,
             'status' => BeneficiaryStatus::class,
-            'gir' => 'integer',
+            'gir' => 'string',
 
             // Health data — RGPD Art 9 — encrypted at rest per
             // references/compliance/encrypted-fields.md

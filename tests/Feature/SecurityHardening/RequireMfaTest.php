@@ -18,12 +18,15 @@ beforeEach(function (): void {
     $this->seed(RoleSeeder::class);
 });
 
-it('blocks an unenrolled dirigeant on the web with a 423 + MFA-required page', function (): void {
+it('blocks an unenrolled dirigeant on the web with a 200 + MFA-required page', function (): void {
     actingAsRole('dirigeant');
 
     $response = $this->get('/dashboard');
 
-    $response->assertStatus(423);
+    // 200 — Inertia client has no handler for 423 on soft navigations
+    // (post-login redirect), causing a blank page. Status conveys no meaning
+    // to the user here; the page content enforces the MFA requirement.
+    $response->assertOk();
     $response->assertInertia(fn ($page) => $page->component('Auth/mfa-required'));
 });
 

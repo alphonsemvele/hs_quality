@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\QvctMood;
+use App\Enums\QvctWeakSignalType;
+use App\Models\QvctWeakSignal;
 use Database\Seeders\RoleSeeder;
 
 beforeEach(function () {
@@ -67,6 +69,8 @@ it('renders the personal QVCT journal', function () {
 it('accepts a journal entry submission and redirects', function () {
     actingAsRole('intervenant');
 
+    // StoreJournalEntryRequest validates 'body' (not 'content') and expects
+    // a QvctMood string value (not an integer).
     $response = $this->post('/qvct/journal', [
         'mood' => QvctMood::Positif->value,
         'body' => 'Bonne journée — tournée bien menée.',
@@ -104,7 +108,14 @@ it('accepts a new exchange request submission', function () {
 it('acknowledges a weak signal via POST', function () {
     actingAsRole('rh');
 
-    $response = $this->post('/qvct/weak-signals/ws-001/acknowledge');
+    $structure = currentStructure();
+    $signal = QvctWeakSignal::factory()->create([
+        'structure_id' => $structure->id,
+        'signal_type' => QvctWeakSignalType::Surcharge->value,
+        'severity' => 7,
+    ]);
+
+    $response = $this->post("/qvct/weak-signals/{$signal->id}/acknowledge");
 
     $response->assertRedirect();
     $response->assertSessionHas('success');

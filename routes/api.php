@@ -1,8 +1,17 @@
 <?php
 
+use App\Http\Controllers\Api\Portal\FamilyPortalController;
+use App\Http\Controllers\Api\Portal\PortalAuthController;
+use App\Http\Controllers\Api\Portal\PortalCarePlanController;
+use App\Http\Controllers\Api\Portal\PortalIncidentController;
+use App\Http\Controllers\Api\Portal\PortalInterventionController;
+use App\Http\Controllers\Api\Portal\PortalProfileController;
+use App\Http\Controllers\Api\Portal\PortalSatisfactionController;
+use App\Http\Controllers\Api\V1\AnnualReportController;
 use App\Http\Controllers\Api\V1\AuditRunController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BeneficiaryController;
+use App\Http\Controllers\Api\V1\BeneficiaryPortalProvisioningController;
 use App\Http\Controllers\Api\V1\CertificationController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\HabilitationController;
@@ -11,6 +20,7 @@ use App\Http\Controllers\Api\V1\InterventionController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\NewsFeedController;
 use App\Http\Controllers\Api\V1\PacController;
+use App\Http\Controllers\Api\V1\PredictionController;
 use App\Http\Controllers\Api\V1\QaController;
 use App\Http\Controllers\Api\V1\QvctActionPlanController;
 use App\Http\Controllers\Api\V1\QvctCampaignController;
@@ -18,6 +28,7 @@ use App\Http\Controllers\Api\V1\QvctExchangeRequestController;
 use App\Http\Controllers\Api\V1\QvctIndicatorController;
 use App\Http\Controllers\Api\V1\QvctJournalController;
 use App\Http\Controllers\Api\V1\QvctWeakSignalController;
+use App\Http\Controllers\Api\V1\SectorBenchmarkController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TrainingAttendanceController;
@@ -68,9 +79,15 @@ Route::prefix('v1')
         Route::post('incidents', [IncidentController::class, 'store'])->middleware('idempotent');
         Route::get('incidents/{incident}', [IncidentController::class, 'show']);
 
-        // Beneficiaries (read-only on mobile)
+        // Beneficiaries (read-only on mobile) + portal provisioning (M8)
         Route::get('beneficiaries', [BeneficiaryController::class, 'index']);
         Route::get('beneficiaries/{beneficiary}', [BeneficiaryController::class, 'show']);
+        Route::middleware('idempotent')->group(function (): void {
+            Route::post('beneficiaries/{beneficiary}/portal-access', [BeneficiaryPortalProvisioningController::class, 'provision']);
+            Route::post('beneficiaries/{beneficiary}/family-tokens', [BeneficiaryPortalProvisioningController::class, 'issueFamilyToken']);
+            Route::delete('beneficiaries/{beneficiary}/family-tokens/{token}', [BeneficiaryPortalProvisioningController::class, 'revokeFamilyToken']);
+        });
+        Route::get('beneficiaries/{beneficiary}/family-tokens', [BeneficiaryPortalProvisioningController::class, 'listFamilyTokens']);
 
         // QVCT — open-campaigns discovery + anonymous response submission +
         // weak-signal triage (RH-only via QvctWeakSignalPolicy::viewAny).
@@ -220,6 +237,26 @@ Route::prefix('v1')
             Route::post('billing/cancel', [SubscriptionController::class, 'cancel']);
         });
 
+        // Phase 3 / Rapport annuel qualité — PDF per structure per year.
+        Route::get('annual-reports', [AnnualReportController::class, 'index']);
+        Route::post('annual-reports', [AnnualReportController::class, 'store'])->middleware('idempotent');
+        Route::get('annual-reports/{annualReport}/pdf-url', [AnnualReportController::class, 'pdfUrl']);
+
+        // Phase 3 / Benchmark anonymisé — sector-wide aggregated KPIs.
+        // Gated by cross_tenant_benchmark.read permission (dirigeant + platform admin).
+        Route::get('benchmark/sector', [SectorBenchmarkController::class, 'show'])
+            ->middleware('throttle:benchmark');
+        Route::post('benchmark/sector/generate', [SectorBenchmarkController::class, 'generate'])
+            ->middleware('idempotent');
+
+        // Phase 3 / M9 — IA prédictive. GET returns the latest prediction per
+        // type (burnout, perte_autonomie, analyse_rapport) for the structure.
+        // POST triggers a new async prediction job. When the ML circuit is open,
+        // the record is returned immediately with status=en_attente ("en calcul").
+        Route::get('predictions', [PredictionController::class, 'index']);
+        Route::post('predictions', [PredictionController::class, 'store'])
+            ->middleware('idempotent');
+
         // Offline sync — flushes the mobile app's queued operations after a
         // network outage. Idempotent at the envelope level (HandleIdempotency)
         // so a network retry of the same batch does not re-execute ops.
@@ -227,4 +264,34 @@ Route::prefix('v1')
         // legitimately push hundreds of ops in seconds.
         Route::middleware(['idempotent', 'throttle:sync'])
             ->post('sync/batch', [SyncController::class, 'batch']);
+    });
+
+// ── Portail bénéficiaires (Phase 3 / M8) ──────────────────────────────────
+// Separate auth path: portal users are type=beneficiaire_portal.
+// Family member routes use ValidateFamilyToken middleware instead of Sanctum.
+
+// Unauthenticated portal login.
+Route::prefix('portal')->middleware('throttle:login')->group(function (): void {
+    Route::post('auth/login', [PortalAuthController::class, 'login']);
+});
+
+// Authenticated beneficiary portal routes.
+Route::prefix('portal')
+    ->middleware(['auth:sanctum', 'portal.user', 'throttle:mobile-api'])
+    ->group(function (): void {
+        Route::post('auth/logout', [PortalAuthController::class, 'logout']);
+        Route::get('me', [PortalProfileController::class, 'show']);
+        Route::get('care-plan', [PortalCarePlanController::class, 'show']);
+        Route::get('interventions', [PortalInterventionController::class, 'index']);
+        Route::post('satisfaction', [PortalSatisfactionController::class, 'store'])->middleware('idempotent');
+        Route::post('incidents', [PortalIncidentController::class, 'store'])->middleware('idempotent');
+    });
+
+// Family member routes (no Sanctum — token validated by middleware).
+Route::prefix('portal/family')
+    ->middleware(['family.token', 'throttle:mobile-api'])
+    ->group(function (): void {
+        Route::get('care-plan', [FamilyPortalController::class, 'carePlan']);
+        Route::get('interventions', [FamilyPortalController::class, 'interventions']);
+        Route::post('satisfaction', [FamilyPortalController::class, 'submitSatisfaction'])->middleware('idempotent');
     });
