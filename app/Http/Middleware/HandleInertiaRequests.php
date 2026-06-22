@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\InertiaUserResource;
-use App\Services\SuperAdminImpersonationService;
+use App\Support\ImpersonationSession;
 use App\Support\UserAbilities;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -71,37 +71,32 @@ class HandleInertiaRequests extends Middleware
             'systemBanners' => fn () => $this->systemBannersPayload(),
             // Eager — the banner + sidebar switch are layout-level and need
             // the value on the first paint, not behind a partial reload.
-            'impersonation' => $this->impersonationPayload(),
+            'impersonation' => $this->impersonationPayload($request),
         ];
     }
 
     /**
-     * When a platform admin has opted into "view as dirigeant", expose the
-     * target structure + start time so the React layout can render the
-     * persistent red banner and swap the sidebar to the tenant nav. Returns
-     * null in every other case (regular tenant users, signed-out, super-admin
-     * with no active session).
+     * When a platform admin is impersonating a tenant user (see
+     * ImpersonationController), expose the target user + structure so the
+     * React layout can render the persistent red banner and swap the
+     * sidebar to the tenant nav. Returns null in every other case (regular
+     * tenant users, signed-out, platform admin with no active session).
      *
-     * @return array{structure_id: string, structure_name: string, started_at: string|null}|null
+     * @return array{user_id: string, user_name: string, structure_id: string, structure_name: string}|null
      */
-    private function impersonationPayload(): ?array
+    private function impersonationPayload(Request $request): ?array
     {
-        $service = app(SuperAdminImpersonationService::class);
+        $payload = ImpersonationSession::current($request);
 
-        if (! $service->isActive()) {
-            return null;
-        }
-
-        $structure = $service->structure();
-
-        if ($structure === null) {
+        if ($payload === null) {
             return null;
         }
 
         return [
-            'structure_id' => (string) $structure->getKey(),
-            'structure_name' => (string) $structure->name,
-            'started_at' => $service->startedAt()?->toIso8601String(),
+            'user_id' => (string) $payload['user_id'],
+            'user_name' => (string) $payload['user_name'],
+            'structure_id' => (string) $payload['structure_id'],
+            'structure_name' => (string) ($payload['structure_name'] ?? ''),
         ];
     }
 

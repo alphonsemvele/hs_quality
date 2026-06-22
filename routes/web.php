@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\FeatureFlagController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
-use App\Http\Controllers\Admin\StructureImpersonationController;
 use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
@@ -393,11 +392,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AdminStructureController::class, 'index'])->name('index');
             Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
             Route::post('/', [AdminStructureController::class, 'store'])->name('store');
-            // POST /admin/structures/stop-impersonating MUST be declared before
-            // the `/{structure}/...` group so it's matched as a literal, not as
-            // a bound model route.
-            Route::post('/stop-impersonating', [StructureImpersonationController::class, 'stop'])
-                ->name('stop-impersonating');
             Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
             Route::get('/{structure}/audit-trail', [AdminStructureController::class, 'auditTrail'])->name('audit-trail');
             Route::get('/{structure}/edit', [AdminStructureController::class, 'edit'])->name('edit');
@@ -405,7 +399,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');
             Route::post('/{structure}/suspend', [AdminStructureController::class, 'suspend'])->name('suspend');
             Route::post('/{structure}/reactivate', [AdminStructureController::class, 'reactivate'])->name('reactivate');
-            Route::post('/{structure}/impersonate', [StructureImpersonationController::class, 'start'])
-                ->name('impersonate');
         });
 });

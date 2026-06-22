@@ -6,7 +6,6 @@ namespace App\Support;
 
 use App\Enums\UserType;
 use App\Models\User;
-use App\Services\SuperAdminImpersonationService;
 
 /**
  * Frontend ability map shared with Inertia on every page.
@@ -71,13 +70,15 @@ final class UserAbilities
         }
 
         // Platform admins (super_admin) only see the cross-tenant surface —
-        // unless they have explicitly opted into a "view as dirigeant"
-        // impersonation session, in which case they inherit the dirigeant
-        // ability set so the tenant nav, action buttons, and quick-actions
-        // light up as they would for the real dirigeant.
+        // unless they're impersonating a tenant user, in which case they
+        // inherit that user's own ability set so the tenant nav, action
+        // buttons, and quick-actions light up exactly as they would for
+        // the real user (not a generic elevated role).
         if ($user->is_platform_admin === true) {
-            if (app(SuperAdminImpersonationService::class)->isActive()) {
-                return array_merge(self::empty(), self::dirigeant(), [
+            $target = self::impersonationTarget();
+
+            if ($target !== null) {
+                return array_merge(self::for($target), [
                     'admin.structures' => true,
                 ]);
             }
@@ -101,6 +102,21 @@ final class UserAbilities
         };
 
         return array_merge(self::empty(), $abilities);
+    }
+
+    /**
+     * The tenant user a platform admin is currently impersonating, read
+     * directly from the session (see ImpersonationController), or null.
+     */
+    private static function impersonationTarget(): ?User
+    {
+        $payload = ImpersonationSession::current();
+
+        if ($payload === null) {
+            return null;
+        }
+
+        return User::query()->find($payload['user_id']);
     }
 
     /**

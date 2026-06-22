@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Concerns\BelongsToStructure;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Models\User;
-use App\Services\SuperAdminImpersonationService;
+use App\Support\ImpersonationSession;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,11 +19,11 @@ use Illuminate\Database\Eloquent\Model;
  * Subclasses add role-specific checks via Spatie Permission in each
  * method (view, create, update, delete, plus any custom abilities).
  *
- * Super-admin impersonation: when the platform operator has selected a
- * structure via the "view as dirigeant" surface, they're treated as a
- * dirigeant of THAT structure (and only that structure). Cross-tenant
- * access remains blocked even while impersonation is active — they only
- * see/touch resources whose structure_id matches the impersonated one.
+ * Platform-admin impersonation: when a platform admin is impersonating a
+ * tenant user (see {@see ImpersonationController}),
+ * they're treated as operating under the impersonated user's structure (and
+ * only that structure). Cross-tenant access remains blocked even while
+ * impersonation is active.
  *
  * See: references/rbac/policies-integration.md
  *      references/conventions/security-first.md
@@ -61,14 +62,16 @@ abstract class BasePolicy
     /**
      * The structure id the user is operating under for THIS request. For
      * a regular tenant-scoped user it's their own structure_id. For a
-     * super-admin who has opted into "view as dirigeant", it's whatever
-     * structure they selected from /admin/structures/{id} — never null
-     * silently lets a super-admin operate without context.
+     * platform admin impersonating a tenant user, it's the impersonated
+     * user's structure — never null silently lets a platform admin operate
+     * without context.
      */
     private function resolveActorStructureId(User $user): ?string
     {
         if ($user->is_platform_admin === true) {
-            return app(SuperAdminImpersonationService::class)->structureId();
+            $payload = ImpersonationSession::current();
+
+            return $payload !== null ? (string) $payload['structure_id'] : null;
         }
 
         return $user->structure_id ? (string) $user->structure_id : null;

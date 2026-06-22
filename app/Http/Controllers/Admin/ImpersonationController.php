@@ -52,6 +52,7 @@ class ImpersonationController extends Controller
             'user_name' => $user->name,
             'structure_id' => $user->structure_id,
             'structure_name' => $user->structure?->name,
+            'started_at' => now()->toIso8601String(),
         ]);
 
         return redirect()->route('dashboard')

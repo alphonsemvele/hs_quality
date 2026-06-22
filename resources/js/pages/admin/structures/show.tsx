@@ -3,7 +3,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import DashboardLayout from '../../dashboard/layout';
 
-type StructurePending = { kind: 'toggle' } | { kind: 'delete' } | { kind: 'impersonate' } | null;
+type StructurePending = { kind: 'toggle' } | { kind: 'delete' } | null;
 
 interface StructureDetail {
     id: number;
@@ -34,7 +34,6 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
 
     const toggleStatus = () => setPending({ kind: 'toggle' });
     const remove = () => setPending({ kind: 'delete' });
-    const impersonate = () => setPending({ kind: 'impersonate' });
 
     const confirmPending = () => {
         if (!pending) return;
@@ -42,8 +41,6 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
         if (pending.kind === 'toggle') {
             const path = isActive ? `/admin/structures/${structure.id}/suspend` : `/admin/structures/${structure.id}/reactivate`;
             router.post(path, undefined, done);
-        } else if (pending.kind === 'impersonate') {
-            router.post(`/admin/structures/${structure.id}/impersonate`, undefined, done);
         } else {
             router.delete(`/admin/structures/${structure.id}`, done);
         }
@@ -59,24 +56,15 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
             tone: (isActive ? 'warning' : 'info') as 'warning' | 'info',
             requireTyped: undefined as string | undefined,
         }
-        : pending?.kind === 'impersonate'
+        : pending?.kind === 'delete'
             ? {
-                title: `Entrer en tant que dirigeant de "${structure.name}" ?`,
-                description:
-                    "Vous accéderez à toutes les actions d'un dirigeant sur cette structure. Chaque action sera tracée dans l'audit log avec votre identité de superadmin (impersonator_id). La session est limitée à 4h ; pensez à quitter explicitement après votre intervention.",
-                confirmLabel: 'Entrer dans la structure',
+                title: 'Supprimer définitivement cette structure ?',
+                description: "Toutes les données seront supprimées sous 30 jours conformément à la politique RGPD. Cette opération est irréversible.",
+                confirmLabel: 'Supprimer définitivement',
                 tone: 'danger' as 'danger',
-                requireTyped: undefined as string | undefined,
+                requireTyped: structure.code,
             }
-            : pending?.kind === 'delete'
-                ? {
-                    title: 'Supprimer définitivement cette structure ?',
-                    description: "Toutes les données seront supprimées sous 30 jours conformément à la politique RGPD. Cette opération est irréversible.",
-                    confirmLabel: 'Supprimer définitivement',
-                    tone: 'danger' as 'danger',
-                    requireTyped: structure.code,
-                }
-                : null;
+            : null;
 
     return (
         <DashboardLayout title={structure.name} subtitle="">
@@ -90,11 +78,6 @@ export default function ShowStructure({ structure }: { structure: StructureDetai
                 ]}
                 actions={
                     <>
-                        {isActive && (
-                            <Button variant="primary" onClick={impersonate}>
-                                Entrer en tant que dirigeant
-                            </Button>
-                        )}
                         <Link href={`/admin/structures/${structure.id}/audit-trail`}>
                             <Button variant="secondary">Audit-trail</Button>
                         </Link>

@@ -78,10 +78,9 @@ export default function DashboardLayout({
 
     // Platform admins see a dedicated cross-tenant nav. Tenant-scoped users
     // see the operational nav. The two surfaces never overlap — UNLESS a
-    // platform admin has opted into a "view as dirigeant" impersonation
-    // session, in which case they see the tenant nav of the structure they
-    // entered. The impersonation prop is set server-side by
-    // HandleInertiaRequests + SuperAdminImpersonationService.
+    // platform admin is impersonating a tenant user, in which case they see
+    // the tenant nav of the structure they entered. The impersonation prop
+    // is set server-side by HandleInertiaRequests.
     const isPlatformAdmin = auth?.user?.is_platform_admin === true;
     const isImpersonating = props.impersonation != null;
     const showPlatformNav = isPlatformAdmin && !isImpersonating;

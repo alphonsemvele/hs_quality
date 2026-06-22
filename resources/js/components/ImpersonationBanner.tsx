@@ -2,9 +2,10 @@ import { router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 
 interface ImpersonationProp {
+    user_id: string;
+    user_name: string;
     structure_id: string;
     structure_name: string;
-    started_at: string | null;
 }
 
 interface PageProps extends InertiaPageProps {
@@ -13,12 +14,12 @@ interface PageProps extends InertiaPageProps {
 
 /**
  * Persistent red bar shown across every tenant page while a platform admin
- * is operating a structure via the "view as dirigeant" surface. The bar
- * is intentionally loud — anyone walking past the screen should be able
- * to see that the actions being performed are not the dirigeant's own.
+ * is impersonating a specific tenant user. The bar is intentionally loud —
+ * anyone walking past the screen should be able to see that the actions
+ * being performed are not the named user's own.
  *
  * Hidden when the impersonation prop is absent (the default for everyone:
- * regular tenant users and super-admins outside of impersonation).
+ * regular tenant users and platform admins outside of impersonation).
  */
 export default function ImpersonationBanner() {
     const { props } = usePage<PageProps>();
@@ -27,7 +28,7 @@ export default function ImpersonationBanner() {
     if (!impersonation) return null;
 
     const onLeave = () => {
-        router.post('/admin/structures/stop-impersonating');
+        router.post('/admin/impersonate/stop');
     };
 
     return (
@@ -49,8 +50,8 @@ export default function ImpersonationBanner() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 17h.01" />
                 </svg>
                 <span className="truncate">
-                    Mode superadmin — vous agissez en tant que dirigeant de{' '}
-                    <strong className="font-semibold">{impersonation.structure_name}</strong>. Toutes les actions sont auditées.
+                    Mode superadmin — vous accédez au compte de <strong className="font-semibold">{impersonation.user_name}</strong> (
+                    {impersonation.structure_name}). Toutes les actions sont auditées.
                 </span>
             </div>
             <button

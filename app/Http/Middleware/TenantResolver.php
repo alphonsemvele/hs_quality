@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Structure;
+use App\Support\ImpersonationSession;
 use Closure;
 use Illuminate\Http\Request;
 use Spatie\Permission\PermissionRegistrar;
@@ -35,9 +36,10 @@ class TenantResolver
         // is_platform_admin flag remains true — policies still grant full
         // access, but tenant-scoped queries now target the impersonated structure.
         if ($user->is_platform_admin === true) {
-            // API routes have no session middleware — hasSession() guards against
-            // "Session store not set on request" on Sanctum token requests.
-            $impersonating = $request->hasSession() ? $request->session()->get('impersonating_as') : null;
+            // API routes have no session middleware — ImpersonationSession
+            // guards against "Session store not set on request" on Sanctum
+            // token requests, and auto-expires sessions past the 4h cap.
+            $impersonating = ImpersonationSession::current($request);
 
             if ($impersonating !== null) {
                 $structure = Structure::find($impersonating['structure_id']);

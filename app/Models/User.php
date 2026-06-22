@@ -3,7 +3,8 @@
 namespace App\Models;
 
 use App\Enums\UserType;
-use App\Services\SuperAdminImpersonationService;
+use App\Http\Controllers\Admin\ImpersonationController;
+use App\Support\ImpersonationSession;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -29,6 +30,15 @@ class User extends Authenticatable
     use Notifiable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
+
+    /**
+     * Per-instance memoisation for {@see impersonationTarget()} — avoids
+     * re-reading the session and re-querying the target user on every
+     * hasRole()/hasPermissionTo() call within the same request.
+     */
+    private ?self $impersonationTargetCache = null;
+
+    private bool $impersonationTargetResolved = false;
 
     protected $fillable = [
         'structure_id',
@@ -134,12 +144,12 @@ class User extends Authenticatable
 
     /**
      * Spatie\Permission role check, with one extra branch: while a platform
-     * admin is inside an active "view as dirigeant" impersonation session,
-     * we report the dirigeant role as if it had been assigned. The real
-     * persistence layer never gets a row written — this is purely a
-     * request-scoped capability grant tied to the session, so logout (or
-     * the 4h hard timeout in {@see SuperAdminImpersonationService}) revokes
-     * it instantly.
+     * admin is impersonating a tenant user (see {@see ImpersonationController}),
+     * we delegate to that user's own roles instead of the admin's (the admin
+     * holds none — `is_platform_admin` accounts are not assigned Spatie
+     * roles). This grants exactly what the impersonated user would see —
+     * not a generic elevated role — so a coordinateur's session looks like
+     * a coordinateur, not a dirigeant.
      *
      * The check matches Spatie's signature exactly so policies, blade
      * directives, and any third-party code calling `$user->hasRole(...)`
@@ -149,8 +159,8 @@ class User extends Authenticatable
      */
     public function hasRole($roles, ?string $guard = null): bool
     {
-        if ($this->impersonatesAsDirigeant() && $this->roleArgumentIncludesDirigeant($roles)) {
-            return true;
+        if ($target = $this->impersonationTarget()) {
+            return $target->spatieHasRole($roles, $guard);
         }
 
         return $this->spatieHasRole($roles, $guard);
@@ -158,99 +168,44 @@ class User extends Authenticatable
 
     /**
      * Same idea as {@see hasRole()} for fine-grained permissions: while
-     * impersonating, the super-admin reports every permission that the
-     * canonical `dirigeant` Spatie role grants. The dirigeant permission
-     * list is memoised on the request-scoped impersonation service to
-     * keep policy hot paths cheap.
+     * impersonating, the platform admin's permission checks are delegated
+     * to the impersonated user.
      *
      * @param  string|int|Permission|\BackedEnum  $permission
      */
     public function hasPermissionTo($permission, $guardName = null): bool
     {
-        if ($this->impersonatesAsDirigeant()) {
-            $name = $this->permissionName($permission);
-
-            if ($name !== null && in_array($name, app(SuperAdminImpersonationService::class)->dirigeantPermissionNames(), true)) {
-                return true;
-            }
+        if ($target = $this->impersonationTarget()) {
+            return $target->spatieHasPermissionTo($permission, $guardName);
         }
 
         return $this->spatieHasPermissionTo($permission, $guardName);
     }
 
     /**
-     * True iff this user is the platform admin currently driving an
-     * impersonation session AND the request's tenant context resolves
-     * to the structure they selected — both checks matter, otherwise a
-     * super-admin without an active session would silently inherit
-     * dirigeant rights everywhere.
+     * The tenant user this platform admin is currently impersonating, or
+     * null when not impersonating (or not a platform admin at all).
+     * Memoised on the instance since hasRole/hasPermissionTo run on every
+     * policy check in the request.
      */
-    private function impersonatesAsDirigeant(): bool
+    private function impersonationTarget(): ?self
     {
         if ($this->is_platform_admin !== true) {
-            return false;
+            return null;
         }
 
-        $service = app(SuperAdminImpersonationService::class);
-
-        return $service->isActive();
-    }
-
-    /**
-     * Spatie accepts roles as string, int, Role model, array of those, or a
-     * Collection. We only need to know whether 'dirigeant' is in the set —
-     * the rest stays parent's problem.
-     *
-     * @param  mixed  $roles
-     */
-    private function roleArgumentIncludesDirigeant($roles): bool
-    {
-        if (is_string($roles)) {
-            foreach (explode('|', $roles) as $candidate) {
-                if (trim($candidate) === 'dirigeant') {
-                    return true;
-                }
-            }
-
-            return false;
+        if ($this->impersonationTargetResolved) {
+            return $this->impersonationTargetCache;
         }
 
-        if (is_array($roles) || $roles instanceof Collection) {
-            foreach ($roles as $role) {
-                if ($this->roleArgumentIncludesDirigeant($role)) {
-                    return true;
-                }
-            }
+        $this->impersonationTargetResolved = true;
 
-            return false;
+        $payload = ImpersonationSession::current();
+
+        if ($payload === null) {
+            return $this->impersonationTargetCache = null;
         }
 
-        if ($roles instanceof Role) {
-            return $roles->name === 'dirigeant';
-        }
-
-        return false;
-    }
-
-    /**
-     * @param  mixed  $permission
-     */
-    private function permissionName($permission): ?string
-    {
-        if (is_string($permission)) {
-            return $permission;
-        }
-
-        if ($permission instanceof \BackedEnum) {
-            $value = $permission->value;
-
-            return is_string($value) ? $value : null;
-        }
-
-        if ($permission instanceof Permission) {
-            return $permission->name;
-        }
-
-        return null;
+        return $this->impersonationTargetCache = self::query()->find($payload['user_id']);
     }
 }
