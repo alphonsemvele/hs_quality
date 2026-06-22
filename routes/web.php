@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\FeatureFlagController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\StructureController as AdminStructureController;
+use App\Http\Controllers\Admin\StructureImpersonationController;
 use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
@@ -244,7 +245,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Audit grids library (read-only — declare before /audits/{audit}
         // so the literal "grids" segment is not matched as a UUID).
         Route::get('/audits/grids', [AuditGridController::class, 'index'])->name('audits.grids.index');
+        Route::get('/audits/grids/create', [AuditGridController::class, 'create'])->name('audits.grids.create');
+        Route::post('/audits/grids', [AuditGridController::class, 'store'])->name('audits.grids.store');
         Route::get('/audits/grids/{auditGrid}', [AuditGridController::class, 'show'])->name('audits.grids.show');
+        Route::get('/audits/grids/{auditGrid}/edit', [AuditGridController::class, 'edit'])->name('audits.grids.edit');
+        Route::put('/audits/grids/{auditGrid}', [AuditGridController::class, 'update'])->name('audits.grids.update');
+        Route::delete('/audits/grids/{auditGrid}', [AuditGridController::class, 'destroy'])->name('audits.grids.destroy');
         Route::get('/audits/has-preparation', [AuditController::class, 'hasPreparation'])->name('audits.has-preparation');
 
         Route::get('/audits/create', [AuditController::class, 'create'])->name('audits.create');
@@ -387,6 +393,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AdminStructureController::class, 'index'])->name('index');
             Route::get('/create', [AdminStructureController::class, 'create'])->name('create');
             Route::post('/', [AdminStructureController::class, 'store'])->name('store');
+            // POST /admin/structures/stop-impersonating MUST be declared before
+            // the `/{structure}/...` group so it's matched as a literal, not as
+            // a bound model route.
+            Route::post('/stop-impersonating', [StructureImpersonationController::class, 'stop'])
+                ->name('stop-impersonating');
             Route::get('/{structure}', [AdminStructureController::class, 'show'])->name('show');
             Route::get('/{structure}/audit-trail', [AdminStructureController::class, 'auditTrail'])->name('audit-trail');
             Route::get('/{structure}/edit', [AdminStructureController::class, 'edit'])->name('edit');
@@ -394,5 +405,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{structure}', [AdminStructureController::class, 'destroy'])->name('destroy');
             Route::post('/{structure}/suspend', [AdminStructureController::class, 'suspend'])->name('suspend');
             Route::post('/{structure}/reactivate', [AdminStructureController::class, 'reactivate'])->name('reactivate');
+            Route::post('/{structure}/impersonate', [StructureImpersonationController::class, 'start'])
+                ->name('impersonate');
         });
 });

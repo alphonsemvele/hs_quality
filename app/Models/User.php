@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserType;
+use App\Services\SuperAdminImpersonationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,15 +11,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Contracts\Permission;
+use Spatie\Permission\Contracts\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use HasApiTokens;
     use HasFactory;
-    use HasRoles;
+    use HasRoles {
+        hasRole as spatieHasRole;
+        hasPermissionTo as spatieHasPermissionTo;
+    }
     use Notifiable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
@@ -123,5 +130,127 @@ class User extends Authenticatable
     public function assignedBeneficiaries(): BelongsToMany
     {
         return $this->allAssignedBeneficiaries()->wherePivotNull('unassigned_at');
+    }
+
+    /**
+     * Spatie\Permission role check, with one extra branch: while a platform
+     * admin is inside an active "view as dirigeant" impersonation session,
+     * we report the dirigeant role as if it had been assigned. The real
+     * persistence layer never gets a row written — this is purely a
+     * request-scoped capability grant tied to the session, so logout (or
+     * the 4h hard timeout in {@see SuperAdminImpersonationService}) revokes
+     * it instantly.
+     *
+     * The check matches Spatie's signature exactly so policies, blade
+     * directives, and any third-party code calling `$user->hasRole(...)`
+     * continue to work without changes.
+     *
+     * @param  string|int|array|Role|Collection  $roles
+     */
+    public function hasRole($roles, ?string $guard = null): bool
+    {
+        if ($this->impersonatesAsDirigeant() && $this->roleArgumentIncludesDirigeant($roles)) {
+            return true;
+        }
+
+        return $this->spatieHasRole($roles, $guard);
+    }
+
+    /**
+     * Same idea as {@see hasRole()} for fine-grained permissions: while
+     * impersonating, the super-admin reports every permission that the
+     * canonical `dirigeant` Spatie role grants. The dirigeant permission
+     * list is memoised on the request-scoped impersonation service to
+     * keep policy hot paths cheap.
+     *
+     * @param  string|int|Permission|\BackedEnum  $permission
+     */
+    public function hasPermissionTo($permission, $guardName = null): bool
+    {
+        if ($this->impersonatesAsDirigeant()) {
+            $name = $this->permissionName($permission);
+
+            if ($name !== null && in_array($name, app(SuperAdminImpersonationService::class)->dirigeantPermissionNames(), true)) {
+                return true;
+            }
+        }
+
+        return $this->spatieHasPermissionTo($permission, $guardName);
+    }
+
+    /**
+     * True iff this user is the platform admin currently driving an
+     * impersonation session AND the request's tenant context resolves
+     * to the structure they selected — both checks matter, otherwise a
+     * super-admin without an active session would silently inherit
+     * dirigeant rights everywhere.
+     */
+    private function impersonatesAsDirigeant(): bool
+    {
+        if ($this->is_platform_admin !== true) {
+            return false;
+        }
+
+        $service = app(SuperAdminImpersonationService::class);
+
+        return $service->isActive();
+    }
+
+    /**
+     * Spatie accepts roles as string, int, Role model, array of those, or a
+     * Collection. We only need to know whether 'dirigeant' is in the set —
+     * the rest stays parent's problem.
+     *
+     * @param  mixed  $roles
+     */
+    private function roleArgumentIncludesDirigeant($roles): bool
+    {
+        if (is_string($roles)) {
+            foreach (explode('|', $roles) as $candidate) {
+                if (trim($candidate) === 'dirigeant') {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if (is_array($roles) || $roles instanceof Collection) {
+            foreach ($roles as $role) {
+                if ($this->roleArgumentIncludesDirigeant($role)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if ($roles instanceof Role) {
+            return $roles->name === 'dirigeant';
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  mixed  $permission
+     */
+    private function permissionName($permission): ?string
+    {
+        if (is_string($permission)) {
+            return $permission;
+        }
+
+        if ($permission instanceof \BackedEnum) {
+            $value = $permission->value;
+
+            return is_string($value) ? $value : null;
+        }
+
+        if ($permission instanceof Permission) {
+            return $permission->name;
+        }
+
+        return null;
     }
 }

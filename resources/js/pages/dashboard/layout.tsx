@@ -7,6 +7,7 @@ import CommandPalette from '@/components/CommandPalette';
 import HelpDrawer from '@/components/HelpDrawer';
 import { GoToShortcuts } from '@/components/GoToShortcuts';
 import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
+import ImpersonationBanner from '@/components/ImpersonationBanner';
 import { Lightbox } from '@/components/Lightbox';
 import { OnboardingTour } from '@/components/OnboardingTour';
 import { ScrollToTop } from '@/components/ScrollToTop';
@@ -26,8 +27,15 @@ interface User {
     is_platform_admin?: boolean;
 }
 
+interface ImpersonationProp {
+    structure_id: string;
+    structure_name: string;
+    started_at: string | null;
+}
+
 interface PageProps extends InertiaPageProps {
     auth: { user: User };
+    impersonation?: ImpersonationProp | null;
 }
 
 interface NavLink {
@@ -61,18 +69,24 @@ export default function DashboardLayout({
     const [showQuickIncident, setShowQuickIncident] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
 
-    const isActive = (path: string) => {
-        const current = url.split('?')[0].replace(/\/$/, '');
+    const current = url.split('?')[0].replace(/\/$/, '');
+    const pathMatches = (path: string) => {
         const clean = path.replace(/\/$/, '');
         if (clean === '/dashboard') return current === '/dashboard';
         return current === clean || current.startsWith(clean + '/');
     };
 
     // Platform admins see a dedicated cross-tenant nav. Tenant-scoped users
-    // see the operational nav. The two surfaces never overlap.
+    // see the operational nav. The two surfaces never overlap — UNLESS a
+    // platform admin has opted into a "view as dirigeant" impersonation
+    // session, in which case they see the tenant nav of the structure they
+    // entered. The impersonation prop is set server-side by
+    // HandleInertiaRequests + SuperAdminImpersonationService.
     const isPlatformAdmin = auth?.user?.is_platform_admin === true;
+    const isImpersonating = props.impersonation != null;
+    const showPlatformNav = isPlatformAdmin && !isImpersonating;
 
-    const rawSections: NavSection[] = isPlatformAdmin
+    const rawSections: NavSection[] = showPlatformNav
         ? [
               {
                   section: null,
@@ -139,6 +153,13 @@ export default function DashboardLayout({
         }))
         .filter((group) => group.links.length > 0);
 
+    // Pick the single most specific (longest-prefix) matching href so that
+    // visiting /audits/grids highlights only "Référentiels", not also "Audits".
+    const activeHref = navSections
+        .flatMap((g) => g.links.map((l) => l.href))
+        .filter((href) => pathMatches(href))
+        .reduce((best, href) => (href.length > best.length ? href : best), '');
+
     const canDeclareIncident = abilities['incidents.create'] === true;
 
     return (
@@ -191,7 +212,7 @@ export default function DashboardLayout({
                                 )}
                                 <ul className="flex flex-col gap-0.5">
                                     {group.links.map((link) => {
-                                        const active = isActive(link.href);
+                                        const active = link.href === activeHref;
                                         return (
                                             <li key={link.href}>
                                                 <Link
@@ -312,6 +333,7 @@ export default function DashboardLayout({
                         </div>
                     </header>
 
+                    <ImpersonationBanner />
                     <SystemBanners />
                     <MfaSetupBanner />
 

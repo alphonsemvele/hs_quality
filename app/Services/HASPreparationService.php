@@ -112,6 +112,11 @@ class HASPreparationService
                     'gap' => round($maxPoints - $score, 2),
                     'response_id' => $response?->id,
                     'pac_action_ids' => $pacIds,
+                    'level' => $item->level?->value,
+                    'is_imperatif' => $item->isImperatif(),
+                    'cotation' => $response?->cotation,
+                    'sources' => $item->sources,
+                    'axis_id' => $item->axis_id,
                 ];
             })
             ->sortBy([
@@ -128,6 +133,18 @@ class HASPreparationService
             ? round((float) $run->score / (float) $run->max_score * 100, 2)
             : 0.0;
 
+        $imperatifTotal = 0;
+        $imperatifNonConforme = 0;
+        foreach ($items as $row) {
+            if (! ($row['is_imperatif'] ?? false)) {
+                continue;
+            }
+            $imperatifTotal++;
+            if ($row['status'] === HASConformityStatus::NonConforme->value) {
+                $imperatifNonConforme++;
+            }
+        }
+
         return [
             'run_id' => $run->id,
             'run_title' => $run->title,
@@ -140,6 +157,8 @@ class HASPreparationService
                 'a_ameliorer' => $summary[HASConformityStatus::AAmeliorer->value] ?? 0,
                 'non_conforme' => $summary[HASConformityStatus::NonConforme->value] ?? 0,
                 'total' => count($items),
+                'imperatif_total' => $imperatifTotal,
+                'imperatif_non_conforme' => $imperatifNonConforme,
             ],
         ];
     }

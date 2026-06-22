@@ -46,6 +46,7 @@ class AuditExecutionService
         ?string $comment,
         ?string $evidenceUrl,
         ?User $recordedBy,
+        ?string $cotation = null,
     ): AuditRunResponse {
         if ($run->isFinalised()) {
             throw new HttpException(409, 'Cannot record responses on a finalised audit run.');
@@ -55,7 +56,7 @@ class AuditExecutionService
             throw new HttpException(422, 'Item does not belong to this run\'s grid.');
         }
 
-        return DB::transaction(function () use ($run, $item, $score, $comment, $evidenceUrl, $recordedBy): AuditRunResponse {
+        return DB::transaction(function () use ($run, $item, $score, $comment, $evidenceUrl, $recordedBy, $cotation): AuditRunResponse {
             // Move out of Draft once any response lands.
             if ($run->status === AuditRunStatus::Draft) {
                 $run->update(['status' => AuditRunStatus::InProgress->value]);
@@ -69,6 +70,7 @@ class AuditExecutionService
                 [
                     'structure_id' => $run->structure_id,
                     'score' => $score,
+                    'cotation' => $cotation,
                     'comment' => $comment,
                     'evidence_url' => $evidenceUrl,
                     'recorded_by' => $recordedBy?->id,

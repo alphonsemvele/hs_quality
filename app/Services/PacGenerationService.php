@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\AuditItemScale;
 use App\Enums\PacActionStatus;
 use App\Enums\PacStatus;
 use App\Models\AuditRun;
@@ -72,18 +73,16 @@ class PacGenerationService
                     continue; // already actioned — preserve operator state
                 }
 
+                $priority = $response->item->priorityFor($response->cotation);
+
                 PacAction::create([
                     'structure_id' => $run->structure_id,
                     'pac_id' => $pac->id,
                     'source_audit_response_id' => $response->id,
                     'title' => 'Action: '.$response->item->title,
-                    'description' => sprintf(
-                        'Score: %.2f / %.2f. %s',
-                        (float) $response->score,
-                        (float) $response->item->max_points,
-                        (string) ($response->comment ?? ''),
-                    ),
+                    'description' => $this->describeGap($response),
                     'status' => PacActionStatus::Pending->value,
+                    'priority' => $priority,
                 ]);
             }
 
@@ -100,10 +99,45 @@ class PacGenerationService
             ->where('audit_run_id', $run->id)
             ->with('item')
             ->get()
-            ->filter(fn (AuditRunResponse $r) => $r->item !== null
-                && $r->score !== null
-                && (float) $r->score < self::THRESHOLD * (float) $r->item->max_points
-            )
+            ->filter(fn (AuditRunResponse $r) => $this->isGap($r))
             ->values();
+    }
+
+    /**
+     * Scale-aware gap detection:
+     *   - HasCotation: any response cotation C or D is a gap (matches the
+     *     "Plan d'action" sheet of the SAP grid). NA is never a gap.
+     *   - Other scales: legacy semantics, score < THRESHOLD × max_points.
+     */
+    private function isGap(AuditRunResponse $r): bool
+    {
+        if ($r->item === null) {
+            return false;
+        }
+
+        if ($r->item->scale === AuditItemScale::HasCotation) {
+            return in_array($r->cotation, ['C', 'D'], true);
+        }
+
+        return $r->score !== null
+            && (float) $r->score < self::THRESHOLD * (float) $r->item->max_points;
+    }
+
+    private function describeGap(AuditRunResponse $r): string
+    {
+        if ($r->item?->scale === AuditItemScale::HasCotation) {
+            return trim(sprintf(
+                'Cotation: %s. %s',
+                (string) $r->cotation,
+                (string) ($r->comment ?? ''),
+            ));
+        }
+
+        return trim(sprintf(
+            'Score: %.2f / %.2f. %s',
+            (float) $r->score,
+            (float) ($r->item?->max_points ?? 0),
+            (string) ($r->comment ?? ''),
+        ));
     }
 }

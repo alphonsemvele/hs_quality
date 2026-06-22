@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Concerns\BelongsToStructure;
 use App\Enums\AuditItemScale;
+use App\Enums\ExigenceLevel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,8 +24,11 @@ class AuditGridItem extends Model implements AuditableContract
     protected $fillable = [
         'structure_id',
         'audit_grid_id',
+        'axis_id',
         'title',
         'description',
+        'sources',
+        'level',
         'scale',
         'max_points',
         'evidence_required',
@@ -35,6 +39,8 @@ class AuditGridItem extends Model implements AuditableContract
     {
         return [
             'scale' => AuditItemScale::class,
+            'level' => ExigenceLevel::class,
+            'sources' => 'array',
             'max_points' => 'decimal:2',
             'evidence_required' => 'boolean',
             'position' => 'integer',
@@ -44,5 +50,32 @@ class AuditGridItem extends Model implements AuditableContract
     public function grid(): BelongsTo
     {
         return $this->belongsTo(AuditGrid::class, 'audit_grid_id');
+    }
+
+    public function axis(): BelongsTo
+    {
+        return $this->belongsTo(AuditGridAxis::class, 'axis_id');
+    }
+
+    public function isImperatif(): bool
+    {
+        return $this->level === ExigenceLevel::Imperatif;
+    }
+
+    /**
+     * Auto-priority derived from level + cotation, matching the
+     * "Plan d'action" sheet of grille_evaluation_SAP.xlsx.
+     */
+    public function priorityFor(?string $cotation): string
+    {
+        if ($this->isImperatif() && ($cotation === 'C' || $cotation === 'D')) {
+            return 'critique';
+        }
+
+        return match ($cotation) {
+            'D' => 'elevee',
+            'C' => 'moyenne',
+            default => 'normale',
+        };
     }
 }

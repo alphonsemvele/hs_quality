@@ -21,6 +21,7 @@ interface Props {
     grids: Grid[];
     filters: Filters;
     sources: Record<string, number>;
+    can: { configure: boolean };
 }
 
 const SOURCE_META: Record<string, { label: string; tone: 'sage' | 'brand' | 'warning' | 'neutral' }> = {
@@ -30,7 +31,12 @@ const SOURCE_META: Record<string, { label: string; tone: 'sage' | 'brand' | 'war
     custom: { label: 'Référentiel interne', tone: 'neutral' },
 };
 
-export default function AuditGridsIndex({ grids = [], filters = { source: null, q: null }, sources = {} }: Partial<Props>) {
+export default function AuditGridsIndex({
+    grids = [],
+    filters = { source: null, q: null },
+    sources = {},
+    can = { configure: false },
+}: Partial<Props>) {
     const [search, setSearch] = useState(filters.q ?? '');
 
     const applyFilter = (next: Partial<Filters>) => {
@@ -56,6 +62,13 @@ export default function AuditGridsIndex({ grids = [], filters = { source: null, 
                     { label: 'Audits', href: '/audits' },
                     { label: 'Référentiels' },
                 ]}
+                actions={
+                    can.configure ? (
+                        <Link href="/audits/grids/create">
+                            <Button>+ Nouveau référentiel</Button>
+                        </Link>
+                    ) : undefined
+                }
             />
 
             <Card className="mb-5">

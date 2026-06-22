@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Http\Resources\InertiaUserResource;
+use App\Services\SuperAdminImpersonationService;
 use App\Support\UserAbilities;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -68,6 +69,39 @@ class HandleInertiaRequests extends Middleware
             'notifications' => fn () => $request->user() ? $this->notificationsPayload($request) : null,
             'structure' => fn () => $this->structurePayload(),
             'systemBanners' => fn () => $this->systemBannersPayload(),
+            // Eager — the banner + sidebar switch are layout-level and need
+            // the value on the first paint, not behind a partial reload.
+            'impersonation' => $this->impersonationPayload(),
+        ];
+    }
+
+    /**
+     * When a platform admin has opted into "view as dirigeant", expose the
+     * target structure + start time so the React layout can render the
+     * persistent red banner and swap the sidebar to the tenant nav. Returns
+     * null in every other case (regular tenant users, signed-out, super-admin
+     * with no active session).
+     *
+     * @return array{structure_id: string, structure_name: string, started_at: string|null}|null
+     */
+    private function impersonationPayload(): ?array
+    {
+        $service = app(SuperAdminImpersonationService::class);
+
+        if (! $service->isActive()) {
+            return null;
+        }
+
+        $structure = $service->structure();
+
+        if ($structure === null) {
+            return null;
+        }
+
+        return [
+            'structure_id' => (string) $structure->getKey(),
+            'structure_name' => (string) $structure->name,
+            'started_at' => $service->startedAt()?->toIso8601String(),
         ];
     }
 
