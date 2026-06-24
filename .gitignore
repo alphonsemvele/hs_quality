@@ -33,3 +33,10 @@ tests/load/summary.json
 *.png
 !public/**/*.png
 !tests/**/fixtures/*.png
+
+# ml-service (Python)
+ml-service/.venv
+ml-service/__pycache__
+ml-service/**/__pycache__
+ml-service/.pytest_cache
+ml-service/.env
