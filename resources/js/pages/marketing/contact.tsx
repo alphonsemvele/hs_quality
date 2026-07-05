@@ -4,6 +4,7 @@ import { type FormEvent } from 'react';
 
 interface FlashProps {
     flash?: { success?: string };
+    [key: string]: unknown;
 }
 
 const STRUCTURE_TYPES: { value: string; label: string }[] = [

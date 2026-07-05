@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\Gdpr\ProcessAccountDeletionRequestsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -76,3 +77,15 @@ Schedule::command('access-review:export')
     ->onOneServer()
     ->runInBackground()
     ->name('access-review.export');
+
+// GDPR Art. 17 — daily sweep of accounts whose 30-day cooling-off
+// period has elapsed. Runs at 04:30 Europe/Paris (after the access
+// review export window). Idempotent: only Pending requests with
+// effective_at in the past are touched, so a re-run on the same day
+// is a no-op.
+Schedule::job(new ProcessAccountDeletionRequestsJob)
+    ->dailyAt('04:30')
+    ->timezone('Europe/Paris')
+    ->withoutOverlapping()
+    ->onOneServer()
+    ->name('gdpr.process-account-deletions');

@@ -31,6 +31,14 @@ it('subscription type is the default tier-agnostic label', function (): void {
     expect(BillingService::SUBSCRIPTION_TYPE)->toBe('default');
 });
 
+it('swap throws when the structure has no active subscription', function (): void {
+    config(['billing.prices.pro' => 'price_test_pro_xxx']);
+    $structure = Structure::factory()->create(['tier' => StructureTier::Essential->value]);
+
+    expect(fn () => $this->service->swap($structure, StructureTier::Pro))
+        ->toThrow(HttpException::class, 'No active subscription to swap.');
+});
+
 it('builder applies the configured trial days', function (): void {
     config([
         'billing.trial_days' => 14,

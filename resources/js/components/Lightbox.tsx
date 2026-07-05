@@ -70,7 +70,7 @@ export function Lightbox() {
                     document.querySelectorAll(`[data-lightbox-group='${CSS.escape(group)}']`),
                 ) as HTMLElement[];
                 const collected: LightboxImage[] = peers
-                    .map((el) => {
+                    .map((el): LightboxImage | null => {
                         if (el instanceof HTMLImageElement) {
                             return { src: el.currentSrc || el.src, alt: el.alt };
                         }

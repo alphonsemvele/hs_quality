@@ -1,4 +1,5 @@
 import { MarketingFooter, MarketingNav, MarketingStyles } from '@/components/marketing/MarketingShell';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { Head, Link } from '@inertiajs/react';
 import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -318,6 +319,7 @@ export default function Welcome() {
                 <link rel="canonical" href="https://hsquality.fr/" />
             </Head>
             <MarketingStyles />
+            <CookieConsentBanner />
 
             <div className="min-h-screen bg-white">
                 <a href="#main-content" className="skip-link">Aller au contenu principal</a>

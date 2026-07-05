@@ -4,6 +4,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { ReactNode, useState } from 'react';
 import CommandPalette from '@/components/CommandPalette';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import HelpDrawer from '@/components/HelpDrawer';
 import { GoToShortcuts } from '@/components/GoToShortcuts';
 import { IdleTimeoutWatcher } from '@/components/IdleTimeoutWatcher';
@@ -165,6 +166,7 @@ export default function DashboardLayout({
         <>
             <Head title={`${title} — HS Quality`} />
             <FlashToasts />
+            <CookieConsentBanner />
             <IdleTimeoutWatcher />
             <ShortcutsCheatsheet />
             <OnboardingTour />

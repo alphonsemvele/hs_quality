@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\StructureTier;
+use App\Http\Requests\Billing\ChangePlanRequest;
 use App\Models\User;
 use App\Services\BillingService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Phase 2 — Inertia surface for the subscription management UI.
@@ -76,13 +78,33 @@ class BillingController extends Controller
         ]);
     }
 
-    public function changePlan(BillingService $service): RedirectResponse
+    public function changePlan(ChangePlanRequest $request, BillingService $service): RedirectResponse
     {
-        // Full plan-change flow requires a Stripe payment-method on the
-        // structure (handled in the mobile API SubscriptionController).
-        // Web surface shows the billing page; actual subscribe call goes
-        // through POST /api/v1/billing/subscribe with a Stripe token.
-        return back()->with('info', 'Pour changer de plan, contactez votre référent ou utilisez l\'API Stripe.');
+        $structure = currentStructure();
+        $targetTier = StructureTier::from($request->validated('tier'));
+
+        if ($structure->tier === $targetTier) {
+            return back()->with('info', sprintf('Vous êtes déjà sur le plan %s.', $targetTier->label()));
+        }
+
+        $subscription = $structure->subscription(BillingService::SUBSCRIPTION_TYPE);
+
+        if ($subscription === null || $subscription->canceled()) {
+            return back()->with(
+                'info',
+                'Aucun abonnement actif. Configurez d\'abord un moyen de paiement pour souscrire.',
+            );
+        }
+
+        try {
+            $service->swap($structure, $targetTier);
+
+            return back()->with('success', sprintf('Plan changé pour %s.', $targetTier->label()));
+        } catch (HttpException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Échec du changement de plan : '.$e->getMessage());
+        }
     }
 
     public function cancel(BillingService $service): RedirectResponse

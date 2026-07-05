@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { type ReactNode, useEffect, useState } from 'react';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 
 // Shared global styles — keyframes, gradient text, card hovers, etc.
 // All marketing pages share this stylesheet so visual identity stays consistent.
@@ -296,6 +297,8 @@ export function MarketingFooter() {
                 { label: 'Mentions légales', href: '/mentions-legales' },
                 { label: 'Confidentialité', href: '/confidentialite' },
                 { label: 'CGU', href: '/cgu' },
+                { label: 'Cookies', href: '/cookies' },
+                { label: 'Registre des traitements', href: '/registre-traitements' },
                 { label: 'Accessibilité', href: '/accessibilite' },
             ],
         },
@@ -351,15 +354,28 @@ export function MarketingFooter() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-6 text-xs text-ink-400">
-                    <p>
-                        &copy; {new Date().getFullYear()} HS Quality &middot; CDC-QUALITE-DOM-2024-v2.0
-                    </p>
-                    <div className="flex gap-5">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                        <p>
+                            &copy; {new Date().getFullYear()} HS Quality &middot; CDC-QUALITE-DOM-2024-v2.0
+                        </p>
+                        <span className="hidden text-ink-300 sm:inline">·</span>
+                        <p className="flex items-center gap-1.5">
+                            <span
+                                aria-hidden="true"
+                                className="inline-flex size-1.5 rounded-full bg-sage-500"
+                            />
+                            Hébergé en France par un prestataire certifié HDS (AWS Paris / OVHcloud)
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-5">
                         <Link href="/confidentialite" className="transition-colors hover:text-ink-700">
                             Confidentialité
                         </Link>
                         <Link href="/cgu" className="transition-colors hover:text-ink-700">
                             CGU
+                        </Link>
+                        <Link href="/cookies" className="transition-colors hover:text-ink-700">
+                            Cookies
                         </Link>
                         <Link href="/mentions-legales" className="transition-colors hover:text-ink-700">
                             Mentions légales
@@ -382,6 +398,7 @@ export function MarketingPage({ children }: { children: ReactNode }) {
     return (
         <>
             <MarketingStyles />
+            <CookieConsentBanner />
             <div className="min-h-screen bg-white">
                 <a
                     href="#main-content"

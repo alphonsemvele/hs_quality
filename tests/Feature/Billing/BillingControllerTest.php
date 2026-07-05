@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\StructureTier;
+use App\Models\Structure;
 use Database\Seeders\RoleSeeder;
 
 beforeEach(function () {
@@ -24,13 +26,50 @@ it('renders the billing page with tiers and current plan', function () {
     expect($currents)->toBe(1);
 });
 
-it('redirects on change plan with info flash', function () {
-    actingAsRole('dirigeant');
+it('flashes info when the requested tier matches the current tier', function () {
+    $structure = Structure::factory()->create(['tier' => StructureTier::Pro->value]);
+    actingAsRole('dirigeant', $structure);
 
     $response = $this->post('/billing/change-plan', ['tier' => 'pro']);
 
     $response->assertRedirect();
     $response->assertSessionHas('info');
+    expect(session('info'))->toContain('déjà sur le plan');
+});
+
+it('flashes info when no Stripe subscription is active', function () {
+    $structure = Structure::factory()->create(['tier' => StructureTier::Essential->value]);
+    actingAsRole('dirigeant', $structure);
+
+    $response = $this->post('/billing/change-plan', ['tier' => 'pro']);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('info');
+    expect(session('info'))->toContain('moyen de paiement');
+});
+
+it('rejects coordinateur from changing the plan', function () {
+    actingAsRole('coordinateur');
+
+    $response = $this->post('/billing/change-plan', ['tier' => 'pro']);
+
+    $response->assertForbidden();
+});
+
+it('rejects an invalid tier value', function () {
+    actingAsRole('dirigeant');
+
+    $response = $this->post('/billing/change-plan', ['tier' => 'enterprise']);
+
+    $response->assertSessionHasErrors('tier');
+});
+
+it('rejects a missing tier value', function () {
+    actingAsRole('dirigeant');
+
+    $response = $this->post('/billing/change-plan', []);
+
+    $response->assertSessionHasErrors('tier');
 });
 
 it('redirects on cancel and flashes a message', function () {
