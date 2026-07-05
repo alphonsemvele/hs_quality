@@ -10,13 +10,13 @@ parameters:
 
     level: 5
 
-    # Allow Inertia's dynamic response props and Laravel's magic query methods
+    # Allow Inertia's dynamic response props and Laravel's magic query methods.
+    # (Replaces the removed checkMissingIterableValueType /
+    # checkGenericClassInNonGenericObjectType options — PHPStan 2.x expresses
+    # the same intent via these error-identifier ignores.)
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: missingType.generics
-
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
 
     # Exclude generated code
     excludePaths:
