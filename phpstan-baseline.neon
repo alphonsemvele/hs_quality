@@ -1,0 +1,3391 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property App\\Auditing\\TenantAwareAudit\:\:\$impersonator_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Auditing/TenantAwareAudit.php
+
+		-
+			message: '#^Access to an undefined property App\\Auditing\\TenantAwareAudit\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Auditing/TenantAwareAudit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Console/Commands/ProvisionAuditGridsCommand.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method App\\Services\\AuditGridLibrary\:\:provisionAllForStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/ProvisionAuditGridsCommand.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method App\\Services\\AuditGridLibrary\:\:provisionForStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/ProvisionAuditGridsCommand.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method App\\Services\\AuditGridLibrary\:\:replaceForStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/ProvisionAuditGridsCommand.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Console/Commands/ProvisionTenantCommand.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Events/IncidentDeclared.php
+
+		-
+			message: '#^Cannot call method toISOString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Events/IncidentDeclared.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Events/IncidentDeclared.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Admin/ImpersonationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/ImpersonationController.php
+
+		-
+			message: '#^Access to an undefined property OwenIt\\Auditing\\Models\\Audit\:\:\$ip_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/StructureController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: app/Http/Controllers/Admin/StructureController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Http/Controllers/Admin/StructureController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/Admin/StructureController.php
+
+		-
+			message: '#^Relation ''user'' is not found in OwenIt\\Auditing\\Models\\Audit model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/StructureController.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<min, 500\> and 2000 is always false\.$#'
+			identifier: greater.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Admin/SystemHealthController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/FamilyPortalController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string\|null and App\\Enums\\UserType\:\:BeneficiairePortal will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalAuthController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalAuthController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalCarePlanController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalIncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalInterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$gir\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalSatisfactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/Portal/PortalSatisfactionController.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/V1/AuditRunController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditItemScale\:\:HasCotation will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/Api/V1/AuditRunController.php
+
+		-
+			message: '#^Parameter \#1 \$group of method App\\Services\\MessageService\:\:unreadCount\(\) expects App\\Models\\DiscussionGroup, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Api/V1/QvctCampaignController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/V1/QvctCampaignController.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method App\\Services\\IndicatorIngestionService\:\:snapshotForStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Api/V1/QvctIndicatorController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Api/V1/SectorBenchmarkController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/Api/V1/SubscriptionController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QualityAudit\:\:\$nb_ecarts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\AuditRun\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QualityAudit\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int, critere\: string, constat\: string, gravite\: mixed, gravite_label\: mixed, action_corrective\: string\|null\}, Closure\(App\\Models\\AuditEcart\)\: array\{id\: int, critere\: string, constat\: string, gravite\: mixed, gravite_label\: mixed, action_corrective\: string\|null\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/AuditController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$axis_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$evidence_required\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$level\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$max_points\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$scale\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sources\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isImperatif\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 3
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/AuditGridController.php
+
+		-
+			message: '#^Access to an undefined property OwenIt\\Auditing\\Models\\Audit\:\:\$ip_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property OwenIt\\Auditing\\Models\\Audit\:\:\$url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\<string, mixed\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,OwenIt\\Auditing\\Models\\Audit\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Relation ''user'' is not found in OwenIt\\Auditing\\Models\\Audit model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 5
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
+			path: app/Http/Controllers/BeneficiaryController.php
+
+		-
+			message: '#^Access to an undefined property Laravel\\Cashier\\Invoice\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Access to an undefined property Laravel\\Cashier\\Invoice\:\:\$paid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Laravel\\Cashier\\Invoice\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\StructureTier will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>brand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>exp_month" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>exp_year" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last4" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tier" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/BillingController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:fullName\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Http/Controllers/CommunicationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Document\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/CommunicationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\NewsFeedPost\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/CommunicationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/CommunicationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: string, body\: string, author\: mixed, upvotes\: int\<0, max\>, is_accepted\: bool, created_at\: string\|null\}, Closure\(App\\Models\\QaAnswer\)\: array\{id\: string, body\: string, author\: mixed, upvotes\: int\<0, max\>, is_accepted\: bool, created_at\: string\|null\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/CommunicationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$categorie\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$gravite\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nom\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$occurred_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$statut\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nom" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$location\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$starts_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$theme\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Cannot call method diffInMinutes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 12
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Instanceof between string\|null and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\TrainingAttendance\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\TrainingPlan\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\TrainingSession\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#1 \$status of method App\\Http\\Controllers\\FormationController\:\:planStatusLabel\(\) expects App\\Enums\\TrainingPlanStatus, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Parameter \#2 \$user of method App\\Http\\Controllers\\FormationController\:\:mapExpiringAlert\(\) expects App\\Models\\User\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 9
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>location" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>theme" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>title" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/FormationController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Cannot call method isDownloadable\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\DataExportRequest\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/Gdpr/DataExportController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$author\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$echeance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$realise_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$responsable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$statut\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,App\\Models\\Incident\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/IncidentController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Incident\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IndicateurController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QualityAudit\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IndicateurController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Incident\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/IndicateurController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QualityAudit\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/IndicateurController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$completed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$original_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plannedTask\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$signed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$signer_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Cannot call method diffInMinutes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Offset ''beneficiaries'' on array\{intervenants\: array\<int, array\{id\: int, name\: string\}\>, beneficiaries\: array\<int, array\{id\: string, name\: string\}\>, care_plans\: array\<int, array\{id\: string, title\: string, beneficiary_id\: string\}\>\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Offset ''intervenants'' on array\{intervenants\: array\<int, array\{id\: int, name\: string\}\>, beneficiaries\: array\<int, array\{id\: string, name\: string\}\>, care_plans\: array\<int, array\{id\: string, title\: string, beneficiary_id\: string\}\>\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 3
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,App\\Models\\Intervention\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\VisitMode\:\:Mobile will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/InterventionController.php
+
+		-
+			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{id\: string, type\: string, title\: mixed, message\: mixed, href\: mixed, level\: mixed, created_at\: string\|null, read_at\: string\|null\}\> but returns Illuminate\\Support\\Collection\<int, array\{id\: string, type\: string, title\: mixed, message\: mixed, href\: mixed, level\: mixed, created_at\: string\|null, read_at\: string\|null\}\>\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Http/Controllers/NotificationController.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Http/Controllers/NotificationController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Http/Controllers/NotificationController.php
+
+		-
+			message: '#^Parameter \#2 \$callback of method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:when\(\) expects \(callable\(Illuminate\\Support\\Collection\<int, array\{id\: string, type\: string, title\: mixed, message\: mixed, href\: mixed, level\: mixed, created_at\: string\|null, read_at\: string\|null\}\>, bool\)\: Illuminate\\Support\\Collection\<int, array\{id\: string, type\: string, title\: mixed, message\: mixed, href\: mixed, level\: mixed, created_at\: string\|null, read_at\: string\|null\}\>\)\|null, Closure\(mixed\)\: Illuminate\\Support\\Collection\<int, array\{id\: string, type\: string, title\: mixed, message\: mixed, href\: mixed, level\: mixed, created_at\: string\|null, read_at\: string\|null\}\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/NotificationController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 7
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\PlanAmelioration\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int, description\: string, responsable\: string\|null, echeance\: mixed, statut\: mixed, statut_label\: mixed, realise_at\: mixed\}, Closure\(App\\Models\\ActionAmelioration\)\: array\{id\: int, description\: string, responsable\: string\|null, echeance\: mixed, statut\: mixed, statut_label\: mixed, realise_at\: mixed\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PlanAmeliorationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Instanceof between string and App\\Enums\\QvctActionPlanItemStatus will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: string, title\: string, description\: string\|null, responsible\: string\|null, due_date\: mixed, status\: string, status_label\: string, impact_measurement_target\: string\|null, impact_measurement_actual\: string\|null\}, Closure\(App\\Models\\QvctActionPlanItem\)\: array\{id\: string, title\: string, description\: string\|null, responsible\: string\|null, due_date\: mixed, status\: string, status_label\: string, impact_measurement_target\: string\|null, impact_measurement_actual\: string\|null\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/QvctActionPlanController.php
+
+		-
+			message: '#^Call to function is_array\(\) with string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Http/Controllers/QvctCampaignController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctCampaignController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QvctActionPlan\:\:\$items_done\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QvctActionPlan\:\:\$items_in_progress\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QvctActionPlan\:\:\$items_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$questions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Call to function in_array\(\) with string and array\{App\\Enums\\QvctActionPlanStatus\:\:Draft, App\\Enums\\QvctActionPlanStatus\:\:Published\} will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Instanceof between string and App\\Enums\\QvctExchangeAddresseeRole will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Instanceof between string and App\\Enums\\QvctExchangeStatus will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 3
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctActionPlanStatus\:\:Closed is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctActionPlanStatus\:\:Draft is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctActionPlanStatus\:\:Published is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctCampaignStatus\:\:Active is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctCampaignStatus\:\:Archived is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctCampaignStatus\:\:Closed is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Enums\\QvctCampaignStatus\:\:Draft is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QvctActionPlan\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QvctCampaign\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QvctExchangeRequest\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\QvctWeakSignal\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctActionPlanStatus\:\:Closed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctCampaignStatus\:\:Active will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctCampaignStatus\:\:Closed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>questions" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>title" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/QvctController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 4
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 6
+			path: app/Http/Controllers/SearchController.php
+
+		-
+			message: '#^Property App\\Http\\Controllers\\Settings\\CustomOptionController\:\:\$service is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: app/Http/Controllers/Settings/CustomOptionController.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Instanceof between string and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 3
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, App\\Models\\Structure\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Instanceof between string\|null and App\\Enums\\UserType will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Result of \|\| is always true\.$#'
+			identifier: booleanOr.alwaysTrue
+			count: 1
+			path: app/Http/Middleware/EnsurePortalUser.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string\|null and App\\Enums\\UserType\:\:BeneficiairePortal will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Middleware/EnsurePortalUser.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Http/Middleware/EnsurePortalUser.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Middleware/HandleIdempotency.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Instanceof between string\|null and BackedEnum will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Http/Middleware/RequireMfa.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditItemScale\:\:HasCotation will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Requests/Audits/RecordAuditResponseRequest.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/PlannedTasks/UpdatePlannedTaskRequest.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/PlannedTasks/UpdatePlannedTaskRequest.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$date_of_birth\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\BeneficiaryResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$analyse_causes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$assigned_to\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$avec_blessure_physique\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$avec_deces\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$avec_hospitalisation\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$beneficiary_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$categorie\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$closed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$declared_by\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$gravite\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$intervention_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$lieu\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$notifie_ars_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$notifie_responsable_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$occurred_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$statut\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\IncidentResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/IncidentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$actual_end_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$actual_start_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$beneficiary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$beneficiary_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$cancellation_reason\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$care_plan_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$intervenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$planned_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$planned_end_time\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$planned_start_time\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\InterventionResource\:\:\$visit_mode\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/InterventionResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$structure_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\V1\\UserResource\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/V1/UserResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/BeneficiaryResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:fullName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/CarePlanResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$is_platform_admin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$two_factor_confirmed_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\InertiaUserResource\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Resources\\InertiaUserResource\:\:requiresMandatoryMfa\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Resources/InertiaUserResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/IntervenantAssignmentResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/IntervenantAssignmentResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:fullName\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Resources/IntervenantAssignmentResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Resources/IntervenantAssignmentResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/IntervenantAssignmentResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Resources/PlannedTaskResource.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Resources/PlannedTaskResource.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/PlannedTaskResource.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Resources/PlannedTaskResource.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Jobs/DispatchPredictionJob.php
+
+		-
+			message: '#^Parameter \#1 \$user of method App\\Services\\Gdpr\\AnonymizeUserAccountService\:\:anonymize\(\) expects App\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Jobs/Gdpr/ProcessAccountDeletionRequestsJob.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Jobs/NotifyARSJob.php
+
+		-
+			message: '#^Cannot call method toISOString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Jobs/NotifyARSJob.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Jobs/NotifyARSJob.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Jobs/NotifyReferentRhJob.php
+
+		-
+			message: '#^Offset ''mean_score'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Jobs/NotifyReferentRhJob.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Jobs/NotifyResponsableSecteurJob.php
+
+		-
+			message: '#^Cannot call method isFuture\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/AccountDeletionRequest.php
+
+		-
+			message: '#^Method App\\Models\\AccountDeletionRequest\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AccountDeletionRequest\)\|null but returns App\\Models\\AccountDeletionRequest\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AccountDeletionRequest.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AccountDeletionStatus\:\:Pending will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/AccountDeletionRequest.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/AccountDeletionRequest.php
+
+		-
+			message: '#^Method App\\Models\\ActionAmelioration\:\:resolveRouteBinding\(\) should return static\(App\\Models\\ActionAmelioration\)\|null but returns App\\Models\\ActionAmelioration\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/ActionAmelioration.php
+
+		-
+			message: '#^Method App\\Models\\AnnualReport\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AnnualReport\)\|null but returns App\\Models\\AnnualReport\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AnnualReport.php
+
+		-
+			message: '#^Method App\\Models\\AuditEcart\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditEcart\)\|null but returns App\\Models\\AuditEcart\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditEcart.php
+
+		-
+			message: '#^Method App\\Models\\AuditGrid\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditGrid\)\|null but returns App\\Models\\AuditGrid\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditGrid.php
+
+		-
+			message: '#^Method App\\Models\\AuditGridAxis\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditGridAxis\)\|null but returns App\\Models\\AuditGridAxis\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditGridAxis.php
+
+		-
+			message: '#^Method App\\Models\\AuditGridItem\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditGridItem\)\|null but returns App\\Models\\AuditGridItem\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditGridItem.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Enums\\ExigenceLevel\:\:Imperatif will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/AuditGridItem.php
+
+		-
+			message: '#^Method App\\Models\\AuditRun\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditRun\)\|null but returns App\\Models\\AuditRun\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditRun.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditRunStatus\:\:Draft will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/AuditRun.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditRunStatus\:\:Finalised will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/AuditRun.php
+
+		-
+			message: '#^Method App\\Models\\AuditRunResponse\:\:resolveRouteBinding\(\) should return static\(App\\Models\\AuditRunResponse\)\|null but returns App\\Models\\AuditRunResponse\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/AuditRunResponse.php
+
+		-
+			message: '#^Cannot access property \$age on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Models/Beneficiary.php
+
+		-
+			message: '#^Method App\\Models\\Beneficiary\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Beneficiary\)\|null but returns App\\Models\\Beneficiary\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Beneficiary.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/BeneficiaryFamilyToken.php
+
+		-
+			message: '#^Method App\\Models\\BeneficiaryFamilyToken\:\:resolveRouteBinding\(\) should return static\(App\\Models\\BeneficiaryFamilyToken\)\|null but returns App\\Models\\BeneficiaryFamilyToken\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/BeneficiaryFamilyToken.php
+
+		-
+			message: '#^Method App\\Models\\BeneficiarySatisfactionRating\:\:resolveRouteBinding\(\) should return static\(App\\Models\\BeneficiarySatisfactionRating\)\|null but returns App\\Models\\BeneficiarySatisfactionRating\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/BeneficiarySatisfactionRating.php
+
+		-
+			message: '#^Method App\\Models\\CarePlan\:\:resolveRouteBinding\(\) should return static\(App\\Models\\CarePlan\)\|null but returns App\\Models\\CarePlan\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/CarePlan.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\CarePlanStatus\:\:Active will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/CarePlan.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\CarePlanStatus\:\:Archived will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/CarePlan.php
+
+		-
+			message: '#^Method App\\Models\\Certification\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Certification\)\|null but returns App\\Models\\Certification\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Certification.php
+
+		-
+			message: '#^Method App\\Models\\CustomOption\:\:resolveRouteBinding\(\) should return static\(App\\Models\\CustomOption\)\|null but returns App\\Models\\CustomOption\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/CustomOption.php
+
+		-
+			message: '#^Method App\\Models\\DataExportRequest\:\:resolveRouteBinding\(\) should return static\(App\\Models\\DataExportRequest\)\|null but returns App\\Models\\DataExportRequest\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/DataExportRequest.php
+
+		-
+			message: '#^Method App\\Models\\DiscussionGroup\:\:resolveRouteBinding\(\) should return static\(App\\Models\\DiscussionGroup\)\|null but returns App\\Models\\DiscussionGroup\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/DiscussionGroup.php
+
+		-
+			message: '#^Method App\\Models\\DiscussionGroupMember\:\:resolveRouteBinding\(\) should return static\(App\\Models\\DiscussionGroupMember\)\|null but returns App\\Models\\DiscussionGroupMember\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/DiscussionGroupMember.php
+
+		-
+			message: '#^Method App\\Models\\Document\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Document\)\|null but returns App\\Models\\Document\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Document.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$arrays of function array_intersect expects array, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Document.php
+
+		-
+			message: '#^Method App\\Models\\Habilitation\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Habilitation\)\|null but returns App\\Models\\Habilitation\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Habilitation.php
+
+		-
+			message: '#^Cannot call method isClosed\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Incident.php
+
+		-
+			message: '#^Cannot call method requiresARSNotification\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Incident.php
+
+		-
+			message: '#^Method App\\Models\\Incident\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Incident\)\|null but returns App\\Models\\Incident\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Incident.php
+
+		-
+			message: '#^Method App\\Models\\IncidentActionCorrective\:\:resolveRouteBinding\(\) should return static\(App\\Models\\IncidentActionCorrective\)\|null but returns App\\Models\\IncidentActionCorrective\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/IncidentActionCorrective.php
+
+		-
+			message: '#^Method App\\Models\\IncidentSuivi\:\:resolveRouteBinding\(\) should return static\(App\\Models\\IncidentSuivi\)\|null but returns App\\Models\\IncidentSuivi\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/IncidentSuivi.php
+
+		-
+			message: '#^Method App\\Models\\IntervenantAssignment\:\:resolveRouteBinding\(\) should return static\(App\\Models\\IntervenantAssignment\)\|null but returns App\\Models\\IntervenantAssignment\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/IntervenantAssignment.php
+
+		-
+			message: '#^Cannot call method diffInMinutes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Cannot call method isTerminal\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Method App\\Models\\Intervention\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Intervention\)\|null but returns App\\Models\\Intervention\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\InterventionStatus\:\:Completed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\InterventionStatus\:\:InProgress will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\InterventionStatus\:\:Planned will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Intervention.php
+
+		-
+			message: '#^Method App\\Models\\InterventionCompletedTask\:\:resolveRouteBinding\(\) should return static\(App\\Models\\InterventionCompletedTask\)\|null but returns App\\Models\\InterventionCompletedTask\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/InterventionCompletedTask.php
+
+		-
+			message: '#^Method App\\Models\\InterventionPhoto\:\:resolveRouteBinding\(\) should return static\(App\\Models\\InterventionPhoto\)\|null but returns App\\Models\\InterventionPhoto\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/InterventionPhoto.php
+
+		-
+			message: '#^Method App\\Models\\InterventionSignature\:\:resolveRouteBinding\(\) should return static\(App\\Models\\InterventionSignature\)\|null but returns App\\Models\\InterventionSignature\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/InterventionSignature.php
+
+		-
+			message: '#^Method App\\Models\\Message\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Message\)\|null but returns App\\Models\\Message\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Message.php
+
+		-
+			message: '#^Method App\\Models\\MessageReadCursor\:\:resolveRouteBinding\(\) should return static\(App\\Models\\MessageReadCursor\)\|null but returns App\\Models\\MessageReadCursor\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/MessageReadCursor.php
+
+		-
+			message: '#^Method App\\Models\\NewsFeedPost\:\:resolveRouteBinding\(\) should return static\(App\\Models\\NewsFeedPost\)\|null but returns App\\Models\\NewsFeedPost\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/NewsFeedPost.php
+
+		-
+			message: '#^Method App\\Models\\Pac\:\:resolveRouteBinding\(\) should return static\(App\\Models\\Pac\)\|null but returns App\\Models\\Pac\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Pac.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PacStatus\:\:Closed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Pac.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PacStatus\:\:Draft will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Pac.php
+
+		-
+			message: '#^Method App\\Models\\PacAction\:\:resolveRouteBinding\(\) should return static\(App\\Models\\PacAction\)\|null but returns App\\Models\\PacAction\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/PacAction.php
+
+		-
+			message: '#^Cannot call method isTerminal\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/PlanAmelioration.php
+
+		-
+			message: '#^Method App\\Models\\PlanAmelioration\:\:resolveRouteBinding\(\) should return static\(App\\Models\\PlanAmelioration\)\|null but returns App\\Models\\PlanAmelioration\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/PlanAmelioration.php
+
+		-
+			message: '#^Method App\\Models\\PlannedTask\:\:resolveRouteBinding\(\) should return static\(App\\Models\\PlannedTask\)\|null but returns App\\Models\\PlannedTask\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/PlannedTask.php
+
+		-
+			message: '#^Cannot call method isTerminal\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/PredictionRequest.php
+
+		-
+			message: '#^Method App\\Models\\PredictionRequest\:\:resolveRouteBinding\(\) should return static\(App\\Models\\PredictionRequest\)\|null but returns App\\Models\\PredictionRequest\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/PredictionRequest.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PredictionStatus\:\:EnAttente will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/PredictionRequest.php
+
+		-
+			message: '#^Method App\\Models\\QaAnswer\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QaAnswer\)\|null but returns App\\Models\\QaAnswer\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QaAnswer.php
+
+		-
+			message: '#^Method App\\Models\\QaAnswerVote\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QaAnswerVote\)\|null but returns App\\Models\\QaAnswerVote\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QaAnswerVote.php
+
+		-
+			message: '#^Method App\\Models\\QaQuestion\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QaQuestion\)\|null but returns App\\Models\\QaQuestion\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QaQuestion.php
+
+		-
+			message: '#^Cannot call method isTerminal\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/QualityAudit.php
+
+		-
+			message: '#^Method App\\Models\\QualityAudit\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QualityAudit\)\|null but returns App\\Models\\QualityAudit\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QualityAudit.php
+
+		-
+			message: '#^Method App\\Models\\QvctActionPlan\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctActionPlan\)\|null but returns App\\Models\\QvctActionPlan\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctActionPlan.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctActionPlanStatus\:\:Closed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctActionPlan.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctActionPlanStatus\:\:Draft will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctActionPlan.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctActionPlanStatus\:\:Published will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctActionPlan.php
+
+		-
+			message: '#^Method App\\Models\\QvctActionPlanItem\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctActionPlanItem\)\|null but returns App\\Models\\QvctActionPlanItem\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctActionPlanItem.php
+
+		-
+			message: '#^Method App\\Models\\QvctCampaign\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctCampaign\)\|null but returns App\\Models\\QvctCampaign\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctCampaign.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctCampaignStatus\:\:Active will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctCampaign.php
+
+		-
+			message: '#^Method App\\Models\\QvctExchangeRequest\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctExchangeRequest\)\|null but returns App\\Models\\QvctExchangeRequest\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctExchangeRequest.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctExchangeStatus\:\:Closed will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctExchangeRequest.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctExchangeStatus\:\:Pending will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QvctExchangeRequest.php
+
+		-
+			message: '#^Method App\\Models\\QvctIndicator\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctIndicator\)\|null but returns App\\Models\\QvctIndicator\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctIndicator.php
+
+		-
+			message: '#^Method App\\Models\\QvctJournalEntry\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctJournalEntry\)\|null but returns App\\Models\\QvctJournalEntry\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctJournalEntry.php
+
+		-
+			message: '#^Method App\\Models\\QvctQuestionnaire\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctQuestionnaire\)\|null but returns App\\Models\\QvctQuestionnaire\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctQuestionnaire.php
+
+		-
+			message: '#^Method App\\Models\\QvctResponse\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctResponse\)\|null but returns App\\Models\\QvctResponse\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctResponse.php
+
+		-
+			message: '#^Method App\\Models\\QvctWeakSignal\:\:resolveRouteBinding\(\) should return static\(App\\Models\\QvctWeakSignal\)\|null but returns App\\Models\\QvctWeakSignal\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/QvctWeakSignal.php
+
+		-
+			message: '#^Call to function in_array\(\) with arguments string, array\{App\\Enums\\StructureTier\:\:Pro, App\\Enums\\StructureTier\:\:Premium\} and true will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 3
+			path: app/Models/Structure.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\StructureStatus\:\:Active will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Structure.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\StructureTier\:\:Premium will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Structure.php
+
+		-
+			message: '#^Method App\\Models\\TrainingAttendance\:\:resolveRouteBinding\(\) should return static\(App\\Models\\TrainingAttendance\)\|null but returns App\\Models\\TrainingAttendance\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/TrainingAttendance.php
+
+		-
+			message: '#^Method App\\Models\\TrainingPlan\:\:resolveRouteBinding\(\) should return static\(App\\Models\\TrainingPlan\)\|null but returns App\\Models\\TrainingPlan\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/TrainingPlan.php
+
+		-
+			message: '#^Method App\\Models\\TrainingSession\:\:resolveRouteBinding\(\) should return static\(App\\Models\\TrainingSession\)\|null but returns App\\Models\\TrainingSession\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/TrainingSession.php
+
+		-
+			message: '#^Cannot call method requiresMfa\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Cannot call method isoFormat\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/CertificationExpiringNotification.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/Gdpr/DataExportReadyNotification.php
+
+		-
+			message: '#^Cannot call method translatedFormat\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/Gdpr/DataExportReadyNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$siret\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Cannot call method translatedFormat\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>siret" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Notifications/Incidents/IncidentArsNotification.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 5
+			path: app/Notifications/Incidents/IncidentSeverelyDeclaredNotification.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/Incidents/IncidentSeverelyDeclaredNotification.php
+
+		-
+			message: '#^Cannot call method translatedFormat\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/Incidents/IncidentSeverelyDeclaredNotification.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Notifications/Incidents/IncidentSeverelyDeclaredNotification.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Notifications/WeakSignalDetectedNotification.php
+
+		-
+			message: '#^Offset ''mean_score'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Notifications/WeakSignalDetectedNotification.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between null and null will always evaluate to false\.$#'
+			identifier: notIdentical.alwaysFalse
+			count: 1
+			path: app/Notifications/WeakSignalDetectedNotification.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Observers/PacActionObserver.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Observers/PacActionObserver.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Observers/PacActionObserver.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Observers/PacObserver.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Observers/PacObserver.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\CarePlanStatus\:\:Archived will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Policies/CarePlanPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/PlannedTaskPolicy.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isDraft\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Policies/QvctActionPlanItemPolicy.php
+
+		-
+			message: '#^Cannot call method addresseePermission\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: app/Policies/QvctExchangeRequestPolicy.php
+
+		-
+			message: '#^Call to an undefined static method Laravel\\Fortify\\Fortify\:\:confirmPasswordViewUsing\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Providers/FortifyServiceProvider.php
+
+		-
+			message: '#^Call to an undefined static method Laravel\\Fortify\\Fortify\:\:requestPasswordResetLinkViewUsing\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Providers/FortifyServiceProvider.php
+
+		-
+			message: '#^Call to an undefined static method Laravel\\Fortify\\Fortify\:\:resetPasswordViewUsing\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Providers/FortifyServiceProvider.php
+
+		-
+			message: '#^Call to an undefined static method Laravel\\Fortify\\Fortify\:\:twoFactorChallengeViewUsing\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Providers/FortifyServiceProvider.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Services/AccessReviewExportService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isClosed\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/ActionPlanService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isDraft\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/ActionPlanService.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method App\\Services\\AnnualReportService\:\:collectData\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/AnnualReportService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditRunStatus\:\:Draft will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/AuditExecutionService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:items\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/AuditScoringService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$duration_minutes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$frequency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$frequency_details\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$mandatory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$task_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/CarePlanService.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Services/CrmService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QvctExchangeStatus\:\:Pending will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/ExchangeRequestService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/Gdpr/DataExportService.php
+
+		-
+			message: '#^Cannot call method isDownloadable\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/Gdpr/DataExportService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/HASPreparationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$source\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/HASPreparationService.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Services/HASPreparationService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\StatutIncident\:\:EnAnalyse will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Services/IncidentService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/IncidentService.php
+
+		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Services/IndicatorIngestionService.php
+
+		-
+			message: '#^Cannot call method copy\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/InterventionService.php
+
+		-
+			message: '#^Parameter \#1 \$type of method App\\Services\\MLServiceClient\:\:submit\(\) expects App\\Enums\\PredictionType, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/MLPredictionService.php
+
+		-
+			message: '#^Parameter \#2 \$payload of method App\\Services\\MLServiceClient\:\:submit\(\) expects array\<string, mixed\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/MLPredictionService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\PredictionStatus\:\:EnTraitement will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Services/MLPredictionService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/MLPredictionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$max_points\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$scale\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:priorityFor\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>max_points" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/PacGenerationService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isTerminal\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Services/PlanAmeliorationService.php
+
+		-
+			message: '#^Method App\\Services\\PlanAmeliorationService\:\:addAction\(\) should return App\\Models\\ActionAmelioration but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PlanAmeliorationService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PlanAmeliorationStatus\:\:Ouvert will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/PlanAmeliorationService.php
+
+		-
+			message: '#^Method App\\Services\\PlannedTaskService\:\:guardArchived\(\) returns void but does not have any side effects\.$#'
+			identifier: void.pure
+			count: 1
+			path: app/Services/PlannedTaskService.php
+
+		-
+			message: '#^Parameter \#1 \$plan of method App\\Services\\PlannedTaskService\:\:guardArchived\(\) expects App\\Models\\CarePlan, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/PlannedTaskService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\CarePlanStatus\:\:Archived will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/PlannedTaskService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Cannot call method diffForHumans\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Cannot call method label\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 6
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Cannot call method monthlyPricePerUser\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Incident\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Structure\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>code" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/PlatformStatsService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$questions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PsychosocialRiskCartographyService.php
+
+		-
+			message: '#^Argument of an invalid type string supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Services/PsychosocialRiskCartographyService.php
+
+		-
+			message: '#^Method App\\Services\\PsychosocialRiskCartographyService\:\:cartographyFor\(\) should return Illuminate\\Support\\Collection\<int, array\{team_tag\: string\|null, response_count\: int, mean_scores\: array\<string, float\>, active_signals\: int, last_signal_severity\: int\}\> but returns Illuminate\\Support\\Collection\<int, array\{team_tag\: mixed, response_count\: mixed, mean_scores\: array\<non\-falsy\-string, float\>, active_signals\: int\<0, max\>, last_signal_severity\: int\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PsychosocialRiskCartographyService.php
+
+		-
+			message: '#^Variable \$response in PHPDoc tag @var does not match any variable in the foreach loop\: \$key, \$value$#'
+			identifier: varTag.differentVariable
+			count: 1
+			path: app/Services/PsychosocialRiskCartographyService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$constat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QualityAuditService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$critere\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QualityAuditService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$gravite\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/QualityAuditService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\AuditStatus\:\:Planifie will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/QualityAuditService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Enums\\QvctCampaignStatus\:\:Closed will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Services/QvctService.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/SectorBenchmarkService.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 6
+			path: app/Services/SyncBatchService.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: app/Services/SyncBatchService.php
+
+		-
+			message: '#^Class App\\Services\\AuditRunResponse not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Services/SyncBatchService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type string\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/SyncBatchService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\TrainingPlanStatus\:\:Archived will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 4
+			path: app/Services/TrainingPlanService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\TrainingPlanStatus\:\:Published will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Services/TrainingPlanService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TrainingPlanService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$answers\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WeakSignalDetector.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$questions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WeakSignalDetector.php
+
+		-
+			message: '#^Variable \$response in PHPDoc tag @var does not match any variable in the foreach loop\: \$key, \$value$#'
+			identifier: varTag.differentVariable
+			count: 1
+			path: app/Services/WeakSignalDetector.php
+
+		-
+			message: '#^Offset ''started_at'' on array\{log_id\: int, user_id\: int, user_name\: string, structure_id\: string, structure_name\: string\|null, started_at\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Support/ImpersonationSession.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Support/ImpersonationSession.php
+
+		-
+			message: '#^Instanceof between string\|null and App\\Enums\\UserType will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: app/Support/UserAbilities.php
+
+		-
+			message: '#^Function currentStructure\(\) should return App\\Models\\Structure\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/helpers.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type DateTime\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/ActionAmeliorationFactory.php
+
+		-
+			message: '#^Unsafe call to private method Database\\Factories\\AuditGridAxisFactory\:\:sequenceCounter\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 1
+			path: database/factories/AuditGridAxisFactory.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method Database\\Factories\\BeneficiaryFactory\:\:forStructure\(\) expects App\\Models\\Structure, Database\\Factories\\StructureFactory given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/factories/BeneficiaryFamilyTokenFactory.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method Database\\Factories\\UserFactory\:\:forStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/factories/MessageFactory.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/MessageFactory.php
+
+		-
+			message: '#^Parameter \#1 \$structure of method Database\\Factories\\UserFactory\:\:forStructure\(\) expects App\\Models\\Structure, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/factories/TrainingAttendanceFactory.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/TrainingAttendanceFactory.php
+
+		-
+			message: '#^Call to an undefined method Faker\\Generator\:\:mobileNumber\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: database/factories/UserFactory.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: database/seeders/DevSeeder.php

@@ -1,14 +1,23 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
 
 parameters:
+    # Production code only. Pest test closures bind $this to the app TestCase in
+    # a way PHPStan can't follow without a dedicated plugin, so analysing tests/
+    # yields only false positives (undefined postJson/getJson/seed on TestCase).
     paths:
         - app
         - database
         - routes
-        - tests
 
     level: 5
+
+    # Known-baseline errors are dominated by one Larastan blind spot: it does not
+    # read enum casts declared via the casts() method, so enum-typed model
+    # properties are seen as raw strings. Tracked in phpstan-baseline.neon;
+    # laravel-ide-helper model annotations will let us shrink it.
+    reportUnmatchedIgnoredErrors: false
 
     # Allow Inertia's dynamic response props and Laravel's magic query methods.
     # (Replaces the removed checkMissingIterableValueType /
