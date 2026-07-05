@@ -52,6 +52,7 @@
         "symfony/yaml": "^7.4"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.7",
         "hotmeteor/spectator": "^3.0",
         "larastan/larastan": "^3.0",
         "laravel/boost": "^1.1",
