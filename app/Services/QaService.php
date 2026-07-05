@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\QaAnswer;
+use App\Models\QaAnswerVote;
 use App\Models\QaQuestion;
 use App\Models\Structure;
 use App\Models\User;
@@ -70,23 +71,19 @@ class QaService
     public function vote(QaAnswer $answer, User $voter): QaAnswer
     {
         return DB::transaction(function () use ($answer, $voter): QaAnswer {
-            $existing = DB::table('qa_answer_votes')
+            $existing = QaAnswerVote::query()
                 ->where('qa_answer_id', $answer->id)
                 ->where('user_id', $voter->id)
                 ->first();
 
             if ($existing !== null) {
-                DB::table('qa_answer_votes')
-                    ->where('id', $existing->id)
-                    ->delete();
+                $existing->delete();
                 $answer->decrement('upvotes');
             } else {
-                DB::table('qa_answer_votes')->insert([
+                QaAnswerVote::create([
                     'structure_id' => $answer->structure_id,
                     'qa_answer_id' => $answer->id,
                     'user_id' => $voter->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
                 $answer->increment('upvotes');
             }

@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use OwenIt\Auditing\Models\Audit;
@@ -82,7 +81,7 @@ class AuditLogController extends Controller
             ->all();
 
         $eventCounts = Audit::query()
-            ->select('event', DB::raw('count(*) as c'))
+            ->selectRaw('event, count(*) as c')
             ->groupBy('event')
             ->pluck('c', 'event')
             ->all();

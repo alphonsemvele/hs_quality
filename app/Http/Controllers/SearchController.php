@@ -48,7 +48,7 @@ class SearchController extends Controller
                 ->where(function ($q) use ($like, $ilike, $isPg, $query) {
                     $q->where('first_name', $ilike, $like)
                         ->orWhere('last_name', $ilike, $like)
-                        ->orWhere(DB::raw("first_name || ' ' || last_name"), $ilike, $like);
+                        ->orWhereRaw("first_name || ' ' || last_name ".$ilike.' ?', [$like]);
 
                     // Trigram fuzzy match in Postgres catches typos and
                     // mis-accents that substring LIKE misses (e.g. "berge"
