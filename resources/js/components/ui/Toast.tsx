@@ -9,6 +9,7 @@ interface FlashProps {
         info?: string | null;
         warning?: string | null;
     };
+    [key: string]: unknown;
 }
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';

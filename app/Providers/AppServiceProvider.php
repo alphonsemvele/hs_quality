@@ -112,6 +112,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->guardProductionDebug();
+        $this->guardProductionWebhookSecret();
         $this->configureRateLimiters();
         $this->registerPolicies();
         $this->registerObservers();
@@ -149,6 +150,34 @@ class AppServiceProvider extends ServiceProvider
             throw new \RuntimeException(
                 'Refusing to boot: APP_DEBUG=true in production. '
                 .'Set APP_DEBUG=false in the production environment and redeploy. '
+                .'See CLAUDE.md → Deploy hygiene.',
+            );
+        }
+    }
+
+    /**
+     * Refuse to boot if APP_ENV is production AND cashier.webhook.secret is empty.
+     *
+     * Cashier's VerifyWebhookSignature middleware is only applied when
+     * `cashier.webhook.secret` is set — if it's empty in production, the
+     * /stripe/webhook endpoint silently accepts unsigned payloads, which
+     * means anyone can forge a `customer.subscription.deleted` event and
+     * downgrade a paying tenant. Fail fast at boot rather than relying on
+     * every deploy script to set STRIPE_WEBHOOK_SECRET.
+     */
+    private function guardProductionWebhookSecret(): void
+    {
+        if (! app()->environment('production')) {
+            return;
+        }
+
+        $secret = config('cashier.webhook.secret');
+
+        if (! is_string($secret) || $secret === '') {
+            throw new \RuntimeException(
+                'Refusing to boot: STRIPE_WEBHOOK_SECRET is not set in production. '
+                .'Stripe webhook signature verification would be skipped, allowing forged events. '
+                .'Set the secret in the deployment platform and redeploy. '
                 .'See CLAUDE.md → Deploy hygiene.',
             );
         }
@@ -290,6 +319,17 @@ class AppServiceProvider extends ServiceProvider
             return [
                 Limit::perMinute(5)->by('ip:'.$request->ip()),
                 Limit::perMinute(3)->by('email:'.mb_strtolower((string) $request->input('email', ''))),
+            ];
+        });
+
+        // Public self-serve signup. Volume is naturally low (one tenant per
+        // organisation, not per user) so we cap aggressively to block
+        // automated farm-out attempts. Per-email backstop blocks the same
+        // address from creating multiple structures.
+        RateLimiter::for('public-signup', function (Request $request) {
+            return [
+                Limit::perHour(3)->by('ip:'.$request->ip()),
+                Limit::perDay(2)->by('email:'.mb_strtolower((string) $request->input('email', ''))),
             ];
         });
     }

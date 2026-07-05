@@ -1,6 +1,6 @@
 import { Badge, Card, EmptyState, KpiCard, PageHeader } from '@/components/ui';
 import { Link, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import DashboardLayout from '../layout';
 
 type EventKind = 'intervention' | 'incident' | 'care_plan' | 'assignment_on' | 'assignment_off';
@@ -48,7 +48,7 @@ const KIND_META: Record<
     {
         label: string;
         tone: 'brand' | 'sage' | 'warning' | 'danger' | 'neutral';
-        icon: () => JSX.Element;
+        icon: () => ReactNode;
         dot: string;
     }
 > = {

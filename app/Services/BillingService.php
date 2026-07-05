@@ -84,6 +84,30 @@ class BillingService
     }
 
     /**
+     * Swap an active subscription to a different tier. Cashier handles the
+     * Stripe proration; we mirror the new tier on the structure so feature
+     * gating (hasFeature()) flips in the same write.
+     *
+     * Throws 422 if the structure has no active subscription — the caller
+     * should branch on subscription presence first and route to the initial
+     * subscribe flow (which collects a payment method) instead.
+     */
+    public function swap(Structure $structure, StructureTier $tier): Subscription
+    {
+        $subscription = $structure->subscription(self::SUBSCRIPTION_TYPE);
+
+        if ($subscription === null || $subscription->canceled()) {
+            throw new HttpException(422, 'No active subscription to swap.');
+        }
+
+        $subscription->swap($this->priceFor($tier));
+
+        $structure->update(['tier' => $tier]);
+
+        return $subscription->fresh();
+    }
+
+    /**
      * Cancel the structure's active subscription at period end (graceful).
      * Dispatches a 30-day data retention notice to the dirigeant (GDPR /
      * données de santé compliance obligation). Returns the cancelled

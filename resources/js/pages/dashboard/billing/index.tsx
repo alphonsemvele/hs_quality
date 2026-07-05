@@ -264,8 +264,13 @@ function Stat({ label, value, hint, accent }: { label: string; value: string; hi
 
 function TierCard({ tier, userCount }: { tier: Tier; userCount: number }) {
     const total = tier.price_per_user * userCount;
+    const [submitting, setSubmitting] = useState(false);
     const change = () => {
-        router.post('/billing/change-plan', { tier: tier.key }, { preserveScroll: true });
+        router.post('/billing/change-plan', { tier: tier.key }, {
+            preserveScroll: true,
+            onStart: () => setSubmitting(true),
+            onFinish: () => setSubmitting(false),
+        });
     };
     return (
         <article
@@ -317,8 +322,13 @@ function TierCard({ tier, userCount }: { tier: Tier; userCount: number }) {
                         Plan actuel
                     </Button>
                 ) : (
-                    <Button onClick={change} className="w-full" variant={tier.is_recommended ? 'primary' : 'secondary'}>
-                        Choisir {tier.label}
+                    <Button
+                        onClick={change}
+                        disabled={submitting}
+                        className="w-full"
+                        variant={tier.is_recommended ? 'primary' : 'secondary'}
+                    >
+                        {submitting ? 'Changement en cours…' : `Choisir ${tier.label}`}
                     </Button>
                 )}
             </div>

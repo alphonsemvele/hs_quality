@@ -17,13 +17,16 @@ use App\Http\Controllers\CommunicationController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\Gdpr\DataExportController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\IndicateurController;
 use App\Http\Controllers\InterventionController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanAmeliorationController;
 use App\Http\Controllers\PlannedTaskController;
+use App\Http\Controllers\PublicSignupController;
 use App\Http\Controllers\QvctActionPlanController;
 use App\Http\Controllers\QvctCampaignController;
 use App\Http\Controllers\QvctController;
@@ -86,6 +89,21 @@ Route::get('/accessibilite', function () {
     return Inertia::render('marketing/accessibility');
 })->name('marketing.accessibility');
 
+Route::get('/cookies', function () {
+    return Inertia::render('marketing/cookies');
+})->name('marketing.cookies');
+
+Route::get('/registre-traitements', function () {
+    return Inertia::render('marketing/registry');
+})->name('marketing.registry');
+
+// Self-serve trial signup — public.
+Route::get('/inscription', [PublicSignupController::class, 'show'])->name('signup.show');
+Route::post('/inscription', [PublicSignupController::class, 'store'])
+    ->middleware('throttle:public-signup')
+    ->name('signup.store');
+Route::get('/inscription/confirmation', [PublicSignupController::class, 'confirmation'])->name('signup.confirmation');
+
 // ─── Auth (login, register, logout, password…) ────────────────────────────────
 require __DIR__.'/auth.php';
 
@@ -99,12 +117,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/profile/notifications', fn () => Inertia::render('dashboard/profile/notifications-preferences'))->name('profile.notifications');
     Route::get('/dashboard/profile/api-tokens', fn () => Inertia::render('dashboard/profile/api-tokens'))->name('profile.api-tokens');
     Route::get('/dashboard/profile/sessions', fn () => Inertia::render('dashboard/profile/sessions'))->name('profile.sessions');
-    Route::get('/dashboard/onboarding', fn () => Inertia::render('dashboard/onboarding'))->name('onboarding');
+
+    Route::get('/dashboard/profile/gdpr', [DataExportController::class, 'show'])->name('profile.gdpr');
+    Route::post('/dashboard/profile/gdpr/export', [DataExportController::class, 'requestExport'])
+        ->middleware('throttle:6,1')
+        ->name('profile.gdpr.export');
+    Route::get('/dashboard/profile/gdpr/export/{export}/download', [DataExportController::class, 'download'])
+        ->name('profile.gdpr.export.download');
+    Route::post('/dashboard/profile/gdpr/delete-account', [DataExportController::class, 'requestDeletion'])
+        ->middleware('throttle:3,60')
+        ->name('profile.gdpr.delete-account');
+    Route::post('/dashboard/profile/gdpr/delete-account/cancel', [DataExportController::class, 'cancelDeletion'])
+        ->name('profile.gdpr.delete-account.cancel');
+
+    Route::get('/dashboard/onboarding', [OnboardingController::class, 'show'])->name('onboarding');
     Route::get('/dashboard/aide/glossaire', fn () => Inertia::render('dashboard/aide/glossaire'))->name('aide.glossaire');
 
     // Notifications (in-app — see HandleInertiaRequests for shared payload)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     // Cross-domain quick search for the Cmd+K command palette
     Route::middleware('tenant')->get('/search/quick', [SearchController::class, 'quick'])->name('search.quick');

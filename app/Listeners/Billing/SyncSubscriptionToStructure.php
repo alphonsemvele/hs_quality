@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Listeners\Billing;
 
 use App\Enums\StructureTier;
+use App\Enums\UserType;
 use App\Models\Structure;
+use App\Models\User;
+use App\Notifications\Billing\SubscriptionPaymentFailedNotification;
 use App\Services\CrmService;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Cashier\Events\WebhookReceived;
 
 /**
@@ -30,8 +34,36 @@ class SyncSubscriptionToStructure
         match ($type) {
             'customer.subscription.updated' => $this->onUpdated($data),
             'customer.subscription.deleted' => $this->onDeleted($data),
+            'invoice.payment_failed' => $this->onInvoicePaymentFailed($data),
             default => null,
         };
+    }
+
+    private function onInvoicePaymentFailed(array $invoice): void
+    {
+        $structure = $this->structureForCustomer($invoice['customer'] ?? null);
+        if ($structure === null) {
+            return;
+        }
+
+        $dirigeants = User::query()
+            ->where('structure_id', $structure->id)
+            ->where('type', UserType::Dirigeant->value)
+            ->get();
+
+        if ($dirigeants->isEmpty()) {
+            return;
+        }
+
+        Notification::send(
+            $dirigeants,
+            new SubscriptionPaymentFailedNotification(
+                structure: $structure,
+                amountCents: isset($invoice['amount_due']) ? (int) $invoice['amount_due'] : null,
+                currency: isset($invoice['currency']) ? (string) $invoice['currency'] : null,
+                hostedInvoiceUrl: isset($invoice['hosted_invoice_url']) ? (string) $invoice['hosted_invoice_url'] : null,
+            ),
+        );
     }
 
     private function onUpdated(array $subscription): void

@@ -12,6 +12,10 @@ interface AuthUser {
 
 interface PageProps {
     auth?: { user?: AuthUser | null };
+    completed?: string[];
+    counts?: { users: number; beneficiaries: number };
+    mfa_enrolled?: boolean;
+    all_critical_done?: boolean;
     [key: string]: unknown;
 }
 
@@ -28,17 +32,23 @@ const PROGRESS_KEY = 'hsq.onboarding.completed-steps';
 export default function Onboarding() {
     const { props } = usePage<PageProps>();
     const user = (props.auth as { user?: AuthUser | null } | undefined)?.user ?? null;
+    const serverCompleted = (props.completed ?? []) as string[];
     const [step, setStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
     useEffect(() => {
+        let merged: string[] = [...serverCompleted];
         try {
             const stored = window.localStorage.getItem(PROGRESS_KEY);
-            if (stored) setCompletedSteps(JSON.parse(stored));
+            if (stored) {
+                const parsed = JSON.parse(stored) as string[];
+                merged = Array.from(new Set([...merged, ...parsed]));
+            }
         } catch {
             // ignore
         }
-    }, []);
+        setCompletedSteps(merged);
+    }, [serverCompleted]);
 
     const markCompleted = (id: string) => {
         const next = Array.from(new Set([...completedSteps, id]));

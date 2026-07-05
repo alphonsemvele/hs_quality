@@ -3,11 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\Incident;
+use App\Notifications\Incidents\IncidentArsNotification;
 use App\Services\CircuitBreaker\CircuitBreaker;
 use App\Services\CircuitBreaker\CircuitOpenException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Fires only for grave/critique incidents — CDC §6.3 requires ARS notification within 24h.
@@ -41,11 +43,26 @@ class NotifyARSJob implements ShouldQueue
 
         try {
             $breaker->call(function (): void {
-                // TODO Phase 2: send structured ARS email per CDC §6.3 template.
-                // When the real ARS HTTP/SMTP submission lands here, the
-                // breaker already wraps it. Failures from the real call
-                // bubble out and increment the breaker's failure counter.
-                Log::warning('ARS notification envoyée', [
+                $arsEmail = config('incidents.ars.email');
+                $arsEnabled = (bool) config('incidents.ars.enabled', false);
+
+                if ($arsEnabled === true && is_string($arsEmail) && $arsEmail !== '') {
+                    // Forward through the framework's notification router so
+                    // the same Notification class is testable via the standard
+                    // Notification::fake() facade. Failures propagate up so
+                    // the circuit breaker sees them.
+                    Notification::route('mail', $arsEmail)
+                        ->notify(new IncidentArsNotification($this->incident));
+                } else {
+                    Log::warning('ARS notification désactivée — config absente', [
+                        'incident_id' => $this->incident->id,
+                        'structure_id' => $this->incident->structure_id,
+                        'has_email' => is_string($arsEmail) && $arsEmail !== '',
+                        'enabled' => $arsEnabled,
+                    ]);
+                }
+
+                Log::info('ARS notification traitée', [
                     'incident_id' => $this->incident->id,
                     'structure_id' => $this->incident->structure_id,
                     'gravite' => $this->incident->gravite->value,

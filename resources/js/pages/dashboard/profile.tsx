@@ -96,6 +96,21 @@ export default function Profile() {
                         )}
                     </CardBody>
                 </Card>
+
+                <Card className="lg:col-span-3">
+                    <CardHeader title="Mes données personnelles" subtitle="RGPD — accès, portabilité, effacement" />
+                    <CardBody>
+                        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                            <p className="text-sm text-ink-600 dark:text-ink-300">
+                                Téléchargez une copie de vos données ou demandez la suppression de votre compte
+                                conformément aux articles 15, 17 et 20 du RGPD.
+                            </p>
+                            <Link href="/dashboard/profile/gdpr" className="shrink-0">
+                                <Button variant="secondary">Gérer mes données</Button>
+                            </Link>
+                        </div>
+                    </CardBody>
+                </Card>
             </div>
         </DashboardLayout>
     );

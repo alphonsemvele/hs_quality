@@ -23,6 +23,15 @@ use Spectator\Spectator;
  * after every API-breaking change.
  */
 beforeEach(function (): void {
+    // Spectator is a dev-only contract-test dependency. CI and local dev
+    // environments install it via `composer install`; environments that
+    // don't have it (some lightweight Docker images, CI matrix slots that
+    // intentionally skip dev deps) should skip these tests rather than
+    // explode with a class-not-found error.
+    if (! class_exists(Spectator::class)) {
+        $this->markTestSkipped('hotmeteor/spectator is not installed (composer install --dev required).');
+    }
+
     $this->seed(RoleSeeder::class);
     Spectator::using('openapi.json');
 });

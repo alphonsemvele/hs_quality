@@ -20,19 +20,26 @@ export function CardHeader({
     subtitle,
     action,
     className,
+    children,
 }: {
-    title: string;
+    title?: string;
     subtitle?: string;
     action?: ReactNode;
     className?: string;
+    children?: ReactNode;
 }) {
     return (
         <div className={cn('flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4 dark:border-ink-700/60', className)}>
             <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{title}</h3>
-                {subtitle && <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">{subtitle}</p>}
+                {title !== undefined && (
+                    <h3 className="text-sm font-semibold text-ink-900 dark:text-white">{title}</h3>
+                )}
+                {subtitle !== undefined && (
+                    <p className="mt-0.5 text-xs text-ink-500 dark:text-ink-400">{subtitle}</p>
+                )}
+                {children}
             </div>
-            {action && <div className="shrink-0">{action}</div>}
+            {action !== undefined && <div className="shrink-0">{action}</div>}
         </div>
     );
 }
