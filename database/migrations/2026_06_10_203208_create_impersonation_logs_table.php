@@ -15,7 +15,7 @@ return new class extends Migration
             // structure_id follows project convention; enables HDS queries like
             // "all platform accesses for Structure X in the past 12 months".
             // No BelongsToStructure global scope — this is a platform-level log.
-            $table->foreignId('structure_id')->constrained('structures')->cascadeOnDelete();
+            $table->foreignUuid('structure_id')->constrained('structures')->cascadeOnDelete();
             $table->text('reason');
             $table->string('ip_address', 45);
             $table->text('user_agent')->nullable();
