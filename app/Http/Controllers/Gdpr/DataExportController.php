@@ -75,6 +75,8 @@ class DataExportController extends Controller
 
     public function requestExport(RequestDataExportRequest $request): RedirectResponse
     {
+        $this->authorize('create', DataExportRequest::class);
+
         $user = $request->user();
 
         $hasInFlight = DataExportRequest::query()
@@ -101,9 +103,7 @@ class DataExportController extends Controller
 
     public function download(DataExportRequest $export, DataExportService $service): HttpResponse|RedirectResponse
     {
-        if ($export->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorize('download', $export);
 
         if (! $export->status->isDownloadable() || $this->isExpired($export)) {
             return back()->with('error', 'Cette archive n\'est plus disponible au téléchargement.');
@@ -119,6 +119,8 @@ class DataExportController extends Controller
 
     public function requestDeletion(RequestAccountDeletionRequest $request): RedirectResponse
     {
+        $this->authorize('create', AccountDeletionRequest::class);
+
         $user = $request->user();
 
         $existing = AccountDeletionRequest::query()
@@ -165,6 +167,8 @@ class DataExportController extends Controller
         if ($deletion === null) {
             return back()->with('info', 'Aucune demande d\'effacement à annuler.');
         }
+
+        $this->authorize('cancel', $deletion);
 
         if (! $deletion->isCancellable()) {
             return back()->with(

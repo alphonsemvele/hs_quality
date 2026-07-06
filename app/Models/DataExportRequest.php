@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Auditing\TenantAwareAudit;
 use App\Concerns\BelongsToStructure;
 use App\Enums\DataExportStatus;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
 /**
  * GDPR (article 15 / 20) personal data export request — one row per
@@ -31,6 +35,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $failure_reason
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Collection<int, TenantAwareAudit> $audits
+ * @property-read int|null $audits_count
  * @property-read Structure|null $structure
  * @property-read User|null $user
  *
@@ -53,8 +59,9 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-class DataExportRequest extends Model
+class DataExportRequest extends Model implements AuditableContract
 {
+    use Auditable;
     use BelongsToStructure;
     use HasFactory;
     use HasUuids;
