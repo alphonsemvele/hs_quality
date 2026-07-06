@@ -5,13 +5,68 @@ namespace App\Models;
 use App\Enums\StructureStatus;
 use App\Enums\StructureTier;
 use App\Enums\StructureType;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Cashier\Billable;
+use Laravel\Cashier\Subscription;
 
+/**
+ * @property string $id
+ * @property string $code
+ * @property string $name
+ * @property StructureType $type
+ * @property string|null $address
+ * @property string|null $siret
+ * @property StructureTier $tier
+ * @property StructureStatus $status
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property string|null $stripe_id
+ * @property string|null $pm_type
+ * @property string|null $pm_last_four
+ * @property Carbon|null $trial_ends_at
+ * @property string|null $billing_email
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read Collection<int, Subscription> $subscriptions
+ * @property-read int|null $subscriptions_count
+ *
+ * @method static \Database\Factories\StructureFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure hasExpiredGenericTrial()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure onGenericTrial()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereBillingEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure wherePmLastFour($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure wherePmType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereSiret($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereStripeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereTier($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereTrialEndsAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Structure withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
 class Structure extends Model
 {
     use Billable;

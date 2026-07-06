@@ -2,18 +2,85 @@
 
 namespace App\Models;
 
+use App\Auditing\TenantAwareAudit;
 use App\Concerns\BelongsToStructure;
 use App\Enums\InterventionStatus;
 use App\Enums\VisitMode;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
+/**
+ * @property string $id
+ * @property string $structure_id
+ * @property int $intervenant_id
+ * @property string $beneficiary_id
+ * @property string|null $care_plan_id
+ * @property Carbon $planned_date
+ * @property string|null $planned_start_time
+ * @property string|null $planned_end_time
+ * @property Carbon|null $actual_start_at
+ * @property Carbon|null $actual_end_at
+ * @property numeric|null $checkin_latitude
+ * @property numeric|null $checkin_longitude
+ * @property InterventionStatus $status
+ * @property VisitMode $visit_mode
+ * @property string|null $report_text
+ * @property string|null $report_voice_transcript
+ * @property string|null $cancellation_reason
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection<int, TenantAwareAudit> $audits
+ * @property-read int|null $audits_count
+ * @property-read Beneficiary|null $beneficiary
+ * @property-read CarePlan|null $carePlan
+ * @property-read Collection<int, InterventionCompletedTask> $completedTasks
+ * @property-read int|null $completed_tasks_count
+ * @property-read User|null $intervenant
+ * @property-read Collection<int, InterventionPhoto> $photos
+ * @property-read int|null $photos_count
+ * @property-read Collection<int, InterventionSignature> $signatures
+ * @property-read int|null $signatures_count
+ * @property-read Structure|null $structure
+ *
+ * @method static \Database\Factories\InterventionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereActualEndAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereActualStartAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereBeneficiaryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereCancellationReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereCarePlanId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereCheckinLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereCheckinLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereIntervenantId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention wherePlannedDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention wherePlannedEndTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention wherePlannedStartTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereReportText($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereReportVoiceTranscript($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereStructureId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention whereVisitMode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Intervention withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
 class Intervention extends Model implements AuditableContract
 {
     use Auditable;

@@ -2,19 +2,72 @@
 
 namespace App\Models;
 
+use App\Auditing\TenantAwareAudit;
 use App\Concerns\BelongsToStructure;
 use App\Enums\ActionStatus;
 use App\Enums\PacSource;
 use App\Enums\PlanAmeliorationStatus;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
+/**
+ * @property string $id
+ * @property string $structure_id
+ * @property int|null $created_by
+ * @property string $titre
+ * @property PacSource $source
+ * @property string|null $source_id
+ * @property string|null $constat
+ * @property string|null $responsable
+ * @property Carbon|null $echeance
+ * @property PlanAmeliorationStatus $statut
+ * @property Carbon|null $closed_at
+ * @property Carbon|null $cancelled_at
+ * @property string|null $cancellation_reason
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection<int, ActionAmelioration> $actions
+ * @property-read int|null $actions_count
+ * @property-read Collection<int, TenantAwareAudit> $audits
+ * @property-read int|null $audits_count
+ * @property-read User|null $creator
+ * @property-read Structure|null $structure
+ *
+ * @method static \Database\Factories\PlanAmeliorationFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereCancellationReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereCancelledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereClosedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereConstat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereEcheance($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereResponsable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereSource($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereSourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereStatut($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereStructureId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereTitre($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration withTrashed(bool $withTrashed = true)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PlanAmelioration withoutTrashed()
+ *
+ * @mixin \Eloquent
+ */
 class PlanAmelioration extends Model implements AuditableContract
 {
     use Auditable;

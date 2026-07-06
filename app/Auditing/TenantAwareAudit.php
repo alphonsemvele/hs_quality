@@ -4,6 +4,8 @@ namespace App\Auditing;
 
 use App\Models\User;
 use App\Support\ImpersonationSession;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Models\Audit;
 
@@ -29,6 +31,47 @@ use OwenIt\Auditing\Models\Audit;
  * would be indistinguishable.
  *
  * See: references/audit-logging/tenant-scoped-driver.md
+ *
+ * @property int $id
+ * @property string|null $structure_id
+ * @property string|null $user_type
+ * @property int|null $user_id
+ * @property string $event
+ * @property string $auditable_type
+ * @property string $auditable_id
+ * @property array<array-key, mixed>|null $old_values
+ * @property array<array-key, mixed>|null $new_values
+ * @property string|null $url
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property string|null $tags
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property int|null $impersonator_id
+ * @property-read Model|\Eloquent $auditable
+ * @property-read Model|\Eloquent|null $user
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereAuditableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereAuditableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereEvent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereImpersonatorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereNewValues($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereOldValues($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereStructureId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereTags($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereUserAgent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantAwareAudit whereUserType($value)
+ *
+ * @mixin \Eloquent
  */
 class TenantAwareAudit extends Audit
 {
